@@ -41,6 +41,10 @@ Bunya-Jido는 이 빈틈을 코딩 에이전트와 함께 메웁니다.
 
 ## 빠른 시작
 
+1. 설치: `python -m pip install bunya-jido`
+2. Codex에게 프롬프트: 아래 Blueprint 모드 프롬프트를 붙여넣으면 문서 작성, 검증, HTML 생성까지 맡길 수 있습니다.
+3. 지도 생성 커맨드라인: `bunya-jido build --root . --out bunya-jido.html`
+
 PyPI 배포 후에는 다음처럼 설치합니다.
 
 ```bash
@@ -72,10 +76,10 @@ Blueprint 모드는 Bunya-Jido의 핵심입니다.
 저장소 루트에서 코딩 에이전트에게 다음 지시를 줍니다.
 
 ```text
-Run `bunya-jido prepare --root . --quiet` if needed, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; fix errors and reduce classification warnings when practical; then say `ready`.
+Run `bunya-jido prepare --root . --quiet` if needed, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; fix errors and reduce classification warnings when practical; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
 ```
 
-에이전트가 준비됐다고 말하면 지도를 생성합니다.
+이 프롬프트는 마지막에 `bunya-jido.html`까지 생성합니다. Blueprint를 고친 뒤 직접 다시 만들고 싶으면 다음 명령을 실행하면 됩니다.
 
 ```bash
 bunya-jido build --root . --out bunya-jido.html

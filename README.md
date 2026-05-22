@@ -41,6 +41,10 @@ Bunya-Jido focuses on questions like these:
 
 ## Quick Start
 
+1. Install: `python -m pip install bunya-jido`
+2. Prompt Codex: paste the Blueprint Mode prompt below to have it write docs, validate outputs, and build the HTML map.
+3. Build the map from the command line: `bunya-jido build --root . --out bunya-jido.html`
+
 After PyPI release, install it with:
 
 ```bash
@@ -72,10 +76,10 @@ Blueprint mode is the core Bunya-Jido workflow.
 From the repository root, ask your coding agent:
 
 ```text
-Run `bunya-jido prepare --root . --quiet` if needed, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; fix errors and reduce classification warnings when practical; then say `ready`.
+Run `bunya-jido prepare --root . --quiet` if needed, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; fix errors and reduce classification warnings when practical; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
 ```
 
-When the agent says it is ready, build the map:
+This prompt builds `bunya-jido.html` at the end. If you edit the blueprint and want to rebuild the map yourself, run:
 
 ```bash
 bunya-jido build --root . --out bunya-jido.html
