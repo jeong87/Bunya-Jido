@@ -42,26 +42,15 @@ Bunya-Jido는 이 빈틈을 코딩 에이전트와 함께 메웁니다.
 ## 빠른 시작
 
 1. 설치: `python -m pip install git+https://github.com/jeong87/Bunya-Jido.git`
-2. Codex에게 프롬프트: 아래 Blueprint 모드 프롬프트를 붙여넣으면 문서 작성, 검증, HTML 생성까지 맡길 수 있습니다.
-3. 지도 생성 커맨드라인: `bunya-jido build --root . --out bunya-jido.html`
+2. Codex에게 지시: 아래 Blueprint 모드 프롬프트를 붙여넣으면 문서 작성, 검증, HTML 지도 생성까지 맡길 수 있습니다.
 
-PyPI 배포 전에는 GitHub에서 바로 설치할 수 있습니다.
+설치는 한 줄이면 됩니다.
 
 ```bash
 python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
 ```
 
-PyPI 배포 후에는 다음처럼 설치합니다.
-
-```bash
-python -m pip install bunya-jido
-```
-
-로컬에 clone한 저장소에서는 다음처럼 설치할 수 있습니다.
-
-```bash
-python -m pip install -e .
-```
+PyPI 배포는 추후 예정입니다.
 
 설치가 끝나면 명령어를 확인합니다.
 
