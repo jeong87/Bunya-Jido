@@ -1,11 +1,17 @@
 # Bunya-Jido
 
 <p align="center">
-  <img src="docs/assets/bunyajido_preview.jpg" alt="Bunya-Jido preview" width="100%">
+  <a href="https://jeong87.github.io/Bunya-Jido/demo.html">
+    <img src="docs/assets/bunyajido_preview.jpg" alt="Bunya-Jido preview" width="100%">
+  </a>
 </p>
 
 <p align="center">
   <strong>EN</strong> | <a href="./README.ko.md">KR</a>
+</p>
+
+<p align="center">
+  <a href="https://jeong87.github.io/Bunya-Jido/demo.html"><strong>Try the demo</strong></a>
 </p>
 
 `Bunya-Jido` turns a repository into an offline architecture map.

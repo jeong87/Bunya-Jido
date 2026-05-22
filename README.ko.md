@@ -1,11 +1,17 @@
 # Bunya-Jido
 
 <p align="center">
-  <img src="docs/assets/bunyajido_preview.jpg" alt="Bunya-Jido preview" width="100%">
+  <a href="https://jeong87.github.io/Bunya-Jido/demo.html">
+    <img src="docs/assets/bunyajido_preview.jpg" alt="Bunya-Jido preview" width="100%">
+  </a>
 </p>
 
 <p align="center">
   <a href="./README.md">EN</a> | <strong>KR</strong>
+</p>
+
+<p align="center">
+  <a href="https://jeong87.github.io/Bunya-Jido/demo.html"><strong>데모 체험하기</strong></a>
 </p>
 
 `Bunya-Jido`는 저장소를 오프라인 아키텍처 지도로 바꿔주는 도구입니다.
