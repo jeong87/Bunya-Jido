@@ -41,17 +41,23 @@ Bunya-Jido focuses on questions like these:
 
 ## Quick Start
 
-1. Install: `python -m pip install bunya-jido`
+1. Install: `python -m pip install git+https://github.com/jeong87/Bunya-Jido.git`
 2. Prompt Codex: paste the Blueprint Mode prompt below to have it write docs, validate outputs, and build the HTML map.
 3. Build the map from the command line: `bunya-jido build --root . --out bunya-jido.html`
 
-After PyPI release, install it with:
+Before the PyPI release, install directly from GitHub:
+
+```bash
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+```
+
+After the PyPI release, install it with:
 
 ```bash
 python -m pip install bunya-jido
 ```
 
-For local development, install from this repository:
+For a local clone, install from this repository:
 
 ```bash
 python -m pip install -e .

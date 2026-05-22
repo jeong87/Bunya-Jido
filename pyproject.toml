@@ -24,6 +24,11 @@ classifiers = [
 ]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/jeong87/Bunya-Jido"
+Repository = "https://github.com/jeong87/Bunya-Jido"
+Issues = "https://github.com/jeong87/Bunya-Jido/issues"
+
 [project.scripts]
 bunya-jido = "bunya_jido.cli:main"
 
