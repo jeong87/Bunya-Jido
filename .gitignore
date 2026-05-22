@@ -1,0 +1,33 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Build and packaging outputs
+build/
+dist/
+*.egg-info/
+.eggs/
+*.whl
+*.tar.gz
+
+# Bunya-Jido generated workspaces and previews
+.bunya-jido/
+bunya-jido.html
+preview*.html
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
