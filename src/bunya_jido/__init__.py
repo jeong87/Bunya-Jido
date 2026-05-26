@@ -1,2 +1,2 @@
-"""Bunya-Jido: one-command offline graph visualization for repositories."""
+"""Bunya-Jido: offline semantic repository maps and bounded agent context."""
 __version__ = "0.3.1"

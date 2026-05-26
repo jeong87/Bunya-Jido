@@ -14,18 +14,22 @@
   <a href="https://jeong87.github.io/Bunya-Jido/demo.html"><strong>Try the demo</strong></a>
 </p>
 
-`Bunya-Jido` turns a repository into an offline architecture map.
+<p align="center">
+  <strong>A semantic repository atlas for humans and coding agents.</strong>
+</p>
+
+`Bunya-Jido` creates offline repository maps from deterministic evidence and reviewable coding-agent interpretation. It shows responsibilities, workflows, and change boundaries for humans, then derives bounded task-oriented navigation context for coding agents.
 
 The project is inspired by Cheonsang Yeolcha Bunyajido, the Korean star map that reads the sky through regions and relationships. In the same spirit, Bunya-Jido gathers files, modules, docs, configuration, runtime artifacts, and coding-agent interpretation into one map of a codebase.
 
-The goal is to create a grounded map that humans can review and coding agents can use as a starting point for work.
+The goal is a grounded semantic map whose important claims can be inspected, not an automatic claim of architectural truth.
 
 ## What It Creates
 
 Bunya-Jido creates two outputs.
 
 1. A single HTML architecture map that opens directly in a browser.
-2. A `.bunya-jido/` context pack that coding agents such as Codex, Claude Code, Cursor, and Cline can use as working memory.
+2. A `.bunya-jido/` context pack that coding agents such as Codex, Claude Code, Cursor, and Cline can use as bounded handoff context for a task.
 
 The HTML map works offline. It does not need a server, database, internet connection, or JavaScript build step.
 
@@ -44,6 +48,22 @@ Bunya-Jido focuses on questions like these:
 - Which files, docs, and tests should be read before changing a feature?
 - Which boundaries should a coding agent avoid touching casually?
 - What real evidence supports each graph node and edge?
+
+## Two Map Modes
+
+Bunya-Jido can produce two related, but different, map forms.
+
+### Deterministic Scan Map
+
+Without a semantic blueprint, Bunya-Jido renders repository structure and detected hints gathered from source files, documentation, configuration, and selected artifacts. This is useful discovery evidence, not an architectural judgment.
+
+```bash
+bunya-jido build --root . --blueprint none --out bunya-jido.html
+```
+
+### Semantic Blueprint Map
+
+When `.bunya-jido/bunya-jido.blueprint.json` exists, Bunya-Jido renders an evidence-linked architectural interpretation written with a coding agent and checked by the tool. This is the recommended mode for responsibility areas, workflows, and agent handoff context.
 
 ## Quick Start
 
@@ -155,11 +175,13 @@ The generated HTML map includes:
 - node and edge filtering
 - local graph focus around a selected node
 - an evidence panel for source files and descriptions
-- path presets for workflows and task routes
+- path presets for blueprint views and workflows
 - PNG and JSON export
 - overview/detail switching when the blueprint provides detail nodes
 
 The map is not the source of truth. The evidence remains in the repository's code, docs, configuration, tests, runtime artifacts, and validated blueprint files. Bunya-Jido projects that evidence into a form that is easier to inspect.
+
+Agent-map task routes currently drive generated context output. Projecting validated task routes into HTML path presets is planned work; see the roadmap below.
 
 ## Working With Coding Agents
 
@@ -185,6 +207,16 @@ bunya-jido refresh-context --root . \
 ```
 
 These files are meant to be pasted or attached before handing work to a coding agent.
+
+## Supported Scope
+
+The current strongest fit is Python repositories with nontrivial workflows, especially developer tooling, research, automation, and agent-oriented projects.
+
+- Python module/import and symbol scanning is the primary code-scanning surface today.
+- Markdown documentation, common package/config files, selected runtime/data artifacts, and provider/API hints are used as discovery evidence.
+- JavaScript and TypeScript files are scanned on a limited basis, but local module-resolution coverage is still developing.
+
+Bunya-Jido does not yet claim equivalent semantic coverage across languages or automatic proof that an authored architecture map is correct.
 
 ## Agent Guide Snippets
 
@@ -233,6 +265,10 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 - Static scanning is fast, but it can become noisy on large repositories.
 - Bunya-Jido does not call an LLM by itself.
 - The HTML map does not prove architectural correctness. It makes assumptions and evidence easier to inspect.
+
+## Roadmap
+
+See [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md) for the grounded-map roadmap, including validation status, human/agent parity, example maps, and measured scanner coverage.
 
 ## License
 

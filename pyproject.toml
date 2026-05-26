@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "bunya-jido"
 version = "0.3.1"
-description = "Generate offline interactive repository architecture graphs, with optional LLM-authored blueprints."
+description = "Create offline semantic repository maps and bounded coding-agent context from reviewable evidence."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Bunya-Jido Contributors" }]
-keywords = ["repository", "graph", "visualization", "architecture", "static-analysis", "offline-html"]
+keywords = ["repository", "semantic-map", "architecture", "coding-agents", "static-analysis", "offline-html"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",

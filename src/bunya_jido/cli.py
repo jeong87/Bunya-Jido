@@ -218,11 +218,11 @@ def cmd_install_agent_guides(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="bunya-jido", description="Generate a single-file interactive graph atlas for a local repository.")
+    parser = argparse.ArgumentParser(prog="bunya-jido", description="Create offline semantic repository maps and bounded coding-agent context.")
     parser.add_argument("--version", action="version", version=f"bunya-jido {__version__}")
     sub = parser.add_subparsers(dest="command")
 
-    p_build = sub.add_parser("build", help="Scan a repo and write an offline HTML graph. Uses .bunya-jido/bunya-jido.blueprint.json if present.")
+    p_build = sub.add_parser("build", help="Write an offline HTML map from a semantic blueprint when present, or from a deterministic scan otherwise.")
     _add_common_scan_args(p_build)
     p_build.add_argument("--out", default="bunya-jido.html", help="Output HTML path. Default: bunya-jido.html")
     p_build.add_argument("--write-json", "--json-out", dest="write_json", default=None, help="Optional path to also write graph JSON.")
