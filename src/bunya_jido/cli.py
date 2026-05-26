@@ -53,6 +53,7 @@ def cmd_build(args: argparse.Namespace) -> int:
         show_root=args.show_root,
         data_policy=args.data_policy,
         max_data_files=args.max_data_files,
+        allow_draft=args.allow_draft,
     )
     html_path = render_html(graph, args.out, template=args.template)
     if args.write_json:
@@ -60,9 +61,10 @@ def cmd_build(args: argparse.Namespace) -> int:
     print(f"Bunya-Jido built: {html_path}")
     if bp_path:
         q = graph.get("blueprint_quality", {})
-        print(f"blueprint={bp_path} quality nodes={q.get('node_count')} edges={q.get('edge_count')} grounded_edges={q.get('grounded_edge_ratio')}")
+        print(f"artifact=semantic_blueprint grounding={q.get('grounding_status')} blueprint={bp_path}")
+        print(f"quality nodes={q.get('node_count')} edges={q.get('edge_count')} grounded_edges={q.get('grounded_edge_ratio')} blockers={q.get('publish_blocker_count')}")
     else:
-        print("blueprint=not found; used deterministic static scan")
+        print("artifact=static_scan grounding=not_assessed blueprint=not found")
         print(f"hint: run `bunya-jido prepare --root {args.root}` or ask Codex to run it, then build again")
     print(f"nodes={graph['node_count']} edges={graph['edge_count']} mode={args.mode}")
     if getattr(args, "open", False):
@@ -142,7 +144,17 @@ def cmd_validate_blueprint(args: argparse.Namespace) -> int:
         for err in errors[:60]:
             print(f"- {err}", file=sys.stderr)
         return 2
+    blockers = list(metrics.get("publish_blockers") or [])
+    if blockers and not args.allow_draft:
+        print("Blueprint publication blocked:", file=sys.stderr)
+        for blocker in blockers[:60]:
+            print(f"- {blocker}", file=sys.stderr)
+        print("Use `--allow-draft` only when an explicitly marked draft output is acceptable.", file=sys.stderr)
+        return 2
+    status = "draft" if blockers else "grounded"
+    metrics = {**metrics, "grounding_status": status}
     print(f"Blueprint validation passed: {bp_path}")
+    print(f"Artifact mode: semantic_blueprint; grounding: {status}")
     print(json.dumps(metrics, ensure_ascii=False, indent=2))
     if warnings:
         print("Warnings:")
@@ -228,6 +240,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_build.add_argument("--write-json", "--json-out", dest="write_json", default=None, help="Optional path to also write graph JSON.")
     p_build.add_argument("--template", default=None, help="Optional custom viewer template path.")
     p_build.add_argument("--blueprint", default="auto", type=_blueprint_arg_value, help="Blueprint path, 'auto' (default), or 'none'.")
+    p_build.add_argument("--allow-draft", action="store_true", help="Render a structurally valid semantic blueprint with grounding blockers as an explicit draft.")
     p_build.add_argument("--open", action="store_true", help="Open the generated HTML in your default browser.")
     p_build.set_defaults(func=cmd_build)
 
@@ -256,6 +269,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_vbp = sub.add_parser("validate-blueprint", help="Validate .bunya-jido/bunya-jido.blueprint.json.")
     p_vbp.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_vbp.add_argument("--blueprint", default=None, help="Blueprint JSON path. Default: .bunya-jido/bunya-jido.blueprint.json")
+    p_vbp.add_argument("--allow-draft", action="store_true", help="Accept grounding blockers for an explicitly marked draft review.")
     p_vbp.set_defaults(func=cmd_validate_blueprint)
 
     p_vam = sub.add_parser("validate-agent-map", help="Validate .bunya-jido/bunya-jido.agent-map.json.")

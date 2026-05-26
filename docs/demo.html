@@ -20,6 +20,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 .checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{display:flex;align-items:center;gap:7px;font-size:11px;color:#d0d9ea}.check input{width:auto}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 12px currentColor}.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.stat{background:#0b1220;border:1px solid rgba(148,163,184,.13);border-radius:12px;padding:8px}.stat b{font-size:17px}.stat span{display:block;color:var(--muted);font-size:10px;margin-top:1px}
 #stage{position:relative;min-width:0;overflow:hidden}#graph{width:100%;height:100%;display:block;cursor:grab}#graph.dragging{cursor:grabbing}.hud{position:absolute;left:16px;top:14px;background:rgba(8,13,24,.68);backdrop-filter:blur(12px);border:1px solid rgba(148,163,184,.17);border-radius:16px;padding:10px 12px;pointer-events:none}.hudtitle{font-size:12px;font-weight:700}.hudmeta{color:#9fb0c9;font-size:11px;margin-top:4px}.toast{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.86);border:1px solid rgba(56,189,248,.22);border-radius:999px;padding:8px 13px;font-size:12px;color:#bfdbfe;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1}.legend{position:absolute;right:16px;bottom:16px;background:rgba(8,13,24,.6);backdrop-filter:blur(12px);border:1px solid rgba(148,163,184,.14);border-radius:16px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;max-width:620px}.legend span{font-size:10px;color:#cbd5e1;display:flex;align-items:center;gap:5px}.legend i{width:26px;height:8px;display:inline-block;border-radius:2px;vertical-align:middle}.edge-glyph{width:24px;height:8px;display:inline-block;vertical-align:middle;flex:0 0 24px}.edge-filter-list .check label{min-width:0}.edge-filter-list .check label span.rel-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .node-title{font-size:20px;font-weight:800;margin:0 0 5px}.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(148,163,184,.17);background:#0b1220;border-radius:999px;padding:4px 8px;margin:0 5px 5px 0;font-size:10px;color:#dbeafe}.desc{color:#cbd5e1;font-size:12px;line-height:1.5}.muted{color:var(--muted)}.small{font-size:11px}.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#bae6fd;background:#0b1220;border:1px solid rgba(148,163,184,.12);border-radius:8px;padding:1px 5px}.relgroup{margin-top:10px}.relgroup h3{font-size:11px;color:#e2e8f0;margin:0 0 6px}.edgeitem{border-left:2px solid #334155;padding:6px 0 6px 9px;margin:4px 0;font-size:11px;color:#cbd5e1;line-height:1.35}.edgeitem b{color:#e0f2fe}.edgeitem:hover{background:rgba(148,163,184,.06);cursor:pointer}.panel-kv{display:grid;grid-template-columns:82px 1fr;gap:6px;font-size:11px;margin-top:10px}.panel-kv div:first-child{color:#8ca0bb}.path-card{display:block;width:100%;text-align:left;border-radius:12px;margin:7px 0;padding:9px 10px}.path-card strong{font-size:12px}.path-card span{display:block;margin-top:3px;color:#9fb0c9;line-height:1.3}.range{display:grid;grid-template-columns:1fr 44px;align-items:center;gap:8px}input[type=range]{padding:0}.footer-note{font-size:10px;line-height:1.45;color:#7f90aa}.kbd{font-size:10px;border:1px solid rgba(148,163,184,.25);background:#0b1220;border-radius:6px;padding:1px 5px;color:#cbd5e1}.pillrow{display:flex;flex-wrap:wrap;gap:6px}.edge-filter-list{max-height:230px;overflow:auto;padding-right:4px}.edge-filter-list .check{justify-content:space-between}.edge-filter-list label{display:flex;align-items:center;gap:7px}.count{color:#7f90aa;font-size:10px}.source-link{word-break:break-all;color:#93c5fd}.empty{padding:30px 10px;text-align:center;color:#94a3b8;font-size:12px;line-height:1.5}
+.trust-state{display:inline-flex;border:1px solid rgba(148,163,184,.22);border-radius:999px;padding:4px 8px;font-size:11px;font-weight:700;margin-bottom:8px}.trust-state.grounded{color:#a7f3d0;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.11)}.trust-state.draft{color:#fde68a;border-color:rgba(250,204,21,.4);background:rgba(250,204,21,.1)}.trust-state.not_assessed{color:#bae6fd;border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.1)}.trust-kv{display:grid;grid-template-columns:88px 1fr;gap:5px;font-size:11px;line-height:1.4}.trust-kv div:nth-child(odd){color:#8ca0bb}.trust-alert{color:#fda4af;margin-top:8px;font-size:11px;line-height:1.4}.evlist{font-size:10px;color:#9fb0c9;margin-top:4px;word-break:break-all}.evlist div{margin:2px 0}
 .legend.focus{border-color:rgba(56,189,248,.38);box-shadow:0 0 0 1px rgba(56,189,248,.10) inset,0 10px 40px rgba(2,6,23,.28)}
 .legend .legend-title{flex-basis:100%;font-size:10px;color:#93c5fd;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px;font-weight:800}
 .legend .legend-note{font-size:10px;color:#8ca0bb;opacity:.9}
@@ -30,8 +31,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 <body>
 <div id="app">
   <aside id="left">
-    <div class="brand"><div class="logo"></div><div><h1>Bunya-Jido</h1><div class="sub">Offline interactive repository graph</div></div></div>
+    <div class="brand"><div class="logo"></div><div><h1>Bunya-Jido</h1><div class="sub">Offline semantic repository map</div></div></div>
     <div class="statgrid"><div class="stat"><b id="statNodes">0</b><span>visible nodes</span></div><div class="stat"><b id="statEdges">0</b><span>visible edges</span></div><div class="stat"><b id="statLens">All</b><span>lens</span></div></div>
+    <div class="section"><h2>Trust</h2><div id="trustPanel"></div></div>
     <div class="section"><h2>Lens</h2><div class="btnrow" id="lensButtons"></div></div>
     <div class="section"><h2>Search / Local Graph</h2><input id="search" list="nodeList" placeholder="Planner, Builder Contract, workflow_trace..."/><datalist id="nodeList"></datalist><div class="btnrow" style="margin-top:8px"><button id="focusBtn">Focus</button><button id="localBtn">Local depth</button><button id="clearFocusBtn">Clear</button></div><div style="margin-top:9px"><label class="small muted">Depth</label><select id="depth"><option value="0">0 · selected only highlight</option><option value="1">1 · immediate neighbors</option><option value="2" selected>2 · operating neighborhood</option><option value="3">3 · wide neighborhood</option></select></div></div>
     <div class="section"><h2>Planes</h2><div class="btnrow" style="margin-bottom:8px"><button id="planesAll">All</button><button id="planesNone">None</button></div><div class="checkgrid" id="planeChecks"></div></div>
@@ -1697,11 +1699,40 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "grounded_edge_ratio": 1.0,
     "warning_count": 0,
     "error_count": 0,
-    "warnings": []
+    "warnings": [],
+    "grounding_status": "draft",
+    "publish_blocker_count": 1,
+    "publish_blockers": [
+      "Illustrative demo evidence paths are not present in this repository."
+    ]
   },
   "node_count": 21,
   "edge_count": 37,
-  "blueprint_path": "/tmp/bunya_jido_preview_compact/.bunya-jido/bunya-jido.blueprint.json"
+  "blueprint_path": "/tmp/bunya_jido_preview_compact/.bunya-jido/bunya-jido.blueprint.json",
+  "artifact_mode": "semantic_blueprint",
+  "grounding": {
+    "status": "draft",
+    "publishable": false,
+    "draft_override": true,
+    "publish_blockers": [
+      "Illustrative demo evidence paths are not present in this repository."
+    ],
+    "warnings": [],
+    "metrics": {
+      "node_count": 21,
+      "edge_count": 37,
+      "grounded_node_ratio": 1.0,
+      "grounded_edge_ratio": 1.0,
+      "warning_count": 0,
+      "error_count": 0,
+      "warnings": [],
+      "grounding_status": "draft",
+      "publish_blocker_count": 1,
+      "publish_blockers": [
+        "Illustrative demo evidence paths are not present in this repository."
+      ]
+    }
+  }
 }</script>
 <script>
 (() => {
@@ -2031,11 +2062,14 @@ function nearestEdge(sx,sy){ let best=null,bd=10; edges.forEach(e=>{ if(!state.v
 function distPointSegment(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1; const l2=dx*dx+dy*dy; if(l2===0)return Math.hypot(px-x1,py-y1); let t=((px-x1)*dx+(py-y1)*dy)/l2; t=Math.max(0,Math.min(1,t)); return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));}
 function fit(animated=true){buildVisibility(); const vis=nodes.filter(n=>state.visibleNodes.has(n.id)); if(!vis.length)return; let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9; const visiblePlanes=new Set(vis.map(n=>n.plane)); Object.entries(planePanels).forEach(([plane,p])=>{ if(!visiblePlanes.has(plane)) return; minx=Math.min(minx,p.x); miny=Math.min(miny,p.y); maxx=Math.max(maxx,p.x+p.w); maxy=Math.max(maxy,p.y+p.h); }); vis.forEach(n=>{minx=Math.min(minx,n.x);miny=Math.min(miny,n.y);maxx=Math.max(maxx,n.x);maxy=Math.max(maxy,n.y);}); const margin=80; const scale=Math.min((W-margin)/(maxx-minx+1),(H-margin)/(maxy-miny+1)); state.zoom=Math.max(.16,Math.min(2.2,scale)); state.panX=W/2-(minx+maxx)/2*state.zoom; state.panY=H/2-(miny+maxy)/2*state.zoom;}
 function selectNode(n){ state.selected=n; document.getElementById('search').value=n?n.label:''; renderDetails(); updateLegend(); }
-function renderDetails(){ const el=document.getElementById('details'); const n=state.selected; if(!n){el.innerHTML='<div class="empty">Click a node to inspect relations, source paths, and evidence.</div>'; return;} const out=edges.filter(e=>e.source===n.id); const inn=edges.filter(e=>e.target===n.id); const badges=`<span class="badge">${n.type}</span><span class="badge">${n.plane}</span><span class="badge">degree ${n.degree}</span>${n.major?'<span class="badge">major</span>':''}${n.detail_level==='detail'?'<span class="badge">detail</span>':''}`; const edgeHtml=(arr,dir)=> arr.slice(0,28).map(e=>`<div class="edgeitem" data-edge="${e.id}" style="border-color:${relationColors[e.relation]||'#64748b'}"><b>${dir==='out'?e.relation:e.relation+' ←'}</b> ${dir==='out'?escapeHtml(e.target_label):escapeHtml(e.source_label)}${e.note?`<br><span class="muted">${escapeHtml(e.note)}</span>`:''}</div>`).join('') || '<div class="muted small">none</div>';
-  el.innerHTML=`<div class="node-title">${escapeHtml(n.label)}</div><div>${badges}</div><p class="desc">${escapeHtml(n.description||'')}</p><div class="panel-kv"><div>source</div><div class="source-link">${escapeHtml(n.source_path||'generated graph node')}</div><div>status</div><div>${escapeHtml(n.status||'n/a')}</div>${n.parent?`<div>parent</div><div><span class="code">${escapeHtml(n.parent)}</span></div>`:''}<div>tags</div><div>${(n.tags||[]).slice(0,8).map(t=>`<span class="code">${escapeHtml(t)}</span>`).join(' ')||'<span class="muted">none</span>'}</div>${n.llm_lane?`<div>LLM lane</div><div><span class="code">${escapeHtml(n.llm_lane)}</span><br><span class="muted">${escapeHtml(n.llm_env||'env-bound')}</span></div>`:''}</div><div class="relgroup"><h3>Outgoing</h3>${edgeHtml(out,'out')}</div><div class="relgroup"><h3>Incoming</h3>${edgeHtml(inn,'in')}</div>`;
+function evidenceHtml(evidence){const items=(evidence||[]).slice(0,4); return items.length?`<div class="evlist">${items.map(ev=>`<div>${escapeHtml(ev.kind||'evidence')}: ${escapeHtml(ev.path||'')}${ev.symbol?` · ${escapeHtml(ev.symbol)}`:''}</div>`).join('')}</div>`:'<div class="evlist">no recorded evidence</div>';}
+function renderTrust(){const el=document.getElementById('trustPanel'); const mode=DATA.artifact_mode==='semantic_blueprint'?'Semantic Blueprint':'Static Scan'; const g=DATA.grounding||{}; const status=g.status||'not_assessed'; const label=status==='not_assessed'?'Not assessed':status[0].toUpperCase()+status.slice(1); const m=g.metrics||DATA.blueprint_quality||{}; let extra=''; if(DATA.artifact_mode==='semantic_blueprint'){const core=m.core_node_count?`${Math.round((m.grounded_core_node_ratio||0)*100)}%`:'n/a'; const rels=m.critical_edge_count?`${Math.round((m.grounded_critical_edge_ratio||0)*100)}%`:'n/a'; extra=`<div>Core evidence</div><div>${core} nodes · ${rels} relations</div><div>Warnings</div><div>${(g.warnings||[]).length}</div>`;} else {extra='<div>Semantic grounding</div><div>Not assessed</div>';}; const alert=(g.publish_blockers||[]).length?`<div class="trust-alert">${escapeHtml(g.publish_blockers[0])}${g.publish_blockers.length>1?` (+${g.publish_blockers.length-1} more)`:''}</div>`:''; el.innerHTML=`<div class="trust-state ${escapeHtml(status)}">${escapeHtml(label)}</div><div class="trust-kv"><div>Artifact</div><div>${escapeHtml(mode)}</div>${extra}</div>${alert}`;}
+function renderDetails(){ const el=document.getElementById('details'); const n=state.selected; if(!n){el.innerHTML='<div class="empty">Click a node to inspect relations, source paths, and evidence.</div>'; return;} const out=edges.filter(e=>e.source===n.id); const inn=edges.filter(e=>e.target===n.id); const badges=`<span class="badge">${n.type}</span><span class="badge">${n.plane}</span><span class="badge">degree ${n.degree}</span>${n.major?'<span class="badge">major</span>':''}${n.detail_level==='detail'?'<span class="badge">detail</span>':''}`; const edgeHtml=(arr,dir)=> arr.slice(0,28).map(e=>`<div class="edgeitem" data-edge="${e.id}" style="border-color:${relationColors[e.relation]||'#64748b'}"><b>${dir==='out'?e.relation:e.relation+' ←'}</b> ${dir==='out'?escapeHtml(e.target_label):escapeHtml(e.source_label)}<br><span class="muted">confidence: ${escapeHtml(e.confidence||'n/a')}</span>${e.note?`<br><span class="muted">${escapeHtml(e.note)}</span>`:''}${evidenceHtml(e.evidence)}</div>`).join('') || '<div class="muted small">none</div>';
+  el.innerHTML=`<div class="node-title">${escapeHtml(n.label)}</div><div>${badges}</div><p class="desc">${escapeHtml(n.description||'')}</p><div class="panel-kv"><div>source</div><div class="source-link">${escapeHtml(n.source_path||'generated graph node')}</div><div>status</div><div>${escapeHtml(n.status||'n/a')}</div>${n.parent?`<div>parent</div><div><span class="code">${escapeHtml(n.parent)}</span></div>`:''}<div>tags</div><div>${(n.tags||[]).slice(0,8).map(t=>`<span class="code">${escapeHtml(t)}</span>`).join(' ')||'<span class="muted">none</span>'}</div>${n.llm_lane?`<div>LLM lane</div><div><span class="code">${escapeHtml(n.llm_lane)}</span><br><span class="muted">${escapeHtml(n.llm_env||'env-bound')}</span></div>`:''}</div><div class="relgroup"><h3>Node Evidence</h3>${evidenceHtml(n.evidence)}</div><div class="relgroup"><h3>Outgoing</h3>${edgeHtml(out,'out')}</div><div class="relgroup"><h3>Incoming</h3>${edgeHtml(inn,'in')}</div>`;
   el.querySelectorAll('[data-edge]').forEach(x=>x.onclick=()=>{const e=edges.find(q=>q.id===x.dataset.edge); if(e){selectNode(e.t); state.hover=e.s; toast(e.source_label+' → '+e.target_label)}});
 }
 function renderUI(){
+  renderTrust();
   document.getElementById('statLens').textContent=lensDefs[state.activeLens].label;
   const lensBox=document.getElementById('lensButtons'); lensBox.innerHTML=''; Object.entries(lensDefs).forEach(([id,def])=>{const b=document.createElement('button');b.textContent=def.label;b.className=id===state.activeLens?'active':'';b.onclick=()=>{state.activeLens=id; renderUI(); fit();}; lensBox.appendChild(b);});
   const dl=document.getElementById('nodeList'); dl.innerHTML=nodes.map(n=>`<option value="${escapeHtml(n.label)}"></option>`).join('');

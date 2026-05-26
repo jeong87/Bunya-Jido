@@ -472,7 +472,8 @@ def make_blueprint_prompt(project_name: str) -> str:
 
     `bunya-jido validate-agent-map --root .`
 
-    Fix errors. Classification warnings are acceptable only if they are honest and hard to avoid.
+    Fix errors and grounding blockers. Classification warnings are acceptable only if they are honest and hard to avoid.
+    Use `--allow-draft` only when a human explicitly wants to inspect an incomplete draft map.
 
     ## Plane classification guidance
 
@@ -699,7 +700,7 @@ def make_blueprint_prompt(project_name: str) -> str:
 
     `bunya-jido validate-agent-map --root .`
 
-    Fix errors. When done, say only:
+    Fix errors and grounding blockers. When done, say only:
 
     `준비완료: .bunya-jido/COMPONENTS.md .bunya-jido/WORKFLOWS.md .bunya-jido/bunya-jido.blueprint.json .bunya-jido/bunya-jido.agent-map.json`
     """).strip() + "\n"
@@ -750,7 +751,7 @@ def prepare_blueprint_workspace(
         "`.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, "
         "`.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; "
         "run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; "
-        "fix errors and reduce classification warnings when practical; then say `준비완료`.\n",
+        "fix errors and grounding blockers and reduce classification warnings when practical; then say `준비완료`.\n",
         encoding="utf-8",
     )
     if not quiet:
@@ -783,9 +784,40 @@ def _walk_strings(obj: Any):
             yield from _walk_strings(v)
 
 
+def _workflow_edge_pairs(bp: dict[str, Any]) -> set[tuple[str, str]]:
+    pairs: set[tuple[str, str]] = set()
+    for workflow in bp.get("workflows") or []:
+        if not isinstance(workflow, dict):
+            continue
+        sequence = [str(node_id) for node_id in workflow.get("node_ids") or [] if node_id]
+        if not sequence:
+            for step in workflow.get("steps") or []:
+                if isinstance(step, str) and step:
+                    sequence.append(step)
+                elif isinstance(step, dict):
+                    node_id = step.get("node") or step.get("node_id")
+                    if node_id:
+                        sequence.append(str(node_id))
+        pairs.update((source, target) for source, target in zip(sequence, sequence[1:]))
+    return pairs
+
+
+def _evidence_path_missing(path: Any, root_path: Path) -> bool:
+    if not path or re.match(r"^[a-z]+://", str(path)):
+        return False
+    value = str(path).split("#", 1)[0]
+    if re.match(r"^[A-Za-z]:\\", value):
+        candidate = Path(value)
+    else:
+        value = re.sub(r":\d+(?::\d+)?$", "", value)
+        candidate = root_path / value
+    return bool(value) and not candidate.exists()
+
+
 def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -> tuple[list[str], list[str], dict[str, Any]]:
     errors: list[str] = []
     warnings: list[str] = []
+    publish_blockers: list[str] = []
     if bp.get("schema_version") != "bunya-jido-blueprint-v1":
         errors.append("schema_version must be bunya-jido-blueprint-v1")
     project = bp.get("project")
@@ -799,6 +831,17 @@ def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -
     if not isinstance(edges, list):
         errors.append("edges must be a list")
         edges = []
+    core_node_ids = {
+        str(n.get("id"))
+        for n in nodes
+        if isinstance(n, dict) and n.get("id") and str(n.get("importance") or "").lower() == "core"
+    }
+    if nodes and not core_node_ids:
+        publish_blockers.append(
+            "semantic blueprint has no core nodes; mark architectural landmarks with importance=core"
+        )
+    workflow_pairs = _workflow_edge_pairs(bp)
+    critical_edges: list[dict[str, Any]] = []
     ids: set[str] = set()
     for i, n in enumerate(nodes):
         if not isinstance(n, dict):
@@ -817,6 +860,8 @@ def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -
         ev = n.get("evidence")
         if not isinstance(ev, list) or not ev:
             warnings.append(f"node {nid} has no evidence")
+            if str(nid) in core_node_ids:
+                publish_blockers.append(f"core node {nid} has no evidence")
         if str(nid).startswith("repo:") or str(n.get("type", "")).lower() == "repo":
             warnings.append(f"node {nid} is a repo/root node; usually omit it because build hides synthetic roots by default")
     # Semantic classification hygiene checks. These are warnings, not hard failures.
@@ -850,14 +895,25 @@ def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -
             errors.append(f"edge {i} source not found: {s}")
         if t not in ids:
             errors.append(f"edge {i} target not found: {t}")
+        is_critical = (s in core_node_ids and t in core_node_ids) or (
+            (str(s), str(t)) in workflow_pairs and (s in core_node_ids or t in core_node_ids)
+        )
+        if is_critical:
+            critical_edges.append(e)
         if not e.get("relation"):
             warnings.append(f"edge {s}->{t} missing relation")
         if not e.get("evidence"):
             warnings.append(f"edge {s}->{t} has no evidence")
+            if is_critical:
+                publish_blockers.append(f"critical edge {s}->{t} has no evidence")
         if e.get("confidence") == "unverified":
             warnings.append(f"edge {s}->{t} is unverified")
+            if is_critical:
+                publish_blockers.append(f"critical edge {s}->{t} is unverified")
     if any(_string_has_secret(s) for s in _walk_strings(bp)):
         errors.append("blueprint appears to contain secret-like text; remove raw tokens/API keys/passwords")
+    unresolved_core_nodes: set[str] = set()
+    unresolved_critical_edges: set[tuple[str, str]] = set()
     if root is not None:
         root_path = Path(root).resolve()
         for n in nodes:
@@ -867,19 +923,51 @@ def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -
                 evs.append({"path": sp, "kind": "source_path"})
             for ev in evs[:8]:
                 path = ev.get("path") if isinstance(ev, dict) else None
-                if not path or re.match(r"^[a-z]+://", str(path)):
-                    continue
-                clean = str(path).split(":", 1)[0] if not re.match(r"^[A-Za-z]:\\", str(path)) else str(path)
-                if clean and not (root_path / clean).exists():
+                if _evidence_path_missing(path, root_path):
                     warnings.append(f"evidence path not found: {path} for node {n.get('id')}")
+                    if str(n.get("id")) in core_node_ids:
+                        unresolved_core_nodes.add(str(n.get("id")))
+                        publish_blockers.append(f"core node {n.get('id')} has unresolved evidence path: {path}")
+                    break
+        critical_ids = {id(edge) for edge in critical_edges}
+        for edge in edges:
+            if not isinstance(edge, dict):
+                continue
+            for ev in (edge.get("evidence") or [])[:8]:
+                path = ev.get("path") if isinstance(ev, dict) else None
+                if _evidence_path_missing(path, root_path):
+                    s, t = str(edge.get("source")), str(edge.get("target"))
+                    warnings.append(f"evidence path not found: {path} for edge {s}->{t}")
+                    if id(edge) in critical_ids:
+                        unresolved_critical_edges.add((s, t))
+                        publish_blockers.append(f"critical edge {s}->{t} has unresolved evidence path: {path}")
                     break
     grounded_nodes = sum(1 for n in nodes if n.get("evidence"))
     grounded_edges = sum(1 for e in edges if e.get("evidence") and e.get("confidence") != "unverified")
+    grounded_core_nodes = sum(
+        1 for n in nodes if str(n.get("id")) in core_node_ids and n.get("evidence") and str(n.get("id")) not in unresolved_core_nodes
+    )
+    grounded_critical_edges = sum(
+        1
+        for e in critical_edges
+        if e.get("evidence")
+        and e.get("confidence") != "unverified"
+        and (str(e.get("source")), str(e.get("target"))) not in unresolved_critical_edges
+    )
+    publish_blockers = list(dict.fromkeys(publish_blockers))
+    grounding_status = "blocked" if errors or publish_blockers else "grounded"
     metrics = {
         "node_count": len(nodes),
         "edge_count": len(edges),
         "grounded_node_ratio": round(grounded_nodes / max(1, len(nodes)), 3),
         "grounded_edge_ratio": round(grounded_edges / max(1, len(edges)), 3),
+        "core_node_count": len(core_node_ids),
+        "critical_edge_count": len(critical_edges),
+        "grounded_core_node_ratio": round(grounded_core_nodes / max(1, len(core_node_ids)), 3),
+        "grounded_critical_edge_ratio": round(grounded_critical_edges / max(1, len(critical_edges)), 3),
+        "grounding_status": grounding_status,
+        "publish_blocker_count": len(publish_blockers),
+        "publish_blockers": publish_blockers[:40],
         "warning_count": len(warnings),
         "error_count": len(errors),
     }
@@ -1130,10 +1218,26 @@ def _normalize_node_id(raw: str) -> str:
     return slug(raw, 120)
 
 
-def graph_from_blueprint(bp: dict[str, Any], *, root: str | Path | None = None, static_graph: dict[str, Any] | None = None, show_root: bool = False) -> dict[str, Any]:
+def graph_from_blueprint(
+    bp: dict[str, Any],
+    *,
+    root: str | Path | None = None,
+    static_graph: dict[str, Any] | None = None,
+    show_root: bool = False,
+    allow_draft: bool = False,
+) -> dict[str, Any]:
     errors, warnings, metrics = validate_blueprint_obj(bp, root=root)
     if errors:
         raise ValueError("Blueprint validation failed: " + "; ".join(errors[:8]))
+    publish_blockers = list(metrics.get("publish_blockers") or [])
+    if publish_blockers and not allow_draft:
+        raise ValueError(
+            "Blueprint publication blocked: "
+            + "; ".join(publish_blockers[:8])
+            + ". Use allow_draft=True or `--allow-draft` to render an explicitly marked draft."
+        )
+    grounding_status = "draft" if publish_blockers else "grounded"
+    quality_metrics = {**metrics, "grounding_status": grounding_status}
     project = bp.get("project") or {}
     project_name = str(project.get("name") or (infer_project_name(Path(root)) if root else "repository"))
     id_map: dict[str, str] = {}
@@ -1299,6 +1403,15 @@ def graph_from_blueprint(bp: dict[str, Any], *, root: str | Path | None = None, 
         "generated_at": now_iso(),
         "title": f"Bunya-Jido · {project_name}",
         "description": str(project.get("summary") or "Blueprint-assisted repository graph."),
+        "artifact_mode": "semantic_blueprint",
+        "grounding": {
+            "status": grounding_status,
+            "publishable": not publish_blockers,
+            "draft_override": bool(publish_blockers and allow_draft),
+            "publish_blockers": publish_blockers[:40],
+            "warnings": warnings[:40],
+            "metrics": quality_metrics,
+        },
         "stats": {"nodes": len(nodes), "edges": len(edges), "relations": relations, "planes": planes, "types": types},
         "nodes": sorted(nodes, key=lambda n: (n["plane"], not n.get("major"), n["type"], n["label"].lower())),
         "edges": edges,
@@ -1306,7 +1419,7 @@ def graph_from_blueprint(bp: dict[str, Any], *, root: str | Path | None = None, 
         "lenses": lenses,
         "groups": groups,
         "source_documents": source_docs,
-        "blueprint_quality": {**metrics, "warnings": warnings[:40]},
+        "blueprint_quality": {**quality_metrics, "warnings": warnings[:40]},
         "node_count": len(nodes),
         "edge_count": len(edges),
     }
@@ -1434,6 +1547,7 @@ def graph_with_optional_blueprint(
     show_root: bool = False,
     data_policy: str = "summary",
     max_data_files: int = 25,
+    allow_draft: bool = False,
 ) -> tuple[dict[str, Any], Path | None]:
     root_path = Path(root).resolve()
     static_graph = build_graph(root_path, mode=mode, max_files=max_files, max_nodes=max_nodes, max_edges=max_edges, include_hidden=include_hidden, show_root=show_root, data_policy=data_policy, max_data_files=max_data_files)
@@ -1453,6 +1567,6 @@ def graph_with_optional_blueprint(
     if not bp_path:
         return static_graph, None
     bp = load_blueprint(bp_path)
-    graph = graph_from_blueprint(bp, root=root_path, static_graph=static_graph, show_root=show_root)
+    graph = graph_from_blueprint(bp, root=root_path, static_graph=static_graph, show_root=show_root, allow_draft=allow_draft)
     graph["blueprint_path"] = bp_path.as_posix()
     return graph, bp_path

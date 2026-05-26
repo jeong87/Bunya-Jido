@@ -65,6 +65,12 @@ bunya-jido build --root . --blueprint none --out bunya-jido.html
 
 `.bunya-jido/bunya-jido.blueprint.json`이 있으면, Bunya-Jido는 코딩 에이전트와 함께 작성하고 도구가 검사한, 근거가 연결된 아키텍처 해석을 렌더링합니다. 책임 영역, 워크플로우, 에이전트 handoff 문맥에는 이 모드를 권장합니다.
 
+핵심 grounding blocker가 해결되지 않은 시맨틱 지도는 기본적으로 빌드되지 않습니다. 구조적으로는 유효하지만 아직 완성되지 않은 지도를 명시적으로 draft로 검토하려면 다음 명령을 사용합니다.
+
+```bash
+bunya-jido build --root . --allow-draft --out bunya-jido.html
+```
+
 ## 빠른 시작
 
 1. 설치: `python -m pip install git+https://github.com/jeong87/Bunya-Jido.git`
@@ -97,7 +103,7 @@ Blueprint 모드는 Bunya-Jido의 핵심입니다.
 저장소 루트에서 코딩 에이전트에게 다음 지시를 줍니다.
 
 ```text
-Run `bunya-jido prepare --root . --quiet` if needed, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; fix errors and reduce classification warnings when practical; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
+Run `bunya-jido prepare --root . --quiet` if needed, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; fix errors and grounding blockers, and reduce classification warnings when practical; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
 ```
 
 이 프롬프트는 마지막에 `bunya-jido.html`까지 생성합니다. Blueprint를 고친 뒤 직접 다시 만들고 싶으면 다음 명령을 실행하면 됩니다.
@@ -174,7 +180,8 @@ LLM 없이 결정적으로 생성되는 정적 스캔 결과입니다.
 - 책임 영역별 plane cluster
 - 노드와 엣지 필터링
 - 선택한 노드 주변만 보는 local graph focus
-- 근거 파일과 설명을 보여주는 evidence panel
+- `Static Scan`, `Grounded`, 명시적 `Draft` 상태를 보여주는 trust panel
+- source path, 관계 confidence, 기록된 근거를 보여주는 evidence panel
 - blueprint view와 워크플로우를 보여주는 path preset
 - PNG와 JSON export
 - blueprint가 제공하는 경우 overview/detail 계층 전환

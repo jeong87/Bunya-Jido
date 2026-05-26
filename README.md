@@ -65,6 +65,12 @@ bunya-jido build --root . --blueprint none --out bunya-jido.html
 
 When `.bunya-jido/bunya-jido.blueprint.json` exists, Bunya-Jido renders an evidence-linked architectural interpretation written with a coding agent and checked by the tool. This is the recommended mode for responsibility areas, workflows, and agent handoff context.
 
+Semantic maps with unresolved core grounding blockers are not built by default. To inspect a structurally valid but unfinished map explicitly as a draft, use:
+
+```bash
+bunya-jido build --root . --allow-draft --out bunya-jido.html
+```
+
 ## Quick Start
 
 1. Install: `python -m pip install git+https://github.com/jeong87/Bunya-Jido.git`
@@ -97,7 +103,7 @@ Blueprint mode is the core Bunya-Jido workflow.
 From the repository root, ask your coding agent:
 
 ```text
-Run `bunya-jido prepare --root . --quiet` if needed, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; fix errors and reduce classification warnings when practical; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
+Run `bunya-jido prepare --root . --quiet` if needed, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; fix errors and grounding blockers, and reduce classification warnings when practical; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
 ```
 
 This prompt builds `bunya-jido.html` at the end. If you edit the blueprint and want to rebuild the map yourself, run:
@@ -174,7 +180,8 @@ The generated HTML map includes:
 - responsibility-oriented plane clusters
 - node and edge filtering
 - local graph focus around a selected node
-- an evidence panel for source files and descriptions
+- a trust panel showing `Static Scan`, `Grounded`, or explicit `Draft` status
+- an evidence panel showing source paths, relation confidence, and recorded evidence
 - path presets for blueprint views and workflows
 - PNG and JSON export
 - overview/detail switching when the blueprint provides detail nodes

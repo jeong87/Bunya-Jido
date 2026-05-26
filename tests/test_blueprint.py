@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from bunya_jido.blueprint import (
@@ -11,6 +13,7 @@ from bunya_jido.blueprint import (
     validate_agent_map_obj,
     validate_blueprint_obj,
 )
+from bunya_jido.cli import main
 from bunya_jido.render import render_html
 
 
@@ -80,7 +83,7 @@ def example_blueprint() -> dict:
 
 
 class BlueprintCharacterizationTests(unittest.TestCase):
-    def test_missing_core_evidence_and_unverified_edge_are_warnings_today(self) -> None:
+    def test_missing_core_evidence_and_unverified_edge_block_publication(self) -> None:
         blueprint = example_blueprint()
         blueprint["nodes"][0]["evidence"] = []
         blueprint["edges"][0]["evidence"] = []
@@ -94,19 +97,44 @@ class BlueprintCharacterizationTests(unittest.TestCase):
         self.assertIn("edge component:cli->component:builder is unverified", warnings)
         self.assertEqual(metrics["grounded_node_ratio"], 0.667)
         self.assertEqual(metrics["grounded_edge_ratio"], 0.5)
-        self.assertEqual(graph_from_blueprint(blueprint)["node_count"], 3)
+        self.assertEqual(metrics["grounding_status"], "blocked")
+        self.assertEqual(metrics["publish_blocker_count"], 3)
+        with self.assertRaisesRegex(ValueError, "Blueprint publication blocked"):
+            graph_from_blueprint(blueprint)
+        draft = graph_from_blueprint(blueprint, allow_draft=True)
+        self.assertEqual(draft["grounding"]["status"], "draft")
+        self.assertTrue(draft["grounding"]["draft_override"])
 
-    def test_unresolved_node_evidence_path_is_a_warning_today(self) -> None:
+    def test_unresolved_core_evidence_path_blocks_publication(self) -> None:
         blueprint = example_blueprint()
         blueprint["nodes"][0]["evidence"] = [{"kind": "source", "path": "src/missing.py"}]
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             (root / "README.md").write_text("fixture", encoding="utf-8")
 
-            errors, warnings, _ = validate_blueprint_obj(blueprint, root=root)
+            errors, warnings, metrics = validate_blueprint_obj(blueprint, root=root)
 
         self.assertEqual(errors, [])
         self.assertIn("evidence path not found: src/missing.py for node component:cli", warnings)
+        self.assertIn(
+            "core node component:cli has unresolved evidence path: src/missing.py",
+            metrics["publish_blockers"],
+        )
+
+    def test_blueprint_without_core_landmarks_is_blocked(self) -> None:
+        blueprint = example_blueprint()
+        for node in blueprint["nodes"]:
+            node.pop("importance", None)
+
+        errors, _, metrics = validate_blueprint_obj(blueprint)
+
+        self.assertEqual(errors, [])
+        self.assertIn(
+            "semantic blueprint has no core nodes; mark architectural landmarks with importance=core",
+            metrics["publish_blockers"],
+        )
+        with self.assertRaisesRegex(ValueError, "Blueprint publication blocked"):
+            graph_from_blueprint(blueprint)
 
     def test_secret_like_blueprint_content_is_an_error(self) -> None:
         blueprint = example_blueprint()
@@ -115,6 +143,8 @@ class BlueprintCharacterizationTests(unittest.TestCase):
         errors, _, _ = validate_blueprint_obj(blueprint)
 
         self.assertTrue(any("secret-like text" in error for error in errors))
+        with self.assertRaisesRegex(ValueError, "Blueprint validation failed"):
+            graph_from_blueprint(blueprint, allow_draft=True)
 
     def test_graph_hides_repo_node_and_preserves_workflow_and_quality_data(self) -> None:
         blueprint = example_blueprint()
@@ -133,6 +163,8 @@ class BlueprintCharacterizationTests(unittest.TestCase):
 
         self.assertFalse(any(node["type"] == "repo" for node in graph["nodes"]))
         self.assertTrue(any(path["label"] == "Main Flow" for path in graph["path_presets"]))
+        self.assertEqual(graph["artifact_mode"], "semantic_blueprint")
+        self.assertEqual(graph["grounding"]["status"], "grounded")
         self.assertEqual(graph["blueprint_quality"]["grounded_node_ratio"], 1.0)
         self.assertEqual(graph["nodes"][0].get("evidence"), [{"kind": "source", "path": "README.md"}])
 
@@ -141,6 +173,8 @@ class BlueprintCharacterizationTests(unittest.TestCase):
             html = render_html(graph, out).read_text(encoding="utf-8")
         self.assertIn('"blueprint_quality"', html)
         self.assertIn('"Main Flow"', html)
+        self.assertIn("Trust", html)
+        self.assertIn("confidence:", html)
 
     def test_graph_conversion_is_stable_after_generated_timestamp_is_removed(self) -> None:
         first = graph_from_blueprint(example_blueprint())
@@ -149,6 +183,30 @@ class BlueprintCharacterizationTests(unittest.TestCase):
         second.pop("generated_at", None)
 
         self.assertEqual(first, second)
+
+    def test_cli_requires_explicit_draft_override_for_grounding_blockers(self) -> None:
+        blueprint = example_blueprint()
+        blueprint["nodes"][0]["evidence"] = []
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(json.dumps(blueprint), encoding="utf-8")
+            html_path = root / "atlas.html"
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                blocked = main(["validate-blueprint", "--root", str(root)])
+                blocked_build = main(["build", "--root", str(root), "--out", str(html_path)])
+                draft = main(["build", "--root", str(root), "--allow-draft", "--out", str(html_path)])
+            html = html_path.read_text(encoding="utf-8")
+
+        self.assertEqual(blocked, 2)
+        self.assertIn("Blueprint publication blocked", stderr.getvalue())
+        self.assertEqual(blocked_build, 1)
+        self.assertEqual(draft, 0)
+        self.assertIn("grounding=draft", stdout.getvalue())
+        self.assertIn('"status": "draft"', html)
 
 
 class AgentMapCharacterizationTests(unittest.TestCase):
