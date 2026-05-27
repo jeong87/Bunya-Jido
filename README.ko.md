@@ -229,6 +229,8 @@ bunya-jido refresh-context --root . \
 
 Bunya-Jido는 아직 언어별로 동등한 시맨틱 분석 범위나, 작성된 아키텍처 지도의 정확성을 자동으로 증명한다고 주장하지 않습니다.
 
+현재의 정확한 동작, 대표 fixture, JS/TS 로컬 해석 제한, 새 지원 범위 주장을 추가하기 위한 근거 조건은 [scanner coverage matrix](docs/SCANNER_COVERAGE.md)에서 확인할 수 있습니다.
+
 ## 에이전트용 가이드 스니펫
 
 Codex, Claude Code, Cursor, Cline 스타일 환경에서 사용할 수 있는 instruction snippet을 생성할 수 있습니다.

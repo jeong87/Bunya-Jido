@@ -229,6 +229,8 @@ The current strongest fit is Python repositories with nontrivial workflows, espe
 
 Bunya-Jido does not yet claim equivalent semantic coverage across languages or automatic proof that an authored architecture map is correct.
 
+See the [scanner coverage matrix](docs/SCANNER_COVERAGE.md) for exact current behavior, representative fixtures, JS/TS local-resolution limits, and the evidence required before adding a new support claim.
+
 ## Agent Guide Snippets
 
 Bunya-Jido can create instruction snippets for Codex, Claude Code, Cursor, and Cline style environments.

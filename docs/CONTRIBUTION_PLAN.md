@@ -5,7 +5,7 @@
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 27, 2026):** PR 1 through PR 6 are implemented on `main`; PR 7 is the next planned milestone.
+**Implementation progress (May 28, 2026):** PR 1 through PR 7 are implemented on `main`; PR 8 is the next planned milestone.
 
 ---
 
@@ -546,6 +546,8 @@ Each pull request should remain independently reviewable. The revised order deli
 
 **Suggested commit message:**  
 `docs: publish scanner coverage matrix and measured extension policy`
+
+**Implemented (May 28, 2026):** `docs/SCANNER_COVERAGE.md` publishes the exact deterministic scanner claims and extension gate. The committed `examples/coverage/` fixture and `tests/test_scanner_coverage.py` cover Python/config/provider evidence, Markdown linkage, bounded runtime/data behavior, and the intentional JS/TS local-import resolution limitation.
 
 ---
 

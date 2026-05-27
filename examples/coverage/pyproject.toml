@@ -1,0 +1,7 @@
+[project]
+name = "scanner-coverage-fixture"
+version = "0.0.0"
+dependencies = ["httpx>=0.27"]
+
+[project.scripts]
+coverage-worker = "coverage_app.worker:main"

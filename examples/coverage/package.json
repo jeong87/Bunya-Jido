@@ -1,0 +1,10 @@
+{
+  "name": "scanner-coverage-web",
+  "private": true,
+  "scripts": {
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "0.0.0-fixture"
+  }
+}

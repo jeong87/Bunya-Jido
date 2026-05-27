@@ -1,0 +1,1 @@
+"""Scanner coverage fixture package."""
