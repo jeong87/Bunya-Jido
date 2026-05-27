@@ -78,6 +78,19 @@ PLANE_BY_KIND = {
     "meta": "meta",
 }
 
+STATIC_PLANE_GLOSSARY = {
+    "repo": ("Repository", "Repository packages and directory structure discovered by static scan."),
+    "code": ("Code", "Implementation modules, symbols, entrypoints, and local code relationships."),
+    "docs": ("Documentation", "Documentation files discovered as explanatory repository surfaces."),
+    "config": ("Configuration", "Build, packaging, environment, and tool configuration inputs."),
+    "runtime": ("Runtime", "Runtime outputs, logs, state, and generated artifacts."),
+    "tests": ("Tests", "Test files and relationships inferred from repository structure."),
+    "data": ("Data", "Dataset-like or data-bearing repository paths handled by scan policy."),
+    "external": ("External", "Provider or external API hints detected from source and configuration."),
+    "meta": ("Metadata", "Repository metadata found during deterministic discovery."),
+    "unknown": ("Other", "Discovered items without a more specific responsibility region."),
+}
+
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -253,6 +266,14 @@ class GraphBuilder:
         relations = sorted({e.relation for e in edges})
         planes = sorted({n.plane for n in nodes})
         types = sorted({n.type for n in nodes})
+        plane_glossary = [
+            {
+                "id": plane,
+                "label": STATIC_PLANE_GLOSSARY.get(plane, (plane.replace("_", " ").title(), ""))[0],
+                "purpose": STATIC_PLANE_GLOSSARY.get(plane, ("", "Discovered static-scan responsibility region."))[1],
+            }
+            for plane in planes
+        ]
         return {
             "schema_version": "bunya-jido-v1",
             "generated_at": now_iso(),
@@ -268,6 +289,7 @@ class GraphBuilder:
                 "metrics": {},
             },
             "stats": {"nodes": len(nodes), "edges": len(edges), "relations": relations, "planes": planes, "types": types},
+            "plane_glossary": plane_glossary,
             "nodes": [n.to_json() for n in sorted(nodes, key=lambda n: (n.plane, n.type, n.label.lower()))],
             "edges": [e.to_json(labels) for e in edges],
             "path_presets": self._path_presets(nodes, edges),

@@ -27,6 +27,7 @@ def stable_semantic_contract(graph: dict) -> dict:
         "artifact_mode": graph["artifact_mode"],
         "grounding": graph["grounding"],
         "stats": graph["stats"],
+        "plane_glossary": graph["plane_glossary"],
         "nodes": [
             (node["id"], node["label"], node["plane"], node["type"])
             for node in graph["nodes"]
@@ -75,6 +76,14 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertTrue(graph["grounding"]["publishable"])
         self.assertEqual(graph["stats"]["nodes"], 12)
         self.assertEqual(graph["stats"]["edges"], 19)
+        self.assertIn(
+            {
+                "id": "semantic",
+                "label": "Semantic",
+                "purpose": "Reviewed architecture and agent-route projection.",
+            },
+            graph["plane_glossary"],
+        )
         self.assertEqual(
             graph["blueprint_path"], ".bunya-jido/bunya-jido.blueprint.json"
         )
@@ -105,6 +114,17 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
     def test_published_demo_matches_stable_semantic_contract(self) -> None:
         html = DEMO_PATH.read_text(encoding="utf-8")
+        for control in (
+            "Explore Mode",
+            "Inspect Evidence",
+            "Implementation Detail",
+            "Responsibility Areas",
+            "Relation Families",
+            "Confidence",
+            "Validated Task Routes",
+            "Selected Relationship",
+        ):
+            self.assertIn(control, html)
         marker = '<script id="graph-data" type="application/json">'
         data_start = html.index(marker) + len(marker)
         data_end = html.index("</script>", data_start)

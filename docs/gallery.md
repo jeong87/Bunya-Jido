@@ -16,6 +16,7 @@ repository and is protected by semantic golden tests.
 | Semantic coverage | 12 nodes, 19 relationships, 5 core nodes, 11 critical relationships |
 | Grounding metrics | 100% core-node evidence; 100% critical-relationship evidence |
 | Agent routes | 3 of 3 routes validated and projected as `Task Route` paths |
+| Viewer disclosure | `Overview` by default; `Inspect Evidence` and `Implementation Detail` on demand |
 | Published output | `docs/demo.html` |
 
 **Generation command:**
@@ -33,6 +34,7 @@ python -m bunya_jido build --root . --max-files 0 --out docs/demo.html
 - A semantic blueprint can publish a compact architecture view with directly inspectable repository evidence.
 - The same committed artifact can expose workflows to humans and bounded task routes to coding agents.
 - Grounded status is visible in the HTML output rather than being an undocumented build assumption.
+- Plane purposes and primary node/relation families make the first read compact, while selected relationships retain their exact verb, confidence, and evidence in `Inspect Evidence`.
 
 **Known limitations:**
 

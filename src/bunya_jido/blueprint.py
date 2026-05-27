@@ -1340,6 +1340,30 @@ def _normalize_node_id(raw: str) -> str:
     return slug(raw, 120)
 
 
+def _plane_glossary_from_blueprint(bp: dict[str, Any], planes: list[str]) -> list[dict[str, str]]:
+    declared: dict[str, dict[str, str]] = {}
+    for raw in bp.get("planes") or []:
+        if not isinstance(raw, dict) or not raw.get("id"):
+            continue
+        plane_id = str(raw["id"])
+        declared[plane_id] = {
+            "id": plane_id,
+            "label": str(raw.get("label") or plane_id.replace("_", " ").title()),
+            "purpose": str(raw.get("purpose") or "No authored purpose recorded."),
+        }
+    return [
+        declared.get(
+            plane,
+            {
+                "id": plane,
+                "label": plane.replace("_", " ").title(),
+                "purpose": "Supporting region included by rendered graph projection.",
+            },
+        )
+        for plane in planes
+    ]
+
+
 def graph_from_blueprint(
     bp: dict[str, Any],
     *,
@@ -1533,6 +1557,7 @@ def graph_from_blueprint(
     relations = sorted({e["relation"] for e in edges})
     planes = sorted({n["plane"] for n in nodes})
     types = sorted({n["type"] for n in nodes})
+    plane_glossary = _plane_glossary_from_blueprint(bp, planes)
     source_docs = []
     seen_paths = set()
     for n in nodes:
@@ -1557,6 +1582,7 @@ def graph_from_blueprint(
             "metrics": quality_metrics,
         },
         "stats": {"nodes": len(nodes), "edges": len(edges), "relations": relations, "planes": planes, "types": types},
+        "plane_glossary": plane_glossary,
         "nodes": sorted(nodes, key=lambda n: (n["plane"], not n.get("major"), n["type"], n["label"].lower())),
         "edges": edges,
         "path_presets": path_presets,

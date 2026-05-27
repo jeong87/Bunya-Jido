@@ -187,6 +187,14 @@ class BlueprintCharacterizationTests(unittest.TestCase):
         self.assertEqual(graph["grounding"]["status"], "grounded")
         self.assertEqual(graph["blueprint_quality"]["grounded_node_ratio"], 1.0)
         self.assertEqual(graph["nodes"][0].get("evidence"), [{"kind": "source", "path": "README.md"}])
+        self.assertEqual(
+            graph["plane_glossary"],
+            [
+                {"id": "control", "label": "Control", "purpose": "Workflow"},
+                {"id": "entry", "label": "Entry", "purpose": "Commands"},
+                {"id": "quality", "label": "Quality", "purpose": "Validation"},
+            ],
+        )
 
         with tempfile.TemporaryDirectory() as tmpdir:
             out = Path(tmpdir) / "atlas.html"
@@ -194,6 +202,12 @@ class BlueprintCharacterizationTests(unittest.TestCase):
         self.assertIn('"blueprint_quality"', html)
         self.assertIn('"Main Flow"', html)
         self.assertIn("Trust", html)
+        self.assertIn("Explore Mode", html)
+        self.assertIn("Inspect Evidence", html)
+        self.assertIn("Implementation Detail", html)
+        self.assertIn("Node Families", html)
+        self.assertIn("Relation Families", html)
+        self.assertIn("Confidence", html)
         self.assertIn("confidence:", html)
 
     def test_graph_conversion_is_stable_after_generated_timestamp_is_removed(self) -> None:

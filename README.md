@@ -180,13 +180,15 @@ It includes files, modules, imports, docs, configuration, runtime artifacts, and
 The generated HTML map includes:
 
 - responsibility-oriented plane clusters
-- node and edge filtering
+- authored plane-purpose glossary plus viewer-facing node and relation families
+- node-family, relation-family, and confidence filtering
 - local graph focus around a selected node
 - a trust panel showing `Static Scan`, `Grounded`, or explicit `Draft` status
 - an evidence panel showing source paths, relation confidence, and recorded evidence
+- explicit `Overview`, `Inspect Evidence`, and `Implementation Detail` exploration modes
 - labeled path presets for blueprint views, workflows, and validated agent-map task routes
 - PNG and JSON export
-- overview/detail switching when the blueprint provides detail nodes
+- implementation-detail expansion when the blueprint provides detail nodes
 
 The map is not the source of truth. The evidence remains in the repository's code, docs, configuration, tests, runtime artifacts, and validated blueprint files. Bunya-Jido projects that evidence into a form that is easier to inspect.
 

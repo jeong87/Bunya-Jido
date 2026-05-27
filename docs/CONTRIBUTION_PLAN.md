@@ -5,7 +5,7 @@
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 27, 2026):** PR 1 through PR 5 are implemented on `main`; PR 6 is the next planned milestone.
+**Implementation progress (May 27, 2026):** PR 1 through PR 6 are implemented on `main`; PR 7 is the next planned milestone.
 
 ---
 
@@ -491,6 +491,8 @@ Each pull request should remain independently reviewable. The revised order deli
 **Goal:** Improve first-read comprehension once trust and examples provide a stable baseline.
 
 **Suggested branch:** `feat/semantic-viewer-disclosure`
+
+**Implemented (May 27, 2026):** Semantic graphs now preserve authored plane-purpose glossary data for the viewer; static scans expose bounded default plane descriptions. The viewer provides explicit Overview, Inspect Evidence, and Implementation Detail modes, node/relation family filters, confidence filtering, grouped task-route/workflow paths, and selected-relationship evidence while preserving exact relation verbs.
 
 **Scope:**
 

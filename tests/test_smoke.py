@@ -28,6 +28,7 @@ class SmokeTests(unittest.TestCase):
         self.assertEqual(graph["artifact_mode"], "static_scan")
         self.assertEqual(graph["grounding"]["status"], "not_assessed")
         self.assertEqual(graph["path_presets"][0]["kind"], "overview")
+        self.assertTrue(graph["plane_glossary"])
 
     def test_render_html_embeds_graph(self) -> None:
         graph = build_graph(MINIMAL_EXAMPLE)
@@ -38,6 +39,8 @@ class SmokeTests(unittest.TestCase):
 
         self.assertIn("bunya-jido-v1", html)
         self.assertNotIn("__BUNYA_JIDO_DATA__", html)
+        self.assertIn("Explore Mode", html)
+        self.assertIn("Relation Families", html)
 
 
 if __name__ == "__main__":

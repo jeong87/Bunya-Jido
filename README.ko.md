@@ -180,13 +180,15 @@ LLM 없이 결정적으로 생성되는 정적 스캔 결과입니다.
 생성된 HTML 지도에는 다음 기능이 들어갑니다.
 
 - 책임 영역별 plane cluster
-- 노드와 엣지 필터링
+- 작성된 plane 목적 설명과 화면용 노드·관계 family
+- 노드 family, 관계 family, confidence 필터링
 - 선택한 노드 주변만 보는 local graph focus
 - `Static Scan`, `Grounded`, 명시적 `Draft` 상태를 보여주는 trust panel
 - source path, 관계 confidence, 기록된 근거를 보여주는 evidence panel
+- 명시적인 `Overview`, `Inspect Evidence`, `Implementation Detail` 탐색 모드
 - blueprint view, 워크플로우, 검증된 agent-map task route를 구분해 보여주는 path preset
 - PNG와 JSON export
-- blueprint가 제공하는 경우 overview/detail 계층 전환
+- blueprint가 제공하는 경우 implementation detail 확장
 
 지도의 근거는 저장소의 코드, 문서, 설정, 테스트, 런타임 산출물, 검증된 blueprint 파일에 있습니다. Bunya-Jido는 그 근거를 보기 좋은 형태로 투영합니다.
 
