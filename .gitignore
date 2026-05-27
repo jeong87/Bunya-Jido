@@ -22,7 +22,12 @@ dist/
 *.tar.gz
 
 # Bunya-Jido generated workspaces and previews
-.bunya-jido/
+.bunya-jido/*
+!.bunya-jido/
+!.bunya-jido/COMPONENTS.md
+!.bunya-jido/WORKFLOWS.md
+!.bunya-jido/bunya-jido.blueprint.json
+!.bunya-jido/bunya-jido.agent-map.json
 bunya-jido.html
 preview*.html
 

@@ -1,0 +1,93 @@
+{
+  "schema_version": "bunya-jido-agent-map-v1",
+  "project": {
+    "name": "Bunya-Jido",
+    "summary": "Validated task routes for changes to grounded semantic publication."
+  },
+  "task_routes": [
+    {
+      "task": "change grounding policy",
+      "intent": "Modify publication blockers or grounding metrics while preserving the trust contract.",
+      "start_nodes": [
+        "semantic:validation"
+      ],
+      "workflows": [
+        "semantic_map_publication"
+      ],
+      "must_read": [
+        "src/bunya_jido/blueprint.py",
+        "docs/CONTRIBUTION_PLAN.md"
+      ],
+      "contracts": [
+        "Core node and critical edge evidence must remain inspectable before semantic publication."
+      ],
+      "tests": [
+        "tests/test_blueprint.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/blueprint.py",
+        "tests/test_blueprint.py"
+      ],
+      "watch_out": [
+        "A weakened blocker changes whether output is allowed to claim Grounded status."
+      ]
+    },
+    {
+      "task": "change task route projection",
+      "intent": "Adjust agent-map validation or the task-route paths shown in rendered maps.",
+      "start_nodes": [
+        "semantic:agent_map"
+      ],
+      "workflows": [
+        "task_route_publication"
+      ],
+      "must_read": [
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/viewer/index.template.html"
+      ],
+      "contracts": [
+        "Only routes validated against repository-relative inputs may reach trusted context or HTML paths."
+      ],
+      "tests": [
+        "tests/test_blueprint.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/viewer/index.template.html",
+        "tests/test_blueprint.py"
+      ],
+      "watch_out": [
+        "Context output and viewer path presets must continue to share the same validated routes."
+      ]
+    },
+    {
+      "task": "change viewer trust presentation",
+      "intent": "Improve how grounded status, evidence, or semantic paths are presented offline.",
+      "start_nodes": [
+        "presentation:viewer"
+      ],
+      "workflows": [
+        "semantic_map_publication"
+      ],
+      "must_read": [
+        "src/bunya_jido/viewer/index.template.html",
+        "src/bunya_jido/render.py"
+      ],
+      "contracts": [
+        "The viewer must display published trust information without becoming the evidence source."
+      ],
+      "tests": [
+        "tests/test_smoke.py",
+        "tests/test_blueprint.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/viewer/index.template.html",
+        "src/bunya_jido/render.py",
+        "tests/test_smoke.py"
+      ],
+      "watch_out": [
+        "A visual change must keep the offline standalone artifact readable and truthful."
+      ]
+    }
+  ]
+}

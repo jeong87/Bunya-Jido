@@ -5,7 +5,7 @@
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 27, 2026):** PR 1 through PR 4 are implemented on `main`; PR 5 is the next planned milestone.
+**Implementation progress (May 27, 2026):** PR 1 through PR 5 are implemented on `main`; PR 6 is the next planned milestone.
 
 ---
 
@@ -464,6 +464,8 @@ Each pull request should remain independently reviewable. The revised order deli
 **Goal:** Demonstrate usefulness with real output and lock in baseline map quality.
 
 **Suggested branch:** `docs/add-grounded-gallery-and-goldens`
+
+**Implemented (May 27, 2026):** The repository now carries a grounded self-map in `.bunya-jido/`, a generated HTML demo and screenshot documented in `docs/gallery.md`, and semantic golden tests. The gallery also records the current provider-hint overlay limitation instead of treating heuristic additions as part of the promoted example.
 
 **Scope:**
 

@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://jeong87.github.io/Bunya-Jido/demo.html">
-    <img src="docs/assets/bunyajido_preview.jpg" alt="Bunya-Jido preview" width="100%">
+    <img src="docs/assets/self-map-grounded.png" alt="Grounded Bunya-Jido self-map preview" width="100%">
   </a>
 </p>
 
@@ -277,7 +277,7 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 
 ## Roadmap
 
-See [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md) for the grounded-map roadmap, including validation status, human/agent parity, example maps, and measured scanner coverage.
+See [docs/gallery.md](docs/gallery.md) for the committed Grounded self-map and generation record. See [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md) for the grounded-map roadmap, including validation status, human/agent parity, example maps, and measured scanner coverage.
 
 ## License
 

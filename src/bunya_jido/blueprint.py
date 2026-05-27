@@ -1623,7 +1623,15 @@ def _path_presets_from_blueprint(
             for e in edge_by_rel.get(rel, []):
                 ids.add(e["source"]); ids.add(e["target"])
         if ids:
-            arr = sorted(ids, key=lambda i: (node_by_id[i].get("major", False), node_by_id[i].get("degree", 0), node_by_id[i].get("size", 0)), reverse=True)[:48]
+            arr = sorted(
+                ids,
+                key=lambda i: (
+                    not node_by_id[i].get("major", False),
+                    -node_by_id[i].get("degree", 0),
+                    -node_by_id[i].get("size", 0),
+                    i,
+                ),
+            )[:48]
             presets.append({
                 "id": slug(view.get("id") or view.get("label") or f"view-{len(presets)}", 60),
                 "label": str(view.get("label") or view.get("id") or "Blueprint View"),
@@ -1694,11 +1702,26 @@ def _path_presets_from_blueprint(
                     "must_read": list(route.get("must_read") or []),
                     "tests": list(route.get("tests") or []),
                 })
-    core = sorted(nodes, key=lambda n: (n.get("major", False), n.get("degree", 0), n.get("size", 0)), reverse=True)[:36]
+    core = sorted(
+        nodes,
+        key=lambda n: (
+            not n.get("major", False),
+            -n.get("degree", 0),
+            -n.get("size", 0),
+            n["id"],
+        ),
+    )[:36]
     presets.insert(0, {"id": "blueprint_core", "label": "Blueprint Core", "description": "Core architecture nodes selected from the LLM-authored blueprint.", "kind": "overview", "source": "blueprint", "node_ids": [n["id"] for n in core], "nodes": [n["label"] for n in core]})
     llm = [n for n in nodes if n.get("plane") in {"llm", "external"} or n.get("type") in {"llm_endpoint", "api_provider"} or n.get("llm_lane")]
     if llm:
-        arr = sorted(llm, key=lambda n: (n.get("major", False), n.get("degree", 0)), reverse=True)[:36]
+        arr = sorted(
+            llm,
+            key=lambda n: (
+                not n.get("major", False),
+                -n.get("degree", 0),
+                n["id"],
+            ),
+        )[:36]
         presets.append({"id": "llm_api", "label": "LLM / API", "description": "Model, API, and external provider routes.", "kind": "view", "source": "blueprint", "node_ids": [n["id"] for n in arr], "nodes": [n["label"] for n in arr]})
     return presets
 
@@ -1723,6 +1746,14 @@ def _lenses_from_blueprint(bp: dict[str, Any], edges: list[dict[str, Any]]) -> l
 
 def load_blueprint(path: str | Path) -> dict[str, Any]:
     return _read_json_relaxed(Path(path))
+
+
+def _published_artifact_path(path: Path, root: Path) -> str:
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError:
+        return resolved.as_posix()
 
 
 def graph_with_optional_blueprint(
@@ -1767,7 +1798,7 @@ def graph_with_optional_blueprint(
         show_root=show_root,
         allow_draft=allow_draft,
     )
-    graph["blueprint_path"] = bp_path.as_posix()
+    graph["blueprint_path"] = _published_artifact_path(bp_path, root_path)
     if agent_map is not None:
-        graph["agent_map_path"] = agent_map_path.as_posix()
+        graph["agent_map_path"] = _published_artifact_path(agent_map_path, root_path)
     return graph, bp_path

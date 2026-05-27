@@ -1,0 +1,564 @@
+{
+  "schema_version": "bunya-jido-blueprint-v1",
+  "project": {
+    "name": "Bunya-Jido",
+    "summary": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
+    "architecture_style": "Offline semantic projection with deterministic support and explicit trust gates.",
+    "entrypoints": [
+      "src/bunya_jido/cli.py",
+      "src/bunya_jido/blueprint.py"
+    ]
+  },
+  "planes": [
+    {
+      "id": "entry",
+      "label": "Entry",
+      "purpose": "User commands and orchestration."
+    },
+    {
+      "id": "analysis",
+      "label": "Analysis",
+      "purpose": "Deterministic repository observation."
+    },
+    {
+      "id": "semantic",
+      "label": "Semantic",
+      "purpose": "Reviewed architecture and agent-route projection."
+    },
+    {
+      "id": "presentation",
+      "label": "Presentation",
+      "purpose": "Offline visualization of published graphs."
+    },
+    {
+      "id": "quality",
+      "label": "Quality",
+      "purpose": "Grounding policy and regression checks."
+    },
+    {
+      "id": "docs",
+      "label": "Documentation",
+      "purpose": "Product contract and implementation roadmap."
+    }
+  ],
+  "nodes": [
+    {
+      "id": "entry:cli",
+      "label": "Command Line Interface",
+      "type": "component",
+      "plane": "entry",
+      "importance": "core",
+      "description": "Dispatches build, validation, preparation, and trusted context commands.",
+      "source_path": "src/bunya_jido/cli.py",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_build"
+        }
+      ]
+    },
+    {
+      "id": "analysis:scanner",
+      "label": "Static Scanner",
+      "type": "component",
+      "plane": "analysis",
+      "importance": "major",
+      "description": "Creates deterministic scan graphs and supporting repository observations.",
+      "source_path": "src/bunya_jido/scanner.py",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/scanner.py",
+          "symbol": "build_graph"
+        }
+      ]
+    },
+    {
+      "id": "semantic:blueprint",
+      "label": "Blueprint Projection",
+      "type": "component",
+      "plane": "semantic",
+      "importance": "core",
+      "description": "Loads semantic artifacts and produces the published graph contract.",
+      "source_path": "src/bunya_jido/blueprint.py",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "graph_with_optional_blueprint"
+        }
+      ]
+    },
+    {
+      "id": "semantic:validation",
+      "label": "Grounding Gate",
+      "type": "contract",
+      "plane": "quality",
+      "importance": "core",
+      "description": "Blocks semantic publication when core evidence or critical relationships cannot be trusted.",
+      "source_path": "src/bunya_jido/blueprint.py",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "validate_blueprint_obj"
+        }
+      ]
+    },
+    {
+      "id": "semantic:agent_map",
+      "label": "Agent Route Parity",
+      "type": "contract",
+      "plane": "semantic",
+      "importance": "major",
+      "description": "Validates bounded task routes against semantic nodes, workflows, required reading, and tests.",
+      "source_path": "src/bunya_jido/blueprint.py",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "validate_agent_map_obj"
+        }
+      ]
+    },
+    {
+      "id": "semantic:context",
+      "label": "Trusted Context Generator",
+      "type": "component",
+      "plane": "semantic",
+      "importance": "major",
+      "description": "Emits bounded navigation guidance only from a grounded blueprint and validated task routes.",
+      "source_path": "src/bunya_jido/blueprint.py",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "generate_agent_context"
+        }
+      ]
+    },
+    {
+      "id": "presentation:renderer",
+      "label": "HTML Renderer",
+      "type": "component",
+      "plane": "presentation",
+      "importance": "core",
+      "description": "Embeds the graph payload into a standalone offline HTML artifact.",
+      "source_path": "src/bunya_jido/render.py",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/render.py",
+          "symbol": "render_html"
+        }
+      ]
+    },
+    {
+      "id": "presentation:viewer",
+      "label": "Interactive Viewer",
+      "type": "ui",
+      "plane": "presentation",
+      "importance": "core",
+      "description": "Displays map paths, trust state, evidence, and navigation controls offline.",
+      "source_path": "src/bunya_jido/viewer/index.template.html",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/viewer/index.template.html",
+          "symbol": "renderTrust"
+        }
+      ]
+    },
+    {
+      "id": "quality:tests",
+      "label": "Semantic Contract Tests",
+      "type": "test",
+      "plane": "quality",
+      "importance": "major",
+      "description": "Exercises grounding publication gates and agent-map parity behavior.",
+      "source_path": "tests/test_blueprint.py",
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_blueprint.py"
+        }
+      ]
+    },
+    {
+      "id": "quality:ci",
+      "label": "Continuous Integration",
+      "type": "config",
+      "plane": "quality",
+      "importance": "support",
+      "description": "Runs the test contract on every push and pull request for supported Python versions.",
+      "source_path": ".github/workflows/ci.yml",
+      "evidence": [
+        {
+          "kind": "config",
+          "path": ".github/workflows/ci.yml"
+        }
+      ]
+    },
+    {
+      "id": "docs:readme",
+      "label": "Public Product Contract",
+      "type": "document",
+      "plane": "docs",
+      "importance": "support",
+      "description": "Explains artifact modes, trust expectations, and command usage.",
+      "source_path": "README.md",
+      "evidence": [
+        {
+          "kind": "documentation",
+          "path": "README.md"
+        }
+      ]
+    },
+    {
+      "id": "docs:roadmap",
+      "label": "Contribution Roadmap",
+      "type": "document",
+      "plane": "docs",
+      "importance": "support",
+      "description": "Defines staged work and acceptance criteria for grounded semantic maps.",
+      "source_path": "docs/CONTRIBUTION_PLAN.md",
+      "evidence": [
+        {
+          "kind": "documentation",
+          "path": "docs/CONTRIBUTION_PLAN.md"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "entry:cli",
+      "target": "semantic:blueprint",
+      "relation": "calls",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_build"
+        }
+      ]
+    },
+    {
+      "source": "semantic:blueprint",
+      "target": "analysis:scanner",
+      "relation": "calls",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "graph_with_optional_blueprint"
+        }
+      ]
+    },
+    {
+      "source": "analysis:scanner",
+      "target": "semantic:blueprint",
+      "relation": "feeds",
+      "confidence": "llm_grounded",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "graph_from_blueprint"
+        }
+      ]
+    },
+    {
+      "source": "semantic:blueprint",
+      "target": "semantic:validation",
+      "relation": "validates",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "graph_from_blueprint"
+        }
+      ]
+    },
+    {
+      "source": "semantic:blueprint",
+      "target": "semantic:agent_map",
+      "relation": "validates",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "graph_from_blueprint"
+        }
+      ]
+    },
+    {
+      "source": "semantic:validation",
+      "target": "presentation:renderer",
+      "relation": "gates",
+      "confidence": "llm_grounded",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_build"
+        }
+      ]
+    },
+    {
+      "source": "semantic:agent_map",
+      "target": "presentation:renderer",
+      "relation": "gates",
+      "confidence": "llm_grounded",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "graph_from_blueprint"
+        }
+      ]
+    },
+    {
+      "source": "entry:cli",
+      "target": "presentation:renderer",
+      "relation": "calls",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_build"
+        }
+      ]
+    },
+    {
+      "source": "presentation:renderer",
+      "target": "presentation:viewer",
+      "relation": "projects_to",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/render.py",
+          "symbol": "render_html"
+        }
+      ]
+    },
+    {
+      "source": "entry:cli",
+      "target": "semantic:context",
+      "relation": "calls",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_context"
+        }
+      ]
+    },
+    {
+      "source": "semantic:context",
+      "target": "semantic:validation",
+      "relation": "validates",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "generate_agent_context"
+        }
+      ]
+    },
+    {
+      "source": "semantic:context",
+      "target": "semantic:agent_map",
+      "relation": "validates",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "generate_agent_context"
+        }
+      ]
+    },
+    {
+      "source": "semantic:validation",
+      "target": "semantic:agent_map",
+      "relation": "precedes",
+      "confidence": "llm_grounded",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "generate_agent_context"
+        }
+      ]
+    },
+    {
+      "source": "quality:tests",
+      "target": "semantic:validation",
+      "relation": "checks",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_blueprint.py"
+        }
+      ]
+    },
+    {
+      "source": "quality:tests",
+      "target": "semantic:agent_map",
+      "relation": "checks",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_blueprint.py"
+        }
+      ]
+    },
+    {
+      "source": "quality:ci",
+      "target": "quality:tests",
+      "relation": "runs",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "config",
+          "path": ".github/workflows/ci.yml"
+        }
+      ]
+    },
+    {
+      "source": "docs:readme",
+      "target": "entry:cli",
+      "relation": "documents",
+      "confidence": "llm_grounded",
+      "evidence": [
+        {
+          "kind": "documentation",
+          "path": "README.md"
+        }
+      ]
+    },
+    {
+      "source": "docs:roadmap",
+      "target": "semantic:validation",
+      "relation": "documents",
+      "confidence": "llm_grounded",
+      "evidence": [
+        {
+          "kind": "documentation",
+          "path": "docs/CONTRIBUTION_PLAN.md"
+        }
+      ]
+    },
+    {
+      "source": "docs:roadmap",
+      "target": "semantic:agent_map",
+      "relation": "documents",
+      "confidence": "llm_grounded",
+      "evidence": [
+        {
+          "kind": "documentation",
+          "path": "docs/CONTRIBUTION_PLAN.md"
+        }
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "semantic_map_publication",
+      "label": "Semantic Map Publication",
+      "description": "Build a grounded semantic graph and expose its trust state in offline HTML.",
+      "node_ids": [
+        "entry:cli",
+        "semantic:blueprint",
+        "semantic:validation",
+        "presentation:renderer",
+        "presentation:viewer"
+      ]
+    },
+    {
+      "id": "task_route_publication",
+      "label": "Task Route Publication",
+      "description": "Validate agent routes against the grounded blueprint before showing them as viewer paths.",
+      "node_ids": [
+        "entry:cli",
+        "semantic:blueprint",
+        "semantic:agent_map",
+        "presentation:renderer",
+        "presentation:viewer"
+      ]
+    },
+    {
+      "id": "trusted_context_generation",
+      "label": "Trusted Context Generation",
+      "description": "Validate blueprint and route trust before emitting bounded navigation context.",
+      "node_ids": [
+        "entry:cli",
+        "semantic:context",
+        "semantic:validation",
+        "semantic:agent_map"
+      ]
+    },
+    {
+      "id": "continuous_contract_check",
+      "label": "Continuous Contract Check",
+      "description": "Run characterization and golden checks in CI against the published semantic contract.",
+      "node_ids": [
+        "quality:ci",
+        "quality:tests",
+        "semantic:validation"
+      ]
+    }
+  ],
+  "views": [
+    {
+      "id": "product_architecture",
+      "label": "Product Architecture",
+      "description": "Core implementation flow from command to trusted offline presentation.",
+      "node_ids": [
+        "entry:cli",
+        "analysis:scanner",
+        "semantic:blueprint",
+        "semantic:validation",
+        "semantic:agent_map",
+        "presentation:renderer",
+        "presentation:viewer"
+      ]
+    },
+    {
+      "id": "trust_contract",
+      "label": "Trust Contract",
+      "description": "Validation, agent context, tests, CI, and the roadmap commitments they enforce.",
+      "node_ids": [
+        "semantic:validation",
+        "semantic:agent_map",
+        "semantic:context",
+        "quality:tests",
+        "quality:ci",
+        "docs:roadmap"
+      ]
+    },
+    {
+      "id": "documentation_surface",
+      "label": "Documentation Surface",
+      "description": "Public narrative and the command/viewer surfaces it explains.",
+      "node_ids": [
+        "docs:readme",
+        "docs:roadmap",
+        "entry:cli",
+        "presentation:viewer"
+      ]
+    }
+  ]
+}
