@@ -242,6 +242,30 @@ class BlueprintCharacterizationTests(unittest.TestCase):
         self.assertIn("grounding=draft", stdout.getvalue())
         self.assertIn('"status": "draft"', html)
 
+    def test_diagnose_reports_blocked_blueprint_without_rendering_it(self) -> None:
+        blueprint = example_blueprint()
+        blueprint["nodes"][0]["evidence"] = []
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(
+                json.dumps(blueprint), encoding="utf-8"
+            )
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                result = main(
+                    ["diagnose", "--root", str(root), "--require-grounded", "--json"]
+                )
+            report = json.loads(stdout.getvalue())
+
+        self.assertEqual(result, 2)
+        self.assertEqual(report["artifact_mode"], "semantic_blueprint")
+        self.assertEqual(report["grounding_status"], "blocked")
+        self.assertFalse(report["semantic_publication_allowed"])
+        self.assertIn("core node component:cli has no evidence", report["publish_blockers"])
+
 
 class AgentMapCharacterizationTests(unittest.TestCase):
     def test_missing_blueprint_start_node_blocks_trusted_context(self) -> None:

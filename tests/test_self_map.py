@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import io
 import json
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from bunya_jido.blueprint import (
@@ -10,6 +12,7 @@ from bunya_jido.blueprint import (
     validate_agent_map_obj,
     validate_blueprint_obj,
 )
+from bunya_jido.cli import main
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -135,6 +138,20 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             stable_semantic_contract(published),
             stable_semantic_contract(rebuilt),
         )
+
+    def test_release_diagnostics_require_the_committed_grounded_self_map(self) -> None:
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            result = main(
+                ["diagnose", "--root", str(ROOT), "--require-grounded", "--json"]
+            )
+        report = json.loads(stdout.getvalue())
+
+        self.assertEqual(result, 0)
+        self.assertEqual(report["artifact_mode"], "semantic_blueprint")
+        self.assertEqual(report["grounding_status"], "grounded")
+        self.assertTrue(report["semantic_publication_allowed"])
+        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 3, "total": 3})
 
 
 if __name__ == "__main__":

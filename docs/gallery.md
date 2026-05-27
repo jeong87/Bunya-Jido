@@ -52,3 +52,20 @@ No second sanitized complex-system map is promoted in this milestone because a
 redistributable, evidence-backed source has not been established. New gallery
 examples should disclose their origin, review status, grounding result, and
 limitations before publication.
+
+## Publishing Workflow
+
+`docs/demo.html` and its screenshot are reviewed, committed gallery outputs.
+Before updating either file, run the validation and generation commands above,
+inspect the resulting offline HTML, and run:
+
+```bash
+python -m unittest tests.test_self_map
+python -m bunya_jido diagnose --root . --require-grounded --json
+```
+
+After reviewed `docs/` changes merge, a maintainer can dispatch
+`.github/workflows/pages.yml`. It deploys only after the committed semantic
+self-map test and strict grounded diagnostic pass. The Pages deployment
+publishes the reviewed artifact already in the repository; it does not
+generate a new semantic interpretation during deployment.

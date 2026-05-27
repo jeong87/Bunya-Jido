@@ -1,0 +1,51 @@
+name: Bug report
+description: Report incorrect output, validation behavior, or a reproducible failure.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for helping make Bunya-Jido's claims more inspectable.
+  - type: input
+    id: version
+    attributes:
+      label: Bunya-Jido version or commit
+      placeholder: "0.3.1 or commit SHA"
+    validations:
+      required: true
+  - type: dropdown
+    id: artifact_mode
+    attributes:
+      label: Artifact mode
+      options:
+        - static_scan
+        - semantic_blueprint
+        - Not sure
+    validations:
+      required: true
+  - type: input
+    id: grounding
+    attributes:
+      label: Grounding status
+      description: Include the `bunya-jido diagnose --root .` status when applicable.
+      placeholder: "grounded, draft, blocked, or not_assessed"
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      placeholder: Include the command, minimal fixture or safe excerpts, and actual behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: checkboxes
+    id: sensitive
+    attributes:
+      label: Evidence hygiene
+      options:
+        - label: I removed credentials, secrets, and private repository contents from this report.
+          required: true

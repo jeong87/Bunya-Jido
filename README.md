@@ -82,7 +82,8 @@ Install with one command:
 python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
 ```
 
-PyPI release is planned for later.
+The repository is prepared for a public alpha PyPI release. Until a release is
+published, install directly from GitHub as shown above.
 
 Check the command:
 
@@ -174,6 +175,20 @@ bunya-jido validate-agent-map --root .
 A deterministic scan result produced without an LLM.
 
 It includes files, modules, imports, docs, configuration, runtime artifacts, and external API hints. The coding agent uses it as raw evidence while writing the blueprint.
+
+## Diagnostics
+
+Use diagnostics to report which artifact mode is present and whether a semantic
+map is actually eligible for grounded publication:
+
+```bash
+bunya-jido diagnose --root .
+bunya-jido diagnose --root . --require-grounded --json
+```
+
+`--require-grounded` exits unsuccessfully for a static scan or a blocked
+semantic blueprint. Release automation uses this exact gate rather than
+assuming a generated map is trusted.
 
 ## HTML Map
 
@@ -279,9 +294,15 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 - Bunya-Jido does not call an LLM by itself.
 - The HTML map does not prove architectural correctness. It makes assumptions and evidence easier to inspect.
 
-## Roadmap
+## Release And Roadmap
 
-See [docs/gallery.md](docs/gallery.md) for the committed Grounded self-map and generation record. See [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md) for the grounded-map roadmap, including validation status, human/agent parity, example maps, and measured scanner coverage.
+The grounded-map implementation roadmap is complete through PR8. See
+[docs/gallery.md](docs/gallery.md) for the committed Grounded self-map,
+[docs/RELEASING.md](docs/RELEASING.md) for public-alpha release gates and
+publishing setup, [CHANGELOG.md](CHANGELOG.md) for release notes, and
+[CONTRIBUTING.md](CONTRIBUTING.md) for contribution requirements. The completed
+implementation plan remains recorded in
+[docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md).
 
 ## License
 

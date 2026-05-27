@@ -23,3 +23,5 @@ jobs:
           python -m pip install -e .
       - name: Run tests
         run: python -m unittest discover -s tests
+      - name: Verify grounded self-map release gate
+        run: python -m bunya_jido diagnose --root . --require-grounded --json

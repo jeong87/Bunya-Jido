@@ -5,7 +5,7 @@
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 28, 2026):** PR 1 through PR 7 are implemented on `main`; PR 8 is the next planned milestone.
+**Implementation progress (May 28, 2026):** PR 1 through PR 8 are implemented on `main`; the grounded public-alpha roadmap is complete.
 
 ---
 
@@ -578,6 +578,8 @@ Each pull request should remain independently reviewable. The revised order deli
 
 **Suggested commit message:**  
 `release: prepare grounded semantic map public alpha`
+
+**Implemented (May 28, 2026):** Release readiness now includes `bunya-jido diagnose --require-grounded` as an executable semantic publication gate, CI coverage for that gate, PyPI Trusted Publishing and Pages workflows, release/version guidance, contribution and issue templates, and explicit public compatibility and limitation documentation.
 
 ---
 

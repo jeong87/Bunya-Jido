@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Scanner coverage contract
+    url: https://github.com/jeong87/Bunya-Jido/blob/main/docs/SCANNER_COVERAGE.md
+    about: Review currently claimed scanner behavior before proposing broader coverage.

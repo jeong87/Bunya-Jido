@@ -1,3 +1,6 @@
 recursive-include src/bunya_jido/viewer *.html
 include README.md
 include LICENSE
+include CHANGELOG.md
+include CONTRIBUTING.md
+recursive-include docs *.md

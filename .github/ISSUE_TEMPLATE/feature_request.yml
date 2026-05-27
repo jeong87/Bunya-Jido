@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose a scanner, viewer, grounding, or agent-context improvement.
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: contract
+    attributes:
+      label: Product contract affected
+      options:
+        - Deterministic scanning coverage
+        - Semantic grounding and validation
+        - Viewer comprehension
+        - Agent context and routes
+        - Release or documentation
+    validations:
+      required: true
+  - type: textarea
+    id: need
+    attributes:
+      label: Problem to solve
+      description: Explain the repository-reading or handoff problem, rather than only the desired UI.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Proposed evidence and fixture
+      description: For new coverage claims, describe a committed minimal fixture and expected node/edge evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: limitations
+    attributes:
+      label: Limits and uncertainty
+      description: What should the feature explicitly avoid claiming?
+    validations:
+      required: true

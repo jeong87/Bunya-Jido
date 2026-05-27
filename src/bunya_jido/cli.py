@@ -5,6 +5,7 @@ import json
 import sys
 import webbrowser
 from pathlib import Path
+from typing import Any
 
 from . import __version__
 from .blueprint import (
@@ -198,6 +199,127 @@ def cmd_validate_agent_map(args: argparse.Namespace) -> int:
     return 0
 
 
+def _diagnostic_blueprint_path(root: Path, blueprint: str | bool) -> Path | None:
+    if blueprint is False or blueprint == "none":
+        return None
+    if blueprint is True or blueprint == "auto":
+        candidate = default_blueprint_path(root)
+        return candidate if candidate.exists() else None
+    candidate = Path(str(blueprint)).resolve()
+    if not candidate.exists():
+        raise FileNotFoundError(f"blueprint file not found: {candidate}")
+    return candidate
+
+
+def _display_path(path: Path, root: Path) -> str:
+    try:
+        return path.resolve().relative_to(root).as_posix()
+    except ValueError:
+        return path.resolve().as_posix()
+
+
+def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
+    root = Path(args.root).resolve()
+    bp_path = _diagnostic_blueprint_path(root, args.blueprint)
+    if not bp_path:
+        graph = build_graph(
+            root,
+            mode=args.mode,
+            max_files=args.max_files,
+            max_nodes=args.max_nodes,
+            max_edges=args.max_edges,
+            include_hidden=args.include_hidden,
+            show_root=args.show_root,
+            data_policy=args.data_policy,
+            max_data_files=args.max_data_files,
+        )
+        return {
+            "root": root.as_posix(),
+            "artifact_mode": "static_scan",
+            "grounding_status": "not_assessed",
+            "semantic_publication_allowed": False,
+            "blueprint_path": None,
+            "agent_map_path": None,
+            "node_count": graph["node_count"],
+            "edge_count": graph["edge_count"],
+            "publish_blockers": [],
+            "warnings": [],
+            "agent_routes": {"status": "not_assessed", "trusted": 0, "total": 0},
+        }
+
+    bp_errors, bp_warnings, bp_metrics = validate_blueprint_file(bp_path, root=root)
+    blockers = list(bp_metrics.get("publish_blockers") or [])
+    errors = list(bp_errors)
+    warnings = list(bp_warnings)
+    agent_path = default_agent_map_path(root)
+    agent_routes = {"status": "not_provided", "trusted": 0, "total": 0}
+    if agent_path.exists():
+        agent_errors, agent_warnings, agent_metrics = validate_agent_map_file(
+            agent_path, root=root, blueprint_path=bp_path
+        )
+        errors.extend(f"agent map: {error}" for error in agent_errors)
+        warnings.extend(f"agent map: {warning}" for warning in agent_warnings)
+        blockers.extend(
+            f"agent map: {blocker}"
+            for blocker in agent_metrics.get("publish_blockers") or []
+        )
+        trusted = int(agent_metrics.get("trusted_route_count") or 0)
+        total = int(agent_metrics.get("task_route_count") or 0)
+        agent_routes = {
+            "status": "validated"
+            if not agent_errors and not agent_metrics.get("publish_blockers")
+            else "blocked",
+            "trusted": trusted,
+            "total": total,
+        }
+    blockers = list(dict.fromkeys(blockers))
+    grounding_status = "blocked" if errors or blockers else "grounded"
+    return {
+        "root": root.as_posix(),
+        "artifact_mode": "semantic_blueprint",
+        "grounding_status": grounding_status,
+        "semantic_publication_allowed": grounding_status == "grounded",
+        "blueprint_path": _display_path(bp_path, root),
+        "agent_map_path": _display_path(agent_path, root) if agent_path.exists() else None,
+        "node_count": int(bp_metrics.get("node_count") or 0),
+        "edge_count": int(bp_metrics.get("edge_count") or 0),
+        "grounded_core_node_ratio": bp_metrics.get("grounded_core_node_ratio"),
+        "grounded_critical_edge_ratio": bp_metrics.get("grounded_critical_edge_ratio"),
+        "publish_blockers": blockers,
+        "warnings": warnings,
+        "errors": errors,
+        "agent_routes": agent_routes,
+    }
+
+
+def cmd_diagnose(args: argparse.Namespace) -> int:
+    report = _diagnostic_report(args)
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(f"Bunya-Jido diagnostics: {report['root']}")
+        print(f"Artifact mode: {report['artifact_mode']}")
+        print(f"Grounding status: {report['grounding_status']}")
+        allowed = "allowed" if report["semantic_publication_allowed"] else "not allowed"
+        print(f"Normal semantic publication: {allowed}")
+        print(f"Blueprint: {report['blueprint_path'] or 'not found'}")
+        print(f"Graph quality: nodes={report['node_count']} edges={report['edge_count']}")
+        routes = report["agent_routes"]
+        print(f"Agent-map routes: {routes['status']} ({routes['trusted']}/{routes['total']} trusted)")
+        print(f"Warnings: {len(report.get('warnings') or [])}")
+        print(f"Blockers: {len(report.get('publish_blockers') or [])}")
+        for blocker in (report.get("publish_blockers") or [])[:10]:
+            print(f"- {blocker}")
+        for error in (report.get("errors") or [])[:10]:
+            print(f"- error: {error}")
+    if args.require_grounded and (
+        report["artifact_mode"] != "semantic_blueprint"
+        or report["grounding_status"] != "grounded"
+    ):
+        return 2
+    return 0
+
+
 def cmd_context(args: argparse.Namespace) -> int:
     changed = []
     for v in args.changed_file or []:
@@ -288,6 +410,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_vam.add_argument("--blueprint", default=None, help="Optional blueprint JSON path for node-reference validation.")
     p_vam.set_defaults(func=cmd_validate_agent_map)
 
+    p_diag = sub.add_parser("diagnose", help="Report actual artifact mode, grounding status, and validated agent-route readiness.")
+    _add_common_scan_args(p_diag)
+    p_diag.add_argument("--blueprint", default="auto", type=_blueprint_arg_value, help="Blueprint path, 'auto' (default), or 'none'.")
+    p_diag.add_argument("--require-grounded", action="store_true", help="Exit with status 2 unless a publishable grounded semantic blueprint is present.")
+    p_diag.add_argument("--json", action="store_true", help="Print a machine-readable diagnostics report.")
+    p_diag.set_defaults(func=cmd_diagnose)
+
     p_ctx = sub.add_parser("context", help="Print or write a coding-agent context pack from blueprint + agent map.")
     p_ctx.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_ctx.add_argument("--node", default=None, help="Optional blueprint node id to focus.")
@@ -315,7 +444,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
-    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "context", "refresh-context", "install-agent-guides"}
+    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "install-agent-guides"}
     if not raw or (raw[0] not in subcommands and raw[0] not in {"-h", "--help", "--version"}):
         raw = ["build"] + raw
     parser = build_parser()

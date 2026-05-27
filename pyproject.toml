@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,14 +8,14 @@ version = "0.3.1"
 description = "Create offline semantic repository maps and bounded coding-agent context from reviewable evidence."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Bunya-Jido Contributors" }]
 keywords = ["repository", "semantic-map", "architecture", "coding-agents", "static-analysis", "offline-html"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -28,6 +28,8 @@ dependencies = []
 Homepage = "https://github.com/jeong87/Bunya-Jido"
 Repository = "https://github.com/jeong87/Bunya-Jido"
 Issues = "https://github.com/jeong87/Bunya-Jido/issues"
+Documentation = "https://jeong87.github.io/Bunya-Jido/"
+Changelog = "https://github.com/jeong87/Bunya-Jido/blob/main/CHANGELOG.md"
 
 [project.scripts]
 bunya-jido = "bunya_jido.cli:main"

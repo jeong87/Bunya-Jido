@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import io
+import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from bunya_jido import __version__
+from bunya_jido.cli import main
 from bunya_jido.render import render_html
 from bunya_jido.scanner import build_graph
 
@@ -41,6 +45,27 @@ class SmokeTests(unittest.TestCase):
         self.assertNotIn("__BUNYA_JIDO_DATA__", html)
         self.assertIn("Explore Mode", html)
         self.assertIn("Relation Families", html)
+
+    def test_diagnose_reports_static_scan_as_not_grounded(self) -> None:
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            result = main(
+                [
+                    "diagnose",
+                    "--root",
+                    str(MINIMAL_EXAMPLE),
+                    "--blueprint",
+                    "none",
+                    "--require-grounded",
+                    "--json",
+                ]
+            )
+        report = json.loads(stdout.getvalue())
+
+        self.assertEqual(result, 2)
+        self.assertEqual(report["artifact_mode"], "static_scan")
+        self.assertEqual(report["grounding_status"], "not_assessed")
+        self.assertFalse(report["semantic_publication_allowed"])
 
 
 if __name__ == "__main__":

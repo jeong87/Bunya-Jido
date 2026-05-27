@@ -82,7 +82,8 @@ bunya-jido build --root . --allow-draft --out bunya-jido.html
 python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
 ```
 
-PyPI 배포는 추후 예정입니다.
+이 저장소는 public alpha PyPI 배포 준비를 마쳤습니다. 실제 릴리스가
+게시되기 전까지는 위와 같이 GitHub에서 직접 설치하세요.
 
 설치가 끝나면 명령어를 확인합니다.
 
@@ -174,6 +175,20 @@ bunya-jido validate-agent-map --root .
 LLM 없이 결정적으로 생성되는 정적 스캔 결과입니다.
 
 파일, 모듈, import, 문서, 설정, 런타임 산출물, 외부 API 힌트를 담습니다. 코딩 에이전트가 blueprint를 만들 때 raw evidence로 사용합니다.
+
+## 진단
+
+현재 어떤 artifact mode가 존재하는지, semantic 지도가 실제로 grounded
+게시 조건을 충족하는지 확인할 수 있습니다.
+
+```bash
+bunya-jido diagnose --root .
+bunya-jido diagnose --root . --require-grounded --json
+```
+
+`--require-grounded`는 정적 스캔이거나 차단된 semantic blueprint이면
+실패 상태로 종료합니다. 릴리스 자동화도 생성 결과를 신뢰한다고
+가정하지 않고 이 검증 조건을 그대로 사용합니다.
 
 ## HTML 지도
 
@@ -279,9 +294,14 @@ bunya-jido build --root . --data-policy full --out bunya-jido.html
 - Bunya-Jido 자체는 LLM을 호출하지 않습니다.
 - HTML 지도가 아키텍처의 정확성을 증명하지는 않습니다. 대신 가정과 근거를 더 쉽게 보고 검토할 수 있게 만듭니다.
 
-## 로드맵
+## 릴리스와 로드맵
 
-검증 상태, 사람/에이전트 패리티, 예시 지도, 측정 기반 스캐너 범위에 관한 계획은 [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md)에서 확인할 수 있습니다.
+grounded-map 구현 로드맵은 PR8까지 완료되었습니다. 커밋된 Grounded
+self-map은 [docs/gallery.md](docs/gallery.md), public alpha 릴리스 조건과
+게시 설정은 [docs/RELEASING.md](docs/RELEASING.md), 변경 내역은
+[CHANGELOG.md](CHANGELOG.md), 기여 요건은
+[CONTRIBUTING.md](CONTRIBUTING.md)에서 확인할 수 있습니다. 완료된 구현
+계획은 [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md)에 남아 있습니다.
 
 ## 라이선스
 
