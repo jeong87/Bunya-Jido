@@ -285,12 +285,12 @@ class GraphBuilder:
             arr = sorted(arr, key=lambda n: (n.major, n.degree, n.size), reverse=True)[:limit]
             return [n.id for n in arr]
         presets = [
-            {"id": "overview", "label": "Project Overview", "description": "Root, packages, entrypoints, config, and high-degree nodes.", "node_ids": top_ids(["repo", "config", "code"], 32)},
-            {"id": "code_flow", "label": "Code Flow", "description": "Python/JS modules, definitions, imports, and calls.", "node_ids": top_ids(["code", "external"], 36)},
-            {"id": "docs_config", "label": "Docs + Config", "description": "Markdown docs and configuration files.", "node_ids": top_ids(["docs", "config", "repo"], 30)},
-            {"id": "runtime_artifacts", "label": "Runtime Artifacts", "description": "Logs, state files, outputs, data, and generated artifacts.", "node_ids": top_ids(["runtime", "data"], 30)},
-            {"id": "api_routes", "label": "API / Model Routes", "description": "Detected API providers, model-server hints, and files that call them.", "node_ids": top_ids(["external", "config", "code"], 34)},
-            {"id": "tests", "label": "Tests", "description": "Test files and modules they appear to exercise.", "node_ids": top_ids(["tests", "code"], 30)},
+            {"id": "overview", "label": "Project Overview", "description": "Root, packages, entrypoints, config, and high-degree nodes.", "kind": "overview", "source": "static_scan", "node_ids": top_ids(["repo", "config", "code"], 32)},
+            {"id": "code_flow", "label": "Code Flow", "description": "Python/JS modules, definitions, imports, and calls.", "kind": "view", "source": "static_scan", "node_ids": top_ids(["code", "external"], 36)},
+            {"id": "docs_config", "label": "Docs + Config", "description": "Markdown docs and configuration files.", "kind": "view", "source": "static_scan", "node_ids": top_ids(["docs", "config", "repo"], 30)},
+            {"id": "runtime_artifacts", "label": "Runtime Artifacts", "description": "Logs, state files, outputs, data, and generated artifacts.", "kind": "view", "source": "static_scan", "node_ids": top_ids(["runtime", "data"], 30)},
+            {"id": "api_routes", "label": "API / Model Routes", "description": "Detected API providers, model-server hints, and files that call them.", "kind": "view", "source": "static_scan", "node_ids": top_ids(["external", "config", "code"], 34)},
+            {"id": "tests", "label": "Tests", "description": "Test files and modules they appear to exercise.", "kind": "view", "source": "static_scan", "node_ids": top_ids(["tests", "code"], 30)},
         ]
         # Add labels for compatibility with older viewer path cards.
         id_to_label = {n.id: n.label for n in nodes}

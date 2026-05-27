@@ -10,6 +10,7 @@ from pathlib import Path
 from bunya_jido.blueprint import (
     generate_agent_context,
     graph_from_blueprint,
+    graph_with_optional_blueprint,
     validate_agent_map_obj,
     validate_blueprint_obj,
 )
@@ -77,6 +78,25 @@ def example_blueprint() -> dict:
                 "label": "Main Flow",
                 "description": "Command to validation.",
                 "node_ids": ["component:cli", "component:builder", "component:validator"],
+            }
+        ],
+    }
+
+
+def example_agent_map() -> dict:
+    return {
+        "schema_version": "bunya-jido-agent-map-v1",
+        "project": {"name": "fixture", "summary": "Agent routes."},
+        "task_routes": [
+            {
+                "task": "change builder behavior",
+                "intent": "Update builder logic.",
+                "start_nodes": ["component:builder"],
+                "workflows": ["main_flow"],
+                "must_read": ["README.md"],
+                "contracts": ["Blueprint contract"],
+                "tests": ["tests/test_smoke.py"],
+                "safe_edit": ["src/bunya_jido/blueprint.py"],
             }
         ],
     }
@@ -210,7 +230,7 @@ class BlueprintCharacterizationTests(unittest.TestCase):
 
 
 class AgentMapCharacterizationTests(unittest.TestCase):
-    def test_missing_blueprint_start_node_is_a_warning_today(self) -> None:
+    def test_missing_blueprint_start_node_blocks_trusted_context(self) -> None:
         agent_map = {
             "schema_version": "bunya-jido-agent-map-v1",
             "project": {"name": "fixture", "summary": "Agent routes."},
@@ -228,39 +248,145 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         errors, warnings, metrics = validate_agent_map_obj(agent_map, blueprint=example_blueprint())
 
         self.assertEqual(errors, [])
-        self.assertTrue(any("references nodes not in blueprint" in warning for warning in warnings))
-        self.assertEqual(metrics["grounded_route_ratio"], 1.0)
+        self.assertEqual(warnings, [])
+        self.assertTrue(any("references nodes not in blueprint" in blocker for blocker in metrics["publish_blockers"]))
+        self.assertEqual(metrics["grounded_route_ratio"], 0.0)
+        self.assertEqual(metrics["trusted_route_count"], 0)
 
-    def test_context_output_uses_agent_routes_separately_from_viewer_paths(self) -> None:
+    def test_missing_workflow_and_required_files_block_trusted_context(self) -> None:
         blueprint = example_blueprint()
-        agent_map = {
-            "schema_version": "bunya-jido-agent-map-v1",
-            "project": {"name": "fixture", "summary": "Agent routes."},
-            "task_routes": [
-                {
-                    "task": "change builder behavior",
-                    "intent": "Update builder logic.",
-                    "start_nodes": ["component:builder"],
-                    "must_read": ["README.md"],
-                    "contracts": ["Blueprint contract"],
-                    "tests": ["tests/test_smoke.py"],
-                    "safe_edit": ["src/bunya_jido/blueprint.py"],
-                }
-            ],
-        }
+        agent_map = example_agent_map()
+        agent_map["task_routes"][0]["workflows"] = ["missing_flow"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            errors, _, metrics = validate_agent_map_obj(agent_map, root=root, blueprint=blueprint)
+
+        self.assertEqual(errors, [])
+        self.assertTrue(any("workflows not in blueprint" in blocker for blocker in metrics["publish_blockers"]))
+        self.assertTrue(any("must-read path not found" in blocker for blocker in metrics["publish_blockers"]))
+        self.assertTrue(any("test path not found" in blocker for blocker in metrics["publish_blockers"]))
+
+    def test_malformed_route_link_fields_are_validation_errors(self) -> None:
+        agent_map = example_agent_map()
+        agent_map["task_routes"][0]["must_read"] = "README.md"
+
+        errors, _, _ = validate_agent_map_obj(agent_map, blueprint=example_blueprint())
+
+        self.assertIn("task_routes[0].must_read must be a list", errors)
+
+    def test_hidden_root_start_and_remote_test_cannot_be_trusted_route(self) -> None:
+        blueprint = example_blueprint()
+        blueprint["nodes"].append(
+            {
+                "id": "repo:fixture",
+                "label": "fixture",
+                "type": "repo",
+                "plane": "repo",
+                "description": "Synthetic root.",
+                "evidence": [{"kind": "root", "path": "."}],
+            }
+        )
+        agent_map = example_agent_map()
+        agent_map["task_routes"][0]["start_nodes"] = ["repo:fixture"]
+        agent_map["task_routes"][0]["must_read"] = ["../outside.md"]
+        agent_map["task_routes"][0]["tests"] = ["https://example.test/remote-test"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "repo"
+            root.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (Path(tmpdir) / "outside.md").write_text("outside", encoding="utf-8")
+
+            _, _, metrics = validate_agent_map_obj(agent_map, root=root, blueprint=blueprint)
+
+        self.assertTrue(any("starts at hidden repo/root node" in blocker for blocker in metrics["publish_blockers"]))
+        self.assertTrue(any("must-read path not found" in blocker for blocker in metrics["publish_blockers"]))
+        self.assertTrue(any("test path not found" in blocker for blocker in metrics["publish_blockers"]))
+
+    def test_validated_task_route_is_shared_by_context_and_html(self) -> None:
+        blueprint = example_blueprint()
+        agent_map = example_agent_map()
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             outdir = root / ".bunya-jido"
+            (root / "tests").mkdir()
+            (root / "src" / "bunya_jido").mkdir(parents=True)
             outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (root / "src" / "bunya_jido" / "blueprint.py").write_text("# fixture\n", encoding="utf-8")
             (outdir / "bunya-jido.blueprint.json").write_text(json.dumps(blueprint), encoding="utf-8")
             (outdir / "bunya-jido.agent-map.json").write_text(json.dumps(agent_map), encoding="utf-8")
 
+            errors, warnings, metrics = validate_agent_map_obj(agent_map, root=root, blueprint=blueprint)
             text = generate_agent_context(root, task="change builder behavior")
+            graph, _ = graph_with_optional_blueprint(root)
+            html = render_html(graph, root / "atlas.html").read_text(encoding="utf-8")
 
+        self.assertEqual(errors, [])
+        self.assertEqual(warnings, [])
+        self.assertEqual(metrics["trusted_route_count"], 1)
+        self.assertIn("## Trust", text)
+        self.assertIn("Grounding status: `grounded`", text)
+        self.assertIn("Agent-map routes: `validated` (1 trusted route(s))", text)
         self.assertIn("## Recommended task routes", text)
         self.assertIn("### change builder behavior", text)
         self.assertIn("`component:builder`", text)
+        self.assertIn("`main_flow`", text)
         self.assertIn("`README.md`", text)
+        route = next(path for path in graph["path_presets"] if path.get("kind") == "task_route")
+        self.assertEqual(route["label"], "change builder behavior")
+        self.assertEqual(route["source"], "agent_map")
+        self.assertIn("component:builder", route["node_ids"])
+        self.assertIn("component:validator", route["node_ids"])
+        self.assertEqual(graph["agent_map_quality"]["trusted_route_count"], 1)
+        self.assertIn('"kind": "task_route"', html)
+        self.assertIn("Task Route", html)
+
+    def test_context_refuses_blocked_task_route(self) -> None:
+        blueprint = example_blueprint()
+        agent_map = example_agent_map()
+        agent_map["task_routes"][0]["start_nodes"] = ["component:missing"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            (root / "tests").mkdir()
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(json.dumps(blueprint), encoding="utf-8")
+            (outdir / "bunya-jido.agent-map.json").write_text(json.dumps(agent_map), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "Trusted context blocked by agent-map routes"):
+                generate_agent_context(root, task="change builder behavior")
+
+    def test_invalid_task_route_blocks_publication_but_draft_omits_it(self) -> None:
+        blueprint = example_blueprint()
+        agent_map = example_agent_map()
+        agent_map["task_routes"][0]["start_nodes"] = ["component:missing"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            (root / "tests").mkdir()
+            (root / "src" / "bunya_jido").mkdir(parents=True)
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (root / "src" / "bunya_jido" / "blueprint.py").write_text("# fixture\n", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(json.dumps(blueprint), encoding="utf-8")
+            (outdir / "bunya-jido.agent-map.json").write_text(json.dumps(agent_map), encoding="utf-8")
+            html_path = root / "atlas.html"
+            stdout, stderr = io.StringIO(), io.StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                blocked = main(["build", "--root", str(root), "--out", str(html_path)])
+                draft = main(["build", "--root", str(root), "--allow-draft", "--out", str(html_path)])
+            html = html_path.read_text(encoding="utf-8")
+
+        self.assertEqual(blocked, 1)
+        self.assertIn("Blueprint publication blocked", stderr.getvalue())
+        self.assertEqual(draft, 0)
+        self.assertIn("grounding=draft", stdout.getvalue())
+        self.assertIn("agent map: task route change builder behavior references nodes not in blueprint", html)
+        self.assertNotIn('"kind": "task_route"', html)
 
 
 if __name__ == "__main__":

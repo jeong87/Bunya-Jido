@@ -161,6 +161,8 @@ bunya-jido validate-blueprint --root .
 
 예를 들어 "provider 동작 수정", "저장 계층 변경", "런타임 실패 디버깅" 같은 작업마다 먼저 읽을 파일, 관련 테스트, 안전하게 수정할 수 있는 영역, 조심해야 할 경계를 기록합니다.
 
+task route는 신뢰된 에이전트 context로 출력되거나 지도 경로로 표시되기 전에 semantic blueprint 및 저장소 상대 경로의 필수 읽기 파일·테스트와의 연결이 검증되어야 합니다.
+
 검증:
 
 ```bash
@@ -182,13 +184,13 @@ LLM 없이 결정적으로 생성되는 정적 스캔 결과입니다.
 - 선택한 노드 주변만 보는 local graph focus
 - `Static Scan`, `Grounded`, 명시적 `Draft` 상태를 보여주는 trust panel
 - source path, 관계 confidence, 기록된 근거를 보여주는 evidence panel
-- blueprint view와 워크플로우를 보여주는 path preset
+- blueprint view, 워크플로우, 검증된 agent-map task route를 구분해 보여주는 path preset
 - PNG와 JSON export
 - blueprint가 제공하는 경우 overview/detail 계층 전환
 
 지도의 근거는 저장소의 코드, 문서, 설정, 테스트, 런타임 산출물, 검증된 blueprint 파일에 있습니다. Bunya-Jido는 그 근거를 보기 좋은 형태로 투영합니다.
 
-agent map의 task route는 현재 생성되는 context 출력에 사용됩니다. 검증된 task route를 HTML path preset으로 투영하는 기능은 로드맵에 포함된 후속 작업입니다.
+검증된 agent map의 task route는 생성되는 context 출력과 HTML 지도의 `Task Route` path preset 양쪽에 나타납니다. blueprint 노드, 워크플로우, 필수 읽기 파일, 테스트 참조가 끊긴 route는 신뢰된 context와 일반 semantic 게시를 차단합니다.
 
 ## 코딩 에이전트와 함께 쓰기
 

@@ -161,6 +161,8 @@ A task map for coding agents.
 
 For tasks such as "modify provider behavior," "change the storage layer," or "debug runtime failure," it records what to read first, which tests matter, what is safe to edit, and which boundaries need care.
 
+Its task routes must resolve against the semantic blueprint and repository-relative required reading and tests before they can be emitted as trusted agent context or shown as map paths.
+
 Validate it with:
 
 ```bash
@@ -182,13 +184,13 @@ The generated HTML map includes:
 - local graph focus around a selected node
 - a trust panel showing `Static Scan`, `Grounded`, or explicit `Draft` status
 - an evidence panel showing source paths, relation confidence, and recorded evidence
-- path presets for blueprint views and workflows
+- labeled path presets for blueprint views, workflows, and validated agent-map task routes
 - PNG and JSON export
 - overview/detail switching when the blueprint provides detail nodes
 
 The map is not the source of truth. The evidence remains in the repository's code, docs, configuration, tests, runtime artifacts, and validated blueprint files. Bunya-Jido projects that evidence into a form that is easier to inspect.
 
-Agent-map task routes currently drive generated context output. Projecting validated task routes into HTML path presets is planned work; see the roadmap below.
+Validated agent-map task routes now appear both in generated context output and as `Task Route` path presets in the HTML map. Missing blueprint nodes, workflows, required reading, or tests block trusted context and normal semantic publication.
 
 ## Working With Coding Agents
 

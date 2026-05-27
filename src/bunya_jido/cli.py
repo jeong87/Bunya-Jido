@@ -63,6 +63,9 @@ def cmd_build(args: argparse.Namespace) -> int:
         q = graph.get("blueprint_quality", {})
         print(f"artifact=semantic_blueprint grounding={q.get('grounding_status')} blueprint={bp_path}")
         print(f"quality nodes={q.get('node_count')} edges={q.get('edge_count')} grounded_edges={q.get('grounded_edge_ratio')} blockers={q.get('publish_blocker_count')}")
+        if graph.get("agent_map_quality"):
+            aq = graph["agent_map_quality"]
+            print(f"agent_routes={aq.get('trusted_route_count')}/{aq.get('task_route_count')} validated")
     else:
         print("artifact=static_scan grounding=not_assessed blueprint=not found")
         print(f"hint: run `bunya-jido prepare --root {args.root}` or ask Codex to run it, then build again")
@@ -177,7 +180,14 @@ def cmd_validate_agent_map(args: argparse.Namespace) -> int:
         for err in errors[:60]:
             print(f"- {err}", file=sys.stderr)
         return 2
+    blockers = list(metrics.get("publish_blockers") or [])
+    if blockers:
+        print("Agent-map trusted context blocked:", file=sys.stderr)
+        for blocker in blockers[:60]:
+            print(f"- {blocker}", file=sys.stderr)
+        return 2
     print(f"Agent map validation passed: {am_path}")
+    print("Agent-map route references: validated")
     print(json.dumps(metrics, ensure_ascii=False, indent=2))
     if warnings:
         print("Warnings:")

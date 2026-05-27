@@ -462,6 +462,9 @@ def make_blueprint_prompt(project_name: str) -> str:
     - What should not be touched without a strong reason?
     - Which workflow or component context should be loaded?
 
+    Every task route must reference node IDs and workflow IDs that exist in the semantic blueprint.
+    Files in `must_read` and `tests` must resolve in the repository; otherwise trusted context and normal semantic publication are blocked.
+
     ### Step 6 — validate
 
     Run:
@@ -688,6 +691,7 @@ def make_blueprint_prompt(project_name: str) -> str:
     - LLM/API/provider routes are visible if the repo uses them.
     - Edges say what actually happens.
     - The agent map contains useful task routes for future coding agents.
+    - Every task route references existing blueprint nodes/workflows and resolving required files/tests.
     - Evidence supports every important node and edge.
 
     ## Final step
@@ -812,6 +816,22 @@ def _evidence_path_missing(path: Any, root_path: Path) -> bool:
         value = re.sub(r":\d+(?::\d+)?$", "", value)
         candidate = root_path / value
     return bool(value) and not candidate.exists()
+
+
+def _route_path_resolves(path: Any, root_path: Path) -> bool:
+    if not isinstance(path, str) or not path:
+        return False
+    if re.match(r"^[a-z]+://", path):
+        return False
+    value = path.split("#", 1)[0]
+    value = re.sub(r":\d+(?::\d+)?$", "", value)
+    route_path = Path(value)
+    if route_path.is_absolute() or re.match(r"^[A-Za-z]:\\", value):
+        return False
+    if any(char in value for char in "*?["):
+        return any(candidate.resolve().is_relative_to(root_path) for candidate in root_path.glob(value))
+    candidate = (root_path / value).resolve()
+    return candidate.is_relative_to(root_path) and candidate.exists()
 
 
 def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -> tuple[list[str], list[str], dict[str, Any]]:
@@ -987,6 +1007,8 @@ def default_agent_map_path(root: str | Path) -> Path:
 def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = None, blueprint: dict[str, Any] | None = None) -> tuple[list[str], list[str], dict[str, Any]]:
     errors: list[str] = []
     warnings: list[str] = []
+    publish_blockers: list[str] = []
+    blocked_route_indexes: set[int] = set()
     if agent_map.get("schema_version") != "bunya-jido-agent-map-v1":
         errors.append("schema_version must be bunya-jido-agent-map-v1")
     project = agent_map.get("project")
@@ -996,47 +1018,120 @@ def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = 
     if not isinstance(routes, list):
         errors.append("task_routes must be a list")
         routes = []
-    bp_node_ids: set[str] = set()
+    bp_node_by_id: dict[str, dict[str, Any]] = {}
+    bp_workflow_by_id: dict[str, dict[str, Any]] = {}
     if blueprint:
-        bp_node_ids = {str(n.get("id")) for n in blueprint.get("nodes", []) if isinstance(n, dict) and n.get("id")}
+        bp_node_by_id = {str(n.get("id")): n for n in blueprint.get("nodes", []) if isinstance(n, dict) and n.get("id")}
+        bp_workflow_by_id = {
+            str(workflow.get("id")): workflow
+            for workflow in blueprint.get("workflows", [])
+            if isinstance(workflow, dict) and workflow.get("id")
+        }
     root_path = Path(root).resolve() if root is not None else None
-    grounded_routes = 0
     for i, route in enumerate(routes):
         if not isinstance(route, dict):
             errors.append(f"task_routes[{i}] is not an object")
             continue
+        task = str(route.get("task") or i)
+        route_blockers: list[str] = []
         if not route.get("task"):
             errors.append(f"task_routes[{i}].task is required")
         if not route.get("intent"):
-            warnings.append(f"task route {route.get('task', i)} missing intent")
-        start_nodes = route.get("start_nodes") or []
-        if not isinstance(start_nodes, list) or not start_nodes:
-            warnings.append(f"task route {route.get('task', i)} has no start_nodes")
-        elif bp_node_ids:
-            missing = [n for n in start_nodes if n not in bp_node_ids]
+            errors.append(f"task_routes[{i}].intent is required")
+        route_lists: dict[str, list[Any]] = {}
+        for key in ("start_nodes", "must_read", "tests", "workflows", "safe_edit"):
+            value = route.get(key) or []
+            if not isinstance(value, list):
+                errors.append(f"task_routes[{i}].{key} must be a list")
+                value = []
+            route_lists[key] = value
+        start_nodes = route_lists["start_nodes"]
+        if not start_nodes:
+            route_blockers.append(f"task route {task} has no start_nodes")
+        elif not blueprint:
+            route_blockers.append(f"task route {task} cannot be trusted without a semantic blueprint")
+        else:
+            missing = [n for n in start_nodes if str(n) not in bp_node_by_id]
             if missing:
-                warnings.append(f"task route {route.get('task', i)} references nodes not in blueprint: {missing[:5]}")
-        must_read = route.get("must_read") or []
-        tests = route.get("tests") or []
+                route_blockers.append(f"task route {task} references nodes not in blueprint: {missing[:5]}")
+            for node_id in [str(n) for n in start_nodes if str(n) in bp_node_by_id]:
+                node = bp_node_by_id[node_id]
+                if node_id.startswith("repo:") or str(node.get("type") or "").lower() == "repo":
+                    route_blockers.append(f"task route {task} starts at hidden repo/root node: {node_id}")
+                evidence = node.get("evidence") or []
+                if not evidence:
+                    route_blockers.append(f"task route {task} starts at ungrounded node: {node_id}")
+                elif root_path and not any(
+                    isinstance(ev, dict) and _route_path_resolves(ev.get("path"), root_path)
+                    for ev in evidence
+                ):
+                    route_blockers.append(f"task route {task} starts at node with unresolved evidence: {node_id}")
+        workflows = route_lists["workflows"]
+        if workflows and not blueprint:
+            route_blockers.append(f"task route {task} references workflows without a semantic blueprint")
+        elif workflows:
+            missing_workflows = [workflow for workflow in workflows if str(workflow) not in bp_workflow_by_id]
+            if missing_workflows:
+                route_blockers.append(f"task route {task} references workflows not in blueprint: {missing_workflows[:5]}")
+            for workflow_id in [str(w) for w in workflows if str(w) in bp_workflow_by_id]:
+                workflow_nodes: list[str] = []
+                workflow = bp_workflow_by_id[workflow_id]
+                workflow_nodes.extend(str(node_id) for node_id in workflow.get("node_ids") or [] if node_id)
+                for step in workflow.get("steps") or []:
+                    if isinstance(step, str) and step:
+                        workflow_nodes.append(step)
+                    elif isinstance(step, dict) and (step.get("node") or step.get("node_id")):
+                        workflow_nodes.append(str(step.get("node") or step.get("node_id")))
+                missing_nodes = [node_id for node_id in workflow_nodes if node_id not in bp_node_by_id]
+                if missing_nodes:
+                    route_blockers.append(
+                        f"task route {task} references workflow {workflow_id} with missing nodes: {missing_nodes[:5]}"
+                    )
+                hidden_nodes = [
+                    node_id
+                    for node_id in workflow_nodes
+                    if node_id in bp_node_by_id
+                    and (
+                        node_id.startswith("repo:")
+                        or str(bp_node_by_id[node_id].get("type") or "").lower() == "repo"
+                    )
+                ]
+                if hidden_nodes:
+                    route_blockers.append(
+                        f"task route {task} references workflow {workflow_id} with hidden repo/root nodes: {hidden_nodes[:5]}"
+                    )
+        must_read = route_lists["must_read"]
+        tests = route_lists["tests"]
         if not must_read:
-            warnings.append(f"task route {route.get('task', i)} has empty must_read")
+            route_blockers.append(f"task route {task} has empty must_read")
         if not tests:
-            warnings.append(f"task route {route.get('task', i)} has empty tests")
-        if must_read:
-            grounded_routes += 1
+            route_blockers.append(f"task route {task} has empty tests")
         if root_path:
-            for path in list(must_read)[:20] + list(tests)[:20] + list(route.get("safe_edit") or [])[:20]:
-                if not isinstance(path, str) or not path or "#" in path or "*" in path:
-                    continue
-                clean = path.split(":", 1)[0] if not re.match(r"^[A-Za-z]:\\", path) else path
-                if clean and not (root_path / clean).exists():
-                    warnings.append(f"agent-map path not found: {path} in route {route.get('task', i)}")
-                    break
+            for path in list(must_read)[:20]:
+                if not _route_path_resolves(path, root_path):
+                    route_blockers.append(f"task route {task} must-read path not found: {path}")
+            for path in list(tests)[:20]:
+                if not _route_path_resolves(path, root_path):
+                    route_blockers.append(f"task route {task} test path not found: {path}")
+            for path in route_lists["safe_edit"][:20]:
+                if isinstance(path, str) and path and not _route_path_resolves(path, root_path):
+                    warnings.append(f"agent-map safe-edit path not found: {path} in route {task}")
+        if route_blockers:
+            blocked_route_indexes.add(i)
+            publish_blockers.extend(route_blockers)
     if any(_string_has_secret(s) for s in _walk_strings(agent_map)):
         errors.append("agent map appears to contain secret-like text; remove raw tokens/API keys/passwords")
+    publish_blockers = list(dict.fromkeys(publish_blockers))
+    projectable_route_indexes = [i for i, route in enumerate(routes) if isinstance(route, dict) and i not in blocked_route_indexes]
+    grounding_status = "blocked" if errors or publish_blockers else "grounded"
     metrics = {
         "task_route_count": len(routes),
-        "grounded_route_ratio": round(grounded_routes / max(1, len(routes)), 3),
+        "trusted_route_count": len(projectable_route_indexes),
+        "grounded_route_ratio": round(len(projectable_route_indexes) / max(1, len(routes)), 3),
+        "grounding_status": grounding_status,
+        "publish_blocker_count": len(publish_blockers),
+        "publish_blockers": publish_blockers[:40],
+        "projectable_route_indexes": projectable_route_indexes,
         "warning_count": len(warnings),
         "error_count": len(errors),
     }
@@ -1076,10 +1171,27 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     am_path = default_agent_map_path(root_path)
     comp_path = blueprint_dir(root_path) / COMPONENTS_FILE
     wf_path = blueprint_dir(root_path) / WORKFLOWS_FILE
-    bp = _read_json_relaxed(bp_path) if bp_path.exists() else {"nodes": [], "edges": [], "workflows": []}
-    agent_map = _read_json_relaxed(am_path) if am_path.exists() else {"task_routes": []}
+    if not bp_path.exists():
+        raise ValueError(f"Trusted context requires a semantic blueprint: {bp_path}")
+    if not am_path.exists():
+        raise ValueError(f"Trusted context requires an agent map: {am_path}")
+    bp = _read_json_relaxed(bp_path)
+    agent_map = _read_json_relaxed(am_path)
+    bp_errors, bp_warnings, bp_metrics = validate_blueprint_obj(bp, root=root_path)
+    if bp_errors:
+        raise ValueError("Trusted context blocked by invalid semantic blueprint: " + "; ".join(bp_errors[:8]))
+    bp_blockers = list(bp_metrics.get("publish_blockers") or [])
+    if bp_blockers:
+        raise ValueError("Trusted context blocked by semantic blueprint grounding: " + "; ".join(bp_blockers[:8]))
+    agent_errors, agent_warnings, agent_metrics = validate_agent_map_obj(agent_map, root=root_path, blueprint=bp)
+    if agent_errors:
+        raise ValueError("Trusted context blocked by invalid agent map: " + "; ".join(agent_errors[:8]))
+    agent_blockers = list(agent_metrics.get("publish_blockers") or [])
+    if agent_blockers:
+        raise ValueError("Trusted context blocked by agent-map routes: " + "; ".join(agent_blockers[:8]))
     node_by_id = {str(n.get("id")): n for n in bp.get("nodes", []) if isinstance(n, dict) and n.get("id")}
-    routes = [r for r in agent_map.get("task_routes", []) if isinstance(r, dict)]
+    trusted_indexes = set(agent_metrics.get("projectable_route_indexes") or [])
+    routes = [r for i, r in enumerate(agent_map.get("task_routes", [])) if isinstance(r, dict) and i in trusted_indexes]
     scored = sorted([( _match_route(r, task=task, node=node, workflow=workflow), r) for r in routes], key=lambda x: x[0], reverse=True)
     chosen = [r for sc,r in scored if sc > 0][:5] or routes[:3]
     changed = changed_files or []
@@ -1101,6 +1213,15 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     if node: lines.append(f"**Focus node:** `{node}`")
     if workflow: lines.append(f"**Focus workflow:** `{workflow}`")
     if changed: lines.append(f"**Changed files:** {', '.join(changed)}")
+    lines.append("")
+    lines.append("## Trust")
+    lines.append("- Artifact mode: `semantic_blueprint`")
+    lines.append("- Grounding status: `grounded`")
+    lines.append(f"- Agent-map routes: `validated` ({agent_metrics.get('trusted_route_count', 0)} trusted route(s))")
+    trust_warnings = list(bp_warnings) + list(agent_warnings)
+    lines.append(f"- Warnings: `{len(trust_warnings)}`")
+    for warning in trust_warnings[:10]:
+        lines.append(f"  - {warning}")
     lines.append("")
     if node and node in node_by_id:
         n = node_by_id[node]
@@ -1129,6 +1250,7 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
                 lines.append(f"\n**{title}:**")
                 for v in vals[:30]: lines.append(f"- `{v}`")
         emit_list("Start nodes", r.get("start_nodes"))
+        emit_list("Workflows", r.get("workflows"))
         emit_list("Must read", r.get("must_read"))
         emit_list("Contracts", r.get("contracts"))
         emit_list("Tests", r.get("tests"))
@@ -1223,6 +1345,7 @@ def graph_from_blueprint(
     *,
     root: str | Path | None = None,
     static_graph: dict[str, Any] | None = None,
+    agent_map: dict[str, Any] | None = None,
     show_root: bool = False,
     allow_draft: bool = False,
 ) -> dict[str, Any]:
@@ -1230,6 +1353,14 @@ def graph_from_blueprint(
     if errors:
         raise ValueError("Blueprint validation failed: " + "; ".join(errors[:8]))
     publish_blockers = list(metrics.get("publish_blockers") or [])
+    agent_metrics: dict[str, Any] | None = None
+    if agent_map is not None:
+        agent_errors, agent_warnings, agent_metrics = validate_agent_map_obj(agent_map, root=root, blueprint=bp)
+        if agent_errors:
+            raise ValueError("Agent map validation failed: " + "; ".join(agent_errors[:8]))
+        warnings.extend(f"agent map: {warning}" for warning in agent_warnings)
+        publish_blockers.extend(f"agent map: {blocker}" for blocker in agent_metrics.get("publish_blockers") or [])
+    publish_blockers = list(dict.fromkeys(publish_blockers))
     if publish_blockers and not allow_draft:
         raise ValueError(
             "Blueprint publication blocked: "
@@ -1237,7 +1368,13 @@ def graph_from_blueprint(
             + ". Use allow_draft=True or `--allow-draft` to render an explicitly marked draft."
         )
     grounding_status = "draft" if publish_blockers else "grounded"
-    quality_metrics = {**metrics, "grounding_status": grounding_status}
+    quality_metrics = {
+        **metrics,
+        "grounding_status": grounding_status,
+        "publish_blocker_count": len(publish_blockers),
+        "publish_blockers": publish_blockers[:40],
+        "warning_count": len(warnings),
+    }
     project = bp.get("project") or {}
     project_name = str(project.get("name") or (infer_project_name(Path(root)) if root else "repository"))
     id_map: dict[str, str] = {}
@@ -1383,7 +1520,14 @@ def graph_from_blueprint(
         e["source_label"] = labels.get(e["source"], e["source"])
         e["target_label"] = labels.get(e["target"], e["target"])
 
-    path_presets = _path_presets_from_blueprint(bp, nodes, edges, id_map)
+    path_presets = _path_presets_from_blueprint(
+        bp,
+        nodes,
+        edges,
+        id_map,
+        agent_map=agent_map,
+        projectable_route_indexes=set((agent_metrics or {}).get("projectable_route_indexes") or []),
+    )
     lenses = _lenses_from_blueprint(bp, edges)
     groups = _groups_from_blueprint(bp, id_map, nodes)
     relations = sorted({e["relation"] for e in edges})
@@ -1423,6 +1567,8 @@ def graph_from_blueprint(
         "node_count": len(nodes),
         "edge_count": len(edges),
     }
+    if agent_metrics is not None:
+        graph["agent_map_quality"] = {**agent_metrics, "warnings": [warning.removeprefix("agent map: ") for warning in warnings if warning.startswith("agent map: ")]}
     return graph
 
 
@@ -1449,7 +1595,15 @@ def _groups_from_blueprint(bp: dict[str, Any], id_map: dict[str, str], nodes: li
     return groups
 
 
-def _path_presets_from_blueprint(bp: dict[str, Any], nodes: list[dict[str, Any]], edges: list[dict[str, Any]], id_map: dict[str, str]) -> list[dict[str, Any]]:
+def _path_presets_from_blueprint(
+    bp: dict[str, Any],
+    nodes: list[dict[str, Any]],
+    edges: list[dict[str, Any]],
+    id_map: dict[str, str],
+    *,
+    agent_map: dict[str, Any] | None = None,
+    projectable_route_indexes: set[int] | None = None,
+) -> list[dict[str, Any]]:
     node_by_id = {n["id"]: n for n in nodes}
     edge_by_rel = defaultdict(list)
     for e in edges:
@@ -1474,42 +1628,78 @@ def _path_presets_from_blueprint(bp: dict[str, Any], nodes: list[dict[str, Any]]
                 "id": slug(view.get("id") or view.get("label") or f"view-{len(presets)}", 60),
                 "label": str(view.get("label") or view.get("id") or "Blueprint View"),
                 "description": str(view.get("description") or "Blueprint-selected view"),
+                "kind": "view",
+                "source": "blueprint",
                 "node_ids": arr,
                 "nodes": [node_by_id[i]["label"] for i in arr],
             })
+    workflow_node_ids: dict[str, list[str]] = {}
     for wf in bp.get("workflows") or []:
         if not isinstance(wf, dict):
             continue
-        ids = set()
+        ordered_ids: list[str] = []
         for raw_id in wf.get("node_ids") or []:
             nid = id_map.get(str(raw_id), _normalize_node_id(str(raw_id)))
-            if nid in node_by_id:
-                ids.add(nid)
+            if nid in node_by_id and nid not in ordered_ids:
+                ordered_ids.append(nid)
         for step in wf.get("steps") or []:
             if isinstance(step, str):
                 nid = id_map.get(step, _normalize_node_id(step))
-                if nid in node_by_id:
-                    ids.add(nid)
+                if nid in node_by_id and nid not in ordered_ids:
+                    ordered_ids.append(nid)
             elif isinstance(step, dict):
                 raw_id = str(step.get("node") or step.get("node_id") or "")
                 nid = id_map.get(raw_id, _normalize_node_id(raw_id))
-                if nid in node_by_id:
-                    ids.add(nid)
-        if ids:
-            arr = sorted(ids, key=lambda i: (node_by_id[i].get("major", False), node_by_id[i].get("degree", 0), node_by_id[i].get("size", 0)), reverse=True)[:60]
+                if nid in node_by_id and nid not in ordered_ids:
+                    ordered_ids.append(nid)
+        workflow_id = str(wf.get("id") or "")
+        if workflow_id:
+            workflow_node_ids[workflow_id] = ordered_ids
+        if ordered_ids:
+            arr = ordered_ids[:60]
             presets.append({
                 "id": slug("workflow_" + str(wf.get("id") or wf.get("label") or len(presets)), 70),
                 "label": str(wf.get("label") or wf.get("id") or "Workflow"),
                 "description": str(wf.get("description") or "Blueprint workflow"),
+                "kind": "workflow",
+                "source": "blueprint",
                 "node_ids": arr,
                 "nodes": [node_by_id[i]["label"] for i in arr],
             })
+    valid_route_indexes = projectable_route_indexes or set()
+    if agent_map is not None:
+        for index, route in enumerate(agent_map.get("task_routes") or []):
+            if index not in valid_route_indexes or not isinstance(route, dict):
+                continue
+            route_ids: list[str] = []
+            for raw_id in route.get("start_nodes") or []:
+                node_id = id_map.get(str(raw_id), _normalize_node_id(str(raw_id)))
+                if node_id in node_by_id and node_id not in route_ids:
+                    route_ids.append(node_id)
+            for workflow_id in route.get("workflows") or []:
+                for node_id in workflow_node_ids.get(str(workflow_id), []):
+                    if node_id not in route_ids:
+                        route_ids.append(node_id)
+            if route_ids:
+                task = str(route.get("task") or f"Task {index + 1}")
+                presets.append({
+                    "id": slug("task_route_" + task, 70),
+                    "label": task,
+                    "description": str(route.get("intent") or "Validated coding-agent task route."),
+                    "kind": "task_route",
+                    "source": "agent_map",
+                    "node_ids": route_ids[:60],
+                    "nodes": [node_by_id[node_id]["label"] for node_id in route_ids[:60]],
+                    "workflows": list(route.get("workflows") or []),
+                    "must_read": list(route.get("must_read") or []),
+                    "tests": list(route.get("tests") or []),
+                })
     core = sorted(nodes, key=lambda n: (n.get("major", False), n.get("degree", 0), n.get("size", 0)), reverse=True)[:36]
-    presets.insert(0, {"id": "blueprint_core", "label": "Blueprint Core", "description": "Core architecture nodes selected from the LLM-authored blueprint.", "node_ids": [n["id"] for n in core], "nodes": [n["label"] for n in core]})
+    presets.insert(0, {"id": "blueprint_core", "label": "Blueprint Core", "description": "Core architecture nodes selected from the LLM-authored blueprint.", "kind": "overview", "source": "blueprint", "node_ids": [n["id"] for n in core], "nodes": [n["label"] for n in core]})
     llm = [n for n in nodes if n.get("plane") in {"llm", "external"} or n.get("type") in {"llm_endpoint", "api_provider"} or n.get("llm_lane")]
     if llm:
         arr = sorted(llm, key=lambda n: (n.get("major", False), n.get("degree", 0)), reverse=True)[:36]
-        presets.append({"id": "llm_api", "label": "LLM / API", "description": "Model, API, and external provider routes.", "node_ids": [n["id"] for n in arr], "nodes": [n["label"] for n in arr]})
+        presets.append({"id": "llm_api", "label": "LLM / API", "description": "Model, API, and external provider routes.", "kind": "view", "source": "blueprint", "node_ids": [n["id"] for n in arr], "nodes": [n["label"] for n in arr]})
     return presets
 
 
@@ -1567,6 +1757,17 @@ def graph_with_optional_blueprint(
     if not bp_path:
         return static_graph, None
     bp = load_blueprint(bp_path)
-    graph = graph_from_blueprint(bp, root=root_path, static_graph=static_graph, show_root=show_root, allow_draft=allow_draft)
+    agent_map_path = default_agent_map_path(root_path)
+    agent_map = _read_json_relaxed(agent_map_path) if agent_map_path.exists() else None
+    graph = graph_from_blueprint(
+        bp,
+        root=root_path,
+        static_graph=static_graph,
+        agent_map=agent_map,
+        show_root=show_root,
+        allow_draft=allow_draft,
+    )
     graph["blueprint_path"] = bp_path.as_posix()
+    if agent_map is not None:
+        graph["agent_map_path"] = agent_map_path.as_posix()
     return graph, bp_path

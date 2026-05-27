@@ -27,6 +27,7 @@ class SmokeTests(unittest.TestCase):
         self.assertIn("edges", graph)
         self.assertEqual(graph["artifact_mode"], "static_scan")
         self.assertEqual(graph["grounding"]["status"], "not_assessed")
+        self.assertEqual(graph["path_presets"][0]["kind"], "overview")
 
     def test_render_html_embeds_graph(self) -> None:
         graph = build_graph(MINIMAL_EXAMPLE)

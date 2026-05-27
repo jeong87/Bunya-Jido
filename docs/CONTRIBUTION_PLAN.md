@@ -5,6 +5,7 @@
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
+**Implementation progress (May 27, 2026):** PR 1 through PR 4 are implemented on `main`; PR 5 is the next planned milestone.
 
 ---
 
@@ -95,6 +96,8 @@ These behaviors are already real and should be preserved:
 
 ### 3.2 Confirmed gaps and corrections
 
+This table records the baseline found during roadmap revision. PR 1 through PR 4 subsequently close the documentation, test, grounding, trust-panel, and agent-map parity gaps listed here.
+
 The following are not merely speculative gaps; they follow from the current implementation and public documentation.
 
 | Current Gap | Current Behavior | Roadmap Consequence |
@@ -131,7 +134,7 @@ The intended contract is:
 
 > Human map paths and coding-agent task routes must be traceable to the same validated semantic blueprint and must not silently contradict it.
 
-This is a **target contract** until implemented and covered by tests. Completing it requires:
+This contract is implemented by PR 4 and covered by parity tests. Its implementation includes:
 
 - validating task-route references against blueprint nodes and workflows,
 - surfacing task routes as optional viewer path presets,
@@ -434,6 +437,8 @@ Each pull request should remain independently reviewable. The revised order deli
 
 **Suggested branch:** `feat/agent-map-parity`
 
+**Implementation status:** Implemented on `main` on May 27, 2026.
+
 **Scope:**
 
 - Treat missing required blueprint node/workflow references in agent routes as blockers for trusted context.
@@ -676,7 +681,7 @@ Each substantial contribution should be evaluated as both software behavior and 
 
 - A `Verified` badge that implies automated proof of architecture.
 - Treating every file or import as a first-class semantic landmark.
-- Presenting task routes as part of the map until parity exists.
+- Presenting task routes as part of the map without validated parity.
 - Calling generated context long-term memory or safe autonomous guidance.
 - Claiming broad JS/TS or multi-language equivalence without fixtures.
 - Adding scanners or decorative UI before closing trust and parity gaps.
