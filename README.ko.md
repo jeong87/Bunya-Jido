@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://jeong87.github.io/Bunya-Jido/demo.html">
-    <img src="docs/assets/self-map-grounded.png" alt="Grounded Bunya-Jido self-map preview" width="100%">
+    <img src="docs/assets/self-map-grounded.png" alt="Grounded Bunya-Jido constellation map preview with semantic role glyphs" width="100%">
   </a>
 </p>
 

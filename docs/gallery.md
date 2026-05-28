@@ -12,11 +12,13 @@ repository and is protected by semantic golden tests.
 | Source inputs | `.bunya-jido/bunya-jido.blueprint.json`, `.bunya-jido/bunya-jido.agent-map.json` |
 | Artifact mode | `semantic_blueprint` |
 | Grounding status | `grounded` |
-| Review status | Maintainer-authored and mechanically validated on May 27, 2026 |
+| Review status | Maintainer-authored and mechanically validated on May 28, 2026 |
 | Semantic coverage | 12 nodes, 19 relationships, 5 core nodes, 11 critical relationships |
 | Grounding metrics | 100% core-node evidence; 100% critical-relationship evidence |
 | Agent routes | 3 of 3 routes validated and projected as `Task Route` paths |
-| Viewer disclosure | `Overview` by default; `Inspect Evidence` and `Implementation Detail` on demand |
+| Viewer surface | Canvas-first constellation with semantic role glyphs, restrained relation families, and workflow launcher bar |
+| Viewer disclosure | `Overview` by default; map controls and selected-item inspector open on demand |
+| Screenshot capture | Clean `Overview` state at 1440 x 900 |
 | Published output | `docs/demo.html` |
 
 **Generation command:**
@@ -27,14 +29,15 @@ python -m bunya_jido validate-agent-map --root .
 python -m bunya_jido build --root . --max-files 0 --out docs/demo.html
 ```
 
-![Grounded Bunya-Jido self-map with trust status and validated task routes](assets/self-map-grounded.png)
+![Grounded Bunya-Jido constellation map with semantic role glyphs, trust status, and workflow routes](assets/self-map-grounded.png)
 
 **Intended lessons:**
 
 - A semantic blueprint can publish a compact architecture view with directly inspectable repository evidence.
 - The same committed artifact can expose workflows to humans and bounded task routes to coding agents.
 - Grounded status is visible in the HTML output rather than being an undocumented build assumption.
-- Plane purposes and primary node/relation families make the first read compact, while selected relationships retain their exact verb, confidence, and evidence in `Inspect Evidence`.
+- The canvas-first overview keeps controls out of the initial reading surface while preserving them in an on-demand drawer.
+- Zone fields, semantic role glyphs, and a restrained relation palette make the first read compact, while selected relationships retain their exact verb, confidence, and evidence in `Inspect Evidence`.
 
 **Known limitations:**
 
@@ -57,7 +60,8 @@ limitations before publication.
 
 `docs/demo.html` and its screenshot are reviewed, committed gallery outputs.
 Before updating either file, run the validation and generation commands above,
-inspect the resulting offline HTML, and run:
+inspect the resulting offline HTML, refresh `assets/self-map-grounded.png` from
+the clean `Overview` state at 1440 x 900, and run:
 
 ```bash
 python -m unittest tests.test_self_map

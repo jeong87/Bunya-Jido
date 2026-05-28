@@ -45,6 +45,12 @@ class SmokeTests(unittest.TestCase):
         self.assertNotIn("__BUNYA_JIDO_DATA__", html)
         self.assertIn("Explore Mode", html)
         self.assertIn("Relation Families", html)
+        self.assertIn("Map Controls", html)
+        self.assertIn('id="toolbarTrust"', html)
+        self.assertIn('id="workflowBar"', html)
+        self.assertIn("nodeRoleStyles", html)
+        self.assertIn("drawNodeShape", html)
+        self.assertIn("relationFamilyVisuals", html)
 
     def test_diagnose_reports_static_scan_as_not_grounded(self) -> None:
         stdout = io.StringIO()

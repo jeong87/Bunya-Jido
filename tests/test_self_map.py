@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import struct
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -19,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BLUEPRINT_PATH = ROOT / ".bunya-jido" / "bunya-jido.blueprint.json"
 AGENT_MAP_PATH = ROOT / ".bunya-jido" / "bunya-jido.agent-map.json"
 DEMO_PATH = ROOT / "docs" / "demo.html"
+HERO_PATH = ROOT / "docs" / "assets" / "self-map-grounded.png"
 
 
 def load_json(path: Path) -> dict:
@@ -126,6 +128,12 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             "Confidence",
             "Validated Task Routes",
             "Selected Relationship",
+            "Map Controls",
+            'id="toolbarTrust"',
+            'id="workflowBar"',
+            "nodeRoleStyles",
+            "drawNodeShape",
+            "relationFamilyVisuals",
         ):
             self.assertIn(control, html)
         marker = '<script id="graph-data" type="application/json">'
@@ -138,6 +146,16 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             stable_semantic_contract(published),
             stable_semantic_contract(rebuilt),
         )
+
+    def test_published_hero_is_wide_and_linked_from_both_readmes(self) -> None:
+        png = HERO_PATH.read_bytes()
+        self.assertEqual(png[:8], b"\x89PNG\r\n\x1a\n")
+        width, height = struct.unpack(">II", png[16:24])
+        self.assertEqual((width, height), (1440, 900))
+        for readme in ("README.md", "README.ko.md"):
+            text = (ROOT / readme).read_text(encoding="utf-8")
+            self.assertIn("docs/assets/self-map-grounded.png", text)
+            self.assertIn("semantic role glyphs", text)
 
     def test_release_diagnostics_require_the_committed_grounded_self_map(self) -> None:
         stdout = io.StringIO()
