@@ -308,6 +308,24 @@ Blueprint 모드 프롬프트로 지도를 갱신하고, 바뀌지 않았다고 
 `--git-diff`는 Git이 추적하는 변경만 읽으므로, 아직 추적하지 않는 새
 파일은 `--changed-file`로 직접 전달합니다.
 
+### 에이전트 효용 평가하기
+
+지도를 사용하는 저장소는 제한된 context의 acceptance case를
+`.bunya-jido/bunya-jido.agent-evaluation.json`에 커밋하고 다음 명령을
+실행할 수 있습니다.
+
+```bash
+bunya-jido evaluate-agent-utility --root . --require-pass --json
+```
+
+이 suite는 예상 첫 읽기 파일, 관련 테스트 회상, 계약/편집 경계,
+정직한 no-match 처리, 변경 근거 기반 refresh 출력을 검사합니다. 이는
+생성된 handoff의 결정적 계약 검사이지, 실제 코딩 에이전트가 내용을
+읽고 따랐다는 증명은 아닙니다. 평가 형식과 선택적인 실제 에이전트
+관찰 절차는
+[docs/AGENT_UTILITY_EVALUATION.md](docs/AGENT_UTILITY_EVALUATION.md)에
+정리되어 있습니다.
+
 이 파일들은 코딩 에이전트에게 작업을 맡기기 전에 붙여넣거나 첨부하기 좋습니다.
 
 ## 현재 지원 범위
@@ -393,9 +411,10 @@ bunya-jido build --root . --data-policy full --out bunya-jido.html
 
 ## 릴리스와 로드맵
 
-기존 grounded-map 구현 로드맵은 PR8까지 완료되었습니다. PR9부터 PR11은
+기존 grounded-map 구현 로드맵은 PR8까지 완료되었습니다. PR9부터 PR12는
 정직한 route matching, 선택적 native agent activation, 변경 인지
-refresh routing으로 agent-consumption 흐름을 확장합니다. 커밋된 Grounded
+refresh routing, stale-map 검토, 제한된 효용 평가로 agent-consumption
+흐름을 확장합니다. 커밋된 Grounded
 self-map은 [docs/gallery.md](docs/gallery.md), public alpha 릴리스 조건과
 게시 설정은 [docs/RELEASING.md](docs/RELEASING.md), 변경 내역은
 [CHANGELOG.md](CHANGELOG.md), 기여 요건은

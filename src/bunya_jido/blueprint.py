@@ -14,6 +14,7 @@ from .scanner import build_graph, infer_project_name, slug
 BLUEPRINT_DIR = ".bunya-jido"
 BLUEPRINT_FILE = "bunya-jido.blueprint.json"
 AGENT_MAP_FILE = "bunya-jido.agent-map.json"
+AGENT_EVALUATION_FILE = "bunya-jido.agent-evaluation.json"
 COMPONENTS_FILE = "COMPONENTS.md"
 WORKFLOWS_FILE = "WORKFLOWS.md"
 MAP_REVIEW_FILE = "MAP_REVIEW.md"
@@ -1018,6 +1019,10 @@ def default_agent_map_path(root: str | Path) -> Path:
     return blueprint_dir(root) / AGENT_MAP_FILE
 
 
+def default_agent_evaluation_path(root: str | Path) -> Path:
+    return blueprint_dir(root) / AGENT_EVALUATION_FILE
+
+
 def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = None, blueprint: dict[str, Any] | None = None) -> tuple[list[str], list[str], dict[str, Any]]:
     errors: list[str] = []
     warnings: list[str] = []
@@ -1516,6 +1521,211 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     lines.append(f"- Blueprint: `{bp_path.relative_to(root_path) if bp_path.exists() else bp_path}`")
     lines.append(f"- Agent map: `{am_path.relative_to(root_path) if am_path.exists() else am_path}`")
     return "\n".join(lines).rstrip() + "\n"
+
+
+AGENT_UTILITY_DIMENSIONS = {
+    "first_read_accuracy",
+    "test_recall",
+    "boundary_discipline",
+    "honest_no_match",
+    "change_aware_refresh",
+}
+AGENT_UTILITY_LIMITATION = (
+    "This deterministic suite verifies generated bounded context against authored "
+    "expectations; it does not measure whether a live coding agent follows that context."
+)
+
+
+def validate_agent_evaluation_obj(evaluation: Any) -> list[str]:
+    errors: list[str] = []
+    if not isinstance(evaluation, dict):
+        return ["evaluation suite must be an object"]
+    if evaluation.get("schema_version") != "bunya-jido-agent-evaluation-v1":
+        errors.append("schema_version must be bunya-jido-agent-evaluation-v1")
+    project = evaluation.get("project")
+    if not isinstance(project, dict) or not project.get("name") or not project.get("summary"):
+        errors.append("project.name and project.summary are required")
+    cases = evaluation.get("cases")
+    if not isinstance(cases, list) or not cases:
+        errors.append("cases must be a non-empty list")
+        cases = []
+    seen_ids: set[str] = set()
+    expected_list_fields = (
+        "routes",
+        "forbid_routes",
+        "must_read",
+        "contracts",
+        "tests",
+        "safe_edit",
+    )
+    for i, case in enumerate(cases):
+        if not isinstance(case, dict):
+            errors.append(f"cases[{i}] is not an object")
+            continue
+        case_id = case.get("id")
+        if not isinstance(case_id, str) or not case_id.strip():
+            errors.append(f"cases[{i}].id is required")
+        elif case_id in seen_ids:
+            errors.append(f"cases[{i}].id must be unique: {case_id}")
+        else:
+            seen_ids.add(case_id)
+        dimension = case.get("dimension")
+        if dimension not in AGENT_UTILITY_DIMENSIONS:
+            errors.append(f"cases[{i}].dimension is not supported: {dimension}")
+        query = case.get("query")
+        if not isinstance(query, dict):
+            errors.append(f"cases[{i}].query must be an object")
+            query = {}
+        has_query = False
+        for key in ("task", "node", "workflow"):
+            if key in query:
+                if not isinstance(query[key], str) or not query[key].strip():
+                    errors.append(f"cases[{i}].query.{key} must be a non-empty string")
+                else:
+                    has_query = True
+        if "changed_files" in query:
+            changed_files = query["changed_files"]
+            if not isinstance(changed_files, list) or not all(
+                isinstance(path, str) and path.strip() for path in changed_files
+            ):
+                errors.append(f"cases[{i}].query.changed_files must be a list of non-empty strings")
+            elif changed_files:
+                has_query = True
+        if not has_query:
+            errors.append(f"cases[{i}].query must request task, node, workflow, or changed_files")
+        expect = case.get("expect")
+        if not isinstance(expect, dict):
+            errors.append(f"cases[{i}].expect must be an object")
+            continue
+        if expect.get("route_status") not in {"matched", "not_found"}:
+            errors.append(f"cases[{i}].expect.route_status must be matched or not_found")
+        for field in expected_list_fields:
+            value = expect.get(field, [])
+            if not isinstance(value, list) or not all(
+                isinstance(item, str) and item.strip() for item in value
+            ):
+                errors.append(f"cases[{i}].expect.{field} must be a list of non-empty strings")
+        if expect.get("route_status") == "not_found" and expect.get("routes"):
+            errors.append(f"cases[{i}].expect.routes must be empty for not_found")
+    if any(_string_has_secret(value) for value in _walk_strings(evaluation)):
+        errors.append("evaluation suite appears to contain secret-like text; remove raw tokens/API keys/passwords")
+    return errors
+
+
+def _context_route_status(context: str) -> str:
+    match = re.search(r"^- Requested route match: `([^`]+)`", context, re.MULTILINE)
+    return match.group(1) if match else "missing"
+
+
+def _context_route_titles(context: str) -> list[str]:
+    return re.findall(r"^### (.+?)\s*$", context, re.MULTILINE)
+
+
+def _context_list_values(context: str, title: str) -> list[str]:
+    values: list[str] = []
+    collecting = False
+    marker = f"**{title}:**"
+    for line in context.splitlines():
+        if line == marker:
+            collecting = True
+            continue
+        if collecting and line.startswith("- `") and line.endswith("`"):
+            values.append(line[3:-1])
+            continue
+        if collecting:
+            collecting = False
+    return values
+
+
+def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None = None) -> dict[str, Any]:
+    root_path = Path(root).resolve()
+    path = Path(evaluation_path).resolve() if evaluation_path else default_agent_evaluation_path(root_path)
+    if not path.exists():
+        raise ValueError(f"Agent utility evaluation suite not found: {path}")
+    evaluation = _read_json_relaxed(path)
+    errors = validate_agent_evaluation_obj(evaluation)
+    if errors:
+        raise ValueError("Invalid agent utility evaluation suite: " + "; ".join(errors[:12]))
+    case_reports: list[dict[str, Any]] = []
+    dimension_counts: dict[str, dict[str, int]] = defaultdict(lambda: {"passed": 0, "total": 0})
+    list_titles = {
+        "must_read": "Must read",
+        "contracts": "Contracts",
+        "tests": "Tests",
+        "safe_edit": "Safe edit",
+    }
+    for case in evaluation["cases"]:
+        query = case["query"]
+        expected = case["expect"]
+        context = generate_agent_context(
+            root_path,
+            task=query.get("task"),
+            node=query.get("node"),
+            workflow=query.get("workflow"),
+            changed_files=query.get("changed_files"),
+        )
+        actual_status = _context_route_status(context)
+        actual_routes = _context_route_titles(context)
+        failures: list[str] = []
+        if actual_status != expected["route_status"]:
+            failures.append(
+                f"route status expected {expected['route_status']}, got {actual_status}"
+            )
+        expected_routes = expected.get("routes", [])
+        if actual_routes != expected_routes:
+            failures.append(f"routes expected {expected_routes}, got {actual_routes}")
+        forbidden = [
+            route for route in expected.get("forbid_routes", []) if route in actual_routes
+        ]
+        if forbidden:
+            failures.append(f"forbidden routes emitted: {forbidden}")
+        actual_lists: dict[str, list[str]] = {}
+        for field, title in list_titles.items():
+            actual_lists[field] = _context_list_values(context, title)
+            missing = [
+                value for value in expected.get(field, []) if value not in actual_lists[field]
+            ]
+            if missing:
+                failures.append(f"{field} missing from context: {missing}")
+        passed = not failures
+        dimension = str(case["dimension"])
+        dimension_counts[dimension]["total"] += 1
+        if passed:
+            dimension_counts[dimension]["passed"] += 1
+        case_reports.append(
+            {
+                "id": case["id"],
+                "dimension": dimension,
+                "status": "passed" if passed else "failed",
+                "expected_route_status": expected["route_status"],
+                "actual_route_status": actual_status,
+                "expected_routes": expected_routes,
+                "actual_routes": actual_routes,
+                "failures": failures,
+            }
+        )
+    passed_count = sum(1 for report in case_reports if report["status"] == "passed")
+    try:
+        suite_path = path.relative_to(root_path).as_posix()
+    except ValueError:
+        suite_path = str(path)
+    dimensions = {
+        dimension: {
+            **counts,
+            "status": "passed" if counts["passed"] == counts["total"] else "failed",
+        }
+        for dimension, counts in dimension_counts.items()
+    }
+    return {
+        "schema_version": "bunya-jido-agent-utility-report-v1",
+        "suite_path": suite_path,
+        "status": "passed" if passed_count == len(case_reports) else "failed",
+        "limitation": evaluation.get("limitation") or AGENT_UTILITY_LIMITATION,
+        "case_count": len(case_reports),
+        "passed_case_count": passed_count,
+        "dimensions": dimensions,
+        "cases": case_reports,
+    }
 
 
 AGENT_ACTIVATION_START = "<!-- BEGIN BUNYA-JIDO MANAGED AGENT ACTIVATION -->"

@@ -11,11 +11,13 @@ from bunya_jido.blueprint import (
     AGENT_ACTIVATION_END,
     AGENT_ACTIVATION_START,
     activate_agent_guides,
+    evaluate_agent_utility,
     evaluate_map_freshness,
     generate_agent_context,
     graph_from_blueprint,
     graph_with_optional_blueprint,
     install_agent_guides,
+    validate_agent_evaluation_obj,
     validate_agent_map_obj,
     validate_blueprint_obj,
 )
@@ -590,6 +592,96 @@ class AgentMapCharacterizationTests(unittest.TestCase):
 
             with self.assertRaisesRegex(ValueError, "Trusted context blocked by agent-map routes"):
                 generate_agent_context(root, task="change builder behavior")
+
+    def test_agent_utility_evaluation_checks_context_contract_and_strict_cli(self) -> None:
+        evaluation = {
+            "schema_version": "bunya-jido-agent-evaluation-v1",
+            "project": {"name": "fixture", "summary": "Agent utility cases."},
+            "cases": [
+                {
+                    "id": "builder-reading",
+                    "dimension": "first_read_accuracy",
+                    "query": {"task": "change builder behavior"},
+                    "expect": {
+                        "route_status": "matched",
+                        "routes": ["change builder behavior"],
+                        "must_read": ["README.md"],
+                        "tests": ["tests/test_smoke.py"],
+                    },
+                },
+                {
+                    "id": "honest-gap",
+                    "dimension": "honest_no_match",
+                    "query": {"task": "rotate database credentials"},
+                    "expect": {
+                        "route_status": "not_found",
+                        "routes": [],
+                        "forbid_routes": ["change builder behavior"],
+                    },
+                },
+            ],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            (root / "tests").mkdir()
+            (root / "src" / "bunya_jido").mkdir(parents=True)
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (root / "src" / "bunya_jido" / "blueprint.py").write_text("# fixture\n", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(
+                json.dumps(example_blueprint()), encoding="utf-8"
+            )
+            (outdir / "bunya-jido.agent-map.json").write_text(
+                json.dumps(example_agent_map()), encoding="utf-8"
+            )
+            suite_path = outdir / "bunya-jido.agent-evaluation.json"
+            suite_path.write_text(json.dumps(evaluation), encoding="utf-8")
+
+            passed = evaluate_agent_utility(root)
+            evaluation["cases"][0]["expect"]["must_read"] = ["src/missing.py"]
+            suite_path.write_text(json.dumps(evaluation), encoding="utf-8")
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                strict_result = main(
+                    [
+                        "evaluate-agent-utility",
+                        "--root",
+                        str(root),
+                        "--require-pass",
+                        "--json",
+                    ]
+                )
+            failed = json.loads(stdout.getvalue())
+
+        self.assertEqual(passed["status"], "passed")
+        self.assertEqual(passed["passed_case_count"], 2)
+        self.assertEqual(strict_result, 2)
+        self.assertEqual(failed["status"], "failed")
+        self.assertIn("must_read missing from context", failed["cases"][0]["failures"][0])
+
+    def test_agent_utility_evaluation_rejects_unsupported_dimension(self) -> None:
+        errors = validate_agent_evaluation_obj(
+            {
+                "schema_version": "bunya-jido-agent-evaluation-v1",
+                "project": {"name": "fixture", "summary": "Agent utility cases."},
+                "cases": [
+                    {
+                        "id": "unsupported",
+                        "dimension": "agent_magic",
+                        "query": {"task": "change builder behavior"},
+                        "expect": {"route_status": "matched", "routes": ["change builder behavior"]},
+                    }
+                ],
+            }
+        )
+
+        self.assertIn("cases[0].dimension is not supported: agent_magic", errors)
+        self.assertEqual(
+            validate_agent_evaluation_obj([]),
+            ["evaluation suite must be an object"],
+        )
 
     def test_invalid_task_route_blocks_publication_but_draft_omits_it(self) -> None:
         blueprint = example_blueprint()

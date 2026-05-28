@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from bunya_jido.blueprint import (
+    evaluate_agent_utility,
     evaluate_map_freshness,
     generate_agent_context,
     graph_with_optional_blueprint,
@@ -20,6 +21,7 @@ from bunya_jido.cli import main
 ROOT = Path(__file__).resolve().parents[1]
 BLUEPRINT_PATH = ROOT / ".bunya-jido" / "bunya-jido.blueprint.json"
 AGENT_MAP_PATH = ROOT / ".bunya-jido" / "bunya-jido.agent-map.json"
+AGENT_EVALUATION_PATH = ROOT / ".bunya-jido" / "bunya-jido.agent-evaluation.json"
 DEMO_PATH = ROOT / "docs" / "demo.html"
 HERO_PATH = ROOT / "docs" / "assets" / "self-map-grounded.png"
 
@@ -156,6 +158,33 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(stale["status"], "stale")
         self.assertIn("src/bunya_jido/cli.py", stale["triggering_files"])
         self.assertEqual(reviewed["status"], "review_recorded")
+
+    def test_committed_agent_utility_evaluation_covers_bounded_context_contract(self) -> None:
+        self.assertTrue(AGENT_EVALUATION_PATH.exists())
+
+        report = evaluate_agent_utility(ROOT)
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            result = main(
+                ["evaluate-agent-utility", "--root", str(ROOT), "--require-pass", "--json"]
+            )
+        cli_report = json.loads(stdout.getvalue())
+
+        self.assertEqual(result, 0)
+        self.assertEqual(report["status"], "passed")
+        self.assertEqual(report["case_count"], 5)
+        self.assertEqual(
+            set(report["dimensions"]),
+            {
+                "first_read_accuracy",
+                "test_recall",
+                "boundary_discipline",
+                "honest_no_match",
+                "change_aware_refresh",
+            },
+        )
+        self.assertEqual(cli_report["status"], "passed")
+        self.assertIn("does not measure whether a live coding agent follows", report["limitation"])
 
     def test_published_demo_matches_stable_semantic_contract(self) -> None:
         html = DEMO_PATH.read_text(encoding="utf-8")

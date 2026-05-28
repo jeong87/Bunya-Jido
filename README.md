@@ -307,6 +307,22 @@ automatically prove the authored architecture complete. CI can run the same
 gate on each pull request or push. Local `--git-diff` reads tracked changes;
 pass new untracked files explicitly with `--changed-file`.
 
+### Evaluating Agent Utility
+
+A mapped repository can commit bounded context acceptance cases in
+`.bunya-jido/bunya-jido.agent-evaluation.json` and run:
+
+```bash
+bunya-jido evaluate-agent-utility --root . --require-pass --json
+```
+
+The suite checks expected first reads, test recall, contract/edit boundaries,
+honest no-match handling, and change-aware refresh output. It is a
+deterministic check of the generated handoff, not proof that a live coding
+agent read or obeyed it. The evaluation format and an optional live-agent
+observation protocol are documented in
+[docs/AGENT_UTILITY_EVALUATION.md](docs/AGENT_UTILITY_EVALUATION.md).
+
 These files are meant to be pasted or attached before handing work to a coding agent.
 
 ## Supported Scope
@@ -393,8 +409,9 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 ## Release And Roadmap
 
 The original grounded-map implementation roadmap is complete through PR8.
-PR9 through PR11 extend agent consumption with honest route matching, optional
-native agent activation, and change-aware refresh routing. See
+PR9 through PR12 extend agent consumption with honest route matching, optional
+native agent activation, change-aware refresh routing, stale-map review, and
+bounded utility evaluation. See
 [docs/gallery.md](docs/gallery.md) for the committed Grounded self-map,
 [docs/RELEASING.md](docs/RELEASING.md) for public-alpha release gates and
 publishing setup, [CHANGELOG.md](CHANGELOG.md) for release notes, and

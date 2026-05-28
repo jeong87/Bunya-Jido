@@ -20,6 +20,8 @@ be documented.
 - A `bunya-jido check-stale` command, committed stale-map policy, and
   `MAP_REVIEW.md` log for requiring recorded semantic-map review when mapped
   repository surfaces change.
+- A `bunya-jido evaluate-agent-utility` command, committed acceptance suite,
+  and documented observation protocol for bounded agent-context utility.
 
 ### Changed
 
@@ -38,6 +40,8 @@ be documented.
   the stale-map review gate to push and pull-request diffs.
 - English and Korean onboarding now state installation requirements and
   platform-specific setup commands.
+- CI, demo publishing, and package release checks now require the committed
+  agent-utility suite to pass without claiming live-agent behavioral proof.
 
 ### Fixed
 

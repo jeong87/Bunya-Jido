@@ -42,6 +42,7 @@ python -m compileall -q src tests
 python -m bunya_jido validate-blueprint --root .
 python -m bunya_jido validate-agent-map --root .
 python -m bunya_jido diagnose --root . --require-grounded --json
+python -m bunya_jido evaluate-agent-utility --root . --require-pass --json
 python -m bunya_jido check-stale --root . --git-diff origin/main...HEAD --require-reviewed
 python -m build
 python -m twine check dist/*
@@ -55,6 +56,11 @@ The stale-map gate does not rewrite semantic output. It requires a reviewed
 blueprint, agent-map, or `.bunya-jido/MAP_REVIEW.md` note when files covered
 by the committed `stale_map_policy` change; CI runs the same gate for pushes
 and pull requests.
+
+The agent-utility gate checks the committed bounded-context acceptance cases.
+Its pass status supports a context-output contract claim only; behavioral
+claims about live coding agents require the observation protocol in
+[`AGENT_UTILITY_EVALUATION.md`](AGENT_UTILITY_EVALUATION.md).
 
 ## PyPI Trusted Publishing
 

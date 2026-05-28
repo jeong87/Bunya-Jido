@@ -28,6 +28,7 @@ dist/
 !.bunya-jido/WORKFLOWS.md
 !.bunya-jido/bunya-jido.blueprint.json
 !.bunya-jido/bunya-jido.agent-map.json
+!.bunya-jido/bunya-jido.agent-evaluation.json
 !.bunya-jido/MAP_REVIEW.md
 bunya-jido.html
 preview*.html

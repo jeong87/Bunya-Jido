@@ -12,3 +12,14 @@ An entry records review work; it does not prove architectural completeness.
   nodes, workflows, and task routes remain adequate for this maintenance gate.
 - Validation: `validate-blueprint`, `validate-agent-map`, strict `diagnose`,
   `check-stale --require-reviewed`, and the unit test suite passed.
+
+## 2026-05-28 - PR 12 Agent Utility Evaluation
+
+- Change: Added committed bounded-context evaluation cases, a strict
+  `evaluate-agent-utility` command, and CI/release/documentation integration.
+- Decision: This tests the existing `semantic:context` and
+  `semantic:agent_map` contracts; it does not introduce a new semantic
+  component or workflow, so the existing self-map structure remains adequate.
+- Validation: Strict agent-utility evaluation, blueprint and agent-map
+  validation, grounded diagnostics, stale-map review, and the unit test suite
+  are required before commit.

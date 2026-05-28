@@ -752,11 +752,44 @@ installation and maintenance steps for each supported operating-system family.
 
 ---
 
-### Planned PR 12: Agent Consumption Loop Completion
+### PR 12: Agent Utility Evaluation
 
-| Pull Request | Goal | Principal Outcome |
-|---|---|---|
-| PR 12: Agent Utility Evaluation | Test whether agents use the map effectively. | A committed evaluation protocol and fixtures measure first-read accuracy, test recall, boundary discipline, and honest no-match handling before a PyPI public-alpha claim. |
+**Goal:** Measure whether the bounded agent-context output supports the tasks
+it claims to cover, without treating deterministic output as proof of live
+agent behavior.
+
+**Scope:**
+
+- Add a committed `bunya-jido.agent-evaluation.json` acceptance suite for a
+  mapped repository.
+- Add `evaluate-agent-utility` with a strict CI mode and machine-readable
+  report.
+- Measure first-read accuracy, test recall, boundary discipline, honest
+  no-match handling, and change-aware refresh behavior against the committed
+  self-map.
+- Document a separate live-agent observation protocol for any later
+  behavioral claim.
+- Apply the deterministic gate in CI, demo publishing, and package release
+  verification.
+
+**Acceptance criteria:**
+
+- The committed self-map suite passes in strict mode and is protected by tests.
+- Broken expected reading, tests, boundaries, or route selection cause strict
+  evaluation to fail.
+- Both READMEs show how to run the evaluation and state its limitation.
+- Release documentation does not confuse context-output validation with proof
+  that a live agent followed the map.
+
+**Implemented (May 28, 2026):** A tracked five-case self-map suite now
+exercises the bounded context contract through `evaluate-agent-utility`.
+Fixture and self-map tests protect pass and failure reporting; CI, Pages, and
+publish workflows run the strict evaluation gate. The dedicated evaluation
+protocol separates deterministic handoff validation from optional recorded
+live-agent observation.
+
+**Suggested commit message:**
+`feat: evaluate bounded agent context utility`
 
 ---
 
@@ -778,6 +811,7 @@ The roadmap was delivered in this order to prioritize truthfulness, testability,
 | 10 | Agent Activation | Place context-first guidance in agent-native project instruction surfaces. |
 | 11 | Change-Aware Refresh Routing | Recommend post-edit routes only from affected files or grounded start-node evidence. |
 | 11.1 | Portability And Stale-Map Review Gate | Verify OS adoption paths and require reviewed map updates after covered changes. |
+| 12 | Agent Utility Evaluation | Gate bounded context claims with committed cases and keep live-agent claims evidence-based. |
 
 The sequencing constraints used during implementation were:
 
@@ -823,6 +857,7 @@ The sequencing constraints used during implementation were:
 - Post-edit context recommends routes only when changed-file evidence supports them and states why.
 - Mapped repositories can fail CI when covered changes lack a reviewed map artifact or review-note update.
 - Installation guidance and CI verification explicitly cover Windows, macOS, and Linux usage.
+- Committed agent-utility cases gate first-read, test, boundary, no-match, and refresh-context claims without implying live-agent compliance.
 
 ---
 

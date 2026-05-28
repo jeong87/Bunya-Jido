@@ -1,0 +1,106 @@
+{
+  "schema_version": "bunya-jido-agent-evaluation-v1",
+  "project": {
+    "name": "Bunya-Jido",
+    "summary": "Acceptance cases for bounded coding-agent context generated from the committed self-map."
+  },
+  "limitation": "This deterministic suite verifies generated bounded context against authored expectations; it does not measure whether a live coding agent follows that context.",
+  "cases": [
+    {
+      "id": "route-projection-first-read",
+      "dimension": "first_read_accuracy",
+      "query": {
+        "task": "change task route projection"
+      },
+      "expect": {
+        "route_status": "matched",
+        "routes": [
+          "change task route projection"
+        ],
+        "forbid_routes": [
+          "change grounding policy",
+          "change viewer trust presentation"
+        ],
+        "must_read": [
+          "src/bunya_jido/blueprint.py",
+          "src/bunya_jido/viewer/index.template.html"
+        ]
+      }
+    },
+    {
+      "id": "viewer-test-recall",
+      "dimension": "test_recall",
+      "query": {
+        "task": "change viewer presentation"
+      },
+      "expect": {
+        "route_status": "matched",
+        "routes": [
+          "change viewer trust presentation"
+        ],
+        "tests": [
+          "tests/test_smoke.py",
+          "tests/test_blueprint.py"
+        ]
+      }
+    },
+    {
+      "id": "grounding-boundary-discipline",
+      "dimension": "boundary_discipline",
+      "query": {
+        "task": "change grounding policy"
+      },
+      "expect": {
+        "route_status": "matched",
+        "routes": [
+          "change grounding policy"
+        ],
+        "forbid_routes": [
+          "change viewer trust presentation"
+        ],
+        "contracts": [
+          "Core node and critical edge evidence must remain inspectable before semantic publication."
+        ],
+        "safe_edit": [
+          "src/bunya_jido/blueprint.py",
+          "tests/test_blueprint.py"
+        ]
+      }
+    },
+    {
+      "id": "unknown-registry-task-honest-no-match",
+      "dimension": "honest_no_match",
+      "query": {
+        "task": "publish package to package registry"
+      },
+      "expect": {
+        "route_status": "not_found",
+        "routes": [],
+        "forbid_routes": [
+          "change grounding policy",
+          "change task route projection",
+          "change viewer trust presentation"
+        ]
+      }
+    },
+    {
+      "id": "changed-evidence-refresh",
+      "dimension": "change_aware_refresh",
+      "query": {
+        "changed_files": [
+          "src/bunya_jido/blueprint.py"
+        ]
+      },
+      "expect": {
+        "route_status": "matched",
+        "routes": [
+          "change grounding policy",
+          "change task route projection"
+        ],
+        "forbid_routes": [
+          "change viewer trust presentation"
+        ]
+      }
+    }
+  ]
+}

@@ -36,6 +36,8 @@ jobs:
         run: python -m unittest discover -s tests
       - name: Verify grounded self-map release gate
         run: python -m bunya_jido diagnose --root . --require-grounded --json
+      - name: Verify bounded agent utility suite
+        run: python -m bunya_jido evaluate-agent-utility --root . --require-pass --json
 
   stale-map:
     name: Verify semantic map review

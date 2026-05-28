@@ -13,6 +13,7 @@ from .blueprint import (
     activate_agent_guides,
     default_blueprint_path,
     default_agent_map_path,
+    evaluate_agent_utility,
     evaluate_map_freshness,
     generate_agent_context,
     graph_with_optional_blueprint,
@@ -413,6 +414,30 @@ def cmd_check_stale(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_evaluate_agent_utility(args: argparse.Namespace) -> int:
+    try:
+        report = evaluate_agent_utility(args.root, evaluation_path=args.suite)
+    except (OSError, ValueError) as exc:
+        print(f"Agent utility evaluation blocked: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(f"Agent utility evaluation: {report['status']}")
+        print(f"Cases: {report['passed_case_count']}/{report['case_count']} passed")
+        for dimension, result in report["dimensions"].items():
+            print(f"- {dimension}: {result['passed']}/{result['total']} passed")
+        for case in report["cases"]:
+            if case["status"] == "failed":
+                print(f"- failed case: {case['id']}")
+                for failure in case["failures"]:
+                    print(f"  - {failure}")
+        print(f"Limit: {report['limitation']}")
+    if args.require_pass and report["status"] != "passed":
+        return 2
+    return 0
+
+
 def cmd_install_agent_guides(args: argparse.Namespace) -> int:
     if args.dry_run and not args.activate:
         print("--dry-run requires --activate.", file=sys.stderr)
@@ -513,6 +538,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_stale.add_argument("--json", action="store_true", help="Print a machine-readable freshness report.")
     p_stale.set_defaults(func=cmd_check_stale)
 
+    p_eval = sub.add_parser("evaluate-agent-utility", help="Evaluate bounded agent context against committed acceptance cases.")
+    p_eval.add_argument("--root", default=".", help="Repository root. Default: current directory.")
+    p_eval.add_argument("--suite", default=None, help="Evaluation JSON path. Default: .bunya-jido/bunya-jido.agent-evaluation.json")
+    p_eval.add_argument("--require-pass", action="store_true", help="Exit with status 2 unless every evaluation case passes.")
+    p_eval.add_argument("--json", action="store_true", help="Print a machine-readable evaluation report.")
+    p_eval.set_defaults(func=cmd_evaluate_agent_utility)
+
     p_guides = sub.add_parser("install-agent-guides", help="Write Bunya-Jido agent guidance snippets or activate managed project instructions.")
     p_guides.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_guides.add_argument("--agent", choices=["all", "codex", "claude", "cursor", "cline"], default="all", help="Which guide to write. Default: all.")
@@ -525,7 +557,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
-    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "install-agent-guides"}
+    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "install-agent-guides"}
     if not raw or (raw[0] not in subcommands and raw[0] not in {"-h", "--help", "--version"}):
         raw = ["build"] + raw
     parser = build_parser()
