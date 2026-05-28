@@ -1,11 +1,11 @@
 # Bunya-Jido Contribution Plan
 ## Grounded Semantic Repository Maps for Humans and Coding Agents
 
-**Status:** Revised roadmap for maintainer review  
+**Status:** Implemented grounded public-alpha roadmap and follow-up viewer refresh
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 28, 2026):** PR 1 through PR 8 are implemented on `main`; the grounded public-alpha roadmap is complete.
+**Implementation progress (May 28, 2026):** PR 1 through PR 8 and the follow-up UI 1 through UI 3 constellation-viewer redesign are implemented on `main`; the grounded public-alpha roadmap is complete. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
 
 ---
 
@@ -29,10 +29,10 @@ The center of gravity remains the semantic map:
 | Coding agent | Start a bounded task with relevant components, files, tests, and cautions | Context output derived from blueprint plus agent map |
 | Reviewer | Know whether the map is publishable, provisional, or blocked | Validation policy, grounding status, warnings, and visible evidence |
 
-Two corrections matter from the outset:
+At roadmap adoption, two corrections mattered from the outset:
 
 1. The tool can validate the presence and consistency of evidence; it cannot automatically prove that every semantic interpretation is true.
-2. The human map and agent navigation output do not yet fully share one enforced contract. Making them agree is an early roadmap item, not an already completed invariant.
+2. The human map and agent navigation output did not yet fully share one enforced contract. PR 4 now enforces and tests that shared task-route contract.
 
 ---
 
@@ -60,9 +60,9 @@ This positions Bunya-Jido between two poor extremes:
 
 ---
 
-## 3. Current Implementation Baseline
+## 3. Baseline Before Roadmap Implementation
 
-The repository already has a substantial alpha foundation:
+Before PR 1 was implemented, the repository already had a substantial alpha foundation:
 
 - deterministic repository scanning in `src/bunya_jido/scanner.py`,
 - blueprint and agent-map workspace preparation in `src/bunya_jido/blueprint.py`,
@@ -583,9 +583,26 @@ Each pull request should remain independently reviewable. The revised order deli
 
 ---
 
-## 9. Recommended Immediate Sequence
+### Follow-up UI 1 through UI 3: Constellation Viewer Design Pass
 
-The next development cycle should prioritize truthfulness, testability, and trust:
+**Goal:** Give the grounded semantic map a calmer, constellation-first reading
+surface without weakening its evidence and task-route contracts.
+
+**Implemented (May 28, 2026):** The offline viewer now opens on a canvas-first
+constellation overview with semantic role glyphs, restrained visible relation
+families, and a workflow launcher bar. Controls and selected-item inspection
+remain available on demand. The committed demo, grounded self-map screenshot,
+gallery explanation, and both README hero presentations have been refreshed to
+show this viewer.
+
+**Verification:** Focused viewer tests protect the new presentation hooks, and
+the committed grounded self-map remains subject to the semantic diagnostic gate.
+
+---
+
+## 9. Completed Delivery Sequence
+
+The roadmap was delivered in this order to prioritize truthfulness, testability, and trust:
 
 | Order | Pull Request | Reason |
 |---:|---|---|
@@ -598,11 +615,11 @@ The next development cycle should prioritize truthfulness, testability, and trus
 | 7 | Scanner Coverage Matrix and Measured Extension | Expand honestly after current strengths are demonstrated. |
 | 8 | Public Alpha Release Readiness | Publish with trust signals rather than promises. |
 
-Parallel work is acceptable only where contracts remain clear:
+The sequencing constraints used during implementation were:
 
-- Documentation corrections may proceed while characterization fixtures are prepared.
-- Gallery authoring may start during parity work, but examples should not be promoted as grounded until the status policy exists.
-- Viewer experimentation may happen early, but semantic taxonomy changes should land with fixtures and trust behavior in place.
+- Documentation corrections could proceed while characterization fixtures were prepared.
+- Gallery authoring could start during parity work, but examples were not promoted as grounded until the status policy existed.
+- Viewer experimentation could happen early, but semantic taxonomy changes landed with fixtures and trust behavior in place.
 
 ---
 

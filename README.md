@@ -194,6 +194,7 @@ assuming a generated map is trusted.
 
 The generated HTML map includes:
 
+- a canvas-first constellation overview with semantic role glyphs and a workflow launcher bar
 - responsibility-oriented plane clusters
 - authored plane-purpose glossary plus viewer-facing node and relation families
 - node-family, relation-family, and confidence filtering
@@ -302,7 +303,9 @@ The grounded-map implementation roadmap is complete through PR8. See
 publishing setup, [CHANGELOG.md](CHANGELOG.md) for release notes, and
 [CONTRIBUTING.md](CONTRIBUTING.md) for contribution requirements. The completed
 implementation plan remains recorded in
-[docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md).
+[docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md). The follow-up
+constellation-viewer design pass is reflected in the live demo and preview
+image above.
 
 ## License
 

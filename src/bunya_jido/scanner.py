@@ -14,8 +14,8 @@ from typing import Any, Iterable
 
 try:
     import tomllib  # py3.11+
-except Exception:  # pragma: no cover
-    tomllib = None  # type: ignore
+except ImportError:  # pragma: no cover - exercised by the Python 3.10 CI job
+    import tomli as tomllib
 
 IGNORE_DIRS = {
     ".git", ".hg", ".svn", ".idea", ".vscode", ".venv", "venv", "env", "__pycache__",

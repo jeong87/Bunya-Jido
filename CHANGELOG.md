@@ -18,6 +18,16 @@ be documented.
   grounding, viewer, agent-context, and release contracts.
 - Distribution metadata prepared for current SPDX license expression support.
 
+### Changed
+
+- A canvas-first constellation viewer design with semantic role glyphs,
+  streamlined workflow access, and a refreshed grounded self-map preview.
+
+### Fixed
+
+- Python 3.10 static scanning now parses `pyproject.toml` through a conditional
+  `tomli` fallback, matching the advertised Python support matrix.
+
 ### Existing Alpha Baseline
 
 - Grounding gates and visible trust state for semantic blueprint maps.

@@ -194,6 +194,7 @@ bunya-jido diagnose --root . --require-grounded --json
 
 생성된 HTML 지도에는 다음 기능이 들어갑니다.
 
+- 시맨틱 역할 표식과 워크플로우 launcher bar가 있는 canvas-first 별자리 overview
 - 책임 영역별 plane cluster
 - 작성된 plane 목적 설명과 화면용 노드·관계 family
 - 노드 family, 관계 family, confidence 필터링
@@ -302,6 +303,8 @@ self-map은 [docs/gallery.md](docs/gallery.md), public alpha 릴리스 조건과
 [CHANGELOG.md](CHANGELOG.md), 기여 요건은
 [CONTRIBUTING.md](CONTRIBUTING.md)에서 확인할 수 있습니다. 완료된 구현
 계획은 [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md)에 남아 있습니다.
+후속 constellation-viewer 디자인 작업도 위의 라이브 데모와 미리보기
+이미지에 반영되어 있습니다.
 
 ## 라이선스
 
