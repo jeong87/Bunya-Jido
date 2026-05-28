@@ -5,7 +5,7 @@
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 28, 2026):** PR 1 through PR 8, the follow-up UI 1 through UI 3 constellation-viewer redesign, and PR 9 honest agent-route matching are implemented on `main`; the original grounded public-alpha roadmap is complete and the agent consumption loop is the active extension. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
+**Implementation progress (May 28, 2026):** PR 1 through PR 8, the follow-up UI 1 through UI 3 constellation-viewer redesign, PR 9 honest agent-route matching, and PR 10 agent activation are implemented on `main`; the original grounded public-alpha roadmap is complete and the agent consumption loop is the active extension. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
 
 ---
 
@@ -632,11 +632,46 @@ recommended, and avoids fabricating guidance for an uncovered task.
 
 ---
 
-### Planned PR 10 through PR 12: Agent Consumption Loop Completion
+### PR 10: Agent Activation
+
+**Goal:** Make validated context discoverable in the instructions that coding
+agents actually load when they begin repository work.
+
+**Scope:**
+
+- Expand generated guidance from map-authoring help into a context-first rule
+  for implementation, debugging, and code review.
+- Add `install-agent-guides --activate` to write managed project-instruction
+  blocks for Codex, Claude Code, Cursor, and Cline.
+- Add `--dry-run` previews before native project instruction files change.
+- Preserve existing user-authored instructions and update only the marked
+  Bunya-Jido block on repeated activation.
+- Dogfood Codex activation in this repository through `AGENTS.md`.
+
+**Acceptance criteria:**
+
+- Activated guidance directs agents to request task context before editing.
+- Guidance explains matched-route, no-match, and not-yet-mapped repository
+  behavior without overclaiming.
+- Native activation targets are covered by tests and documented in both
+  READMEs.
+- Repeated activation is idempotent and does not erase existing instructions.
+
+**Implemented (May 28, 2026):** The CLI now previews or activates managed
+task-context guidance in `AGENTS.md`, `CLAUDE.md`,
+`.cursor/rules/bunya-jido.mdc`, and `.clinerules/bunya-jido.md`. Generated
+snippets carry the same context-first instruction, while tests protect
+dry-run behavior, preservation of existing content, and idempotent updates.
+
+**Suggested commit message:**
+`feat: activate bounded context guidance for coding agents`
+
+---
+
+### Planned PR 11 through PR 12: Agent Consumption Loop Completion
 
 | Pull Request | Goal | Principal Outcome |
 |---|---|---|
-| PR 10: Agent Activation | Make context usage part of an agent's normal task-start instructions. | Managed Codex/Claude/Cursor/Cline guidance runs `bunya-jido context` before implementation, debugging, or review work without overwriting user instructions. |
 | PR 11: Change-Aware Refresh Routing | Route post-edit context through affected evidence and files. | `refresh-context` recommends routes only when changed files justify them and explains the match. |
 | PR 12: Agent Utility Evaluation | Test whether agents use the map effectively. | A committed evaluation protocol and fixtures measure first-read accuracy, test recall, boundary discipline, and honest no-match handling before a PyPI public-alpha claim. |
 
@@ -657,6 +692,7 @@ The roadmap was delivered in this order to prioritize truthfulness, testability,
 | 7 | Scanner Coverage Matrix and Measured Extension | Expand honestly after current strengths are demonstrated. |
 | 8 | Public Alpha Release Readiness | Publish with trust signals rather than promises. |
 | 9 | Honest Agent Route Matching | Avoid presenting unrelated prepared routes for uncovered agent tasks. |
+| 10 | Agent Activation | Place context-first guidance in agent-native project instruction surfaces. |
 
 The sequencing constraints used during implementation were:
 
@@ -698,6 +734,7 @@ The sequencing constraints used during implementation were:
 - Every real gallery map includes at least one bounded task route once parity ships.
 - Maintainer review can distinguish suggested edit areas from boundaries that require care.
 - Requests without a matching validated route receive an explicit no-match result rather than arbitrary route guidance.
+- Maintainers can activate context-first agent instructions without losing existing project guidance.
 
 ---
 

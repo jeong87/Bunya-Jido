@@ -9,6 +9,7 @@ from typing import Any
 
 from . import __version__
 from .blueprint import (
+    activate_agent_guides,
     default_blueprint_path,
     default_agent_map_path,
     generate_agent_context,
@@ -355,6 +356,17 @@ def cmd_refresh_context(args: argparse.Namespace) -> int:
 
 
 def cmd_install_agent_guides(args: argparse.Namespace) -> int:
+    if args.dry_run and not args.activate:
+        print("--dry-run requires --activate.", file=sys.stderr)
+        return 2
+    if args.activate:
+        actions = activate_agent_guides(args.root, agent=args.agent, dry_run=args.dry_run)
+        for name, action in actions.items():
+            print(f"{name}: {action['status']} {action['path']}")
+            if args.dry_run:
+                print(action["content"].rstrip())
+                print()
+        return 0
     paths = install_agent_guides(args.root, agent=args.agent, overwrite=args.overwrite)
     for name, path in paths.items():
         print(f"{name}: {path}")
@@ -434,10 +446,12 @@ def build_parser() -> argparse.ArgumentParser:
     p_refresh.add_argument("--out", default=None, help="Optional output markdown path.")
     p_refresh.set_defaults(func=cmd_refresh_context)
 
-    p_guides = sub.add_parser("install-agent-guides", help="Write Codex/Claude/Cursor/Cline instruction snippets under .bunya-jido/agent-guides.")
+    p_guides = sub.add_parser("install-agent-guides", help="Write Bunya-Jido agent guidance snippets or activate managed project instructions.")
     p_guides.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_guides.add_argument("--agent", choices=["all", "codex", "claude", "cursor", "cline"], default="all", help="Which guide to write. Default: all.")
-    p_guides.add_argument("--overwrite", action="store_true", help="Overwrite existing guide files.")
+    p_guides.add_argument("--overwrite", action="store_true", help="Overwrite existing snippet files in default snippet mode.")
+    p_guides.add_argument("--activate", action="store_true", help="Install or update a managed task-context block in each agent's native project instructions file.")
+    p_guides.add_argument("--dry-run", action="store_true", help="With --activate, show planned native instruction writes without changing files.")
     p_guides.set_defaults(func=cmd_install_agent_guides)
     return parser
 

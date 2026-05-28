@@ -252,21 +252,39 @@ Bunya-Jido does not yet claim equivalent semantic coverage across languages or a
 
 See the [scanner coverage matrix](docs/SCANNER_COVERAGE.md) for exact current behavior, representative fixtures, JS/TS local-resolution limits, and the evidence required before adding a new support claim.
 
-## Agent Guide Snippets
+## Agent Activation
 
-Bunya-Jido can create instruction snippets for Codex, Claude Code, Cursor, and Cline style environments.
+Bunya-Jido can activate task-context instructions for Codex, Claude Code,
+Cursor, and Cline so an agent checks the validated map before implementation,
+debugging, or review work.
+
+```bash
+bunya-jido install-agent-guides --root . --agent all --activate --dry-run
+bunya-jido install-agent-guides --root . --agent all --activate
+```
+
+Native activation targets:
+
+```text
+Codex       AGENTS.md
+Claude Code CLAUDE.md
+Cursor      .cursor/rules/bunya-jido.mdc
+Cline       .clinerules/bunya-jido.md
+```
+
+Activation inserts or updates only a marked Bunya-Jido block, preserving any
+existing project instructions. The block tells the agent to run `bunya-jido
+context --root . --task "<user request>"`, use matched reading/contracts/tests,
+and proceed without invented guidance when the map has no matching route.
+
+To generate copyable snippets without touching native project instruction
+files, omit `--activate`:
 
 ```bash
 bunya-jido install-agent-guides --root . --agent all
 ```
 
-Generated location:
-
-```text
-.bunya-jido/agent-guides/
-```
-
-It does not overwrite root-level `AGENTS.md`, `CLAUDE.md`, Cursor rules, or Cline rules. Move the snippets only when you want those tools to always reference Bunya-Jido guidance.
+Those snippets are written under `.bunya-jido/agent-guides/`.
 
 ## Data-Heavy Repositories
 
@@ -303,8 +321,8 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 ## Release And Roadmap
 
 The original grounded-map implementation roadmap is complete through PR8.
-PR9 begins the agent-consumption expansion by reporting unmatched task
-requests honestly instead of presenting unrelated routes. See
+PR9 and PR10 extend agent consumption with honest route matching and optional
+native agent activation. See
 [docs/gallery.md](docs/gallery.md) for the committed Grounded self-map,
 [docs/RELEASING.md](docs/RELEASING.md) for public-alpha release gates and
 publishing setup, [CHANGELOG.md](CHANGELOG.md) for release notes, and

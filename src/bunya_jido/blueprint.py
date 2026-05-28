@@ -1319,37 +1319,93 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     return "\n".join(lines).rstrip() + "\n"
 
 
+AGENT_ACTIVATION_START = "<!-- BEGIN BUNYA-JIDO MANAGED AGENT ACTIVATION -->"
+AGENT_ACTIVATION_END = "<!-- END BUNYA-JIDO MANAGED AGENT ACTIVATION -->"
+
+
+def _agent_activation_instructions() -> str:
+    return textwrap.dedent("""
+    ## Bunya-Jido Task Context
+
+    For implementation, debugging, or code-review work in this repository:
+
+    1. Before editing, run `bunya-jido context --root . --task "<user request>"`.
+    2. If a route is matched, read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
+    3. If the output says `No matching trusted route`, state that the map has no prepared route for the task and continue with ordinary repository inspection. Do not infer a route.
+    4. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
+    5. Run the tests named by a matched route after the change, together with any checks required by the repository.
+
+    When asked to update the Bunya-Jido map itself, run `bunya-jido prepare --root . --quiet`,
+    execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`, then validate the blueprint and agent map.
+    """).strip()
+
+
+def _agent_activation_block() -> str:
+    return "\n".join(
+        [AGENT_ACTIVATION_START, _agent_activation_instructions(), AGENT_ACTIVATION_END]
+    )
+
+
+def _active_agent_targets(root_path: Path) -> dict[str, Path]:
+    return {
+        "codex": root_path / "AGENTS.md",
+        "claude": root_path / "CLAUDE.md",
+        "cursor": root_path / ".cursor" / "rules" / "bunya-jido.mdc",
+        "cline": root_path / ".clinerules" / "bunya-jido.md",
+    }
+
+
+def _new_activation_document(name: str, block: str) -> str:
+    if name == "cursor":
+        return (
+            "---\n"
+            "description: Use Bunya-Jido validated context before repository work\n"
+            "alwaysApply: true\n"
+            "---\n\n"
+            + block
+            + "\n"
+        )
+    return block + "\n"
+
+
+def _merge_activation_block(existing: str, block: str) -> tuple[str, str]:
+    pattern = re.compile(
+        re.escape(AGENT_ACTIVATION_START)
+        + r".*?"
+        + re.escape(AGENT_ACTIVATION_END),
+        re.DOTALL,
+    )
+    if pattern.search(existing):
+        return pattern.sub(block, existing), "updated"
+    prefix = existing.rstrip()
+    return (prefix + "\n\n" if prefix else "") + block + "\n", "appended"
+
+
+def activate_agent_guides(root: str | Path, agent: str = "all", *, dry_run: bool = False) -> dict[str, dict[str, Any]]:
+    root_path = Path(root).resolve()
+    targets = _active_agent_targets(root_path)
+    selected = targets if agent == "all" else {agent: targets[agent]}
+    block = _agent_activation_block()
+    actions: dict[str, dict[str, Any]] = {}
+    planned_actions = {"created": "would_create", "updated": "would_update", "appended": "would_append"}
+    for name, path in selected.items():
+        if path.exists():
+            rendered, action = _merge_activation_block(path.read_text(encoding="utf-8"), block)
+        else:
+            rendered, action = _new_activation_document(name, block), "created"
+        status = planned_actions[action] if dry_run else action
+        actions[name] = {"path": path, "status": status, "content": rendered}
+        if not dry_run:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(rendered, encoding="utf-8")
+    return actions
+
+
 def install_agent_guides(root: str | Path, agent: str = "all", *, overwrite: bool = False) -> dict[str, Path]:
     root_path = Path(root).resolve()
     outdir = blueprint_dir(root_path) / "agent-guides"
     outdir.mkdir(parents=True, exist_ok=True)
-    base = textwrap.dedent("""
-    # Bunya-Jido Agent Guide
-
-    When asked to update a Bunya-Jido blueprint, run:
-
-    ```bash
-    bunya-jido prepare --root . --quiet
-    ```
-
-    Then read `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md` and execute it exactly.
-    Create or refresh:
-
-    - `.bunya-jido/COMPONENTS.md`
-    - `.bunya-jido/WORKFLOWS.md`
-    - `.bunya-jido/bunya-jido.blueprint.json`
-    - `.bunya-jido/bunya-jido.agent-map.json`
-
-    Validate with:
-
-    ```bash
-    bunya-jido validate-blueprint --root .
-    bunya-jido validate-agent-map --root .
-    ```
-
-    Do not edit application source code unless the user asks for implementation work.
-    Treat Bunya-Jido as an architecture-context compiler for future coding agents.
-    """).strip()+"\n"
+    base = "# Bunya-Jido Agent Guide\n\n" + _agent_activation_instructions() + "\n"
     targets = {
         "codex": outdir / "AGENTS.bunya-jido.md",
         "claude": outdir / "CLAUDE.bunya-jido.md",

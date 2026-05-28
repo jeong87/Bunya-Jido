@@ -25,6 +25,9 @@ be documented.
 - Agent context selects only routes that match the requested task or explicit
   focus, and reports an unmatched request instead of presenting unrelated
   guidance.
+- Agent guidance can be activated in Codex, Claude Code, Cursor, and Cline
+  project instruction files through preserved managed blocks with dry-run
+  previews.
 
 ### Fixed
 

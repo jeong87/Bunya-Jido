@@ -8,9 +8,13 @@ from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
 from bunya_jido.blueprint import (
+    AGENT_ACTIVATION_END,
+    AGENT_ACTIVATION_START,
+    activate_agent_guides,
     generate_agent_context,
     graph_from_blueprint,
     graph_with_optional_blueprint,
+    install_agent_guides,
     validate_agent_map_obj,
     validate_blueprint_obj,
 )
@@ -438,6 +442,77 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertIn("grounding=draft", stdout.getvalue())
         self.assertIn("agent map: task route change builder behavior references nodes not in blueprint", html)
         self.assertNotIn('"kind": "task_route"', html)
+
+
+class AgentGuideActivationTests(unittest.TestCase):
+    def test_snippet_guides_agents_to_load_task_context_first(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            paths = install_agent_guides(tmpdir, agent="codex")
+            text = paths["codex"].read_text(encoding="utf-8")
+
+        self.assertIn('bunya-jido context --root . --task "<user request>"', text)
+        self.assertIn("No matching trusted route", text)
+        self.assertIn("no semantic blueprint or agent map", text)
+        self.assertIn("Must read", text)
+        self.assertIn("Tests", text)
+
+    def test_activation_dry_run_writes_nothing_and_lists_native_targets(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                result = main(
+                    [
+                        "install-agent-guides",
+                        "--root",
+                        str(root),
+                        "--agent",
+                        "all",
+                        "--activate",
+                        "--dry-run",
+                    ]
+                )
+
+            output = stdout.getvalue()
+            self.assertEqual(result, 0)
+            self.assertFalse((root / "AGENTS.md").exists())
+            self.assertFalse((root / "CLAUDE.md").exists())
+            self.assertFalse((root / ".cursor" / "rules" / "bunya-jido.mdc").exists())
+            self.assertFalse((root / ".clinerules" / "bunya-jido.md").exists())
+            self.assertIn("codex: would_create", output)
+            self.assertIn("claude: would_create", output)
+            self.assertIn("cursor: would_create", output)
+            self.assertIn("cline: would_create", output)
+            self.assertIn('bunya-jido context --root . --task "<user request>"', output)
+
+    def test_activation_preserves_user_content_and_updates_only_managed_block(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            agents_path = root / "AGENTS.md"
+            agents_path.write_text("# Existing Rules\n\nKeep this instruction.\n", encoding="utf-8")
+
+            first = activate_agent_guides(root, agent="all")
+            first_text = agents_path.read_text(encoding="utf-8")
+            second = activate_agent_guides(root, agent="all")
+            second_text = agents_path.read_text(encoding="utf-8")
+            cursor_text = (root / ".cursor" / "rules" / "bunya-jido.mdc").read_text(encoding="utf-8")
+
+        self.assertEqual(first["codex"]["status"], "appended")
+        self.assertEqual(second["codex"]["status"], "updated")
+        self.assertIn("Keep this instruction.", second_text)
+        self.assertEqual(first_text, second_text)
+        self.assertEqual(second_text.count(AGENT_ACTIVATION_START), 1)
+        self.assertEqual(second_text.count(AGENT_ACTIVATION_END), 1)
+        self.assertIn("alwaysApply: true", cursor_text)
+        self.assertIn('bunya-jido context --root . --task "<user request>"', cursor_text)
+
+    def test_dry_run_without_activation_is_rejected(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            result = main(["install-agent-guides", "--dry-run"])
+
+        self.assertEqual(result, 2)
+        self.assertIn("--dry-run requires --activate", stderr.getvalue())
 
 
 if __name__ == "__main__":
