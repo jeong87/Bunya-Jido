@@ -364,6 +364,28 @@ class AgentMapCharacterizationTests(unittest.TestCase):
             node_text = generate_agent_context(root, node="component:builder")
             unmatched_text = generate_agent_context(root, task="rotate database credentials")
             catalog_text = generate_agent_context(root)
+            changed_text = generate_agent_context(
+                root, changed_files=["src/bunya_jido/blueprint.py"]
+            )
+            unrelated_changed_text = generate_agent_context(
+                root, changed_files=["docs/new-guide.md"]
+            )
+            task_without_file_evidence_text = generate_agent_context(
+                root,
+                task="change builder behavior",
+                changed_files=["docs/new-guide.md"],
+            )
+            refresh_stdout = io.StringIO()
+            with redirect_stdout(refresh_stdout):
+                refresh_result = main(
+                    [
+                        "refresh-context",
+                        "--root",
+                        str(root),
+                        "--changed-file",
+                        "src/bunya_jido/blueprint.py",
+                    ]
+                )
             graph, _ = graph_with_optional_blueprint(root)
             html = render_html(graph, root / "atlas.html").read_text(encoding="utf-8")
 
@@ -388,6 +410,16 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertIn("Requested route match: `not_requested`", catalog_text)
         self.assertIn("## Available trusted task routes", catalog_text)
         self.assertIn("### change builder behavior", catalog_text)
+        self.assertIn("Requested route match: `matched`", changed_text)
+        self.assertIn("Changed-file route match: `matched`", changed_text)
+        self.assertIn("changed file `src/bunya_jido/blueprint.py` matches route safe-edit path", changed_text)
+        self.assertIn("### change builder behavior", changed_text)
+        self.assertIn("Changed-file route match: `not_found`", unrelated_changed_text)
+        self.assertIn("No matching trusted route for this request.", unrelated_changed_text)
+        self.assertIn("Changed-file route match: `not_found`", task_without_file_evidence_text)
+        self.assertNotIn("### change builder behavior", task_without_file_evidence_text)
+        self.assertEqual(refresh_result, 0)
+        self.assertIn("Changed-file route match: `matched`", refresh_stdout.getvalue())
         route = next(path for path in graph["path_presets"] if path.get("kind") == "task_route")
         self.assertEqual(route["label"], "change builder behavior")
         self.assertEqual(route["source"], "agent_map")
@@ -396,6 +428,53 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(graph["agent_map_quality"]["trusted_route_count"], 1)
         self.assertIn('"kind": "task_route"', html)
         self.assertIn("Task Route", html)
+
+    def test_changed_start_node_evidence_can_select_a_route_without_path_overlap(self) -> None:
+        blueprint = example_blueprint()
+        blueprint["nodes"][1]["evidence"] = [{"kind": "source", "path": "src/builder.py"}]
+        agent_map = example_agent_map()
+        agent_map["task_routes"][0]["must_read"] = ["docs/route-guide.md"]
+        agent_map["task_routes"][0]["safe_edit"] = []
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            (root / "docs").mkdir()
+            (root / "src").mkdir()
+            (root / "tests").mkdir()
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "docs" / "route-guide.md").write_text("route", encoding="utf-8")
+            (root / "src" / "builder.py").write_text("# changed\n", encoding="utf-8")
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(json.dumps(blueprint), encoding="utf-8")
+            (outdir / "bunya-jido.agent-map.json").write_text(json.dumps(agent_map), encoding="utf-8")
+
+            text = generate_agent_context(root, changed_files=["src/builder.py"])
+
+        self.assertIn("Changed-file route match: `matched`", text)
+        self.assertIn("### change builder behavior", text)
+        self.assertIn(
+            "changed file `src/builder.py` affects route start node `component:builder` through grounded evidence",
+            text,
+        )
+        self.assertNotIn("matches route safe-edit path", text)
+
+    def test_refresh_context_requires_changed_file_evidence(self) -> None:
+        stderr = io.StringIO()
+        with redirect_stderr(stderr):
+            empty_result = main(["refresh-context"])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            missing_file = Path(tmpdir) / "not-created.txt"
+            missing_stderr = io.StringIO()
+            with redirect_stderr(missing_stderr):
+                missing_result = main(
+                    ["refresh-context", "--changed-files-from", str(missing_file)]
+                )
+
+        self.assertEqual(empty_result, 2)
+        self.assertIn("requires at least one", stderr.getvalue())
+        self.assertEqual(missing_result, 2)
+        self.assertIn("Changed-files input not found", missing_stderr.getvalue())
 
     def test_context_refuses_blocked_task_route(self) -> None:
         blueprint = example_blueprint()
@@ -449,12 +528,15 @@ class AgentGuideActivationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             paths = install_agent_guides(tmpdir, agent="codex")
             text = paths["codex"].read_text(encoding="utf-8")
+            snippet_bytes = paths["codex"].read_bytes()
 
         self.assertIn('bunya-jido context --root . --task "<user request>"', text)
         self.assertIn("No matching trusted route", text)
         self.assertIn("no semantic blueprint or agent map", text)
         self.assertIn("Must read", text)
         self.assertIn("Tests", text)
+        self.assertIn("refresh-context --root . --changed-file <path>", text)
+        self.assertNotIn(b"\r\n", snippet_bytes)
 
     def test_activation_dry_run_writes_nothing_and_lists_native_targets(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -495,7 +577,9 @@ class AgentGuideActivationTests(unittest.TestCase):
             first_text = agents_path.read_text(encoding="utf-8")
             second = activate_agent_guides(root, agent="all")
             second_text = agents_path.read_text(encoding="utf-8")
-            cursor_text = (root / ".cursor" / "rules" / "bunya-jido.mdc").read_text(encoding="utf-8")
+            cursor_path = root / ".cursor" / "rules" / "bunya-jido.mdc"
+            cursor_text = cursor_path.read_text(encoding="utf-8")
+            cursor_bytes = cursor_path.read_bytes()
 
         self.assertEqual(first["codex"]["status"], "appended")
         self.assertEqual(second["codex"]["status"], "updated")
@@ -505,6 +589,8 @@ class AgentGuideActivationTests(unittest.TestCase):
         self.assertEqual(second_text.count(AGENT_ACTIVATION_END), 1)
         self.assertIn("alwaysApply: true", cursor_text)
         self.assertIn('bunya-jido context --root . --task "<user request>"', cursor_text)
+        self.assertIn("refresh-context --root . --changed-file <path>", cursor_text)
+        self.assertNotIn(b"\r\n", cursor_bytes)
 
     def test_dry_run_without_activation_is_rejected(self) -> None:
         stderr = io.StringIO()

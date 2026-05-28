@@ -1171,8 +1171,91 @@ def _task_match_terms(task: str | None) -> list[str]:
     )
 
 
-def _match_route(route: dict[str, Any], *, task: str | None = None, node: str | None = None, workflow: str | None = None) -> dict[str, Any]:
+def _normalize_context_path(path: str) -> str:
+    normalized = str(path).strip().replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized.rstrip("/")
+
+
+def _context_paths_overlap(left: str, right: str) -> bool:
+    left_path = _normalize_context_path(left)
+    right_path = _normalize_context_path(right)
+    if not left_path or not right_path:
+        return False
+    return (
+        left_path == right_path
+        or left_path.startswith(right_path + "/")
+        or right_path.startswith(left_path + "/")
+    )
+
+
+def _affected_nodes_for_changes(changed_files: list[str], node_by_id: dict[str, dict[str, Any]]) -> dict[str, list[str]]:
+    affected: dict[str, list[str]] = {}
+    for node_id, node in node_by_id.items():
+        evidence_paths: list[str] = []
+        if node.get("source_path"):
+            evidence_paths.append(str(node.get("source_path")).split(":", 1)[0])
+        for evidence in node.get("evidence") or []:
+            if isinstance(evidence, dict) and evidence.get("path"):
+                evidence_paths.append(str(evidence["path"]).split(":", 1)[0])
+        matched = [
+            changed_file
+            for changed_file in changed_files
+            if any(_context_paths_overlap(changed_file, evidence_path) for evidence_path in evidence_paths)
+        ]
+        if matched:
+            affected[node_id] = list(dict.fromkeys(matched))
+    return affected
+
+
+def _match_changed_files(
+    route: dict[str, Any],
+    *,
+    changed_files: list[str],
+    affected_node_files: dict[str, list[str]],
+) -> dict[str, Any]:
     reasons: list[str] = []
+    score = 0
+    route_path_fields = (
+        ("must_read", "must-read"),
+        ("tests", "test"),
+        ("safe_edit", "safe-edit"),
+        ("do_not_touch_without_reason", "guarded"),
+    )
+    for field, label in route_path_fields:
+        for route_path in route.get(field) or []:
+            for changed_file in changed_files:
+                if _context_paths_overlap(changed_file, str(route_path)):
+                    reasons.append(
+                        f"changed file `{changed_file}` matches route {label} path `{route_path}`"
+                    )
+                    score += 3
+    for node_id in route.get("start_nodes") or []:
+        for changed_file in affected_node_files.get(str(node_id), []):
+            reasons.append(
+                f"changed file `{changed_file}` affects route start node `{node_id}` through grounded evidence"
+            )
+            score += 2
+    reasons = list(dict.fromkeys(reasons))
+    return {
+        "status": "matched" if reasons else "unmatched",
+        "score": score,
+        "reasons": reasons,
+    }
+
+
+def _match_route(
+    route: dict[str, Any],
+    *,
+    task: str | None = None,
+    node: str | None = None,
+    workflow: str | None = None,
+    changed_files: list[str] | None = None,
+    affected_node_files: dict[str, list[str]] | None = None,
+) -> dict[str, Any]:
+    reasons: list[str] = []
+    score = 0
     if node is not None or workflow is not None:
         if node is not None:
             if node not in (route.get("start_nodes") or []):
@@ -1182,20 +1265,30 @@ def _match_route(route: dict[str, Any], *, task: str | None = None, node: str | 
             if workflow not in (route.get("workflows") or []):
                 return {"status": "unmatched", "score": 0, "reasons": []}
             reasons.append(f"focus workflow `{workflow}` belongs to this route")
-        return {"status": "matched", "score": 100 + (10 * len(reasons)), "reasons": reasons}
+        score = 100 + (10 * len(reasons))
+    elif task:
+        hay = " ".join(str(route.get(k, "")) for k in ("task", "intent", "notes")).lower()
+        matched_terms = [word for word in _task_match_terms(task) if word in hay]
+        if matched_terms:
+            reasons.append("task terms match: " + ", ".join(f"`{word}`" for word in matched_terms))
+            score += len(matched_terms) * 2
+        elif not changed_files:
+            return {"status": "unmatched", "score": 0, "reasons": []}
 
-    if not task:
-        return {"status": "available", "score": 0, "reasons": []}
+    if changed_files:
+        changed_match = _match_changed_files(
+            route,
+            changed_files=changed_files,
+            affected_node_files=affected_node_files or {},
+        )
+        if changed_match["status"] != "matched":
+            return {"status": "unmatched", "score": 0, "reasons": []}
+        reasons.extend(changed_match["reasons"])
+        return {"status": "matched", "score": score + changed_match["score"], "reasons": reasons}
 
-    hay = " ".join(str(route.get(k, "")) for k in ("task", "intent", "notes")).lower()
-    matched_terms = [word for word in _task_match_terms(task) if word in hay]
-    if matched_terms:
-        return {
-            "status": "matched",
-            "score": len(matched_terms) * 2,
-            "reasons": ["task terms match: " + ", ".join(f"`{word}`" for word in matched_terms)],
-        }
-    return {"status": "unmatched", "score": 0, "reasons": []}
+    if reasons:
+        return {"status": "matched", "score": score, "reasons": reasons}
+    return {"status": "available", "score": 0, "reasons": []}
 
 
 def generate_agent_context(root: str | Path, *, node: str | None = None, workflow: str | None = None, task: str | None = None, changed_files: list[str] | None = None) -> str:
@@ -1225,9 +1318,25 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     node_by_id = {str(n.get("id")): n for n in bp.get("nodes", []) if isinstance(n, dict) and n.get("id")}
     trusted_indexes = set(agent_metrics.get("projectable_route_indexes") or [])
     routes = [r for i, r in enumerate(agent_map.get("task_routes", [])) if isinstance(r, dict) and i in trusted_indexes]
-    selection_requested = bool(task or node or workflow)
+    changed = [_normalize_context_path(path) for path in (changed_files or []) if str(path).strip()]
+    affected_node_files = _affected_nodes_for_changes(changed, node_by_id)
+    affected_nodes = list(affected_node_files)
+    selection_requested = bool(task or node or workflow or changed)
     scored = sorted(
-        [(_match_route(route, task=task, node=node, workflow=workflow), route) for route in routes],
+        [
+            (
+                _match_route(
+                    route,
+                    task=task,
+                    node=node,
+                    workflow=workflow,
+                    changed_files=changed,
+                    affected_node_files=affected_node_files,
+                ),
+                route,
+            )
+            for route in routes
+        ],
         key=lambda item: item[0]["score"],
         reverse=True,
     )
@@ -1235,19 +1344,6 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         chosen = [(match, route) for match, route in scored if match["status"] == "matched"][:5]
     else:
         chosen = [({"status": "available", "score": 0, "reasons": []}, route) for route in routes[:3]]
-    changed = changed_files or []
-    affected_nodes: list[str] = []
-    if changed:
-        chset = {c.strip().lstrip("./") for c in changed if c.strip()}
-        for nid, n in node_by_id.items():
-            paths = []
-            if n.get("source_path"):
-                paths.append(str(n.get("source_path")).split(":", 1)[0])
-            for ev in n.get("evidence") or []:
-                if isinstance(ev, dict) and ev.get("path"):
-                    paths.append(str(ev["path"]).split(":", 1)[0])
-            if any(p in chset or any(p.startswith(c.rstrip("/")+"/") or c.startswith(p.rstrip("/") + "/") for c in chset) for p in paths if p):
-                affected_nodes.append(nid)
     lines = []
     lines.append("# Bunya-Jido Agent Context\n")
     if task: lines.append(f"**Task:** {task}")
@@ -1263,6 +1359,8 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         lines.append(f"- Requested route match: `{'matched' if chosen else 'not_found'}`")
     else:
         lines.append("- Requested route match: `not_requested`")
+    if changed:
+        lines.append(f"- Changed-file route match: `{'matched' if chosen else 'not_found'}`")
     trust_warnings = list(bp_warnings) + list(agent_warnings)
     lines.append(f"- Warnings: `{len(trust_warnings)}`")
     for warning in trust_warnings[:10]:
@@ -1281,7 +1379,7 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         lines.append("## Affected nodes from changed files")
         for nid in affected_nodes[:20]:
             n = node_by_id.get(nid, {})
-            lines.append(f"- `{nid}` — {n.get('label','')} · {n.get('plane','')} · {n.get('type','')}")
+            lines.append(f"- `{nid}` - {n.get('label','')} | {n.get('plane','')} | {n.get('type','')}")
         lines.append("")
     lines.append("## Recommended task routes" if selection_requested else "## Available trusted task routes")
     if not chosen:
@@ -1333,7 +1431,8 @@ def _agent_activation_instructions() -> str:
     2. If a route is matched, read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
     3. If the output says `No matching trusted route`, state that the map has no prepared route for the task and continue with ordinary repository inspection. Do not infer a route.
     4. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
-    5. Run the tests named by a matched route after the change, together with any checks required by the repository.
+    5. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
+    6. Run the tests named by a matched route after the change, together with any checks required by the repository.
 
     When asked to update the Bunya-Jido map itself, run `bunya-jido prepare --root . --quiet`,
     execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`, then validate the blueprint and agent map.
@@ -1397,7 +1496,7 @@ def activate_agent_guides(root: str | Path, agent: str = "all", *, dry_run: bool
         actions[name] = {"path": path, "status": status, "content": rendered}
         if not dry_run:
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(rendered, encoding="utf-8")
+            path.write_text(rendered, encoding="utf-8", newline="\n")
     return actions
 
 
@@ -1416,7 +1515,11 @@ def install_agent_guides(root: str | Path, agent: str = "all", *, overwrite: boo
     for name, path in selected.items():
         if path.exists() and not overwrite:
             continue
-        path.write_text(base.replace("Bunya-Jido Agent Guide", f"Bunya-Jido Agent Guide · {name}"), encoding="utf-8")
+        path.write_text(
+            base.replace("Bunya-Jido Agent Guide", f"Bunya-Jido Agent Guide · {name}"),
+            encoding="utf-8",
+            newline="\n",
+        )
     return selected
 
 

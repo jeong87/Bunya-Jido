@@ -28,6 +28,9 @@ be documented.
 - Agent guidance can be activated in Codex, Claude Code, Cursor, and Cline
   project instruction files through preserved managed blocks with dry-run
   previews.
+- `refresh-context` now recommends only routes justified by supplied changed
+  files, reports the matching path or grounded start-node evidence, and
+  rejects refresh requests without change input.
 
 ### Fixed
 

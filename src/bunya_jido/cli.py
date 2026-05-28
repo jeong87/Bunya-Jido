@@ -342,9 +342,14 @@ def cmd_refresh_context(args: argparse.Namespace) -> int:
         changed.extend([x.strip() for x in v.split(",") if x.strip()])
     if args.changed_files_from:
         cf = Path(args.changed_files_from)
-        if cf.exists():
-            changed.extend([x.strip() for x in cf.read_text(encoding="utf-8").splitlines() if x.strip()])
-    text = generate_agent_context(args.root, task=args.task or "refresh context for changed files", changed_files=changed)
+        if not cf.exists():
+            print(f"Changed-files input not found: {cf}", file=sys.stderr)
+            return 2
+        changed.extend([x.strip() for x in cf.read_text(encoding="utf-8").splitlines() if x.strip()])
+    if not changed:
+        print("refresh-context requires at least one --changed-file or --changed-files-from entry.", file=sys.stderr)
+        return 2
+    text = generate_agent_context(args.root, task=args.task, changed_files=changed)
     if args.out:
         out = Path(args.out).resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -438,10 +443,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_ctx.add_argument("--out", default=None, help="Optional output markdown path.")
     p_ctx.set_defaults(func=cmd_context)
 
-    p_refresh = sub.add_parser("refresh-context", help="Generate agent context for changed files, useful after a PR/diff or stale blueprint warning.")
+    p_refresh = sub.add_parser("refresh-context", help="Recommend trusted routes justified by changed-file evidence after an edit or diff.")
     p_refresh.add_argument("--root", default=".", help="Repository root. Default: current directory.")
-    p_refresh.add_argument("--changed-file", action="append", default=[], help="Changed file path or comma-separated list. Repeatable.")
-    p_refresh.add_argument("--changed-files-from", default=None, help="File containing changed paths, one per line.")
+    p_refresh.add_argument("--changed-file", action="append", default=[], help="Changed file path used as route evidence, or a comma-separated list. Repeatable.")
+    p_refresh.add_argument("--changed-files-from", default=None, help="File containing changed paths used as route evidence, one per line.")
     p_refresh.add_argument("--task", default=None, help="Optional task text to route context.")
     p_refresh.add_argument("--out", default=None, help="Optional output markdown path.")
     p_refresh.set_defaults(func=cmd_refresh_context)

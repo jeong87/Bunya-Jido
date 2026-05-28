@@ -238,6 +238,11 @@ bunya-jido refresh-context --root . \
   --out .bunya-jido/REFRESH_CONTEXT.md
 ```
 
+`refresh-context` recommends only routes justified by the supplied changed
+files: route reading/test/edit paths or grounded evidence for a route start
+node. Its output explains each file match; unrelated changes produce
+`No matching trusted route`.
+
 These files are meant to be pasted or attached before handing work to a coding agent.
 
 ## Supported Scope
@@ -275,7 +280,8 @@ Cline       .clinerules/bunya-jido.md
 Activation inserts or updates only a marked Bunya-Jido block, preserving any
 existing project instructions. The block tells the agent to run `bunya-jido
 context --root . --task "<user request>"`, use matched reading/contracts/tests,
-and proceed without invented guidance when the map has no matching route.
+proceed without invented guidance when the map has no matching route, and run
+`refresh-context` from actual changed files after editing.
 
 To generate copyable snippets without touching native project instruction
 files, omit `--activate`:
@@ -321,8 +327,8 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 ## Release And Roadmap
 
 The original grounded-map implementation roadmap is complete through PR8.
-PR9 and PR10 extend agent consumption with honest route matching and optional
-native agent activation. See
+PR9 through PR11 extend agent consumption with honest route matching, optional
+native agent activation, and change-aware refresh routing. See
 [docs/gallery.md](docs/gallery.md) for the committed Grounded self-map,
 [docs/RELEASING.md](docs/RELEASING.md) for public-alpha release gates and
 publishing setup, [CHANGELOG.md](CHANGELOG.md) for release notes, and

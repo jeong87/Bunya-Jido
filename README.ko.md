@@ -237,6 +237,11 @@ bunya-jido refresh-context --root . \
   --out .bunya-jido/REFRESH_CONTEXT.md
 ```
 
+`refresh-context`는 전달된 변경 파일이 route의 읽기/테스트/편집 경로
+또는 route 시작 노드의 grounded evidence와 연결될 때만 route를
+추천합니다. 출력에는 파일이 일치한 이유가 표시되며, 무관한 변경이면
+`No matching trusted route`를 반환합니다.
+
 이 파일들은 코딩 에이전트에게 작업을 맡기기 전에 붙여넣거나 첨부하기 좋습니다.
 
 ## 현재 지원 범위
@@ -274,7 +279,8 @@ Cline       .clinerules/bunya-jido.md
 블록만 추가하거나 갱신합니다. 이 블록은 에이전트에게 `bunya-jido
 context --root . --task "<user request>"`를 먼저 실행하고, 일치한 route의
 읽기 파일, 계약, 테스트를 따르며, 일치 경로가 없을 때는 무관한 안내를
-추측하지 말라고 지시합니다.
+추측하지 말고, 수정 후에는 실제 변경 파일로 `refresh-context`를 실행하라고
+지시합니다.
 
 native 지침 파일을 건드리지 않고 복사 가능한 snippet만 만들려면
 `--activate`를 생략합니다.
@@ -319,9 +325,9 @@ bunya-jido build --root . --data-policy full --out bunya-jido.html
 
 ## 릴리스와 로드맵
 
-기존 grounded-map 구현 로드맵은 PR8까지 완료되었습니다. PR9와 PR10은
-정직한 route matching과 선택적 native agent activation으로
-agent-consumption 흐름을 확장합니다. 커밋된 Grounded
+기존 grounded-map 구현 로드맵은 PR8까지 완료되었습니다. PR9부터 PR11은
+정직한 route matching, 선택적 native agent activation, 변경 인지
+refresh routing으로 agent-consumption 흐름을 확장합니다. 커밋된 Grounded
 self-map은 [docs/gallery.md](docs/gallery.md), public alpha 릴리스 조건과
 게시 설정은 [docs/RELEASING.md](docs/RELEASING.md), 변경 내역은
 [CHANGELOG.md](CHANGELOG.md), 기여 요건은

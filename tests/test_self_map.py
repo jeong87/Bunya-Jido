@@ -127,6 +127,24 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertNotIn("### change task route projection", context)
         self.assertNotIn("### change viewer trust presentation", context)
 
+    def test_refresh_context_routes_only_from_changed_self_map_evidence(self) -> None:
+        context = generate_agent_context(
+            ROOT, changed_files=["src/bunya_jido/blueprint.py"]
+        )
+        unrelated = generate_agent_context(ROOT, changed_files=["README.ko.md"])
+
+        self.assertIn("- Changed-file route match: `matched`", context)
+        self.assertIn("### change grounding policy", context)
+        self.assertIn("### change task route projection", context)
+        self.assertNotIn("### change viewer trust presentation", context)
+        self.assertIn(
+            "changed file `src/bunya_jido/blueprint.py` matches route safe-edit path",
+            context,
+        )
+        self.assertIn("- Changed-file route match: `not_found`", unrelated)
+        self.assertNotIn("### change grounding policy", unrelated)
+        self.assertNotIn("### change task route projection", unrelated)
+
     def test_published_demo_matches_stable_semantic_contract(self) -> None:
         html = DEMO_PATH.read_text(encoding="utf-8")
         for control in (

@@ -5,7 +5,7 @@
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 28, 2026):** PR 1 through PR 8, the follow-up UI 1 through UI 3 constellation-viewer redesign, PR 9 honest agent-route matching, and PR 10 agent activation are implemented on `main`; the original grounded public-alpha roadmap is complete and the agent consumption loop is the active extension. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
+**Implementation progress (May 28, 2026):** PR 1 through PR 8, the follow-up UI 1 through UI 3 constellation-viewer redesign, PR 9 honest agent-route matching, PR 10 agent activation, and PR 11 change-aware refresh routing are implemented on `main`; the original grounded public-alpha roadmap is complete and the agent consumption loop is the active extension. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
 
 ---
 
@@ -668,11 +668,51 @@ dry-run behavior, preservation of existing content, and idempotent updates.
 
 ---
 
-### Planned PR 11 through PR 12: Agent Consumption Loop Completion
+### PR 11: Change-Aware Refresh Routing
+
+**Goal:** Route post-edit context through the files and grounded evidence that
+were actually affected.
+
+**Scope:**
+
+- Treat `--changed-file` and `--changed-files-from` inputs as the evidence
+  gate for `refresh-context` route recommendations.
+- Match changed files against route reading, test, safe-edit, and guarded
+  paths, as well as grounded evidence for route start nodes.
+- Explain the file-level reason for every recommended route.
+- Preserve honest no-match behavior when changes are unrelated to prepared
+  routes, even when task text sounds related.
+- Reject refresh requests that do not supply changed-file evidence.
+- Extend activated agent guidance so agents request evidence-based refresh
+  context after editing.
+
+**Acceptance criteria:**
+
+- `refresh-context` recommends no route unless a supplied changed file
+  justifies it.
+- Both path-based and grounded start-node matching are covered by tests.
+- A matching task description cannot override unrelated changed files.
+- Native Windows console output remains usable for affected-node reporting.
+- English and Korean READMEs describe the bounded refresh behavior.
+- Activated project guidance includes the post-edit refresh step.
+
+**Implemented (May 28, 2026):** Context generation now normalizes changed
+paths, selects routes only from matching route paths or grounded start-node
+evidence, and prints each match reason. `refresh-context` fails early without
+changed-file input or when its input list file is missing. Fixture and
+committed self-map tests cover matched, unrelated, and task-without-file-
+evidence cases, and activated guidance now directs agents through this
+post-edit refresh step.
+
+**Suggested commit message:**
+`feat: route refreshed agent context from changed evidence`
+
+---
+
+### Planned PR 12: Agent Consumption Loop Completion
 
 | Pull Request | Goal | Principal Outcome |
 |---|---|---|
-| PR 11: Change-Aware Refresh Routing | Route post-edit context through affected evidence and files. | `refresh-context` recommends routes only when changed files justify them and explains the match. |
 | PR 12: Agent Utility Evaluation | Test whether agents use the map effectively. | A committed evaluation protocol and fixtures measure first-read accuracy, test recall, boundary discipline, and honest no-match handling before a PyPI public-alpha claim. |
 
 ---
@@ -693,6 +733,7 @@ The roadmap was delivered in this order to prioritize truthfulness, testability,
 | 8 | Public Alpha Release Readiness | Publish with trust signals rather than promises. |
 | 9 | Honest Agent Route Matching | Avoid presenting unrelated prepared routes for uncovered agent tasks. |
 | 10 | Agent Activation | Place context-first guidance in agent-native project instruction surfaces. |
+| 11 | Change-Aware Refresh Routing | Recommend post-edit routes only from affected files or grounded start-node evidence. |
 
 The sequencing constraints used during implementation were:
 
@@ -735,6 +776,7 @@ The sequencing constraints used during implementation were:
 - Maintainer review can distinguish suggested edit areas from boundaries that require care.
 - Requests without a matching validated route receive an explicit no-match result rather than arbitrary route guidance.
 - Maintainers can activate context-first agent instructions without losing existing project guidance.
+- Post-edit context recommends routes only when changed-file evidence supports them and states why.
 
 ---
 
