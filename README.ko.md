@@ -76,6 +76,18 @@ bunya-jido build --root . --allow-draft --out bunya-jido.html
 1. 설치: `python -m pip install git+https://github.com/jeong87/Bunya-Jido.git`
 2. Codex에게 지시: 아래 Blueprint 모드 프롬프트를 붙여넣으면 문서 작성, 검증, HTML 지도 생성까지 맡길 수 있습니다.
 
+필요 환경:
+
+- `pip`을 사용할 수 있는 Python 3.10 이상.
+- 현재 GitHub 설치 명령을 위한 Git.
+- Blueprint 모드에서는 저장소를 읽고 쓰며 터미널 명령을 실행할 수
+  있는 코딩 에이전트(Codex, Claude Code 등).
+- 생성된 오프라인 HTML 지도를 확인할 때만 브라우저가 필요합니다.
+
+CLI는 Windows, macOS, Linux에서 사용할 수 있도록 설계되어 있습니다.
+CI는 Ubuntu에서 Python 3.10-3.12를, Windows와 macOS에서 Python 3.12를
+검증합니다.
+
 설치는 한 줄이면 됩니다.
 
 ```bash
@@ -90,6 +102,29 @@ python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
 ```bash
 bunya-jido --version
 ```
+
+### 운영체제별 설치
+
+Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+bunya-jido --version
+```
+
+macOS 또는 Linux (`bash` / `zsh`):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+bunya-jido --version
+```
+
+Python 3.10 이상이면 사용할 수 있습니다. Windows 예시에서 `3.12`를
+사용한 것은 세 CI 운영체제 모두에서 검증하는 버전이기 때문입니다.
 
 ### Blueprint 모드
 
@@ -131,6 +166,9 @@ bunya-jido build --root . --out bunya-jido.html
   BUNYA_JIDO_BLUEPRINT_PROMPT.md
   CODEX_ONE_LINER.txt
 ```
+
+지도 저장소는 `check-stale`에서 구조 변경이 필요 없다고 검토한 결정을
+남기기 위해 `.bunya-jido/MAP_REVIEW.md`를 추가로 추적할 수 있습니다.
 
 ### `COMPONENTS.md`
 
@@ -242,6 +280,34 @@ bunya-jido refresh-context --root . \
 추천합니다. 출력에는 파일이 일치한 이유가 표시되며, 무관한 변경이면
 `No matching trusted route`를 반환합니다.
 
+### 지도를 최신으로 유지하기
+
+Bunya-Jido는 소스 코드가 바뀔 때 semantic map을 검토 없이 자동으로
+다시 쓰지 않습니다. semantic 갱신은 여전히 코딩 에이전트가 읽고
+작성해야 합니다. 대신 지도 저장소는
+`.bunya-jido/bunya-jido.agent-map.json`에 `stale_map_policy`를 정의하고
+다음 명령으로 재검토 필요 여부를 자동 확인할 수 있습니다.
+
+```bash
+bunya-jido check-stale --root . --git-diff --require-reviewed
+```
+
+브랜치를 기준 브랜치와 비교하려면 revision range를 전달합니다.
+
+```bash
+bunya-jido check-stale --root . --git-diff origin/main...HEAD --require-reviewed
+```
+
+policy 대상 파일이 바뀌었는데 blueprint, agent map 또는
+`.bunya-jido/MAP_REVIEW.md` 검토 메모 갱신이 함께 없으면 명령은
+`stale`을 보고하고 strict 모드에서 실패합니다. 아키텍처가 바뀌었으면
+Blueprint 모드 프롬프트로 지도를 갱신하고, 바뀌지 않았다고 검토했으면
+결정을 `MAP_REVIEW.md`에 남깁니다. 어느 경우든 `review_recorded`는
+검토 작업의 존재를 기록하는 것이지, 작성된 아키텍처가 완전하다는 자동
+증명은 아닙니다. CI에서도 pull request나 push마다 같은 gate를 실행할 수 있습니다. 로컬의
+`--git-diff`는 Git이 추적하는 변경만 읽으므로, 아직 추적하지 않는 새
+파일은 `--changed-file`로 직접 전달합니다.
+
 이 파일들은 코딩 에이전트에게 작업을 맡기기 전에 붙여넣거나 첨부하기 좋습니다.
 
 ## 현재 지원 범위
@@ -280,7 +346,9 @@ Cline       .clinerules/bunya-jido.md
 context --root . --task "<user request>"`를 먼저 실행하고, 일치한 route의
 읽기 파일, 계약, 테스트를 따르며, 일치 경로가 없을 때는 무관한 안내를
 추측하지 말고, 수정 후에는 실제 변경 파일로 `refresh-context`를 실행하라고
-지시합니다.
+지시합니다. 저장소에 stale-map policy가 정의되어 있으면
+`check-stale`도 실행하고, 지도 갱신 또는 구조 변경 없음 검토 기록 중
+맞는 조치를 남기도록 안내합니다.
 
 native 지침 파일을 건드리지 않고 복사 가능한 snippet만 만들려면
 `--activate`를 생략합니다.

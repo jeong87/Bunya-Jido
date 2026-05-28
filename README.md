@@ -76,6 +76,17 @@ bunya-jido build --root . --allow-draft --out bunya-jido.html
 1. Install: `python -m pip install git+https://github.com/jeong87/Bunya-Jido.git`
 2. Prompt Codex: paste the Blueprint Mode prompt below to have it write docs, validate outputs, and build the HTML map.
 
+Requirements:
+
+- Python 3.10 or newer with `pip`.
+- Git for the current GitHub installation command.
+- For Blueprint Mode, a coding agent that can read and write the repository
+  and run terminal commands, such as Codex or Claude Code.
+- A browser only when you want to inspect the generated offline HTML map.
+
+The CLI is designed for Windows, macOS, and Linux. CI tests Ubuntu with Python
+3.10-3.12 and Windows and macOS with Python 3.12.
+
 Install with one command:
 
 ```bash
@@ -90,6 +101,30 @@ Check the command:
 ```bash
 bunya-jido --version
 ```
+
+### Install By Operating System
+
+Windows PowerShell:
+
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+bunya-jido --version
+```
+
+macOS or Linux (`bash` / `zsh`):
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+bunya-jido --version
+```
+
+Any Python version from 3.10 onward is acceptable; `3.12` is shown in the
+Windows example because it is also exercised in all three CI operating
+systems.
 
 ### Blueprint Mode
 
@@ -131,6 +166,9 @@ Open `bunya-jido.html` in your browser.
   BUNYA_JIDO_BLUEPRINT_PROMPT.md
   CODEX_ONE_LINER.txt
 ```
+
+A mapped repository can additionally track `.bunya-jido/MAP_REVIEW.md` to
+record a reviewed no-structure-change decision for `check-stale`.
 
 ### `COMPONENTS.md`
 
@@ -243,6 +281,32 @@ files: route reading/test/edit paths or grounded evidence for a route start
 node. Its output explains each file match; unrelated changes produce
 `No matching trusted route`.
 
+### Keeping The Map Current
+
+Bunya-Jido does not silently rewrite a semantic map whenever source code
+changes. A coding agent still reviews and authors semantic updates. To make
+that maintenance easy to notice, a mapped repository can define
+`stale_map_policy` in `.bunya-jido/bunya-jido.agent-map.json` and run:
+
+```bash
+bunya-jido check-stale --root . --git-diff --require-reviewed
+```
+
+For a branch compared with its base, pass a revision range:
+
+```bash
+bunya-jido check-stale --root . --git-diff origin/main...HEAD --require-reviewed
+```
+
+If policy-covered files changed without an updated blueprint, agent map, or
+`.bunya-jido/MAP_REVIEW.md` note, the command reports `stale` and fails in
+strict mode. Refresh with the Blueprint Mode prompt when the architecture
+changed; when it did not, record the reviewed decision in `MAP_REVIEW.md`.
+Either form reports `review_recorded`; it records review work but does not
+automatically prove the authored architecture complete. CI can run the same
+gate on each pull request or push. Local `--git-diff` reads tracked changes;
+pass new untracked files explicitly with `--changed-file`.
+
 These files are meant to be pasted or attached before handing work to a coding agent.
 
 ## Supported Scope
@@ -281,7 +345,9 @@ Activation inserts or updates only a marked Bunya-Jido block, preserving any
 existing project instructions. The block tells the agent to run `bunya-jido
 context --root . --task "<user request>"`, use matched reading/contracts/tests,
 proceed without invented guidance when the map has no matching route, and run
-`refresh-context` from actual changed files after editing.
+`refresh-context` from actual changed files after editing. If a repository
+defines a stale-map policy, it also tells the agent to run `check-stale` and
+either update the map or record an explicit no-structure-change review.
 
 To generate copyable snippets without touching native project instruction
 files, omit `--activate`:

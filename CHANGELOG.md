@@ -17,6 +17,9 @@ be documented.
 - Contribution guidance and structured issue templates for changes to scanner,
   grounding, viewer, agent-context, and release contracts.
 - Distribution metadata prepared for current SPDX license expression support.
+- A `bunya-jido check-stale` command, committed stale-map policy, and
+  `MAP_REVIEW.md` log for requiring recorded semantic-map review when mapped
+  repository surfaces change.
 
 ### Changed
 
@@ -31,6 +34,10 @@ be documented.
 - `refresh-context` now recommends only routes justified by supplied changed
   files, reports the matching path or grounded start-node evidence, and
   rejects refresh requests without change input.
+- CI now exercises the Python CLI on Ubuntu, Windows, and macOS and applies
+  the stale-map review gate to push and pull-request diffs.
+- English and Korean onboarding now state installation requirements and
+  platform-specific setup commands.
 
 ### Fixed
 

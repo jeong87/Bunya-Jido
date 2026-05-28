@@ -8,6 +8,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 
 from bunya_jido.blueprint import (
+    evaluate_map_freshness,
     generate_agent_context,
     graph_with_optional_blueprint,
     validate_agent_map_obj,
@@ -144,6 +145,17 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("- Changed-file route match: `not_found`", unrelated)
         self.assertNotIn("### change grounding policy", unrelated)
         self.assertNotIn("### change task route projection", unrelated)
+
+    def test_committed_stale_policy_requires_map_review_for_source_changes(self) -> None:
+        stale = evaluate_map_freshness(ROOT, ["src/bunya_jido/cli.py"])
+        reviewed = evaluate_map_freshness(
+            ROOT,
+            ["src/bunya_jido/cli.py", ".bunya-jido/MAP_REVIEW.md"],
+        )
+
+        self.assertEqual(stale["status"], "stale")
+        self.assertIn("src/bunya_jido/cli.py", stale["triggering_files"])
+        self.assertEqual(reviewed["status"], "review_recorded")
 
     def test_published_demo_matches_stable_semantic_contract(self) -> None:
         html = DEMO_PATH.read_text(encoding="utf-8")

@@ -8,7 +8,8 @@ For implementation, debugging, or code-review work in this repository:
 3. If the output says `No matching trusted route`, state that the map has no prepared route for the task and continue with ordinary repository inspection. Do not infer a route.
 4. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
 5. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
-6. Run the tests named by a matched route after the change, together with any checks required by the repository.
+6. If the repository defines `stale_map_policy`, run `bunya-jido check-stale --root . --git-diff --require-reviewed`; when it reports `stale`, refresh and validate the map or record a reviewed no-structure-change decision in `.bunya-jido/MAP_REVIEW.md`.
+7. Run the tests named by a matched route after the change, together with any checks required by the repository.
 
 When asked to update the Bunya-Jido map itself, run `bunya-jido prepare --root . --quiet`,
 execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`, then validate the blueprint and agent map.

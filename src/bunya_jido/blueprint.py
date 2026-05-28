@@ -5,6 +5,7 @@ import re
 import textwrap
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any
 
@@ -15,12 +16,18 @@ BLUEPRINT_FILE = "bunya-jido.blueprint.json"
 AGENT_MAP_FILE = "bunya-jido.agent-map.json"
 COMPONENTS_FILE = "COMPONENTS.md"
 WORKFLOWS_FILE = "WORKFLOWS.md"
+MAP_REVIEW_FILE = "MAP_REVIEW.md"
 AGENT_HANDOFF_FILE = "AGENT_HANDOFF.md"
 PROMPT_FILE = "BUNYA_JIDO_BLUEPRINT_PROMPT.md"
 SHORT_PROMPT_FILE = "CODEX_ONE_LINER.txt"
 SCHEMA_FILE = "bunya-jido-blueprint.schema.json"
 AGENT_MAP_SCHEMA_FILE = "bunya-jido-agent-map.schema.json"
 STATIC_SCAN_FILE = "bunya-jido-static-scan.json"
+MAP_REVIEW_ARTIFACTS = {
+    f"{BLUEPRINT_DIR}/{BLUEPRINT_FILE}",
+    f"{BLUEPRINT_DIR}/{AGENT_MAP_FILE}",
+    f"{BLUEPRINT_DIR}/{MAP_REVIEW_FILE}",
+}
 
 SECRET_PATTERNS = [
     re.compile(r"sk-[A-Za-z0-9_\-]{20,}"),
@@ -263,7 +270,14 @@ def agent_map_schema() -> dict[str, Any]:
                 }
             },
             "workflow_routes": {"type": "array", "items": {"type": "object"}},
-            "stale_map_policy": {"type": "object"}
+            "stale_map_policy": {
+                "type": "object",
+                "required": ["rerun_when_changed", "ignore_when_changed"],
+                "properties": {
+                    "rerun_when_changed": {"type": "array", "items": {"type": "string"}},
+                    "ignore_when_changed": {"type": "array", "items": {"type": "string"}},
+                },
+            },
         }
     }
 
@@ -1121,6 +1135,17 @@ def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = 
             publish_blockers.extend(route_blockers)
     if any(_string_has_secret(s) for s in _walk_strings(agent_map)):
         errors.append("agent map appears to contain secret-like text; remove raw tokens/API keys/passwords")
+    stale_policy = agent_map.get("stale_map_policy")
+    if stale_policy is not None:
+        if not isinstance(stale_policy, dict):
+            errors.append("stale_map_policy must be an object")
+        else:
+            for key in ("rerun_when_changed", "ignore_when_changed"):
+                patterns = stale_policy.get(key)
+                if not isinstance(patterns, list) or not all(
+                    isinstance(pattern, str) and pattern.strip() for pattern in patterns
+                ):
+                    errors.append(f"stale_map_policy.{key} must be a list of non-empty strings")
     publish_blockers = list(dict.fromkeys(publish_blockers))
     projectable_route_indexes = [i for i, route in enumerate(routes) if isinstance(route, dict) and i not in blocked_route_indexes]
     grounding_status = "blocked" if errors or publish_blockers else "grounded"
@@ -1188,6 +1213,82 @@ def _context_paths_overlap(left: str, right: str) -> bool:
         or left_path.startswith(right_path + "/")
         or right_path.startswith(left_path + "/")
     )
+
+
+def _matches_policy_path(path: str, patterns: list[str]) -> bool:
+    normalized = _normalize_context_path(path)
+    return any(fnmatchcase(normalized, _normalize_context_path(pattern)) for pattern in patterns)
+
+
+def evaluate_map_freshness(root: str | Path, changed_files: list[str]) -> dict[str, Any]:
+    root_path = Path(root).resolve()
+    agent_map_path = default_agent_map_path(root_path)
+    changed = list(
+        dict.fromkeys(
+            _normalize_context_path(path) for path in changed_files if str(path).strip()
+        )
+    )
+    if not agent_map_path.exists():
+        return {
+            "status": "not_configured",
+            "reason": "agent map not found",
+            "changed_files": changed,
+            "triggering_files": [],
+            "ignored_files": [],
+            "review_artifacts": [],
+        }
+    agent_map = _read_json_relaxed(agent_map_path)
+    policy = agent_map.get("stale_map_policy")
+    if not isinstance(policy, dict):
+        return {
+            "status": "not_configured",
+            "reason": "agent map has no stale_map_policy",
+            "changed_files": changed,
+            "triggering_files": [],
+            "ignored_files": [],
+            "review_artifacts": [],
+        }
+    rerun_patterns = policy.get("rerun_when_changed")
+    ignore_patterns = policy.get("ignore_when_changed")
+    if not isinstance(rerun_patterns, list) or not all(
+        isinstance(pattern, str) and pattern.strip() for pattern in rerun_patterns
+    ) or not isinstance(ignore_patterns, list) or not all(
+        isinstance(pattern, str) and pattern.strip() for pattern in ignore_patterns
+    ):
+        return {
+            "status": "invalid_policy",
+            "reason": "stale_map_policy lists are invalid",
+            "changed_files": changed,
+            "triggering_files": [],
+            "ignored_files": [],
+            "review_artifacts": [],
+        }
+    ignored = [path for path in changed if _matches_policy_path(path, ignore_patterns)]
+    triggering = [
+        path
+        for path in changed
+        if path not in ignored and _matches_policy_path(path, rerun_patterns)
+    ]
+    review_artifacts = [path for path in changed if path in MAP_REVIEW_ARTIFACTS]
+    if not triggering:
+        status = "current"
+        reason = "no changed file matches stale-map review policy"
+    elif review_artifacts:
+        status = "review_recorded"
+        reason = "triggering changes include a map review artifact update"
+    else:
+        status = "stale"
+        reason = "triggering changes require a semantic map review"
+    return {
+        "status": status,
+        "reason": reason,
+        "changed_files": changed,
+        "triggering_files": triggering,
+        "ignored_files": ignored,
+        "review_artifacts": review_artifacts,
+        "rerun_when_changed": rerun_patterns,
+        "ignore_when_changed": ignore_patterns,
+    }
 
 
 def _affected_nodes_for_changes(changed_files: list[str], node_by_id: dict[str, dict[str, Any]]) -> dict[str, list[str]]:
@@ -1432,7 +1533,8 @@ def _agent_activation_instructions() -> str:
     3. If the output says `No matching trusted route`, state that the map has no prepared route for the task and continue with ordinary repository inspection. Do not infer a route.
     4. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
     5. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
-    6. Run the tests named by a matched route after the change, together with any checks required by the repository.
+    6. If the repository defines `stale_map_policy`, run `bunya-jido check-stale --root . --git-diff --require-reviewed`; when it reports `stale`, refresh and validate the map or record a reviewed no-structure-change decision in `.bunya-jido/MAP_REVIEW.md`.
+    7. Run the tests named by a matched route after the change, together with any checks required by the repository.
 
     When asked to update the Bunya-Jido map itself, run `bunya-jido prepare --root . --quiet`,
     execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`, then validate the blueprint and agent map.

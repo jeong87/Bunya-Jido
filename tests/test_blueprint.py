@@ -11,6 +11,7 @@ from bunya_jido.blueprint import (
     AGENT_ACTIVATION_END,
     AGENT_ACTIVATION_START,
     activate_agent_guides,
+    evaluate_map_freshness,
     generate_agent_context,
     graph_from_blueprint,
     graph_with_optional_blueprint,
@@ -316,6 +317,24 @@ class AgentMapCharacterizationTests(unittest.TestCase):
 
         self.assertIn("task_routes[0].must_read must be a list", errors)
 
+    def test_malformed_stale_map_policy_is_a_validation_error(self) -> None:
+        agent_map = example_agent_map()
+        agent_map["stale_map_policy"] = {
+            "rerun_when_changed": "src/**",
+            "ignore_when_changed": [""],
+        }
+
+        errors, _, _ = validate_agent_map_obj(agent_map, blueprint=example_blueprint())
+
+        self.assertIn(
+            "stale_map_policy.rerun_when_changed must be a list of non-empty strings",
+            errors,
+        )
+        self.assertIn(
+            "stale_map_policy.ignore_when_changed must be a list of non-empty strings",
+            errors,
+        )
+
     def test_hidden_root_start_and_remote_test_cannot_be_trusted_route(self) -> None:
         blueprint = example_blueprint()
         blueprint["nodes"].append(
@@ -476,6 +495,85 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(missing_result, 2)
         self.assertIn("Changed-files input not found", missing_stderr.getvalue())
 
+    def test_stale_map_policy_requires_review_artifact_for_triggering_changes(self) -> None:
+        agent_map = example_agent_map()
+        agent_map["stale_map_policy"] = {
+            "rerun_when_changed": ["src/**", "docs/**"],
+            "ignore_when_changed": ["docs/generated/**"],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            outdir.mkdir()
+            (outdir / "bunya-jido.agent-map.json").write_text(
+                json.dumps(agent_map), encoding="utf-8"
+            )
+
+            stale = evaluate_map_freshness(root, ["src/builder.py"])
+            reviewed = evaluate_map_freshness(
+                root, ["src/builder.py", ".bunya-jido/bunya-jido.agent-map.json"]
+            )
+            acknowledged = evaluate_map_freshness(
+                root, ["src/builder.py", ".bunya-jido/MAP_REVIEW.md"]
+            )
+            ignored = evaluate_map_freshness(root, ["docs/generated/report.md"])
+
+        self.assertEqual(stale["status"], "stale")
+        self.assertEqual(stale["triggering_files"], ["src/builder.py"])
+        self.assertEqual(reviewed["status"], "review_recorded")
+        self.assertEqual(
+            reviewed["review_artifacts"], [".bunya-jido/bunya-jido.agent-map.json"]
+        )
+        self.assertEqual(acknowledged["status"], "review_recorded")
+        self.assertEqual(acknowledged["review_artifacts"], [".bunya-jido/MAP_REVIEW.md"])
+        self.assertEqual(ignored["status"], "current")
+        self.assertEqual(ignored["ignored_files"], ["docs/generated/report.md"])
+
+    def test_check_stale_strict_mode_blocks_unreviewed_changes(self) -> None:
+        agent_map = example_agent_map()
+        agent_map["stale_map_policy"] = {
+            "rerun_when_changed": ["src/**"],
+            "ignore_when_changed": [],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            outdir.mkdir()
+            (outdir / "bunya-jido.agent-map.json").write_text(
+                json.dumps(agent_map), encoding="utf-8"
+            )
+            stale_stdout = io.StringIO()
+            reviewed_stdout = io.StringIO()
+            with redirect_stdout(stale_stdout):
+                stale_result = main(
+                    [
+                        "check-stale",
+                        "--root",
+                        str(root),
+                        "--changed-file",
+                        "src/builder.py",
+                        "--require-reviewed",
+                    ]
+                )
+            with redirect_stdout(reviewed_stdout):
+                reviewed_result = main(
+                    [
+                        "check-stale",
+                        "--root",
+                        str(root),
+                        "--changed-file",
+                        "src/builder.py",
+                        "--changed-file",
+                        ".bunya-jido/bunya-jido.agent-map.json",
+                        "--require-reviewed",
+                    ]
+                )
+
+        self.assertEqual(stale_result, 2)
+        self.assertIn("Map freshness status: stale", stale_stdout.getvalue())
+        self.assertEqual(reviewed_result, 0)
+        self.assertIn("Map freshness status: review_recorded", reviewed_stdout.getvalue())
+
     def test_context_refuses_blocked_task_route(self) -> None:
         blueprint = example_blueprint()
         agent_map = example_agent_map()
@@ -536,6 +634,8 @@ class AgentGuideActivationTests(unittest.TestCase):
         self.assertIn("Must read", text)
         self.assertIn("Tests", text)
         self.assertIn("refresh-context --root . --changed-file <path>", text)
+        self.assertIn("check-stale --root . --git-diff --require-reviewed", text)
+        self.assertIn(".bunya-jido/MAP_REVIEW.md", text)
         self.assertNotIn(b"\r\n", snippet_bytes)
 
     def test_activation_dry_run_writes_nothing_and_lists_native_targets(self) -> None:
@@ -590,6 +690,8 @@ class AgentGuideActivationTests(unittest.TestCase):
         self.assertIn("alwaysApply: true", cursor_text)
         self.assertIn('bunya-jido context --root . --task "<user request>"', cursor_text)
         self.assertIn("refresh-context --root . --changed-file <path>", cursor_text)
+        self.assertIn("check-stale --root . --git-diff --require-reviewed", cursor_text)
+        self.assertIn(".bunya-jido/MAP_REVIEW.md", cursor_text)
         self.assertNotIn(b"\r\n", cursor_bytes)
 
     def test_dry_run_without_activation_is_rejected(self) -> None:

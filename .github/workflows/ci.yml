@@ -6,11 +6,22 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Test (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        include:
+          - os: ubuntu-latest
+            python-version: "3.10"
+          - os: ubuntu-latest
+            python-version: "3.11"
+          - os: ubuntu-latest
+            python-version: "3.12"
+          - os: windows-latest
+            python-version: "3.12"
+          - os: macos-latest
+            python-version: "3.12"
 
     steps:
       - uses: actions/checkout@v4
@@ -25,3 +36,32 @@ jobs:
         run: python -m unittest discover -s tests
       - name: Verify grounded self-map release gate
         run: python -m bunya_jido diagnose --root . --require-grounded --json
+
+  stale-map:
+    name: Verify semantic map review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install package
+        run: python -m pip install -e .
+      - name: Check changed files against stale-map policy
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            RANGE="${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }}"
+            python -m bunya_jido check-stale --root . --git-diff "$RANGE" --require-reviewed
+          else
+            BASE="${{ github.event.before }}"
+            HEAD="${{ github.sha }}"
+            if git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+              python -m bunya_jido check-stale --root . --git-diff "${BASE}...${HEAD}" --require-reviewed
+            else
+              git diff-tree --no-commit-id --name-only -r "${HEAD}" > changed-files.txt
+              python -m bunya_jido check-stale --root . --changed-files-from changed-files.txt --require-reviewed
+            fi
+          fi

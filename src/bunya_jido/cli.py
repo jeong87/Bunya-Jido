@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 import webbrowser
 from pathlib import Path
@@ -12,6 +13,7 @@ from .blueprint import (
     activate_agent_guides,
     default_blueprint_path,
     default_agent_map_path,
+    evaluate_map_freshness,
     generate_agent_context,
     graph_with_optional_blueprint,
     install_agent_guides,
@@ -360,6 +362,57 @@ def cmd_refresh_context(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_check_stale(args: argparse.Namespace) -> int:
+    changed = []
+    for value in args.changed_file or []:
+        changed.extend([path.strip() for path in value.split(",") if path.strip()])
+    if args.changed_files_from:
+        changed_file_path = Path(args.changed_files_from)
+        if not changed_file_path.exists():
+            print(f"Changed-files input not found: {changed_file_path}", file=sys.stderr)
+            return 2
+        changed.extend(
+            path.strip()
+            for path in changed_file_path.read_text(encoding="utf-8").splitlines()
+            if path.strip()
+        )
+    if args.git_diff is not None:
+        root = Path(args.root).resolve()
+        revision = args.git_diff or "HEAD"
+        try:
+            completed = subprocess.run(
+                ["git", "-C", str(root), "diff", "--name-only", revision, "--"],
+                check=True,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+        except (OSError, subprocess.CalledProcessError) as exc:
+            print(f"Could not collect git diff paths: {exc}", file=sys.stderr)
+            return 2
+        changed.extend(path.strip() for path in completed.stdout.splitlines() if path.strip())
+    if not changed:
+        print("check-stale requires changed files from --changed-file, --changed-files-from, or --git-diff.", file=sys.stderr)
+        return 2
+    report = evaluate_map_freshness(args.root, changed)
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(f"Map freshness status: {report['status']}")
+        print(f"Reason: {report['reason']}")
+        for path in report.get("triggering_files") or []:
+            print(f"- requires review: {path}")
+        for path in report.get("review_artifacts") or []:
+            print(f"- review artifact updated: {path}")
+        if report["status"] == "stale":
+            print("Run `bunya-jido prepare --root . --quiet`, have a coding agent refresh the semantic map, then commit the updated map artifact.")
+        elif report["status"] == "review_recorded":
+            print("A map update or review note is present; validation still checks trust, not architectural completeness.")
+    if args.require_reviewed and report["status"] not in {"current", "review_recorded"}:
+        return 2
+    return 0
+
+
 def cmd_install_agent_guides(args: argparse.Namespace) -> int:
     if args.dry_run and not args.activate:
         print("--dry-run requires --activate.", file=sys.stderr)
@@ -451,6 +504,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_refresh.add_argument("--out", default=None, help="Optional output markdown path.")
     p_refresh.set_defaults(func=cmd_refresh_context)
 
+    p_stale = sub.add_parser("check-stale", help="Check whether changed files require a reviewed semantic map update.")
+    p_stale.add_argument("--root", default=".", help="Repository root. Default: current directory.")
+    p_stale.add_argument("--changed-file", action="append", default=[], help="Changed file path, or a comma-separated list. Repeatable.")
+    p_stale.add_argument("--changed-files-from", default=None, help="File containing changed paths, one per line.")
+    p_stale.add_argument("--git-diff", nargs="?", const="", default=None, metavar="REVISION", help="Read tracked changed paths from git diff against REVISION; without a value, compare the working tree to HEAD.")
+    p_stale.add_argument("--require-reviewed", action="store_true", help="Exit with status 2 when policy-triggering changes have no semantic map artifact update.")
+    p_stale.add_argument("--json", action="store_true", help="Print a machine-readable freshness report.")
+    p_stale.set_defaults(func=cmd_check_stale)
+
     p_guides = sub.add_parser("install-agent-guides", help="Write Bunya-Jido agent guidance snippets or activate managed project instructions.")
     p_guides.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_guides.add_argument("--agent", choices=["all", "codex", "claude", "cursor", "cline"], default="all", help="Which guide to write. Default: all.")
@@ -463,7 +525,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
-    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "install-agent-guides"}
+    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "install-agent-guides"}
     if not raw or (raw[0] not in subcommands and raw[0] not in {"-h", "--help", "--version"}):
         raw = ["build"] + raw
     parser = build_parser()

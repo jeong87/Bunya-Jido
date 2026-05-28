@@ -13,5 +13,6 @@ viewer comprehension, scanner coverage, or release behavior.
 
 - [ ] `python -m unittest discover -s tests`
 - [ ] `python -m bunya_jido diagnose --root . --require-grounded --json`
+- [ ] `python -m bunya_jido check-stale --root . --git-diff origin/main...HEAD --require-reviewed` reviewed when tracked repository files change
 - [ ] Generated HTML inspected when viewer, semantic graph, or gallery output changes
 - [ ] Coverage matrix updated when scanner support claims change

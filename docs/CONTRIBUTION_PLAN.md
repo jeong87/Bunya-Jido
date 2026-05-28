@@ -5,7 +5,7 @@
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 28, 2026):** PR 1 through PR 8, the follow-up UI 1 through UI 3 constellation-viewer redesign, PR 9 honest agent-route matching, PR 10 agent activation, and PR 11 change-aware refresh routing are implemented on `main`; the original grounded public-alpha roadmap is complete and the agent consumption loop is the active extension. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
+**Implementation progress (May 28, 2026):** PR 1 through PR 8, the follow-up UI 1 through UI 3 constellation-viewer redesign, PR 9 honest agent-route matching, PR 10 agent activation, PR 11 change-aware refresh routing, and PR 11.1 portability and stale-map review gates are implemented on `main`; the original grounded public-alpha roadmap is complete and the agent consumption loop is the active extension. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
 
 ---
 
@@ -709,6 +709,49 @@ post-edit refresh step.
 
 ---
 
+### PR 11.1: Portability And Stale-Map Review Gate
+
+**Goal:** Make the agent-consumption loop easier to adopt across operating
+systems and prevent mapped repositories from silently drifting after code
+changes.
+
+**Scope:**
+
+- Add a deterministic `check-stale` command driven by an authored
+  `stale_map_policy`.
+- Distinguish `stale` changes from `review_recorded` changes without claiming
+  automatic semantic correctness.
+- Apply the stale-map review gate in CI for push and pull-request diffs.
+- Expand CI execution coverage from Ubuntu to Windows and macOS.
+- Document Python, Git, coding-agent, and optional browser requirements with
+  OS-specific installation commands in both READMEs.
+- Extend activated agent guidance with the post-edit stale-map check.
+
+**Acceptance criteria:**
+
+- A policy-covered source change without a blueprint, agent-map, or map-review
+  note update
+  fails `check-stale --require-reviewed`.
+- A changed semantic-map artifact or `MAP_REVIEW.md` note records review while
+  retaining the explicit limitation that validation does not prove completeness.
+- CI executes tests on Ubuntu, Windows, and macOS and runs the freshness gate.
+- English and Korean onboarding gives usable Windows PowerShell and
+  macOS/Linux command sequences.
+- The committed self-map defines and tests its own stale-map policy.
+
+**Implemented (May 28, 2026):** `check-stale` accepts explicit changed files,
+files-from input, or tracked `git diff` input, and reports `current`,
+`review_recorded`, or `stale` from the agent-map policy. The repository
+self-map now carries that policy, CI exercises three operating systems and
+enforces map-review detection, a tracked `MAP_REVIEW.md` avoids meaningless
+map churn for reviewed no-structure-change cases, and onboarding documents
+installation and maintenance steps for each supported operating-system family.
+
+**Suggested commit message:**
+`feat: add portable stale-map review gate`
+
+---
+
 ### Planned PR 12: Agent Consumption Loop Completion
 
 | Pull Request | Goal | Principal Outcome |
@@ -734,6 +777,7 @@ The roadmap was delivered in this order to prioritize truthfulness, testability,
 | 9 | Honest Agent Route Matching | Avoid presenting unrelated prepared routes for uncovered agent tasks. |
 | 10 | Agent Activation | Place context-first guidance in agent-native project instruction surfaces. |
 | 11 | Change-Aware Refresh Routing | Recommend post-edit routes only from affected files or grounded start-node evidence. |
+| 11.1 | Portability And Stale-Map Review Gate | Verify OS adoption paths and require reviewed map updates after covered changes. |
 
 The sequencing constraints used during implementation were:
 
@@ -777,6 +821,8 @@ The sequencing constraints used during implementation were:
 - Requests without a matching validated route receive an explicit no-match result rather than arbitrary route guidance.
 - Maintainers can activate context-first agent instructions without losing existing project guidance.
 - Post-edit context recommends routes only when changed-file evidence supports them and states why.
+- Mapped repositories can fail CI when covered changes lack a reviewed map artifact or review-note update.
+- Installation guidance and CI verification explicitly cover Windows, macOS, and Linux usage.
 
 ---
 

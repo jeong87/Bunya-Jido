@@ -7,6 +7,8 @@ the semantic map automatically proves an architecture correct.
 ## Compatibility And Limits
 
 - Supported Python versions are `3.10`, `3.11`, and `3.12`.
+- The CI compatibility matrix exercises Ubuntu with Python `3.10`-`3.12`,
+  and Windows and macOS with Python `3.12`.
 - The public interfaces under alpha review are the CLI commands, the generated
   offline HTML artifact, and the `.bunya-jido/` blueprint and agent-map flow.
 - Python scanning is the strongest deterministic code surface. Exact scanner
@@ -40,6 +42,7 @@ python -m compileall -q src tests
 python -m bunya_jido validate-blueprint --root .
 python -m bunya_jido validate-agent-map --root .
 python -m bunya_jido diagnose --root . --require-grounded --json
+python -m bunya_jido check-stale --root . --git-diff origin/main...HEAD --require-reviewed
 python -m build
 python -m twine check dist/*
 ```
@@ -47,6 +50,11 @@ python -m twine check dist/*
 If the viewer or semantic self-map changed, regenerate and visually inspect
 `docs/demo.html` and its screenshot using the commands in
 [`gallery.md`](gallery.md) before releasing.
+
+The stale-map gate does not rewrite semantic output. It requires a reviewed
+blueprint, agent-map, or `.bunya-jido/MAP_REVIEW.md` note when files covered
+by the committed `stale_map_policy` change; CI runs the same gate for pushes
+and pull requests.
 
 ## PyPI Trusted Publishing
 

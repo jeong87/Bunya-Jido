@@ -89,5 +89,22 @@
         "A visual change must keep the offline standalone artifact readable and truthful."
       ]
     }
-  ]
+  ],
+  "stale_map_policy": {
+    "rerun_when_changed": [
+      "AGENTS.md",
+      "README.md",
+      "README.ko.md",
+      "pyproject.toml",
+      "src/**",
+      "tests/**",
+      "docs/**",
+      ".github/workflows/**"
+    ],
+    "ignore_when_changed": [
+      ".git/**",
+      "node_modules/**",
+      "__pycache__/**"
+    ]
+  }
 }
