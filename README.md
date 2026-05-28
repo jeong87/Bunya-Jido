@@ -218,6 +218,11 @@ Once a blueprint and agent map exist, Bunya-Jido can generate a focused handoff 
 bunya-jido context --root . --task "modify provider behavior" --out .bunya-jido/CONTEXT.md
 ```
 
+When a request matches a validated task route, the generated context identifies
+why it matched and supplies that route's reading, contract, and test guidance.
+If no route matches, it states `No matching trusted route` instead of
+presenting an unrelated prepared path as guidance.
+
 You can also focus on a specific node:
 
 ```bash
@@ -297,12 +302,14 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 
 ## Release And Roadmap
 
-The grounded-map implementation roadmap is complete through PR8. See
+The original grounded-map implementation roadmap is complete through PR8.
+PR9 begins the agent-consumption expansion by reporting unmatched task
+requests honestly instead of presenting unrelated routes. See
 [docs/gallery.md](docs/gallery.md) for the committed Grounded self-map,
 [docs/RELEASING.md](docs/RELEASING.md) for public-alpha release gates and
 publishing setup, [CHANGELOG.md](CHANGELOG.md) for release notes, and
 [CONTRIBUTING.md](CONTRIBUTING.md) for contribution requirements. The completed
-implementation plan remains recorded in
+and extended implementation plan remains recorded in
 [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md). The follow-up
 constellation-viewer design pass is reflected in the live demo and preview
 image above.

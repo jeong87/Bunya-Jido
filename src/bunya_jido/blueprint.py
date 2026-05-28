@@ -1152,17 +1152,50 @@ def _load_optional_text(path: Path) -> str:
     return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
-def _match_route(route: dict[str, Any], *, task: str | None = None, node: str | None = None, workflow: str | None = None) -> int:
-    score = 0
+GENERIC_ROUTE_TERMS = {
+    "add", "change", "changed", "debug", "edit", "fix", "implement", "improve",
+    "modify", "review", "update", "behavior", "context", "feature", "issue", "map",
+    "repository", "route", "task", "work", "working",
+}
+
+
+def _task_match_terms(task: str | None) -> list[str]:
+    if not task:
+        return []
+    return list(
+        dict.fromkeys(
+            word
+            for word in re.findall(r"\w+", task.lower())
+            if len(word) >= 3 and word not in GENERIC_ROUTE_TERMS
+        )
+    )
+
+
+def _match_route(route: dict[str, Any], *, task: str | None = None, node: str | None = None, workflow: str | None = None) -> dict[str, Any]:
+    reasons: list[str] = []
+    if node is not None or workflow is not None:
+        if node is not None:
+            if node not in (route.get("start_nodes") or []):
+                return {"status": "unmatched", "score": 0, "reasons": []}
+            reasons.append(f"focus node `{node}` starts this route")
+        if workflow is not None:
+            if workflow not in (route.get("workflows") or []):
+                return {"status": "unmatched", "score": 0, "reasons": []}
+            reasons.append(f"focus workflow `{workflow}` belongs to this route")
+        return {"status": "matched", "score": 100 + (10 * len(reasons)), "reasons": reasons}
+
+    if not task:
+        return {"status": "available", "score": 0, "reasons": []}
+
     hay = " ".join(str(route.get(k, "")) for k in ("task", "intent", "notes")).lower()
-    if task:
-        words = [w for w in re.split(r"\W+", task.lower()) if len(w) >= 3]
-        score += sum(2 for w in words if w in hay)
-    if node and node in (route.get("start_nodes") or []):
-        score += 8
-    if workflow and workflow in (route.get("workflows") or []):
-        score += 8
-    return score
+    matched_terms = [word for word in _task_match_terms(task) if word in hay]
+    if matched_terms:
+        return {
+            "status": "matched",
+            "score": len(matched_terms) * 2,
+            "reasons": ["task terms match: " + ", ".join(f"`{word}`" for word in matched_terms)],
+        }
+    return {"status": "unmatched", "score": 0, "reasons": []}
 
 
 def generate_agent_context(root: str | Path, *, node: str | None = None, workflow: str | None = None, task: str | None = None, changed_files: list[str] | None = None) -> str:
@@ -1192,8 +1225,16 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     node_by_id = {str(n.get("id")): n for n in bp.get("nodes", []) if isinstance(n, dict) and n.get("id")}
     trusted_indexes = set(agent_metrics.get("projectable_route_indexes") or [])
     routes = [r for i, r in enumerate(agent_map.get("task_routes", [])) if isinstance(r, dict) and i in trusted_indexes]
-    scored = sorted([( _match_route(r, task=task, node=node, workflow=workflow), r) for r in routes], key=lambda x: x[0], reverse=True)
-    chosen = [r for sc,r in scored if sc > 0][:5] or routes[:3]
+    selection_requested = bool(task or node or workflow)
+    scored = sorted(
+        [(_match_route(route, task=task, node=node, workflow=workflow), route) for route in routes],
+        key=lambda item: item[0]["score"],
+        reverse=True,
+    )
+    if selection_requested:
+        chosen = [(match, route) for match, route in scored if match["status"] == "matched"][:5]
+    else:
+        chosen = [({"status": "available", "score": 0, "reasons": []}, route) for route in routes[:3]]
     changed = changed_files or []
     affected_nodes: list[str] = []
     if changed:
@@ -1218,6 +1259,10 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     lines.append("- Artifact mode: `semantic_blueprint`")
     lines.append("- Grounding status: `grounded`")
     lines.append(f"- Agent-map routes: `validated` ({agent_metrics.get('trusted_route_count', 0)} trusted route(s))")
+    if selection_requested:
+        lines.append(f"- Requested route match: `{'matched' if chosen else 'not_found'}`")
+    else:
+        lines.append("- Requested route match: `not_requested`")
     trust_warnings = list(bp_warnings) + list(agent_warnings)
     lines.append(f"- Warnings: `{len(trust_warnings)}`")
     for warning in trust_warnings[:10]:
@@ -1238,12 +1283,20 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
             n = node_by_id.get(nid, {})
             lines.append(f"- `{nid}` — {n.get('label','')} · {n.get('plane','')} · {n.get('type','')}")
         lines.append("")
-    lines.append("## Recommended task routes")
+    lines.append("## Recommended task routes" if selection_requested else "## Available trusted task routes")
     if not chosen:
-        lines.append("No agent-map routes found. Run the Bunya-Jido blueprint prompt first.")
-    for r in chosen:
+        if selection_requested:
+            lines.append("No matching trusted route for this request. The grounded map does not claim a prepared path for this task.")
+        else:
+            lines.append("No trusted task routes are available. Run the Bunya-Jido blueprint prompt to author routes.")
+        lines.append("")
+    for match, r in chosen:
         lines.append(f"### {r.get('task','Unnamed route')}")
         if r.get("intent"): lines.append(str(r.get("intent")))
+        if match["reasons"]:
+            lines.append("\n**Matched because:**")
+            for reason in match["reasons"]:
+                lines.append(f"- {reason}")
         def emit_list(title, vals):
             vals = [v for v in (vals or []) if v]
             if vals:

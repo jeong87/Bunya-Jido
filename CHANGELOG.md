@@ -22,6 +22,9 @@ be documented.
 
 - A canvas-first constellation viewer design with semantic role glyphs,
   streamlined workflow access, and a refreshed grounded self-map preview.
+- Agent context selects only routes that match the requested task or explicit
+  focus, and reports an unmatched request instead of presenting unrelated
+  guidance.
 
 ### Fixed
 

@@ -1,11 +1,11 @@
 # Bunya-Jido Contribution Plan
 ## Grounded Semantic Repository Maps for Humans and Coding Agents
 
-**Status:** Implemented grounded public-alpha roadmap and follow-up viewer refresh
+**Status:** Implemented grounded public-alpha roadmap with agent consumption expansion in progress
 **Target repository:** `jeong87/Bunya-Jido`  
 **Document location:** `docs/CONTRIBUTION_PLAN.md`  
 **Revision basis:** Direct review of the current repository implementation, README, package metadata, viewer, and tests.
-**Implementation progress (May 28, 2026):** PR 1 through PR 8 and the follow-up UI 1 through UI 3 constellation-viewer redesign are implemented on `main`; the grounded public-alpha roadmap is complete. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
+**Implementation progress (May 28, 2026):** PR 1 through PR 8, the follow-up UI 1 through UI 3 constellation-viewer redesign, and PR 9 honest agent-route matching are implemented on `main`; the original grounded public-alpha roadmap is complete and the agent consumption loop is the active extension. Python 3.10 scanner compatibility is retained through a conditional `tomli` fallback for TOML evidence.
 
 ---
 
@@ -600,6 +600,48 @@ the committed grounded self-map remains subject to the semantic diagnostic gate.
 
 ---
 
+### PR 9: Honest Agent Route Matching
+
+**Goal:** Ensure coding-agent context recommends a prepared route only when it
+actually matches the requested task or explicit semantic focus.
+
+**Scope:**
+
+- Treat explicit node and workflow selection as precise route matches.
+- Match natural-language task requests only through meaningful route terms,
+  excluding generic action and product words.
+- Emit match reasons for recommended routes.
+- Emit `No matching trusted route` rather than unrelated routes when a request
+  is outside the authored agent map.
+- Preserve an unfiltered route catalog only when no task or focus was requested.
+
+**Acceptance criteria:**
+
+- Known fixture and self-map tasks select their intended validated route.
+- An unrelated requested task emits no prepared route.
+- Explicit focus and no-match behavior are covered by tests.
+- README guidance describes the honest no-match contract.
+
+**Implemented (May 28, 2026):** Agent context now distinguishes validated
+routes from routes relevant to the current request. Task or focus selection
+reports `matched` or `not_found`, includes match reasons when a route is
+recommended, and avoids fabricating guidance for an uncovered task.
+
+**Suggested commit message:**
+`feat: report unmatched agent tasks without invented routes`
+
+---
+
+### Planned PR 10 through PR 12: Agent Consumption Loop Completion
+
+| Pull Request | Goal | Principal Outcome |
+|---|---|---|
+| PR 10: Agent Activation | Make context usage part of an agent's normal task-start instructions. | Managed Codex/Claude/Cursor/Cline guidance runs `bunya-jido context` before implementation, debugging, or review work without overwriting user instructions. |
+| PR 11: Change-Aware Refresh Routing | Route post-edit context through affected evidence and files. | `refresh-context` recommends routes only when changed files justify them and explains the match. |
+| PR 12: Agent Utility Evaluation | Test whether agents use the map effectively. | A committed evaluation protocol and fixtures measure first-read accuracy, test recall, boundary discipline, and honest no-match handling before a PyPI public-alpha claim. |
+
+---
+
 ## 9. Completed Delivery Sequence
 
 The roadmap was delivered in this order to prioritize truthfulness, testability, and trust:
@@ -614,6 +656,7 @@ The roadmap was delivered in this order to prioritize truthfulness, testability,
 | 6 | Viewer Semantics and Progressive Disclosure | Improve comprehension against stable, trusted fixtures. |
 | 7 | Scanner Coverage Matrix and Measured Extension | Expand honestly after current strengths are demonstrated. |
 | 8 | Public Alpha Release Readiness | Publish with trust signals rather than promises. |
+| 9 | Honest Agent Route Matching | Avoid presenting unrelated prepared routes for uncovered agent tasks. |
 
 The sequencing constraints used during implementation were:
 
@@ -654,6 +697,7 @@ The sequencing constraints used during implementation were:
 - Every published task route validates against shared semantic nodes/workflows.
 - Every real gallery map includes at least one bounded task route once parity ships.
 - Maintainer review can distinguish suggested edit areas from boundaries that require care.
+- Requests without a matching validated route receive an explicit no-match result rather than arbitrary route guidance.
 
 ---
 

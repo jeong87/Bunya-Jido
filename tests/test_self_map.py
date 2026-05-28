@@ -114,8 +114,18 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertIn("- Grounding status: `grounded`", context)
         self.assertIn("- Agent-map routes: `validated` (3 trusted route(s))", context)
+        self.assertIn("- Requested route match: `matched`", context)
         self.assertIn("### change task route projection", context)
         self.assertIn("- `task_route_publication`", context)
+
+    def test_unmatched_context_does_not_invent_self_map_route(self) -> None:
+        context = generate_agent_context(ROOT, task="publish package to package registry")
+
+        self.assertIn("- Requested route match: `not_found`", context)
+        self.assertIn("No matching trusted route for this request.", context)
+        self.assertNotIn("### change grounding policy", context)
+        self.assertNotIn("### change task route projection", context)
+        self.assertNotIn("### change viewer trust presentation", context)
 
     def test_published_demo_matches_stable_semantic_contract(self) -> None:
         html = DEMO_PATH.read_text(encoding="utf-8")
