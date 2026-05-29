@@ -176,15 +176,14 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
     keys. Do not assume this repository is an agent system, workflow engine,
     web application, SDK, compiler, or library before inspecting evidence.
 
-    ## Phase 1 publication boundary
+    ## Phase 2 publication boundary
 
-    Studio authoring is opt-in and currently prepares editorial inputs only.
-    The installed machine-readable publication schema is still
-    `bunya-jido-blueprint-v1`. Keep `.bunya-jido/bunya-jido.blueprint.json`
-    and `.bunya-jido/bunya-jido.agent-map.json` compatible with the existing
-    v1 validation and rendering path. Record candidate Studio vocabulary,
-    projections, scenario policy, and scenarios in Markdown until v2 schema
-    support is introduced.
+    Studio authoring is opt-in. In Studio mode, the machine-readable blueprint
+    contract is `bunya-jido-blueprint-v2`: write repository-local vocabulary,
+    projections, scenario policy, and scenarios beneath the `atlas` object
+    after drafting them in Markdown. The agent map remains grounded in the
+    semantic nodes and workflows rather than depending on editorial narration.
+    Advanced viewer projection styling and playback arrive in later phases.
 
     ## Files to create or refresh
 
@@ -193,11 +192,11 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
     3. `.bunya-jido/REPOSITORY_THESIS.md`
     4. `.bunya-jido/PROJECTIONS.md`
     5. `.bunya-jido/SCENARIOS.md`
-    6. `.bunya-jido/bunya-jido.blueprint.json` (current v1 contract)
+    6. `.bunya-jido/bunya-jido.blueprint.json` (Studio v2 contract)
     7. `.bunya-jido/bunya-jido.agent-map.json`
 
     Inputs include the repository itself, the generated deterministic static
-    scan, and the generated v1 blueprint and agent-map schemas. Treat source,
+    scan, and the generated Studio v2 blueprint and agent-map schemas. Treat source,
     docs, tests, and inspectable artifacts as the evidence source.
 
     ## Non-negotiable rules
@@ -209,7 +208,8 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
     - Use a behavioral scenario only for evidenced ordered behavior.
     - Use a structural tour only when it aids reading without implying runtime order.
     - If no scenario is honest or useful, explain `none_with_reason`.
-    - Identify static/provider overlays that should not dominate a primary projection.
+    - Static/provider overlays are excluded from Studio primary projection by default.
+      If a contextual overlay is justified, declare its existing map-local node family.
 
     ## Working sequence
 
@@ -225,8 +225,9 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
        and selecting one primary projection.
     6. Write `SCENARIOS.md` with the scenario policy and up to five justified
        scenario candidates, or an honest no-scenario rationale.
-    7. Refresh the existing v1 blueprint and agent map only with facts
-       supported by the current schemas and repository evidence.
+    7. Write the Studio v2 blueprint and the agent map only with facts
+       supported by the generated schemas and repository evidence. Keep the
+       semantic contract separate from `atlas` presentation choices.
     8. Validate and build:
 
        `bunya-jido validate-blueprint --root .`
@@ -235,6 +236,6 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
 
        `bunya-jido build --root . --out bunya-jido.html`
 
-    Confirm the generated HTML path and clearly distinguish current v1
-    publication from candidate Studio design inputs.
+    Confirm the generated HTML path and clearly distinguish validated Studio v2
+    contract data from viewer features planned for later phases.
     """).strip() + "\n"

@@ -36,3 +36,17 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Blueprint and agent-map validation, grounded diagnostics,
   strict agent-utility evaluation, stale-map review, and the unit test suite
   are required before commit.
+
+## 2026-05-29 - Studio Atlas Phase 2 Additive V2 Contract
+
+- Change: Added the opt-in Studio v2 blueprint schema, deterministic atlas
+  reference and scenario-policy validation, v2 graph metadata, and explicit
+  provider-overlay handling.
+- Decision: Updated the existing Grounding Gate and Semantic Contract Tests
+  evidence plus the grounding-policy agent route because `schema.py` and
+  `test_blueprint_v2.py` are now part of that published trust contract. No new
+  product node is needed because v2 validation remains the same gate's
+  responsibility.
+- Validation: Blueprint and agent-map validation, grounded diagnostics,
+  strict agent-utility evaluation, stale-map review, and the full unit test
+  suite are required before commit.

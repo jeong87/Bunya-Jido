@@ -16,17 +16,21 @@
       ],
       "must_read": [
         "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/schema.py",
         "docs/CONTRIBUTION_PLAN.md"
       ],
       "contracts": [
         "Core node and critical edge evidence must remain inspectable before semantic publication."
       ],
       "tests": [
-        "tests/test_blueprint.py"
+        "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py"
       ],
       "safe_edit": [
         "src/bunya_jido/blueprint.py",
-        "tests/test_blueprint.py"
+        "src/bunya_jido/schema.py",
+        "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py"
       ],
       "watch_out": [
         "A weakened blocker changes whether output is allowed to claim Grounded status."

@@ -18,6 +18,7 @@ from .blueprint import (
     generate_agent_context,
     graph_with_optional_blueprint,
     install_agent_guides,
+    load_blueprint,
     prepare_blueprint_workspace,
     validate_agent_map_file,
     validate_blueprint_file,
@@ -240,6 +241,7 @@ def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
         )
         return {
             "root": root.as_posix(),
+            "schema_version": graph.get("schema_version"),
             "artifact_mode": "static_scan",
             "grounding_status": "not_assessed",
             "semantic_publication_allowed": False,
@@ -252,6 +254,7 @@ def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
             "agent_routes": {"status": "not_assessed", "trusted": 0, "total": 0},
         }
 
+    blueprint = load_blueprint(bp_path)
     bp_errors, bp_warnings, bp_metrics = validate_blueprint_file(bp_path, root=root)
     blockers = list(bp_metrics.get("publish_blockers") or [])
     errors = list(bp_errors)
@@ -281,6 +284,7 @@ def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
     grounding_status = "blocked" if errors or blockers else "grounded"
     return {
         "root": root.as_posix(),
+        "schema_version": blueprint.get("schema_version"),
         "artifact_mode": "semantic_blueprint",
         "grounding_status": grounding_status,
         "semantic_publication_allowed": grounding_status == "grounded",
@@ -290,6 +294,9 @@ def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
         "edge_count": int(bp_metrics.get("edge_count") or 0),
         "grounded_core_node_ratio": bp_metrics.get("grounded_core_node_ratio"),
         "grounded_critical_edge_ratio": bp_metrics.get("grounded_critical_edge_ratio"),
+        "primary_projection": bp_metrics.get("primary_projection"),
+        "scenario_policy": bp_metrics.get("scenario_policy"),
+        "scenario_count": bp_metrics.get("scenario_count", 0),
         "publish_blockers": blockers,
         "warnings": warnings,
         "errors": errors,
@@ -303,6 +310,7 @@ def cmd_diagnose(args: argparse.Namespace) -> int:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
         print(f"Bunya-Jido diagnostics: {report['root']}")
+        print(f"Schema version: {report.get('schema_version') or 'not provided'}")
         print(f"Artifact mode: {report['artifact_mode']}")
         print(f"Grounding status: {report['grounding_status']}")
         allowed = "allowed" if report["semantic_publication_allowed"] else "not allowed"
@@ -311,6 +319,9 @@ def cmd_diagnose(args: argparse.Namespace) -> int:
         print(f"Graph quality: nodes={report['node_count']} edges={report['edge_count']}")
         routes = report["agent_routes"]
         print(f"Agent-map routes: {routes['status']} ({routes['trusted']}/{routes['total']} trusted)")
+        if report.get("schema_version") == "bunya-jido-blueprint-v2":
+            print(f"Primary projection: {report.get('primary_projection') or 'not provided'}")
+            print(f"Scenario policy: {report.get('scenario_policy') or 'not provided'} ({report.get('scenario_count', 0)} scenarios)")
         print(f"Warnings: {len(report.get('warnings') or [])}")
         print(f"Blockers: {len(report.get('publish_blockers') or [])}")
         for blocker in (report.get("publish_blockers") or [])[:10]:

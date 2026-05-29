@@ -23,8 +23,11 @@ be documented.
 - A `bunya-jido evaluate-agent-utility` command, committed acceptance suite,
   and documented observation protocol for bounded agent-context utility.
 - An opt-in `prepare --atlas-mode studio` authoring path that creates
-  repository-thesis, projection-candidate, and scenario-policy documents while
-  keeping published JSON on the existing v1 contract.
+  repository-thesis, projection-candidate, and scenario-policy documents.
+- An additive Studio `bunya-jido-blueprint-v2` contract with validated
+  repository-local vocabularies, projections, scenario policies, scenario
+  references, and explicit static-provider overlay handling while classic v1
+  output remains compatible.
 
 ### Changed
 

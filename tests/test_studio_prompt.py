@@ -27,7 +27,7 @@ class StudioPromptTests(unittest.TestCase):
             self.assertFalse((outdir / "SCENARIOS.md").exists())
             self.assertNotIn("Studio Atlas Prompt", prompt)
 
-    def test_studio_prepare_creates_editorial_inputs_without_claiming_v2_publication(self) -> None:
+    def test_studio_prepare_creates_editorial_inputs_and_v2_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             (root / "README.md").write_text("# fixture\n", encoding="utf-8")
@@ -46,14 +46,15 @@ class StudioPromptTests(unittest.TestCase):
             for name in ("REPOSITORY_THESIS.md", "PROJECTIONS.md", "SCENARIOS.md"):
                 self.assertTrue((outdir / name).exists())
             self.assertIn("Bunya-Jido Studio Atlas Prompt", prompt)
-            self.assertIn("bunya-jido-blueprint-v1", prompt)
-            self.assertIn("until v2 schema", prompt)
-            self.assertIn("support is introduced", prompt)
+            self.assertIn("bunya-jido-blueprint-v2", prompt)
+            self.assertIn("Advanced viewer projection styling", prompt)
             self.assertIn("none_with_reason", prompt)
             self.assertIn("Static overlays permitted", projections)
             self.assertIn("Scenario policy", scenarios)
             self.assertIn("--atlas-mode studio", short_prompt)
-            self.assertEqual(schema["properties"]["schema_version"]["const"], "bunya-jido-blueprint-v1")
+            self.assertIn("Studio v2 schema", short_prompt)
+            self.assertEqual(schema["properties"]["schema_version"]["const"], "bunya-jido-blueprint-v2")
+            self.assertIn("atlas", schema["required"])
 
     def test_studio_prepare_preserves_existing_intermediate_documents(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

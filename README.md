@@ -162,9 +162,11 @@ bunya-jido prepare --root . --atlas-mode studio --quiet
 Studio preparation additionally creates `REPOSITORY_THESIS.md`,
 `PROJECTIONS.md`, and `SCENARIOS.md`. These documents ask for a primary
 projection and an honest scenario policy: `required`, `optional`, or
-`none_with_reason`. In this phase, the publishable JSON and rendered HTML
-remain on the current `bunya-jido-blueprint-v1` contract; v2 projection and
-scenario playback support is planned separately.
+`none_with_reason`. Studio preparation now generates the additive
+`bunya-jido-blueprint-v2` schema, and `validate-blueprint`, `build`, and
+`diagnose` accept its vocabulary, projection, and scenario contract. Dedicated
+v2 viewer styling and scenario playback are planned separately. Classic mode
+continues to use the existing v1 contract.
 
 ## Generated Files
 
@@ -186,7 +188,7 @@ scenario playback support is planned separately.
 A mapped repository can additionally track `.bunya-jido/MAP_REVIEW.md` to
 record a reviewed no-structure-change decision for `check-stale`.
 With `--atlas-mode studio`, preparation also creates `REPOSITORY_THESIS.md`,
-`PROJECTIONS.md`, and `SCENARIOS.md` as editorial inputs for a future v2 atlas.
+`PROJECTIONS.md`, and `SCENARIOS.md` and emits the Studio v2 blueprint schema.
 
 ### `COMPONENTS.md`
 

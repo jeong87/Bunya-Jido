@@ -95,7 +95,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v1",
-  "generated_at": "2026-05-28T00:29:22+00:00",
+  "generated_at": "2026-05-29T14:43:51+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
   "artifact_mode": "semantic_blueprint",
@@ -350,7 +350,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Grounding Gate",
       "type": "contract",
       "plane": "quality",
-      "description": "Blocks semantic publication when core evidence or critical relationships cannot be trusted.",
+      "description": "Blocks semantic publication when core evidence, critical relationships, or Studio v2 atlas contracts cannot be trusted.",
       "source_path": "src/bunya_jido/blueprint.py",
       "tags": [
         "blueprint",
@@ -369,6 +369,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "source",
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "validate_blueprint_obj"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/schema.py",
+          "symbol": "validate_blueprint_v2_atlas"
         }
       ]
     },
@@ -377,7 +382,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Semantic Contract Tests",
       "type": "test",
       "plane": "quality",
-      "description": "Exercises grounding publication gates and agent-map parity behavior.",
+      "description": "Exercises grounding publication gates, Studio v2 contracts, and agent-map parity behavior.",
       "source_path": "tests/test_blueprint.py",
       "tags": [
         "blueprint",
@@ -395,6 +400,10 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "kind": "test",
           "path": "tests/test_blueprint.py"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_blueprint_v2.py"
         }
       ]
     },
@@ -769,6 +778,10 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "kind": "test",
           "path": "tests/test_blueprint.py"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_blueprint_v2.py"
         }
       ]
     },
@@ -1069,10 +1082,12 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "must_read": [
         "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/schema.py",
         "docs/CONTRIBUTION_PLAN.md"
       ],
       "tests": [
-        "tests/test_blueprint.py"
+        "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py"
       ]
     },
     {
@@ -1225,6 +1240,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     },
     {
       "kind": "source",
+      "path": "src/bunya_jido/schema.py",
+      "symbol": "validate_blueprint_v2_atlas"
+    },
+    {
+      "kind": "source",
       "path": "src/bunya_jido/render.py",
       "symbol": "render_html"
     },
@@ -1236,6 +1256,10 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "kind": "test",
       "path": "tests/test_blueprint.py"
+    },
+    {
+      "kind": "test",
+      "path": "tests/test_blueprint_v2.py"
     },
     {
       "kind": "config",

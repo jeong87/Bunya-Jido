@@ -10,6 +10,10 @@ from pathlib import Path
 from typing import Any
 
 from .scanner import build_graph, infer_project_name, slug
+from .schema import (
+    blueprint_schema_v2 as studio_blueprint_schema_v2,
+    validate_blueprint_v2_atlas,
+)
 from .studio import (
     make_studio_blueprint_prompt,
     projections_template,
@@ -115,7 +119,7 @@ def _safe_write_json(path: Path, obj: Any) -> None:
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def blueprint_schema() -> dict[str, Any]:
+def blueprint_schema_v1() -> dict[str, Any]:
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "title": "Bunya-Jido Blueprint",
@@ -249,6 +253,18 @@ def blueprint_schema() -> dict[str, Any]:
         },
 
     }
+
+
+def blueprint_schema_v2() -> dict[str, Any]:
+    return studio_blueprint_schema_v2(blueprint_schema_v1())
+
+
+def blueprint_schema(atlas_mode: str = "classic") -> dict[str, Any]:
+    if atlas_mode == "classic":
+        return blueprint_schema_v1()
+    if atlas_mode == "studio":
+        return blueprint_schema_v2()
+    raise ValueError(f"Unsupported atlas mode: {atlas_mode}")
 
 
 def agent_map_schema() -> dict[str, Any]:
@@ -779,7 +795,7 @@ def prepare_blueprint_workspace(
         "blueprint": outdir / BLUEPRINT_FILE,
     }
     _safe_write_json(paths["static_scan"], compact)
-    _safe_write_json(paths["schema"], blueprint_schema())
+    _safe_write_json(paths["schema"], blueprint_schema(atlas_mode))
     _safe_write_json(paths["agent_map_schema"], agent_map_schema())
     if not paths["components"].exists():
         component_text = studio_components_template(project_name) if atlas_mode == "studio" else components_template(project_name)
@@ -800,7 +816,7 @@ def prepare_blueprint_workspace(
         short_prompt = (
             "Run `bunya-jido prepare --root . --atlas-mode studio --quiet` if needed, then read and execute "
             "`.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Refresh the five Studio Markdown inputs, keep "
-            "the JSON blueprint and agent map compatible with the current v1 validation path, validate them, "
+            "the blueprint compatible with the Studio v2 schema and the agent map grounded in its semantic layer, validate them, "
             "then run `bunya-jido build --root . --out bunya-jido.html` and report the HTML path.\n"
         )
     else:
@@ -897,8 +913,11 @@ def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -
     errors: list[str] = []
     warnings: list[str] = []
     publish_blockers: list[str] = []
-    if bp.get("schema_version") != "bunya-jido-blueprint-v1":
-        errors.append("schema_version must be bunya-jido-blueprint-v1")
+    schema_version = bp.get("schema_version")
+    if schema_version not in {"bunya-jido-blueprint-v1", "bunya-jido-blueprint-v2"}:
+        errors.append(
+            "schema_version must be bunya-jido-blueprint-v1 or bunya-jido-blueprint-v2"
+        )
     project = bp.get("project")
     if not isinstance(project, dict) or not project.get("name") or not project.get("summary"):
         errors.append("project.name and project.summary are required")
@@ -1033,6 +1052,14 @@ def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -
         and e.get("confidence") != "unverified"
         and (str(e.get("source")), str(e.get("target"))) not in unresolved_critical_edges
     )
+    atlas_metrics: dict[str, Any] = {}
+    if schema_version == "bunya-jido-blueprint-v2":
+        atlas_errors, atlas_warnings, atlas_blockers, atlas_metrics = (
+            validate_blueprint_v2_atlas(bp)
+        )
+        errors.extend(atlas_errors)
+        warnings.extend(atlas_warnings)
+        publish_blockers.extend(atlas_blockers)
     publish_blockers = list(dict.fromkeys(publish_blockers))
     grounding_status = "blocked" if errors or publish_blockers else "grounded"
     metrics = {
@@ -1049,6 +1076,7 @@ def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -
         "publish_blockers": publish_blockers[:40],
         "warning_count": len(warnings),
         "error_count": len(errors),
+        **atlas_metrics,
     }
     return errors, warnings, metrics
 
@@ -1968,6 +1996,17 @@ def graph_from_blueprint(
         "warning_count": len(warnings),
     }
     project = bp.get("project") or {}
+    is_v2 = bp.get("schema_version") == "bunya-jido-blueprint-v2"
+    atlas = bp.get("atlas") if is_v2 and isinstance(bp.get("atlas"), dict) else {}
+    atlas_intent = atlas.get("intent") if isinstance(atlas.get("intent"), dict) else {}
+    static_provider_overlay = (
+        str(atlas_intent.get("static_provider_overlay") or "excluded")
+        if is_v2
+        else "legacy"
+    )
+    static_provider_overlay_family = str(
+        atlas_intent.get("static_provider_overlay_family") or ""
+    )
     project_name = str(project.get("name") or (infer_project_name(Path(root)) if root else "repository"))
     id_map: dict[str, str] = {}
     raw_group_children: dict[str, str] = {}
@@ -2034,6 +2073,19 @@ def graph_from_blueprint(
             node["llm_lane"] = str(raw.get("llm_lane"))
         if raw.get("llm_env"):
             node["llm_env"] = str(raw.get("llm_env"))
+        if is_v2:
+            for key in (
+                "family",
+                "overview_visibility",
+                "activation",
+                "why_it_matters",
+                "inputs",
+                "outputs",
+                "constraints",
+                "inspector_summary",
+            ):
+                if raw.get(key) is not None:
+                    node[key] = raw[key]
         nodes.append(node)
         if show_root and not explicit_repo and type_ not in {"repo", "plane"}:
             edges.append({
@@ -2062,8 +2114,8 @@ def graph_from_blueprint(
             continue
         rel = str(raw.get("relation") or "references")
         lens = str(raw.get("lens") or RELATION_LENS.get(rel, "architecture"))
-        edges.append({
-            "id": f"e{len(edges):05d}",
+        edge = {
+            "id": str(raw.get("id") or f"e{len(edges):05d}"),
             "source": s,
             "target": t,
             "source_label": node_labels.get(s, s),
@@ -2074,24 +2126,39 @@ def graph_from_blueprint(
             "confidence": str(raw.get("confidence") or "llm_grounded"),
             "directed": bool(raw.get("directed", True)),
             "evidence": raw.get("evidence") or [],
-        })
+        }
+        if is_v2:
+            for key in ("relation_family", "workflow_role", "overview_visibility", "activation"):
+                if raw.get(key) is not None:
+                    edge[key] = raw[key]
+        edges.append(edge)
 
     # Add selected static API/provider nodes that the blueprint did not name, so LLM/API routes remain visible in generic repos.
     existing_labels = {n["label"].lower() for n in nodes}
-    if static_graph:
+    if static_graph and (not is_v2 or static_provider_overlay == "contextual"):
         for sn in static_graph.get("nodes", []):
             if sn.get("type") not in {"api_provider"}:
                 continue
             if str(sn.get("label", "")).lower() in existing_labels:
                 continue
             sid = _normalize_node_id(sn.get("id", ""))
-            nodes.append({
+            overlay_node = {
                 "id": sid, "label": sn.get("label", sid), "type": "api_provider", "plane": "external",
                 "description": sn.get("description", "Detected API/model provider from static scan."),
                 "source_path": sn.get("source_path", ""), "tags": ["type/api_provider", "plane/external", "static-overlay"],
-                "status": "", "major": True, "degree": 0, "size": 16,
+                "status": "", "major": not is_v2, "degree": 0, "size": 16,
                 "evidence": [{"kind": "static_scan", "path": f".bunya-jido/{STATIC_SCAN_FILE}"}],
-            })
+            }
+            if is_v2:
+                overlay_node.update(
+                    {
+                        "family": static_provider_overlay_family,
+                        "overview_visibility": "contextual",
+                        "activation": "external_boundary",
+                        "detail_level": "detail",
+                    }
+                )
+            nodes.append(overlay_node)
             existing_labels.add(str(sn.get("label", "")).lower())
 
     # Recompute degree and labels after optional overlay.
@@ -2136,7 +2203,7 @@ def graph_from_blueprint(
             if len(source_docs) >= 80:
                 break
     graph = {
-        "schema_version": "bunya-jido-v1",
+        "schema_version": "bunya-jido-v2" if is_v2 else "bunya-jido-v1",
         "generated_at": now_iso(),
         "title": f"Bunya-Jido · {project_name}",
         "description": str(project.get("summary") or "Blueprint-assisted repository graph."),
@@ -2161,6 +2228,12 @@ def graph_from_blueprint(
         "node_count": len(nodes),
         "edge_count": len(edges),
     }
+    if is_v2:
+        graph["blueprint_schema_version"] = str(bp.get("schema_version") or "")
+        graph["atlas"] = atlas
+        graph["primary_projection"] = project.get("primary_projection_id")
+        graph["scenario_count"] = len(atlas.get("scenarios") or [])
+        graph["static_provider_overlay"] = static_provider_overlay
     if agent_metrics is not None:
         graph["agent_map_quality"] = {**agent_metrics, "warnings": [warning.removeprefix("agent map: ") for warning in warnings if warning.startswith("agent map: ")]}
     return graph

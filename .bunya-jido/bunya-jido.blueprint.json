@@ -96,13 +96,18 @@
       "type": "contract",
       "plane": "quality",
       "importance": "core",
-      "description": "Blocks semantic publication when core evidence or critical relationships cannot be trusted.",
+      "description": "Blocks semantic publication when core evidence, critical relationships, or Studio v2 atlas contracts cannot be trusted.",
       "source_path": "src/bunya_jido/blueprint.py",
       "evidence": [
         {
           "kind": "source",
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "validate_blueprint_obj"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/schema.py",
+          "symbol": "validate_blueprint_v2_atlas"
         }
       ]
     },
@@ -176,12 +181,16 @@
       "type": "test",
       "plane": "quality",
       "importance": "major",
-      "description": "Exercises grounding publication gates and agent-map parity behavior.",
+      "description": "Exercises grounding publication gates, Studio v2 contracts, and agent-map parity behavior.",
       "source_path": "tests/test_blueprint.py",
       "evidence": [
         {
           "kind": "test",
           "path": "tests/test_blueprint.py"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_blueprint_v2.py"
         }
       ]
     },
@@ -410,6 +419,10 @@
         {
           "kind": "test",
           "path": "tests/test_blueprint.py"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_blueprint_v2.py"
         }
       ]
     },
