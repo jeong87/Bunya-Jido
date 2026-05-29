@@ -22,6 +22,9 @@ be documented.
   repository surfaces change.
 - A `bunya-jido evaluate-agent-utility` command, committed acceptance suite,
   and documented observation protocol for bounded agent-context utility.
+- An opt-in `prepare --atlas-mode studio` authoring path that creates
+  repository-thesis, projection-candidate, and scenario-policy documents while
+  keeping published JSON on the existing v1 contract.
 
 ### Changed
 

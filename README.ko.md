@@ -150,6 +150,22 @@ bunya-jido build --root . --out bunya-jido.html
 
 그 다음 `bunya-jido.html`을 브라우저에서 열면 됩니다.
 
+#### Studio 계획 모드
+
+선택적인 Studio 준비 모드는 추후 narrated atlas 렌더링에 앞서 코딩
+에이전트가 저장소에 맞는 설명 관점을 비교하도록 합니다.
+
+```bash
+bunya-jido prepare --root . --atlas-mode studio --quiet
+```
+
+Studio 준비는 `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`도
+추가로 생성합니다. 이 문서들은 primary projection과 정직한 scenario
+정책(`required`, `optional`, `none_with_reason`)을 검토하기 위한 것입니다.
+현재 단계에서 게시 가능한 JSON과 생성 HTML은 여전히
+`bunya-jido-blueprint-v1` 계약을 사용하며, v2 projection과 scenario
+playback 지원은 별도 단계로 남아 있습니다.
+
 ## 생성되는 파일
 
 `bunya-jido prepare`를 실행하면 다음 파일들이 만들어집니다.
@@ -169,6 +185,8 @@ bunya-jido build --root . --out bunya-jido.html
 
 지도 저장소는 `check-stale`에서 구조 변경이 필요 없다고 검토한 결정을
 남기기 위해 `.bunya-jido/MAP_REVIEW.md`를 추가로 추적할 수 있습니다.
+`--atlas-mode studio`를 사용하면 향후 v2 atlas를 위한 편집 입력으로
+`REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`도 생성됩니다.
 
 ### `COMPONENTS.md`
 

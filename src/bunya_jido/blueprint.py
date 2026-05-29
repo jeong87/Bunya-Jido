@@ -10,6 +10,14 @@ from pathlib import Path
 from typing import Any
 
 from .scanner import build_graph, infer_project_name, slug
+from .studio import (
+    make_studio_blueprint_prompt,
+    projections_template,
+    repository_thesis_template,
+    scenarios_template,
+    studio_components_template,
+    studio_workflows_template,
+)
 
 BLUEPRINT_DIR = ".bunya-jido"
 BLUEPRINT_FILE = "bunya-jido.blueprint.json"
@@ -17,6 +25,9 @@ AGENT_MAP_FILE = "bunya-jido.agent-map.json"
 AGENT_EVALUATION_FILE = "bunya-jido.agent-evaluation.json"
 COMPONENTS_FILE = "COMPONENTS.md"
 WORKFLOWS_FILE = "WORKFLOWS.md"
+REPOSITORY_THESIS_FILE = "REPOSITORY_THESIS.md"
+PROJECTIONS_FILE = "PROJECTIONS.md"
+SCENARIOS_FILE = "SCENARIOS.md"
 MAP_REVIEW_FILE = "MAP_REVIEW.md"
 AGENT_HANDOFF_FILE = "AGENT_HANDOFF.md"
 PROMPT_FILE = "BUNYA_JIDO_BLUEPRINT_PROMPT.md"
@@ -388,7 +399,11 @@ def compact_static_scan(graph: dict[str, Any], limit_nodes: int = 180, limit_edg
     }
 
 
-def make_blueprint_prompt(project_name: str) -> str:
+def make_blueprint_prompt(project_name: str, atlas_mode: str = "classic") -> str:
+    if atlas_mode not in {"classic", "studio"}:
+        raise ValueError(f"Unsupported atlas mode: {atlas_mode}")
+    if atlas_mode == "studio":
+        return make_studio_blueprint_prompt(project_name)
     return textwrap.dedent(f"""
     # Bunya-Jido Blueprint Prompt
 
@@ -724,6 +739,7 @@ def make_blueprint_prompt(project_name: str) -> str:
     `준비완료: .bunya-jido/COMPONENTS.md .bunya-jido/WORKFLOWS.md .bunya-jido/bunya-jido.blueprint.json .bunya-jido/bunya-jido.agent-map.json`
     """).strip() + "\n"
 
+
 def prepare_blueprint_workspace(
     root: str | Path,
     *,
@@ -736,7 +752,10 @@ def prepare_blueprint_workspace(
     show_root: bool = False,
     data_policy: str = "summary",
     max_data_files: int = 25,
+    atlas_mode: str = "classic",
 ) -> dict[str, Path]:
+    if atlas_mode not in {"classic", "studio"}:
+        raise ValueError(f"Unsupported atlas mode: {atlas_mode}")
     root_path = Path(root).resolve()
     outdir = blueprint_dir(root_path)
     outdir.mkdir(parents=True, exist_ok=True)
@@ -750,6 +769,9 @@ def prepare_blueprint_workspace(
         "agent_map_schema": outdir / AGENT_MAP_SCHEMA_FILE,
         "components": outdir / COMPONENTS_FILE,
         "workflows": outdir / WORKFLOWS_FILE,
+        "repository_thesis": outdir / REPOSITORY_THESIS_FILE,
+        "projections": outdir / PROJECTIONS_FILE,
+        "scenarios": outdir / SCENARIOS_FILE,
         "agent_map": outdir / AGENT_MAP_FILE,
         "handoff": outdir / AGENT_HANDOFF_FILE,
         "prompt": outdir / PROMPT_FILE,
@@ -760,19 +782,37 @@ def prepare_blueprint_workspace(
     _safe_write_json(paths["schema"], blueprint_schema())
     _safe_write_json(paths["agent_map_schema"], agent_map_schema())
     if not paths["components"].exists():
-        paths["components"].write_text(components_template(project_name), encoding="utf-8")
+        component_text = studio_components_template(project_name) if atlas_mode == "studio" else components_template(project_name)
+        paths["components"].write_text(component_text, encoding="utf-8")
     if not paths["workflows"].exists():
-        paths["workflows"].write_text(workflows_template(project_name), encoding="utf-8")
-    paths["prompt"].write_text(make_blueprint_prompt(project_name), encoding="utf-8")
-    paths["short_prompt"].write_text(
-        "Run `bunya-jido prepare --root . --quiet` if needed, then read and execute "
-        "`.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh "
-        "`.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, "
-        "`.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; "
-        "run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; "
-        "fix errors and grounding blockers and reduce classification warnings when practical; then say `준비완료`.\n",
-        encoding="utf-8",
-    )
+        workflow_text = studio_workflows_template(project_name) if atlas_mode == "studio" else workflows_template(project_name)
+        paths["workflows"].write_text(workflow_text, encoding="utf-8")
+    if atlas_mode == "studio":
+        for key, template in (
+            ("repository_thesis", repository_thesis_template),
+            ("projections", projections_template),
+            ("scenarios", scenarios_template),
+        ):
+            if not paths[key].exists():
+                paths[key].write_text(template(project_name), encoding="utf-8")
+    paths["prompt"].write_text(make_blueprint_prompt(project_name, atlas_mode=atlas_mode), encoding="utf-8")
+    if atlas_mode == "studio":
+        short_prompt = (
+            "Run `bunya-jido prepare --root . --atlas-mode studio --quiet` if needed, then read and execute "
+            "`.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Refresh the five Studio Markdown inputs, keep "
+            "the JSON blueprint and agent map compatible with the current v1 validation path, validate them, "
+            "then run `bunya-jido build --root . --out bunya-jido.html` and report the HTML path.\n"
+        )
+    else:
+        short_prompt = (
+            "Run `bunya-jido prepare --root . --quiet` if needed, then read and execute "
+            "`.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh "
+            "`.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, "
+            "`.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; "
+            "run `bunya-jido validate-blueprint --root .` and `bunya-jido validate-agent-map --root .`; "
+            "fix errors and grounding blockers and reduce classification warnings when practical; then say `준비완료`.\n"
+        )
+    paths["short_prompt"].write_text(short_prompt, encoding="utf-8")
     if not quiet:
         print(f"Bunya-Jido blueprint workspace prepared: {outdir}")
         print(f"Prompt: {paths['prompt']}")
@@ -781,6 +821,10 @@ def prepare_blueprint_workspace(
         print("Expected outputs:")
         print(f"  {paths['components']}")
         print(f"  {paths['workflows']}")
+        if atlas_mode == "studio":
+            print(f"  {paths['repository_thesis']}")
+            print(f"  {paths['projections']}")
+            print(f"  {paths['scenarios']}")
         print(f"  {paths['blueprint']}")
         print(f"  {paths['agent_map']}")
     return paths

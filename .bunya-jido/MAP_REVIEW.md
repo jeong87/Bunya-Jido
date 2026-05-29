@@ -23,3 +23,16 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Strict agent-utility evaluation, blueprint and agent-map
   validation, grounded diagnostics, stale-map review, and the unit test suite
   are required before commit.
+
+## 2026-05-29 - Studio Atlas Phase 0 And Phase 1
+
+- Change: Recorded the v1 baseline and added opt-in
+  `prepare --atlas-mode studio` editorial templates and prompting while
+  retaining the current v1 schema and rendering.
+- Decision: This phase prepares future authored inputs but does not add a
+  published semantic component, viewer path, or trusted context route.
+  Existing CLI and blueprint-publication nodes remain the correct self-map
+  structure until v2 publication is implemented.
+- Validation: Blueprint and agent-map validation, grounded diagnostics,
+  strict agent-utility evaluation, stale-map review, and the unit test suite
+  are required before commit.

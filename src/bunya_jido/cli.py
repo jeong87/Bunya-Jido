@@ -92,6 +92,7 @@ def cmd_prepare(args: argparse.Namespace) -> int:
         show_root=args.show_root,
         data_policy=args.data_policy,
         max_data_files=args.max_data_files,
+        atlas_mode=args.atlas_mode,
     )
     if args.print_short_prompt:
         print(paths["short_prompt"].read_text(encoding="utf-8"), end="")
@@ -473,6 +474,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_prepare = sub.add_parser("prepare", help="Create .bunya-jido prompt/schema/static scan for Codex, Claude Code, or another coding agent.")
     _add_common_scan_args(p_prepare)
+    p_prepare.add_argument("--atlas-mode", choices=["classic", "studio"], default="classic", help="Authoring prompt mode. Studio adds thesis/projection/scenario planning documents while retaining the current v1 publication contract. Default: classic.")
     p_prepare.add_argument("--quiet", action="store_true", help="Only print the generated prompt path.")
     p_prepare.add_argument("--print-short-prompt", action="store_true", help="Print the one-line instruction for coding agents.")
     p_prepare.set_defaults(func=cmd_prepare)

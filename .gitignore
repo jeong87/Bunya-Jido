@@ -33,6 +33,9 @@ dist/
 bunya-jido.html
 preview*.html
 
+# Local upgrade design inputs
+docs/BUNYA_JIDO_STUDIO_ATLAS_UPGRADE_PLAN_FOR_CODEX.md
+
 # Editor and OS noise
 .DS_Store
 Thumbs.db
