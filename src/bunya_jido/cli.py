@@ -13,6 +13,7 @@ from .blueprint import (
     activate_agent_guides,
     default_blueprint_path,
     default_agent_map_path,
+    evaluate_atlas_quality,
     evaluate_agent_utility,
     evaluate_map_freshness,
     generate_agent_context,
@@ -249,6 +250,7 @@ def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
             "agent_map_path": None,
             "node_count": graph["node_count"],
             "edge_count": graph["edge_count"],
+            "atlas_quality_status": "not_assessed",
             "publish_blockers": [],
             "warnings": [],
             "agent_routes": {"status": "not_assessed", "trusted": 0, "total": 0},
@@ -256,6 +258,7 @@ def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
 
     blueprint = load_blueprint(bp_path)
     bp_errors, bp_warnings, bp_metrics = validate_blueprint_file(bp_path, root=root)
+    atlas_quality = evaluate_atlas_quality(root, blueprint_path=bp_path)
     blockers = list(bp_metrics.get("publish_blockers") or [])
     errors = list(bp_errors)
     warnings = list(bp_warnings)
@@ -297,6 +300,18 @@ def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
         "primary_projection": bp_metrics.get("primary_projection"),
         "scenario_policy": bp_metrics.get("scenario_policy"),
         "scenario_count": bp_metrics.get("scenario_count", 0),
+        "atlas_quality_status": atlas_quality["status"],
+        "atlas_quality": {
+            "deterministic_blocker_count": len(
+                atlas_quality.get("deterministic_blockers") or []
+            ),
+            "deterministic_warning_count": len(
+                atlas_quality.get("deterministic_warnings") or []
+            ),
+            "review_required_warning_count": len(
+                atlas_quality.get("review_required_warnings") or []
+            ),
+        },
         "publish_blockers": blockers,
         "warnings": warnings,
         "errors": errors,
@@ -322,6 +337,7 @@ def cmd_diagnose(args: argparse.Namespace) -> int:
         if report.get("schema_version") == "bunya-jido-blueprint-v2":
             print(f"Primary projection: {report.get('primary_projection') or 'not provided'}")
             print(f"Scenario policy: {report.get('scenario_policy') or 'not provided'} ({report.get('scenario_count', 0)} scenarios)")
+            print(f"Atlas quality: {report.get('atlas_quality_status')}")
         print(f"Warnings: {len(report.get('warnings') or [])}")
         print(f"Blockers: {len(report.get('publish_blockers') or [])}")
         for blocker in (report.get("publish_blockers") or [])[:10]:
@@ -450,6 +466,38 @@ def cmd_evaluate_agent_utility(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_evaluate_atlas_quality(args: argparse.Namespace) -> int:
+    try:
+        report = evaluate_atlas_quality(args.root, blueprint_path=args.blueprint)
+    except (OSError, ValueError) as exc:
+        print(f"Atlas quality evaluation blocked: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(f"Atlas quality evaluation: {report['status']}")
+        if report["status"] == "not_assessed":
+            print(f"Reason: {report['reason']}")
+        else:
+            metrics = report["metrics"]
+            print(
+                "Overview: "
+                f"{metrics['visible_node_count']} nodes, "
+                f"{metrics['visible_edge_count']} edges, "
+                f"{metrics['visible_relation_family_count']} relation families"
+            )
+            for blocker in report["deterministic_blockers"]:
+                print(f"- blocker: {blocker}")
+            for warning in report["deterministic_warnings"]:
+                print(f"- warning: {warning}")
+            for warning in report["review_required_warnings"]:
+                print(f"- review: {warning}")
+        print(f"Limit: {report['limitation']}")
+    if args.require_pass and report["status"] != "passed":
+        return 2
+    return 0
+
+
 def cmd_install_agent_guides(args: argparse.Namespace) -> int:
     if args.dry_run and not args.activate:
         print("--dry-run requires --activate.", file=sys.stderr)
@@ -485,7 +533,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_prepare = sub.add_parser("prepare", help="Create .bunya-jido prompt/schema/static scan for Codex, Claude Code, or another coding agent.")
     _add_common_scan_args(p_prepare)
-    p_prepare.add_argument("--atlas-mode", choices=["classic", "studio"], default="classic", help="Authoring prompt mode. Studio adds thesis/projection/scenario planning documents while retaining the current v1 publication contract. Default: classic.")
+    p_prepare.add_argument("--atlas-mode", choices=["classic", "studio"], default="classic", help="Authoring prompt mode. Studio adds editorial inputs and an additive v2 blueprint contract; classic retains v1. Default: classic.")
     p_prepare.add_argument("--quiet", action="store_true", help="Only print the generated prompt path.")
     p_prepare.add_argument("--print-short-prompt", action="store_true", help="Print the one-line instruction for coding agents.")
     p_prepare.set_defaults(func=cmd_prepare)
@@ -558,6 +606,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_eval.add_argument("--json", action="store_true", help="Print a machine-readable evaluation report.")
     p_eval.set_defaults(func=cmd_evaluate_agent_utility)
 
+    p_atlas_quality = sub.add_parser("evaluate-atlas-quality", help="Evaluate measurable Studio v2 readability and scenario-policy signals while reporting review-required judgments separately.")
+    p_atlas_quality.add_argument("--root", default=".", help="Repository root. Default: current directory.")
+    p_atlas_quality.add_argument("--blueprint", default=None, help="Blueprint JSON path. Default: .bunya-jido/bunya-jido.blueprint.json")
+    p_atlas_quality.add_argument("--require-pass", action="store_true", help="Exit with status 2 unless a Studio v2 atlas has no deterministic blockers.")
+    p_atlas_quality.add_argument("--json", action="store_true", help="Print a machine-readable atlas-quality report.")
+    p_atlas_quality.set_defaults(func=cmd_evaluate_atlas_quality)
+
     p_guides = sub.add_parser("install-agent-guides", help="Write Bunya-Jido agent guidance snippets or activate managed project instructions.")
     p_guides.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_guides.add_argument("--agent", choices=["all", "codex", "claude", "cursor", "cline"], default="all", help="Which guide to write. Default: all.")
@@ -570,7 +625,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
-    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "install-agent-guides"}
+    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "install-agent-guides"}
     if not raw or (raw[0] not in subcommands and raw[0] not in {"-h", "--help", "--version"}):
         raw = ["build"] + raw
     parser = build_parser()

@@ -37,6 +37,38 @@
       ]
     },
     {
+      "task": "change atlas quality evaluation",
+      "intent": "Modify deterministic Studio readability or scenario-quality diagnostics without presenting subjective editorial judgment as proof.",
+      "start_nodes": [
+        "quality:atlas"
+      ],
+      "workflows": [
+        "atlas_quality_evaluation"
+      ],
+      "must_read": [
+        "src/bunya_jido/quality.py",
+        "src/bunya_jido/schema.py",
+        "src/bunya_jido/blueprint.py"
+      ],
+      "contracts": [
+        "Deterministic blockers and warnings must remain separate from review-required editorial judgments."
+      ],
+      "tests": [
+        "tests/test_projection_quality.py",
+        "tests/test_blueprint_v2.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/quality.py",
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/cli.py",
+        "tests/test_projection_quality.py",
+        "tests/test_blueprint_v2.py"
+      ],
+      "watch_out": [
+        "A heuristic warning must not silently become a publication claim about the best explanation."
+      ]
+    },
+    {
       "task": "change task route projection",
       "intent": "Adjust agent-map validation or the task-route paths shown in rendered maps.",
       "start_nodes": [

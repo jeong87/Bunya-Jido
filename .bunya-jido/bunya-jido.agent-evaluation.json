@@ -68,6 +68,29 @@
       }
     },
     {
+      "id": "atlas-quality-judgment-boundary",
+      "dimension": "boundary_discipline",
+      "query": {
+        "task": "change atlas quality evaluation"
+      },
+      "expect": {
+        "route_status": "matched",
+        "routes": [
+          "change atlas quality evaluation"
+        ],
+        "must_read": [
+          "src/bunya_jido/quality.py",
+          "src/bunya_jido/schema.py"
+        ],
+        "contracts": [
+          "Deterministic blockers and warnings must remain separate from review-required editorial judgments."
+        ],
+        "tests": [
+          "tests/test_projection_quality.py"
+        ]
+      }
+    },
+    {
       "id": "unknown-registry-task-honest-no-match",
       "dimension": "honest_no_match",
       "query": {
@@ -95,7 +118,8 @@
         "route_status": "matched",
         "routes": [
           "change grounding policy",
-          "change task route projection"
+          "change task route projection",
+          "change atlas quality evaluation"
         ],
         "forbid_routes": [
           "change viewer trust presentation"

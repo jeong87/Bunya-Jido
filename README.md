@@ -168,6 +168,18 @@ projection and an honest scenario policy: `required`, `optional`, or
 v2 viewer styling and scenario playback are planned separately. Classic mode
 continues to use the existing v1 contract.
 
+For a Studio v2 blueprint, evaluate measurable first-read and scenario-policy
+signals with:
+
+```bash
+bunya-jido evaluate-atlas-quality --root . --require-pass --json
+```
+
+This quality gate blocks deterministic contract failures and reports
+readability heuristics such as dense overview graphs or weak core inspection.
+Projection choice and narration meaning remain explicitly review-required
+judgments rather than automated proof.
+
 ## Generated Files
 
 `bunya-jido prepare` creates these files:
@@ -242,11 +254,14 @@ map is actually eligible for grounded publication:
 ```bash
 bunya-jido diagnose --root .
 bunya-jido diagnose --root . --require-grounded --json
+bunya-jido evaluate-atlas-quality --root . --require-pass --json  # Studio v2
 ```
 
 `--require-grounded` exits unsuccessfully for a static scan or a blocked
 semantic blueprint. Release automation uses this exact gate rather than
 assuming a generated map is trusted.
+`evaluate-atlas-quality` applies to Studio v2 blueprints and keeps measurable
+warnings separate from editorial review.
 
 ## HTML Map
 

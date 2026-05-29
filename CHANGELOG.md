@@ -28,6 +28,9 @@ be documented.
   repository-local vocabularies, projections, scenario policies, scenario
   references, and explicit static-provider overlay handling while classic v1
   output remains compatible.
+- An `evaluate-atlas-quality` command and diagnostics summary for Studio v2
+  that separate deterministic readability/scenario checks from
+  review-required editorial judgment.
 
 ### Changed
 

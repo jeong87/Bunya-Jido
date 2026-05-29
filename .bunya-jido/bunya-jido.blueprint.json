@@ -48,13 +48,18 @@
       "type": "component",
       "plane": "entry",
       "importance": "core",
-      "description": "Dispatches build, validation, preparation, and trusted context commands.",
+      "description": "Dispatches build, validation, preparation, atlas-quality evaluation, and trusted context commands.",
       "source_path": "src/bunya_jido/cli.py",
       "evidence": [
         {
           "kind": "source",
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_build"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_evaluate_atlas_quality"
         }
       ]
     },
@@ -108,6 +113,22 @@
           "kind": "source",
           "path": "src/bunya_jido/schema.py",
           "symbol": "validate_blueprint_v2_atlas"
+        }
+      ]
+    },
+    {
+      "id": "quality:atlas",
+      "label": "Atlas Quality Evaluator",
+      "type": "contract",
+      "plane": "quality",
+      "importance": "major",
+      "description": "Measures deterministic Studio v2 readability and scenario-policy signals while separating review-required interpretation.",
+      "source_path": "src/bunya_jido/quality.py",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/quality.py",
+          "symbol": "evaluate_atlas_quality_obj"
         }
       ]
     },
@@ -191,6 +212,10 @@
         {
           "kind": "test",
           "path": "tests/test_blueprint_v2.py"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_projection_quality.py"
         }
       ]
     },
@@ -290,6 +315,32 @@
           "kind": "source",
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "graph_from_blueprint"
+        }
+      ]
+    },
+    {
+      "source": "entry:cli",
+      "target": "quality:atlas",
+      "relation": "calls",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_evaluate_atlas_quality"
+        }
+      ]
+    },
+    {
+      "source": "semantic:validation",
+      "target": "quality:atlas",
+      "relation": "precedes",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "evaluate_atlas_quality"
         }
       ]
     },
@@ -428,6 +479,18 @@
     },
     {
       "source": "quality:tests",
+      "target": "quality:atlas",
+      "relation": "checks",
+      "confidence": "deterministic",
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_projection_quality.py"
+        }
+      ]
+    },
+    {
+      "source": "quality:tests",
       "target": "semantic:agent_map",
       "relation": "checks",
       "confidence": "deterministic",
@@ -532,6 +595,16 @@
         "quality:tests",
         "semantic:validation"
       ]
+    },
+    {
+      "id": "atlas_quality_evaluation",
+      "label": "Atlas Quality Evaluation",
+      "description": "Measure Studio v2 overview and scenario signals while exposing interpretation that still needs human review.",
+      "node_ids": [
+        "entry:cli",
+        "semantic:validation",
+        "quality:atlas"
+      ]
     }
   ],
   "views": [
@@ -544,6 +617,7 @@
         "analysis:scanner",
         "semantic:blueprint",
         "semantic:validation",
+        "quality:atlas",
         "semantic:agent_map",
         "presentation:renderer",
         "presentation:viewer"
@@ -555,6 +629,7 @@
       "description": "Validation, agent context, tests, CI, and the roadmap commitments they enforce.",
       "node_ids": [
         "semantic:validation",
+        "quality:atlas",
         "semantic:agent_map",
         "semantic:context",
         "quality:tests",

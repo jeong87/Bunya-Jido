@@ -50,3 +50,15 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Blueprint and agent-map validation, grounded diagnostics,
   strict agent-utility evaluation, stale-map review, and the full unit test
   suite are required before commit.
+
+## 2026-05-29 - Studio Atlas Phase 3 Quality Evaluator
+
+- Change: Added `evaluate-atlas-quality`, Studio v2 quality metrics and
+  diagnostics, and tests for density, inspector weakness, scenario gaps, and
+  review-required narration judgments.
+- Decision: Added the Atlas Quality Evaluator contract node, its CLI/validation
+  workflow, and a bounded agent route because this is a new maintained
+  publication boundary rather than an implementation detail of validation.
+- Validation: Blueprint and agent-map validation, strict diagnostics and
+  agent-utility evaluation, stale-map review, and the full unit test suite are
+  required before commit.

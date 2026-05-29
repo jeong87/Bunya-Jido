@@ -9,6 +9,7 @@ from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any
 
+from .quality import evaluate_atlas_quality_obj
 from .scanner import build_graph, infer_project_name, slug
 from .schema import (
     blueprint_schema_v2 as studio_blueprint_schema_v2,
@@ -1084,6 +1085,24 @@ def validate_blueprint_obj(bp: dict[str, Any], root: str | Path | None = None) -
 def validate_blueprint_file(path: str | Path, root: str | Path | None = None) -> tuple[list[str], list[str], dict[str, Any]]:
     bp = _read_json_relaxed(Path(path))
     return validate_blueprint_obj(bp, root=root)
+
+
+def evaluate_atlas_quality(
+    root: str | Path,
+    blueprint_path: str | Path | None = None,
+) -> dict[str, Any]:
+    root_path = Path(root).resolve()
+    path = Path(blueprint_path).resolve() if blueprint_path else default_blueprint_path(root_path)
+    if not path.exists():
+        raise ValueError(f"Atlas quality requires a semantic blueprint: {path}")
+    blueprint = _read_json_relaxed(path)
+    errors, _, metrics = validate_blueprint_obj(blueprint, root=root_path)
+    return evaluate_atlas_quality_obj(
+        blueprint,
+        root=root_path,
+        validation_errors=errors,
+        validation_metrics=metrics,
+    )
 
 
 

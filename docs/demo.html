@@ -95,7 +95,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v1",
-  "generated_at": "2026-05-29T14:43:51+00:00",
+  "generated_at": "2026-05-29T14:50:47+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
   "artifact_mode": "semantic_blueprint",
@@ -106,12 +106,12 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "publish_blockers": [],
     "warnings": [],
     "metrics": {
-      "node_count": 12,
-      "edge_count": 19,
+      "node_count": 13,
+      "edge_count": 22,
       "grounded_node_ratio": 1.0,
       "grounded_edge_ratio": 1.0,
       "core_node_count": 5,
-      "critical_edge_count": 11,
+      "critical_edge_count": 12,
       "grounded_core_node_ratio": 1.0,
       "grounded_critical_edge_ratio": 1.0,
       "grounding_status": "grounded",
@@ -122,8 +122,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     }
   },
   "stats": {
-    "nodes": 12,
-    "edges": 19,
+    "nodes": 13,
+    "edges": 22,
     "relations": [
       "calls",
       "checks",
@@ -269,7 +269,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Command Line Interface",
       "type": "component",
       "plane": "entry",
-      "description": "Dispatches build, validation, preparation, and trusted context commands.",
+      "description": "Dispatches build, validation, preparation, atlas-quality evaluation, and trusted context commands.",
       "source_path": "src/bunya_jido/cli.py",
       "tags": [
         "blueprint",
@@ -279,7 +279,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 4,
+      "degree": 5,
       "size": 22.0,
       "parent": "",
       "detail_level": "overview",
@@ -288,6 +288,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "source",
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_build"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_evaluate_atlas_quality"
         }
       ]
     },
@@ -346,6 +351,33 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
+      "id": "quality:atlas",
+      "label": "Atlas Quality Evaluator",
+      "type": "contract",
+      "plane": "quality",
+      "description": "Measures deterministic Studio v2 readability and scenario-policy signals while separating review-required interpretation.",
+      "source_path": "src/bunya_jido/quality.py",
+      "tags": [
+        "blueprint",
+        "importance/major",
+        "plane/quality",
+        "type/contract"
+      ],
+      "status": "",
+      "major": true,
+      "degree": 3,
+      "size": 17.0,
+      "parent": "",
+      "detail_level": "overview",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/quality.py",
+          "symbol": "evaluate_atlas_quality_obj"
+        }
+      ]
+    },
+    {
       "id": "semantic:validation",
       "label": "Grounding Gate",
       "type": "contract",
@@ -360,7 +392,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 6,
+      "degree": 7,
       "size": 22.0,
       "parent": "",
       "detail_level": "overview",
@@ -392,7 +424,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 3,
+      "degree": 4,
       "size": 17.0,
       "parent": "",
       "detail_level": "overview",
@@ -404,6 +436,10 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "kind": "test",
           "path": "tests/test_blueprint_v2.py"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_projection_quality.py"
         }
       ]
     },
@@ -594,6 +630,44 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     },
     {
       "id": "e00004",
+      "source": "entry:cli",
+      "target": "quality:atlas",
+      "source_label": "Command Line Interface",
+      "target_label": "Atlas Quality Evaluator",
+      "relation": "calls",
+      "lens": "call",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_evaluate_atlas_quality"
+        }
+      ]
+    },
+    {
+      "id": "e00005",
+      "source": "semantic:validation",
+      "target": "quality:atlas",
+      "source_label": "Grounding Gate",
+      "target_label": "Atlas Quality Evaluator",
+      "relation": "precedes",
+      "lens": "architecture",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "evaluate_atlas_quality"
+        }
+      ]
+    },
+    {
+      "id": "e00006",
       "source": "semantic:blueprint",
       "target": "semantic:agent_map",
       "source_label": "Blueprint Projection",
@@ -612,7 +686,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00005",
+      "id": "e00007",
       "source": "semantic:validation",
       "target": "presentation:renderer",
       "source_label": "Grounding Gate",
@@ -631,7 +705,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00006",
+      "id": "e00008",
       "source": "semantic:agent_map",
       "target": "presentation:renderer",
       "source_label": "Agent Route Parity",
@@ -650,7 +724,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00007",
+      "id": "e00009",
       "source": "entry:cli",
       "target": "presentation:renderer",
       "source_label": "Command Line Interface",
@@ -669,7 +743,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00008",
+      "id": "e00010",
       "source": "presentation:renderer",
       "target": "presentation:viewer",
       "source_label": "HTML Renderer",
@@ -688,7 +762,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00009",
+      "id": "e00011",
       "source": "entry:cli",
       "target": "semantic:context",
       "source_label": "Command Line Interface",
@@ -707,7 +781,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00010",
+      "id": "e00012",
       "source": "semantic:context",
       "target": "semantic:validation",
       "source_label": "Trusted Context Generator",
@@ -726,7 +800,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00011",
+      "id": "e00013",
       "source": "semantic:context",
       "target": "semantic:agent_map",
       "source_label": "Trusted Context Generator",
@@ -745,7 +819,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00012",
+      "id": "e00014",
       "source": "semantic:validation",
       "target": "semantic:agent_map",
       "source_label": "Grounding Gate",
@@ -764,7 +838,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00013",
+      "id": "e00015",
       "source": "quality:tests",
       "target": "semantic:validation",
       "source_label": "Semantic Contract Tests",
@@ -786,7 +860,25 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00014",
+      "id": "e00016",
+      "source": "quality:tests",
+      "target": "quality:atlas",
+      "source_label": "Semantic Contract Tests",
+      "target_label": "Atlas Quality Evaluator",
+      "relation": "checks",
+      "lens": "contract",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_projection_quality.py"
+        }
+      ]
+    },
+    {
+      "id": "e00017",
       "source": "quality:tests",
       "target": "semantic:agent_map",
       "source_label": "Semantic Contract Tests",
@@ -804,7 +896,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00015",
+      "id": "e00018",
       "source": "quality:ci",
       "target": "quality:tests",
       "source_label": "Continuous Integration",
@@ -822,7 +914,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00016",
+      "id": "e00019",
       "source": "docs:readme",
       "target": "entry:cli",
       "source_label": "Public Product Contract",
@@ -840,7 +932,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00017",
+      "id": "e00020",
       "source": "docs:roadmap",
       "target": "semantic:validation",
       "source_label": "Contribution Roadmap",
@@ -858,7 +950,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
-      "id": "e00018",
+      "id": "e00021",
       "source": "docs:roadmap",
       "target": "semantic:agent_map",
       "source_label": "Contribution Roadmap",
@@ -886,10 +978,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "node_ids": [
         "semantic:validation",
         "semantic:agent_map",
-        "semantic:blueprint",
         "entry:cli",
+        "semantic:blueprint",
         "presentation:renderer",
         "quality:tests",
+        "quality:atlas",
         "semantic:context",
         "analysis:scanner",
         "presentation:viewer",
@@ -900,10 +993,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "nodes": [
         "Grounding Gate",
         "Agent Route Parity",
-        "Blueprint Projection",
         "Command Line Interface",
+        "Blueprint Projection",
         "HTML Renderer",
         "Semantic Contract Tests",
+        "Atlas Quality Evaluator",
         "Trusted Context Generator",
         "Static Scanner",
         "Interactive Viewer",
@@ -921,18 +1015,20 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "node_ids": [
         "semantic:validation",
         "semantic:agent_map",
-        "semantic:blueprint",
         "entry:cli",
+        "semantic:blueprint",
         "presentation:renderer",
+        "quality:atlas",
         "analysis:scanner",
         "presentation:viewer"
       ],
       "nodes": [
         "Grounding Gate",
         "Agent Route Parity",
-        "Blueprint Projection",
         "Command Line Interface",
+        "Blueprint Projection",
         "HTML Renderer",
+        "Atlas Quality Evaluator",
         "Static Scanner",
         "Interactive Viewer"
       ]
@@ -947,6 +1043,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "semantic:validation",
         "semantic:agent_map",
         "quality:tests",
+        "quality:atlas",
         "semantic:context",
         "docs:roadmap",
         "quality:ci"
@@ -955,6 +1052,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Grounding Gate",
         "Agent Route Parity",
         "Semantic Contract Tests",
+        "Atlas Quality Evaluator",
         "Trusted Context Generator",
         "Contribution Roadmap",
         "Continuous Integration"
@@ -1058,6 +1156,23 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ]
     },
     {
+      "id": "workflow_atlas_quality_evaluation",
+      "label": "Atlas Quality Evaluation",
+      "description": "Measure Studio v2 overview and scenario signals while exposing interpretation that still needs human review.",
+      "kind": "workflow",
+      "source": "blueprint",
+      "node_ids": [
+        "entry:cli",
+        "semantic:validation",
+        "quality:atlas"
+      ],
+      "nodes": [
+        "Command Line Interface",
+        "Grounding Gate",
+        "Atlas Quality Evaluator"
+      ]
+    },
+    {
       "id": "task_route_change-grounding-policy",
       "label": "change grounding policy",
       "description": "Modify publication blockers or grounding metrics while preserving the trust contract.",
@@ -1087,6 +1202,35 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "tests": [
         "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py"
+      ]
+    },
+    {
+      "id": "task_route_change-atlas-quality-evaluation",
+      "label": "change atlas quality evaluation",
+      "description": "Modify deterministic Studio readability or scenario-quality diagnostics without presenting subjective editorial judgment as proof.",
+      "kind": "task_route",
+      "source": "agent_map",
+      "node_ids": [
+        "quality:atlas",
+        "entry:cli",
+        "semantic:validation"
+      ],
+      "nodes": [
+        "Atlas Quality Evaluator",
+        "Command Line Interface",
+        "Grounding Gate"
+      ],
+      "workflows": [
+        "atlas_quality_evaluation"
+      ],
+      "must_read": [
+        "src/bunya_jido/quality.py",
+        "src/bunya_jido/schema.py",
+        "src/bunya_jido/blueprint.py"
+      ],
+      "tests": [
+        "tests/test_projection_quality.py",
         "tests/test_blueprint_v2.py"
       ]
     },
@@ -1245,6 +1389,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     },
     {
       "kind": "source",
+      "path": "src/bunya_jido/quality.py",
+      "symbol": "evaluate_atlas_quality_obj"
+    },
+    {
+      "kind": "source",
       "path": "src/bunya_jido/render.py",
       "symbol": "render_html"
     },
@@ -1262,6 +1411,10 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "path": "tests/test_blueprint_v2.py"
     },
     {
+      "kind": "test",
+      "path": "tests/test_projection_quality.py"
+    },
+    {
       "kind": "config",
       "path": ".github/workflows/ci.yml"
     },
@@ -1275,12 +1428,12 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     }
   ],
   "blueprint_quality": {
-    "node_count": 12,
-    "edge_count": 19,
+    "node_count": 13,
+    "edge_count": 22,
     "grounded_node_ratio": 1.0,
     "grounded_edge_ratio": 1.0,
     "core_node_count": 5,
-    "critical_edge_count": 11,
+    "critical_edge_count": 12,
     "grounded_core_node_ratio": 1.0,
     "grounded_critical_edge_ratio": 1.0,
     "grounding_status": "grounded",
@@ -1290,11 +1443,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "error_count": 0,
     "warnings": []
   },
-  "node_count": 12,
-  "edge_count": 19,
+  "node_count": 13,
+  "edge_count": 22,
   "agent_map_quality": {
-    "task_route_count": 3,
-    "trusted_route_count": 3,
+    "task_route_count": 4,
+    "trusted_route_count": 4,
     "grounded_route_ratio": 1.0,
     "grounding_status": "grounded",
     "publish_blocker_count": 0,
@@ -1302,7 +1455,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "projectable_route_indexes": [
       0,
       1,
-      2
+      2,
+      3
     ],
     "warning_count": 0,
     "error_count": 0,

@@ -379,6 +379,7 @@ class BlueprintV2Tests(unittest.TestCase):
         self.assertEqual(report["primary_projection"], "projection:primary")
         self.assertEqual(report["scenario_policy"], "required")
         self.assertEqual(report["scenario_count"], 1)
+        self.assertEqual(report["atlas_quality_status"], "passed")
         self.assertIn('"schema_version": "bunya-jido-v2"', html)
         self.assertIn('"primary_projection": "projection:primary"', html)
 

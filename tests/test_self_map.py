@@ -63,8 +63,8 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
         self.assertEqual(metrics["grounding_status"], "grounded")
-        self.assertEqual(metrics["node_count"], 12)
-        self.assertEqual(metrics["edge_count"], 19)
+        self.assertEqual(metrics["node_count"], 13)
+        self.assertEqual(metrics["edge_count"], 22)
         self.assertEqual(metrics["grounded_core_node_ratio"], 1.0)
         self.assertEqual(metrics["grounded_critical_edge_ratio"], 1.0)
 
@@ -74,7 +74,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
         self.assertEqual(metrics["grounding_status"], "grounded")
-        self.assertEqual(metrics["trusted_route_count"], 3)
+        self.assertEqual(metrics["trusted_route_count"], 4)
 
     def test_gallery_build_projects_expected_semantic_paths(self) -> None:
         graph, _ = graph_with_optional_blueprint(ROOT, max_files=0)
@@ -82,8 +82,8 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(graph["artifact_mode"], "semantic_blueprint")
         self.assertEqual(graph["grounding"]["status"], "grounded")
         self.assertTrue(graph["grounding"]["publishable"])
-        self.assertEqual(graph["stats"]["nodes"], 12)
-        self.assertEqual(graph["stats"]["edges"], 19)
+        self.assertEqual(graph["stats"]["nodes"], 13)
+        self.assertEqual(graph["stats"]["edges"], 22)
         self.assertIn(
             {
                 "id": "semantic",
@@ -107,6 +107,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             route_ids,
             {
                 "task_route_change-grounding-policy",
+                "task_route_change-atlas-quality-evaluation",
                 "task_route_change-task-route-projection",
                 "task_route_change-viewer-trust-presentation",
             },
@@ -116,7 +117,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         context = generate_agent_context(ROOT, task="change task route projection")
 
         self.assertIn("- Grounding status: `grounded`", context)
-        self.assertIn("- Agent-map routes: `validated` (3 trusted route(s))", context)
+        self.assertIn("- Agent-map routes: `validated` (4 trusted route(s))", context)
         self.assertIn("- Requested route match: `matched`", context)
         self.assertIn("### change task route projection", context)
         self.assertIn("- `task_route_publication`", context)
@@ -127,6 +128,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("- Requested route match: `not_found`", context)
         self.assertIn("No matching trusted route for this request.", context)
         self.assertNotIn("### change grounding policy", context)
+        self.assertNotIn("### change atlas quality evaluation", context)
         self.assertNotIn("### change task route projection", context)
         self.assertNotIn("### change viewer trust presentation", context)
 
@@ -138,6 +140,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertIn("- Changed-file route match: `matched`", context)
         self.assertIn("### change grounding policy", context)
+        self.assertIn("### change atlas quality evaluation", context)
         self.assertIn("### change task route projection", context)
         self.assertNotIn("### change viewer trust presentation", context)
         self.assertIn(
@@ -146,6 +149,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         )
         self.assertIn("- Changed-file route match: `not_found`", unrelated)
         self.assertNotIn("### change grounding policy", unrelated)
+        self.assertNotIn("### change atlas quality evaluation", unrelated)
         self.assertNotIn("### change task route projection", unrelated)
 
     def test_committed_stale_policy_requires_map_review_for_source_changes(self) -> None:
@@ -172,7 +176,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 5)
+        self.assertEqual(report["case_count"], 6)
         self.assertEqual(
             set(report["dimensions"]),
             {
@@ -238,7 +242,8 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(report["artifact_mode"], "semantic_blueprint")
         self.assertEqual(report["grounding_status"], "grounded")
         self.assertTrue(report["semantic_publication_allowed"])
-        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 3, "total": 3})
+        self.assertEqual(report["atlas_quality_status"], "not_assessed")
+        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 4, "total": 4})
 
 
 if __name__ == "__main__":
