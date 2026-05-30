@@ -58,6 +58,8 @@ be documented.
   platform-specific setup commands.
 - CI, demo publishing, and package release checks now require the committed
   agent-utility suite to pass without claiming live-agent behavioral proof.
+- Maintained workflows use current official Node.js 24-backed checkout,
+  Python setup, and release artifact actions where supported.
 - The committed Bunya-Jido self-map now publishes a grounded Studio v2 atlas
   with authored projections and evidence-badged scenarios; Studio layout
   derives its planes from authored data rather than domain-specific defaults.

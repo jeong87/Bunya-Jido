@@ -102,3 +102,13 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Blueprint and agent-map validation, strict atlas-quality and
   agent-utility evaluation, full unit tests, regenerated demo/screenshot,
   stale-map review, and visual inspection are required before commit.
+
+## 2026-05-30 - Official Actions Node 24 Runtime Maintenance
+
+- Change: Upgraded maintained workflow uses of checkout, Python setup, and
+  release artifact transport actions to official Node.js 24-backed majors.
+- Decision: This is CI and publishing runtime maintenance only. The committed
+  Studio self-map structure, projections, scenarios, and trusted routes remain
+  accurate, so no blueprint or agent-map rewrite is required.
+- Validation: Full tests, strict semantic and atlas gates, agent-utility
+  evaluation, stale-map review, and the resulting GitHub CI run are required.
