@@ -112,3 +112,12 @@ An entry records review work; it does not prove architectural completeness.
   accurate, so no blueprint or agent-map rewrite is required.
 - Validation: Full tests, strict semantic and atlas gates, agent-utility
   evaluation, stale-map review, and the resulting GitHub CI run are required.
+
+## 2026-05-31 - Quick Start Studio Onboarding Placement
+
+- Change: Moved the two-step Quick Start above the product-output description
+  and embedded the full recommended Studio atlas agent prompt in both READMEs.
+- Decision: This is onboarding presentation for the already published Studio
+  workflow. It does not change the semantic self-map, scenarios, or routes.
+- Validation: Self-map tests, strict semantic and atlas gates, agent-utility
+  evaluation, and stale-map review are required before publication.

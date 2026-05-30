@@ -24,6 +24,22 @@ The project is inspired by Cheonsang Yeolcha Bunyajido, the Korean star map that
 
 The goal is a grounded semantic map whose important claims can be inspected, not an automatic claim of architectural truth.
 
+## Quick Start
+
+1. In the repository you want to map, install Bunya-Jido:
+
+```bash
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+```
+
+2. From that repository root, give your coding agent this prompt:
+
+```text
+Run `bunya-jido prepare --root . --atlas-mode studio --quiet`, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and `bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix errors and grounding blockers; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
+```
+
+Open `bunya-jido.html` in your browser.
+
 ## What It Creates
 
 Bunya-Jido creates two outputs.
@@ -71,10 +87,7 @@ Semantic maps with unresolved core grounding blockers are not built by default. 
 bunya-jido build --root . --allow-draft --out bunya-jido.html
 ```
 
-## Quick Start
-
-1. Install: `python -m pip install git+https://github.com/jeong87/Bunya-Jido.git`
-2. Prompt Codex: paste the Blueprint Mode prompt below to have it write docs, validate outputs, and build the HTML map.
+## Installation And Mode Details
 
 Requirements:
 
@@ -128,7 +141,9 @@ systems.
 
 ### Blueprint Mode
 
-Blueprint mode is the core Bunya-Jido workflow.
+Blueprint mode is the base semantic workflow. The Quick Start above selects
+its richer Studio atlas extension; use this baseline path when authored
+projections and narrated scenarios are not needed.
 
 1. Bunya-Jido scans the repository deterministically.
 2. A coding agent reads the repository and scan output.
@@ -152,8 +167,8 @@ Open `bunya-jido.html` in your browser.
 
 #### Studio Atlas Mode
 
-The opt-in Studio mode asks a coding agent to compare repository-specific
-explanations before publishing a narrated atlas:
+The recommended Quick Start above uses Studio mode. It asks a coding agent to
+compare repository-specific explanations before publishing a narrated atlas:
 
 ```bash
 bunya-jido prepare --root . --atlas-mode studio --quiet

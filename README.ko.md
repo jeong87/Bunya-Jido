@@ -24,6 +24,22 @@
 
 목표는 중요한 주장에 붙은 근거를 검토할 수 있는 시맨틱 지도를 만드는 것이며, 아키텍처의 정답을 자동으로 증명한다고 주장하는 것은 아닙니다.
 
+## 빠른 시작
+
+1. 지도를 만들 저장소에서 Bunya-Jido를 설치합니다.
+
+```bash
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+```
+
+2. 그 저장소 루트에서 코딩 에이전트에게 다음 문장을 그대로 지시합니다.
+
+```text
+Run `bunya-jido prepare --root . --atlas-mode studio --quiet`, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and `bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix errors and grounding blockers; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
+```
+
+완료되면 브라우저에서 `bunya-jido.html`을 엽니다.
+
 ## 무엇을 만드나요?
 
 Bunya-Jido는 두 가지 결과물을 만듭니다.
@@ -71,10 +87,7 @@ bunya-jido build --root . --blueprint none --out bunya-jido.html
 bunya-jido build --root . --allow-draft --out bunya-jido.html
 ```
 
-## 빠른 시작
-
-1. 설치: `python -m pip install git+https://github.com/jeong87/Bunya-Jido.git`
-2. Codex에게 지시: 아래 Blueprint 모드 프롬프트를 붙여넣으면 문서 작성, 검증, HTML 지도 생성까지 맡길 수 있습니다.
+## 설치와 모드 상세
 
 필요 환경:
 
@@ -128,7 +141,9 @@ Python 3.10 이상이면 사용할 수 있습니다. Windows 예시에서 `3.12`
 
 ### Blueprint 모드
 
-Blueprint 모드는 Bunya-Jido의 핵심입니다.
+Blueprint 모드는 기본 시맨틱 워크플로우입니다. 위 빠른 시작은 더 풍부한
+Studio atlas 확장을 선택합니다. authored projection과 narrated
+scenario가 필요하지 않다면 이 기본 경로를 사용할 수 있습니다.
 
 1. Bunya-Jido가 저장소를 정적으로 스캔합니다.
 2. 코딩 에이전트가 저장소와 스캔 결과를 읽습니다.
@@ -152,8 +167,9 @@ bunya-jido build --root . --out bunya-jido.html
 
 #### Studio Atlas 모드
 
-선택적인 Studio 모드는 narrated atlas를 게시하기에 앞서 코딩 에이전트가
-저장소에 맞는 설명 관점을 비교하도록 합니다.
+위 빠른 시작에서 권장하는 경로가 Studio 모드입니다. narrated atlas를
+게시하기에 앞서 코딩 에이전트가 저장소에 맞는 설명 관점을 비교하도록
+합니다.
 
 ```bash
 bunya-jido prepare --root . --atlas-mode studio --quiet
