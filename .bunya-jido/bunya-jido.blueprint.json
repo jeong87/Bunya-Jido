@@ -85,13 +85,18 @@
       "type": "component",
       "plane": "semantic",
       "importance": "core",
-      "description": "Loads semantic artifacts and produces the published graph contract.",
+      "description": "Loads semantic artifacts and produces the published graph contract, including Studio projection presets.",
       "source_path": "src/bunya_jido/blueprint.py",
       "evidence": [
         {
           "kind": "source",
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "graph_with_optional_blueprint"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/blueprint.py",
+          "symbol": "_path_presets_from_blueprint"
         }
       ]
     },
@@ -186,13 +191,18 @@
       "type": "ui",
       "plane": "presentation",
       "importance": "core",
-      "description": "Displays map paths, trust state, evidence, and navigation controls offline.",
+      "description": "Displays trust, evidence, Studio projection vocabulary and presets, and contextual navigation controls offline.",
       "source_path": "src/bunya_jido/viewer/index.template.html",
       "evidence": [
         {
           "kind": "source",
           "path": "src/bunya_jido/viewer/index.template.html",
           "symbol": "renderTrust"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/viewer/index.template.html",
+          "symbol": "contextualDirectContext"
         }
       ]
     },
@@ -202,7 +212,7 @@
       "type": "test",
       "plane": "quality",
       "importance": "major",
-      "description": "Exercises grounding publication gates, Studio v2 contracts, and agent-map parity behavior.",
+      "description": "Exercises grounding publication gates, Studio v2 contracts and viewer projections, and agent-map parity behavior.",
       "source_path": "tests/test_blueprint.py",
       "evidence": [
         {

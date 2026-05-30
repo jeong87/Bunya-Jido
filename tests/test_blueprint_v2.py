@@ -225,6 +225,13 @@ class BlueprintV2Tests(unittest.TestCase):
         self.assertEqual(graph["primary_projection"], "projection:primary")
         self.assertEqual(graph["static_provider_overlay"], "excluded")
         self.assertNotIn("Provider", {node["label"] for node in graph["nodes"]})
+        projection = next(
+            path for path in graph["path_presets"] if path["kind"] == "projection"
+        )
+        self.assertEqual(projection["projection_id"], "projection:primary")
+        self.assertTrue(projection["is_primary"])
+        self.assertEqual(projection["label"], "Authoring Flow")
+        self.assertEqual(projection["relation_family_ids"], ["flow", "checks"])
 
     def test_v2_family_and_projection_references_are_checked(self) -> None:
         blueprint = valid_v2_blueprint()
@@ -337,6 +344,63 @@ class BlueprintV2Tests(unittest.TestCase):
             errors,
         )
 
+    def test_v2_viewer_presets_preserve_secondary_projection_and_contextual_neighbors(self) -> None:
+        blueprint = valid_v2_blueprint()
+        evidence = [{"kind": "source", "path": "README.md"}]
+        blueprint["nodes"].append(
+            {
+                "id": "component:detail",
+                "label": "Direct Context",
+                "type": "component",
+                "family": "transformer",
+                "plane": "control",
+                "importance": "detail",
+                "overview_visibility": "contextual",
+                "activation": "optional",
+                "description": "A contextual neighbor revealed from a selected core node.",
+                "evidence": evidence,
+            }
+        )
+        blueprint["edges"].append(
+            {
+                "id": "edge:builder_detail",
+                "source": "component:builder",
+                "target": "component:detail",
+                "relation": "documents",
+                "relation_family": "flow",
+                "workflow_role": "detail",
+                "overview_visibility": "contextual",
+                "activation": "optional",
+                "confidence": "llm_grounded",
+                "evidence": evidence,
+            }
+        )
+        secondary = copy.deepcopy(blueprint["atlas"]["projections"][0])
+        secondary.update(
+            {
+                "id": "projection:detail",
+                "label": "Context View",
+                "description": "A supporting context projection.",
+                "question_answered": "What supporting context is available?",
+                "is_primary": False,
+                "node_ids": ["component:builder", "component:detail"],
+            }
+        )
+        blueprint["atlas"]["projections"].append(secondary)
+
+        errors, _, _ = validate_blueprint_obj(blueprint)
+        graph = graph_from_blueprint(blueprint)
+        projections = [
+            path for path in graph["path_presets"] if path["kind"] == "projection"
+        ]
+
+        self.assertEqual(errors, [])
+        self.assertEqual([path["label"] for path in projections], ["Authoring Flow", "Context View"])
+        self.assertEqual([path["is_primary"] for path in projections], [True, False])
+        self.assertEqual(projections[1]["node_ids"], ["component:builder", "component:detail"])
+        contextual = next(node for node in graph["nodes"] if node["id"] == "component:detail")
+        self.assertEqual(contextual["overview_visibility"], "contextual")
+
     def test_v2_structural_tour_is_allowed_without_inventing_runtime_order(self) -> None:
         blueprint = valid_v2_blueprint()
         blueprint["atlas"]["scenario_policy"] = "optional"
@@ -382,6 +446,9 @@ class BlueprintV2Tests(unittest.TestCase):
         self.assertEqual(report["atlas_quality_status"], "passed")
         self.assertIn('"schema_version": "bunya-jido-v2"', html)
         self.assertIn('"primary_projection": "projection:primary"', html)
+        self.assertIn('"kind": "projection"', html)
+        self.assertIn("Studio Projections", html)
+        self.assertIn("contextualDirectContext", html)
 
 
 if __name__ == "__main__":

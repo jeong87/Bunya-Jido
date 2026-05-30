@@ -40,7 +40,8 @@
         ],
         "tests": [
           "tests/test_smoke.py",
-          "tests/test_blueprint.py"
+          "tests/test_blueprint.py",
+          "tests/test_blueprint_v2.py"
         ]
       }
     },
@@ -119,9 +120,7 @@
         "routes": [
           "change grounding policy",
           "change task route projection",
-          "change atlas quality evaluation"
-        ],
-        "forbid_routes": [
+          "change atlas quality evaluation",
           "change viewer trust presentation"
         ]
       }

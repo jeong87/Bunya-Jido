@@ -2295,6 +2295,41 @@ def _path_presets_from_blueprint(
     for e in edges:
         edge_by_rel[e["relation"]].append(e)
     presets: list[dict[str, Any]] = []
+    if bp.get("schema_version") == "bunya-jido-blueprint-v2":
+        atlas = bp.get("atlas") if isinstance(bp.get("atlas"), dict) else {}
+        project = bp.get("project") if isinstance(bp.get("project"), dict) else {}
+        primary_projection_id = str(project.get("primary_projection_id") or "")
+        for projection in atlas.get("projections") or []:
+            if not isinstance(projection, dict):
+                continue
+            projection_id = str(projection.get("id") or "")
+            ordered_ids: list[str] = []
+            for raw_id in projection.get("node_ids") or []:
+                nid = id_map.get(str(raw_id), _normalize_node_id(str(raw_id)))
+                if nid in node_by_id and nid not in ordered_ids:
+                    ordered_ids.append(nid)
+            if not ordered_ids:
+                continue
+            arr = ordered_ids[:60]
+            presets.append({
+                "id": slug("projection_" + (projection_id or str(len(presets))), 70),
+                "projection_id": projection_id,
+                "label": str(projection.get("label") or projection_id or "Atlas Projection"),
+                "description": str(projection.get("description") or "Studio atlas projection."),
+                "question_answered": str(projection.get("question_answered") or ""),
+                "kind": "projection",
+                "source": "atlas",
+                "is_primary": bool(
+                    projection.get("is_primary") is True
+                    and projection_id == primary_projection_id
+                ),
+                "node_ids": arr,
+                "nodes": [node_by_id[node_id]["label"] for node_id in arr],
+                "plane_ids": list(projection.get("plane_ids") or []),
+                "relation_family_ids": list(
+                    projection.get("relation_family_ids") or []
+                ),
+            })
     for view in bp.get("views") or []:
         if not isinstance(view, dict):
             continue

@@ -142,7 +142,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("### change grounding policy", context)
         self.assertIn("### change atlas quality evaluation", context)
         self.assertIn("### change task route projection", context)
-        self.assertNotIn("### change viewer trust presentation", context)
+        self.assertIn("### change viewer trust presentation", context)
         self.assertIn(
             "changed file `src/bunya_jido/blueprint.py` matches route safe-edit path",
             context,

@@ -62,3 +62,17 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Blueprint and agent-map validation, strict diagnostics and
   agent-utility evaluation, stale-map review, and the full unit test suite are
   required before commit.
+
+## 2026-05-30 - Studio Atlas Phase 4 Viewer Projection Upgrade
+
+- Change: Added Studio v2 projection presets, map-local node and relation
+  styling, primary-projection initial focus, and contextual direct-neighbor
+  reveal in the offline viewer.
+- Decision: Updated the existing Blueprint Projection and Interactive Viewer
+  evidence and viewer route rather than adding a new component: authored
+  atlas data remains the source, while the viewer presents that data without
+  asserting new evidence.
+- Validation: V2/viewer regression tests, blueprint and agent-map validation,
+  grounded diagnostics, agent-utility evaluation, and the stale-map review
+  gate are required before commit. Visual browser inspection is attempted when
+  a connected in-app browser session is available.

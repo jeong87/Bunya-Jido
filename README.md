@@ -164,9 +164,11 @@ Studio preparation additionally creates `REPOSITORY_THESIS.md`,
 projection and an honest scenario policy: `required`, `optional`, or
 `none_with_reason`. Studio preparation now generates the additive
 `bunya-jido-blueprint-v2` schema, and `validate-blueprint`, `build`, and
-`diagnose` accept its vocabulary, projection, and scenario contract. Dedicated
-v2 viewer styling and scenario playback are planned separately. Classic mode
-continues to use the existing v1 contract.
+`diagnose` accept its vocabulary, projection, and scenario contract. The
+offline viewer now renders map-local node/relation families, starts on the
+primary projection, offers projection presets, and reveals authored
+contextual neighbors on selection. Scenario playback is planned separately.
+Classic mode continues to use the existing v1 contract.
 
 For a Studio v2 blueprint, evaluate measurable first-read and scenario-policy
 signals with:
@@ -270,6 +272,7 @@ The generated HTML map includes:
 - a canvas-first constellation overview with semantic role glyphs and a workflow launcher bar
 - responsibility-oriented plane clusters
 - authored plane-purpose glossary plus viewer-facing node and relation families
+- Studio v2 map-local glyph/line vocabularies, primary projection tabs, and contextual direct-neighbor reveal
 - node-family, relation-family, and confidence filtering
 - local graph focus around a selected node
 - a trust panel showing `Static Scan`, `Grounded`, or explicit `Draft` status

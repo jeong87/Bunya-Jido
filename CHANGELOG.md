@@ -31,6 +31,8 @@ be documented.
 - An `evaluate-atlas-quality` command and diagnostics summary for Studio v2
   that separate deterministic readability/scenario checks from
   review-required editorial judgment.
+- Studio v2 viewer projection presets with map-local node/relation styling,
+  primary-projection initial focus, and contextual direct-neighbor reveal.
 
 ### Changed
 

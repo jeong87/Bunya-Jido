@@ -164,8 +164,11 @@ Studio 준비는 `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`도
 정책(`required`, `optional`, `none_with_reason`)을 검토하기 위한 것입니다.
 Studio 준비는 이제 additive `bunya-jido-blueprint-v2` schema를 생성하며,
 `validate-blueprint`, `build`, `diagnose`는 vocabulary, projection, scenario
-계약을 처리합니다. 전용 v2 viewer styling과 scenario playback은 후속
-단계로 남아 있습니다. Classic 모드는 기존 v1 계약을 계속 사용합니다.
+계약을 처리합니다. 오프라인 viewer는 이제 map-local node/relation
+family를 렌더링하고 primary projection에서 시작하며, projection
+preset과 선택 노드의 contextual 이웃 표시를 제공합니다. Scenario
+playback은 후속 단계로 남아 있습니다. Classic 모드는 기존 v1 계약을
+계속 사용합니다.
 
 Studio v2 blueprint의 첫 화면 가독성과 scenario 정책 신호는 다음
 명령으로 평가할 수 있습니다.
@@ -270,6 +273,7 @@ bunya-jido evaluate-atlas-quality --root . --require-pass --json  # Studio v2
 - 시맨틱 역할 표식과 워크플로우 launcher bar가 있는 canvas-first 별자리 overview
 - 책임 영역별 plane cluster
 - 작성된 plane 목적 설명과 화면용 노드·관계 family
+- Studio v2의 map-local glyph/line vocabulary, primary projection tab, contextual direct-neighbor reveal
 - 노드 family, 관계 family, confidence 필터링
 - 선택한 노드 주변만 보는 local graph focus
 - `Static Scan`, `Grounded`, 명시적 `Draft` 상태를 보여주는 trust panel
