@@ -191,7 +191,7 @@
       "type": "ui",
       "plane": "presentation",
       "importance": "core",
-      "description": "Displays trust, evidence, Studio projection vocabulary and presets, and contextual navigation controls offline.",
+      "description": "Displays trust, evidence, Studio projection vocabulary and presets, contextual navigation, and validated narrated scenario playback offline.",
       "source_path": "src/bunya_jido/viewer/index.template.html",
       "evidence": [
         {
@@ -203,6 +203,11 @@
           "kind": "source",
           "path": "src/bunya_jido/viewer/index.template.html",
           "symbol": "contextualDirectContext"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/viewer/index.template.html",
+          "symbol": "renderScenarioUI"
         }
       ]
     },
@@ -212,7 +217,7 @@
       "type": "test",
       "plane": "quality",
       "importance": "major",
-      "description": "Exercises grounding publication gates, Studio v2 contracts and viewer projections, and agent-map parity behavior.",
+      "description": "Exercises grounding publication gates, Studio v2 contracts, viewer projection and scenario playback surfaces, and agent-map parity behavior.",
       "source_path": "tests/test_blueprint.py",
       "evidence": [
         {

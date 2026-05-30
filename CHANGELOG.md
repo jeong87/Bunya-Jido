@@ -33,6 +33,8 @@ be documented.
   review-required editorial judgment.
 - Studio v2 viewer projection presets with map-local node/relation styling,
   primary-projection initial focus, and contextual direct-neighbor reveal.
+- Studio v2 narrated scenario playback with basis badges, animated behavioral
+  paths, non-directional structural tours, and restored pre-playback view state.
 
 ### Changed
 

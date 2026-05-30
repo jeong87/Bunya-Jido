@@ -99,7 +99,7 @@
     },
     {
       "task": "change viewer trust presentation",
-      "intent": "Improve how grounded status, evidence, semantic paths, or authored alternate views are presented offline.",
+      "intent": "Improve how grounded status, evidence, semantic paths, authored alternate views, or narrated walkthroughs are presented offline.",
       "start_nodes": [
         "presentation:viewer"
       ],
@@ -114,7 +114,8 @@
       ],
       "contracts": [
         "The viewer must display published trust information without becoming the evidence source.",
-        "Studio projection labels and contextual reveal must come from validated atlas data, with classic v1 behavior preserved."
+        "Studio projection labels and contextual reveal must come from validated atlas data, with classic v1 behavior preserved.",
+        "Studio scenario playback must display its authored basis, avoid implying runtime order for structural tours, and restore the prior view on exit."
       ],
       "tests": [
         "tests/test_smoke.py",
@@ -129,7 +130,8 @@
         "tests/test_blueprint_v2.py"
       ],
       "watch_out": [
-        "A visual change must keep the offline standalone artifact readable and truthful."
+        "A visual change must keep the offline standalone artifact readable and truthful.",
+        "A narrated tour must not turn illustrative structure into a claim of recorded behavior."
       ]
     }
   ],

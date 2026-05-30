@@ -10,6 +10,7 @@ from pathlib import Path
 
 from bunya_jido.blueprint import blueprint_schema, graph_from_blueprint, validate_blueprint_obj
 from bunya_jido.cli import main
+from bunya_jido.render import render_html
 
 
 def valid_v2_blueprint() -> dict:
@@ -411,9 +412,28 @@ class BlueprintV2Tests(unittest.TestCase):
         scenario["derived_from_workflow_ids"] = []
 
         errors, _, metrics = validate_blueprint_obj(blueprint)
+        graph = graph_from_blueprint(blueprint)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            html = render_html(graph, Path(tmpdir) / "tour.html").read_text(encoding="utf-8")
 
         self.assertEqual(errors, [])
         self.assertEqual(metrics["publish_blockers"], [])
+        self.assertIn('"playback_mode": "stepped_highlight"', html)
+        self.assertIn("Illustrative structural tour", html)
+
+    def test_v2_none_with_reason_publishes_no_scenario_launcher_items(self) -> None:
+        blueprint = valid_v2_blueprint()
+        blueprint["atlas"]["scenario_policy"] = "none_with_reason"
+        blueprint["atlas"]["scenario_policy_reason"] = "A narrated tour would imply unsupported order."
+        blueprint["atlas"]["scenarios"] = []
+
+        graph = graph_from_blueprint(blueprint)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            html = render_html(graph, Path(tmpdir) / "quiet.html").read_text(encoding="utf-8")
+
+        self.assertIn('"scenario_policy": "none_with_reason"', html)
+        self.assertIn('"scenarios": []', html)
+        self.assertIn("studioAtlas.scenario_policy!=='none_with_reason'", html)
 
     def test_v2_diagnostics_and_build_report_atlas_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -449,6 +469,11 @@ class BlueprintV2Tests(unittest.TestCase):
         self.assertIn('"kind": "projection"', html)
         self.assertIn("Studio Projections", html)
         self.assertIn("contextualDirectContext", html)
+        self.assertIn('id="scenarioBtn"', html)
+        self.assertIn('id="scenarioPlayback"', html)
+        self.assertIn("startScenario", html)
+        self.assertIn("drawScenarioOverlay", html)
+        self.assertIn("restoreScenarioSnapshot", html)
 
 
 if __name__ == "__main__":

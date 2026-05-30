@@ -76,3 +76,15 @@ An entry records review work; it does not prove architectural completeness.
   grounded diagnostics, agent-utility evaluation, and the stale-map review
   gate are required before commit. Visual browser inspection is attempted when
   a connected in-app browser session is available.
+
+## 2026-05-30 - Studio Atlas Phase 5 Scenario Playback Engine
+
+- Change: Added Studio-only scenario launching and narrated playback controls,
+  animated behavioral tokens, non-directional structural highlighting, basis
+  badges, and restoration of the pre-playback view state.
+- Decision: Kept playback inside the existing Interactive Viewer node and
+  expanded its route contract: validated atlas data remains the source of
+  narration and basis claims, while the viewer only presents it.
+- Validation: V2/viewer regression tests, blueprint and agent-map validation,
+  grounded diagnostics, agent-utility evaluation, stale-map review, and
+  available visual inspection are required before commit.

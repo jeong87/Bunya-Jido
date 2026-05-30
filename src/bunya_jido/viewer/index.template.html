@@ -39,6 +39,10 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 #projectionSummary{display:none;margin-top:8px;border-top:1px solid rgba(122,146,184,.15);padding-top:7px;font-size:10px;line-height:1.42;color:#9fb0c9}#projectionSummary.visible{display:block}#projectionSummary strong{display:block;color:#bfdbfe;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
 #presetBar{position:absolute;left:50%;top:16px;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(8,14,26,.88);border:1px solid rgba(122,146,184,.18);border-radius:14px;box-shadow:var(--shadow);max-width:min(680px,calc(100% - 580px));overflow:auto;z-index:2}#presetBar:empty{display:none}.preset-chip{white-space:nowrap;height:36px;padding:0 12px;border-radius:9px;border-color:transparent;color:#aabbd4;background:transparent;font-size:11px}.preset-chip small{font-size:9px;color:#5de6ff;text-transform:uppercase;margin-right:5px}.preset-chip.active small{color:#bae6fd}
 #workflowBar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(8,14,26,.88);border:1px solid rgba(122,146,184,.18);border-radius:14px;box-shadow:var(--shadow);max-width:calc(100% - 42px);overflow:auto;z-index:2}.workflow-chip{white-space:nowrap;height:34px;padding:0 12px;border-radius:9px;border-color:transparent;color:#aabbd4;background:transparent;font-size:11px}.workflow-chip em{font-size:9px;text-transform:uppercase;font-style:normal;color:#647e9f}
+#scenarioBtn[hidden]{display:none}
+#scenarioMenu{position:absolute;right:18px;top:16px;width:min(356px,calc(100% - 36px));display:none;padding:9px;background:rgba(8,14,26,.96);border:1px solid rgba(122,146,184,.2);border-radius:14px;box-shadow:var(--shadow);z-index:5}#scenarioMenu.open{display:block}.scenario-menu-head{font-size:10px;color:#93c5fd;letter-spacing:.07em;text-transform:uppercase;margin:2px 4px 8px}.scenario-card{display:block;height:auto;min-height:62px;width:100%;text-align:left;margin:5px 0;padding:9px 10px}.scenario-card strong{display:block;color:#e5edf8;font-size:12px}.scenario-card span{display:block;margin-top:4px;color:#91a3c1;line-height:1.35}.scenario-basis{display:inline-flex!important;width:auto;margin:0 6px 0 0!important;padding:3px 7px;border:1px solid rgba(56,189,248,.27);border-radius:999px;color:#bae6fd!important;font-size:9px!important;text-transform:uppercase}
+#scenarioPlayback{position:absolute;left:50%;bottom:69px;transform:translateX(-50%);display:none;align-items:center;gap:6px;padding:7px 9px;background:rgba(8,14,26,.95);border:1px solid rgba(56,189,248,.28);border-radius:14px;box-shadow:var(--shadow);z-index:5;max-width:calc(100% - 32px);overflow:auto}#scenarioPlayback.active{display:flex}.scenario-progress{white-space:nowrap;padding:0 7px;font-size:11px;color:#bfdbfe}.scenario-speed{height:32px;padding:0 9px}.scenario-speed.active{color:#e0f2fe}
+#scenarioNarration{position:absolute;display:none;width:min(300px,calc(100% - 30px));padding:11px 12px;background:rgba(8,14,26,.96);border:1px solid rgba(56,189,248,.28);border-radius:13px;box-shadow:var(--shadow);z-index:4;pointer-events:none}#scenarioNarration.visible{display:block}#scenarioNarration .scenario-step{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#8ea4c4;margin-bottom:6px}#scenarioNarration .scenario-step strong{color:#bae6fd}#scenarioNarration h3{font-size:12px;margin:0 0 5px;color:#f1f5f9}#scenarioNarration p{font-size:11px;color:#c7d4e8;line-height:1.45;margin:0}.scenario-status{color:#fcd34d;margin-left:5px}
 .toast{position:absolute;top:18px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.86);border:1px solid rgba(56,189,248,.22);border-radius:999px;padding:8px 13px;font-size:12px;color:#bfdbfe;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1}.legend{position:absolute;right:18px;bottom:70px;background:rgba(8,14,26,.78);backdrop-filter:blur(12px);border:1px solid rgba(148,163,184,.14);border-radius:11px;padding:8px 11px;display:flex;flex-wrap:wrap;gap:8px;max-width:600px}.legend span{font-size:10px;color:#cbd5e1;display:flex;align-items:center;gap:5px}.legend i{width:26px;height:8px;display:inline-block;border-radius:2px;vertical-align:middle}.edge-glyph{width:24px;height:8px;display:inline-block;vertical-align:middle;flex:0 0 24px}.edge-filter-list .check label{min-width:0}.edge-filter-list .check label span.rel-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .node-title{font-size:20px;font-weight:800;margin:0 0 5px}.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(148,163,184,.17);background:#0b1220;border-radius:999px;padding:4px 8px;margin:0 5px 5px 0;font-size:10px;color:#dbeafe}.desc{color:#cbd5e1;font-size:12px;line-height:1.5}.muted{color:var(--muted)}.small{font-size:11px}.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#bae6fd;background:#0b1220;border:1px solid rgba(148,163,184,.12);border-radius:8px;padding:1px 5px}.relgroup{margin-top:10px}.relgroup h3{font-size:11px;color:#e2e8f0;margin:0 0 6px}.edgeitem{border-left:2px solid #334155;padding:6px 0 6px 9px;margin:4px 0;font-size:11px;color:#cbd5e1;line-height:1.35}.edgeitem b{color:#e0f2fe}.edgeitem:hover{background:rgba(148,163,184,.06);cursor:pointer}.panel-kv{display:grid;grid-template-columns:82px 1fr;gap:6px;font-size:11px;margin-top:10px}.panel-kv div:first-child{color:#8ca0bb}.path-card{display:block;width:100%;text-align:left;border-radius:12px;margin:7px 0;padding:9px 10px}.path-card strong{font-size:12px}.path-card span{display:block;margin-top:3px;color:#9fb0c9;line-height:1.3}.path-kind{display:inline-block;margin-left:6px;border:1px solid rgba(56,189,248,.3);border-radius:999px;padding:2px 5px;color:#93c5fd;font-size:9px;font-style:normal;text-transform:uppercase;vertical-align:1px}.range{display:grid;grid-template-columns:1fr 44px;align-items:center;gap:8px}input[type=range]{padding:0}.footer-note{font-size:10px;line-height:1.45;color:#7f90aa}.kbd{font-size:10px;border:1px solid rgba(148,163,184,.25);background:#0b1220;border-radius:6px;padding:1px 5px;color:#cbd5e1}.pillrow{display:flex;flex-wrap:wrap;gap:6px}.edge-filter-list{max-height:230px;overflow:auto;padding-right:4px}.edge-filter-list .check{justify-content:space-between}.edge-filter-list label{display:flex;align-items:center;gap:7px}.count{color:#7f90aa;font-size:10px}.source-link{word-break:break-all;color:#93c5fd}.empty{padding:30px 10px;text-align:center;color:#94a3b8;font-size:12px;line-height:1.5}
 .trust-state{display:inline-flex;border:1px solid rgba(148,163,184,.22);border-radius:999px;padding:4px 8px;font-size:11px;font-weight:700;margin-bottom:8px}.trust-state.grounded{color:#a7f3d0;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.11)}.trust-state.draft{color:#fde68a;border-color:rgba(250,204,21,.4);background:rgba(250,204,21,.1)}.trust-state.not_assessed{color:#bae6fd;border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.1)}.trust-kv{display:grid;grid-template-columns:88px 1fr;gap:5px;font-size:11px;line-height:1.4}.trust-kv div:nth-child(odd){color:#8ca0bb}.trust-alert{color:#fda4af;margin-top:8px;font-size:11px;line-height:1.4}.evlist{font-size:10px;color:#9fb0c9;margin-top:4px;word-break:break-all}.evlist div{margin:2px 0}
@@ -52,7 +56,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 .legend .legend-note{font-size:10px;color:#8ca0bb;opacity:.9}
 
 @media(max-width:1200px){.brand{min-width:180px}.sub{display:none}.search-wrap{width:220px}}
-@media(max-width:900px){#toolbar{gap:7px;padding:10px}.brand{min-width:auto}.brand h1{display:none}.drawer{width:min(360px,calc(100% - 28px))}#inspector{width:min(390px,calc(100% - 28px))}.legend{display:none}}
+@media(max-width:900px){#toolbar{gap:7px;padding:10px}.brand{min-width:auto}.brand h1{display:none}.drawer{width:min(360px,calc(100% - 28px))}#inspector{width:min(390px,calc(100% - 28px))}.legend{display:none}#scenarioMenu{top:64px}#scenarioPlayback{bottom:64px;justify-content:flex-start}#scenarioNarration{width:min(280px,calc(100% - 26px))}}
 </style>
 </head>
 <body>
@@ -62,6 +66,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     <div class="toolbar-group" id="modeButtons" aria-label="Explore Mode"></div>
     <button class="toolbar-action" id="fitBtn">Fit map</button>
     <button class="toolbar-action" id="clearPathBtn">Clear highlight</button>
+    <button class="toolbar-action" id="scenarioBtn" hidden>▶ Scenarios</button>
     <div class="toolbar-spacer"></div>
     <div class="search-wrap"><input id="search" list="nodeList" placeholder="Find a role or artifact"/><datalist id="nodeList"></datalist><button id="focusBtn">Focus</button></div>
     <button class="toolbar-action" id="filterBtn">Filters</button>
@@ -73,6 +78,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       <div class="legend" id="legend"></div>
       <div id="presetBar" aria-label="Studio projection presets"></div>
       <div id="workflowBar" aria-label="Operational workflows"></div>
+      <div id="scenarioMenu" aria-label="Narrated scenarios"></div>
+      <div id="scenarioNarration" aria-live="polite"></div>
+      <div id="scenarioPlayback" aria-label="Scenario playback controls"></div>
       <div class="toast" id="toast"></div>
     </main>
     <aside class="drawer" id="filters">
@@ -102,6 +110,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 const DATA = JSON.parse(document.getElementById('graph-data').textContent);
 const studioAtlas = DATA.schema_version==='bunya-jido-v2' && DATA.atlas && typeof DATA.atlas==='object' ? DATA.atlas : null;
 const studioVocabulary = studioAtlas && studioAtlas.vocabularies && typeof studioAtlas.vocabularies==='object' ? studioAtlas.vocabularies : null;
+const studioScenarios = studioAtlas && studioAtlas.scenario_policy!=='none_with_reason' && Array.isArray(studioAtlas.scenarios) ? studioAtlas.scenarios.slice(0,5) : [];
+const scenarioById = new Map(studioScenarios.map(scenario=>[scenario.id,scenario]));
+const scenarioBasisLabels = {documented_workflow:'Documented workflow',grounded_inference:'Grounded inferred flow',illustrative_tour:'Illustrative structural tour',deterministic_trace:'Recorded trace'};
 const canvas = document.getElementById('graph'); const ctx = canvas.getContext('2d');
 const stage = document.getElementById('stage'); let W=1,H=1, DPR=1;
 const nodes = DATA.nodes.map((n,i)=>({...n, idx:i, x:0, y:0, vx:0, vy:0, fixed:false, hidden:false}));
@@ -350,7 +361,7 @@ if (Array.isArray(DATA.lenses)) {
 }
 const primaryProjectionPreset = studioAtlas ? (DATA.path_presets||[]).find(path=>path.kind==='projection' && path.projection_id===DATA.primary_projection && path.is_primary) || null : null;
 let state = {zoom:1, panX:0, panY:0, hover:null, selected:null, selectedEdge:null, mode:'overview', activeLens:'all', depthMode:false, path:primaryProjectionPreset, pathOnly:!!primaryProjectionPreset, showPaint:true, showLabels:true, showEdgeLabels:false, charge:1,
-  allowedPlanes:new Set(DATA.stats.planes), allowedNodeFamilies:new Set(Object.keys(nodeFamilyCounts)), allowedRelationFamilies:new Set(Object.keys(relationFamilyCounts)), allowedConfidences:new Set(Object.keys(confidenceCounts)), visibleNodes:new Set(), visibleEdges:new Set(), contextualNodeIds:new Set(), contextualEdgeIds:new Set(), dragging:null, running:true};
+  allowedPlanes:new Set(DATA.stats.planes), allowedNodeFamilies:new Set(Object.keys(nodeFamilyCounts)), allowedRelationFamilies:new Set(Object.keys(relationFamilyCounts)), allowedConfidences:new Set(Object.keys(confidenceCounts)), visibleNodes:new Set(), visibleEdges:new Set(), contextualNodeIds:new Set(), contextualEdgeIds:new Set(), scenarioNodeIds:new Set(), scenarioEdgeIds:new Set(), scenario:null, scenarioStepIndex:-1, scenarioPlaying:false, scenarioSpeed:1, scenarioStepDuration:0, scenarioStepEndsAt:0, scenarioPausedRemaining:0, scenarioTokenProgress:0, scenarioFrameAt:0, scenarioTimer:null, scenarioSnapshot:null, scenarioMenuOpen:false, dragging:null, running:true};
 const anchors = Object.fromEntries(Object.keys(planePanels).map(k=>[k,[ (planePanels[k].x+planePanels[k].w/2)/WORLD.w, (planePanels[k].y+planePanels[k].h/2)/WORLD.h ]])); anchors.unknown = anchors.unknown || [.5,.9];
 function resize(){DPR=Math.max(1, Math.min(2, window.devicePixelRatio||1)); W=stage.clientWidth; H=stage.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+'px'; canvas.style.height=H+'px'; ctx.setTransform(DPR,0,0,DPR,0,0); if(!state._inited) initLayout(); else fit(false);}
 function randFor(id){let h=0; for(let i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))|0; return ((h>>>0)%10000)/10000;}
@@ -408,21 +419,33 @@ function contextualDirectContext(){
   });
   return revealed;
 }
-function edgeAllowed(e,revealed){const visibility=!studioAtlas || !e.overview_visibility || e.overview_visibility==='visible' || state.mode==='implementation' || (e.overview_visibility==='contextual' && revealed.edges.has(e.id));return visibility&&state.allowedRelationFamilies.has(relationFamily(e))&&state.allowedConfidences.has(e.confidence||'not_recorded')&&edgeAllowedByLens(e);}
-function nodeAllowedByDetail(n,revealed){return state.mode==='implementation' || !n.detail_level || n.detail_level==='overview' || revealed.nodes.has(n.id);}
-function nodeAllowedByVisibility(n,revealed){return !studioAtlas || !n.overview_visibility || n.overview_visibility==='visible' || state.mode==='implementation' || (n.overview_visibility==='contextual' && revealed.nodes.has(n.id));}
-function nodeAllowed(n,revealed){return state.allowedPlanes.has(n.plane)&&state.allowedNodeFamilies.has(nodeFamily(n))&&nodeAllowedByDetail(n,revealed)&&nodeAllowedByVisibility(n,revealed);}
+function scenarioPlaybackContext(){
+  const revealed={nodes:new Set(),edges:new Set()};
+  if(!state.scenario || state.scenarioStepIndex<0) return revealed;
+  state.scenario.steps.slice(0,state.scenarioStepIndex+1).forEach(step=>{
+    if(nodeById.has(step.node_id)) revealed.nodes.add(step.node_id);
+    const edge=edges.find(item=>item.id===step.edge_id);
+    if(edge){revealed.edges.add(edge.id); revealed.nodes.add(edge.source); revealed.nodes.add(edge.target);}
+  });
+  return revealed;
+}
+function edgeAllowed(e,revealed,playback){const visibility=!studioAtlas || !e.overview_visibility || e.overview_visibility==='visible' || state.mode==='implementation' || playback.edges.has(e.id) || (e.overview_visibility==='contextual' && revealed.edges.has(e.id));return visibility&&state.allowedRelationFamilies.has(relationFamily(e))&&state.allowedConfidences.has(e.confidence||'not_recorded')&&edgeAllowedByLens(e);}
+function nodeAllowedByDetail(n,revealed,playback){return state.mode==='implementation' || !n.detail_level || n.detail_level==='overview' || revealed.nodes.has(n.id) || playback.nodes.has(n.id);}
+function nodeAllowedByVisibility(n,revealed,playback){return !studioAtlas || !n.overview_visibility || n.overview_visibility==='visible' || state.mode==='implementation' || playback.nodes.has(n.id) || (n.overview_visibility==='contextual' && revealed.nodes.has(n.id));}
+function nodeAllowed(n,revealed,playback){return state.allowedPlanes.has(n.plane)&&state.allowedNodeFamilies.has(nodeFamily(n))&&nodeAllowedByDetail(n,revealed,playback)&&nodeAllowedByVisibility(n,revealed,playback);}
 function buildVisibility(){
   const revealed=contextualDirectContext();
-  const baseEdges = edges.filter(e => edgeAllowed(e,revealed) && nodeAllowed(e.s,revealed) && nodeAllowed(e.t,revealed));
+  const playback=scenarioPlaybackContext();
+  const baseEdges = edges.filter(e => edgeAllowed(e,revealed,playback) && nodeAllowed(e.s,revealed,playback) && nodeAllowed(e.t,revealed,playback));
   let nodeSet = new Set(); baseEdges.forEach(e=>{nodeSet.add(e.s.id); nodeSet.add(e.t.id)});
-  nodes.forEach(n=>{ if(nodeAllowed(n,revealed) && n.degree===0) nodeSet.add(n.id); });
-  if(state.path){ const ps = new Set(state.path.node_ids); if(state.pathOnly){nodeSet = studioAtlas?new Set([...ps].filter(id=>nodeById.has(id)&&nodeAllowed(nodeById.get(id),revealed))):ps;} else {ps.forEach(id=>nodeSet.add(id));} }
+  nodes.forEach(n=>{ if(nodeAllowed(n,revealed,playback) && n.degree===0) nodeSet.add(n.id); });
+  if(state.path){ const ps = new Set(state.path.node_ids); if(state.pathOnly){nodeSet = studioAtlas?new Set([...ps].filter(id=>nodeById.has(id)&&nodeAllowed(nodeById.get(id),revealed,playback))):ps;} else {ps.forEach(id=>nodeSet.add(id));} }
   revealed.nodes.forEach(id=>nodeSet.add(id));
+  playback.nodes.forEach(id=>nodeSet.add(id));
   if(state.depthMode && state.selected){ const depth=+document.getElementById('depth').value; if(depth>0){ const seen=new Set([state.selected.id]); let frontier=[state.selected.id]; for(let d=0; d<depth; d++){ const nxt=[]; baseEdges.forEach(e=>{ if(frontier.includes(e.source)&&!seen.has(e.target)){seen.add(e.target);nxt.push(e.target)} if(frontier.includes(e.target)&&!seen.has(e.source)){seen.add(e.source);nxt.push(e.source)} }); frontier=nxt; } nodeSet = seen; }}
-  const edgeSet = new Set(); baseEdges.forEach(e=>{ if(nodeSet.has(e.source)&&nodeSet.has(e.target)){ if(revealed.edges.has(e.id) || !state.pathOnly || !state.path || (state.path.node_ids.includes(e.source)&&state.path.node_ids.includes(e.target))) edgeSet.add(e.id); }});
+  const edgeSet = new Set(); baseEdges.forEach(e=>{ if(nodeSet.has(e.source)&&nodeSet.has(e.target)){ if(playback.edges.has(e.id) || revealed.edges.has(e.id) || !state.pathOnly || !state.path || (state.path.node_ids.includes(e.source)&&state.path.node_ids.includes(e.target))) edgeSet.add(e.id); }});
   if(state.path && !state.pathOnly){ const ps = new Set(state.path.node_ids); baseEdges.forEach(e=>{ if(ps.has(e.source)&&ps.has(e.target)) edgeSet.add(e.id); }); }
-  state.visibleNodes=nodeSet; state.visibleEdges=edgeSet; state.contextualNodeIds=revealed.nodes; state.contextualEdgeIds=revealed.edges;
+  state.visibleNodes=nodeSet; state.visibleEdges=edgeSet; state.contextualNodeIds=revealed.nodes; state.contextualEdgeIds=revealed.edges; state.scenarioNodeIds=playback.nodes; state.scenarioEdgeIds=playback.edges;
 }
 function tick(){
   if(!state.running) return; buildVisibility();
@@ -525,6 +548,39 @@ function drawStyledEdge(e,x1,y1,x2,y2,hi){
   ctx.setLineDash([]); ctx.restore();
 }
 function clipLine(x1,y1,x2,y2,r1,r2){const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;return {x1:x1+ux*(r1+4),y1:y1+uy*(r1+4),x2:x2-ux*(r2+4),y2:y2-uy*(r2+4)};}
+function drawScenarioOverlay(){
+  if(!state.scenario) return;
+  const step=state.scenario.steps[state.scenarioStepIndex];
+  const node=step&&nodeById.get(step.node_id);
+  if(!node) return;
+  const [nx,ny]=worldToScreen(node.x,node.y);
+  const color=roleForNode(node).color||'#38bdf8';
+  const pulse=state.scenarioPlaying ? 4+Math.sin(performance.now()/210)*3 : 5;
+  ctx.save();
+  ctx.globalAlpha=.72;
+  ctx.strokeStyle=rgba(color,.84);
+  ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(nx,ny,nodeRadius(node)+10+pulse,0,Math.PI*2); ctx.stroke();
+  if(state.scenario.playback_mode==='animated_token'){
+    const edge=edges.find(item=>item.id===step.edge_id);
+    if(edge && state.visibleEdges.has(edge.id)){
+      if(state.scenarioPlaying){
+        const now=performance.now();
+        const travel=Math.max(850,state.scenarioStepDuration*.6);
+        state.scenarioTokenProgress=Math.min(1,state.scenarioTokenProgress+(now-state.scenarioFrameAt)/travel);
+        state.scenarioFrameAt=now;
+      }
+      const start=worldToScreen(edge.s.x,edge.s.y), end=worldToScreen(edge.t.x,edge.t.y);
+      const x=start[0]+(end[0]-start[0])*state.scenarioTokenProgress;
+      const y=start[1]+(end[1]-start[1])*state.scenarioTokenProgress;
+      ctx.shadowColor=rgba('#38bdf8',.82); ctx.shadowBlur=14;
+      ctx.fillStyle='#7dd3fc'; ctx.beginPath(); ctx.arc(x,y,5.5,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0; ctx.fillStyle='#e0f2fe'; ctx.beginPath(); ctx.arc(x,y,2.2,0,Math.PI*2); ctx.fill();
+    }
+  }
+  ctx.restore();
+  positionScenarioNarration(node);
+}
 function draw(){
   tick(); ctx.clearRect(0,0,W,H); ctx.save();
   const grad=ctx.createRadialGradient(W*.48,H*.38,0,W*.5,H*.5,Math.max(W,H)); grad.addColorStop(0,'#0d1b31'); grad.addColorStop(.52,'#080f1c'); grad.addColorStop(1,'#050811'); ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
@@ -557,6 +613,7 @@ function draw(){
     if(state.showLabels&&(state.zoom>.65||n.major||selected||hovered||path)){ctx.globalAlpha=dim?.27:1;ctx.font=(n.major||selected?'600 ':'500 ')+(n.major?12:10)+'px Inter, sans-serif';ctx.textBaseline='top';ctx.fillStyle=selected?'#fff':'rgba(217,229,246,.96)';const label=n.label.replace(/^artifact - /,'').replace(/^module - /,'');const parts=wrap(label,n.major?18:15);parts.slice(0,2).forEach((part,i)=>ctx.fillText(part,x,y+r+7+i*12));}
     ctx.restore();
   });
+  drawScenarioOverlay();
   ctx.restore(); updateHud(); requestAnimationFrame(draw);
 }
 function wrap(s,max){const out=[]; let cur=''; s.split(/\s+/).forEach(w=>{ if((cur+' '+w).trim().length>max){ if(cur)out.push(cur); cur=w;} else cur=(cur+' '+w).trim(); }); if(cur) out.push(cur); return out.length?out:[s.slice(0,max)];}
@@ -564,9 +621,64 @@ function nearestNode(sx,sy){ const [wx,wy]=screenToWorld(sx,sy); let best=null,b
 function nearestEdge(sx,sy){ let best=null,bd=10; edges.forEach(e=>{ if(!state.visibleEdges.has(e.id))return; const [x1,y1]=worldToScreen(e.s.x,e.s.y), [x2,y2]=worldToScreen(e.t.x,e.t.y); const d=distPointSegment(sx,sy,x1,y1,x2,y2); if(d<bd){bd=d;best=e} }); return best;}
 function distPointSegment(px,py,x1,y1,x2,y2){const dx=x2-x1,dy=y2-y1; const l2=dx*dx+dy*dy; if(l2===0)return Math.hypot(px-x1,py-y1); let t=((px-x1)*dx+(py-y1)*dy)/l2; t=Math.max(0,Math.min(1,t)); return Math.hypot(px-(x1+t*dx),py-(y1+t*dy));}
 function fit(animated=true){buildVisibility(); const vis=nodes.filter(n=>state.visibleNodes.has(n.id)); if(!vis.length)return; let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9; const visiblePlanes=new Set(vis.map(n=>n.plane)); Object.entries(planePanels).forEach(([plane,p])=>{ if(!visiblePlanes.has(plane)) return; minx=Math.min(minx,p.x); miny=Math.min(miny,p.y); maxx=Math.max(maxx,p.x+p.w); maxy=Math.max(maxy,p.y+p.h); }); vis.forEach(n=>{minx=Math.min(minx,n.x);miny=Math.min(miny,n.y);maxx=Math.max(maxx,n.x);maxy=Math.max(maxy,n.y);}); const margin=80; const scale=Math.min((W-margin)/(maxx-minx+1),(H-margin)/(maxy-miny+1)); state.zoom=Math.max(.16,Math.min(2.2,scale)); state.panX=W/2-(minx+maxx)/2*state.zoom; state.panY=H/2-(miny+maxy)/2*state.zoom;}
-function setMode(mode){state.mode=mode;renderUI();buildVisibility();fit(false);toast(modeDefs.find(item=>item.id===mode)?.label||mode);}
-function selectNode(n){state.selected=n;state.selectedEdge=null;document.getElementById('search').value=n?n.label:'';document.getElementById('inspector').classList.toggle('open',!!n);buildVisibility();renderDetails();updateLegend();if(studioAtlas&&state.mode==='overview')fit(false);}
-function selectEdge(edge){state.selected=edge.t;state.selectedEdge=edge;state.mode='evidence';document.getElementById('search').value=edge.t.label;document.getElementById('inspector').classList.add('open');renderUI();fit(false);toast('inspect: '+edge.relation);}
+function scenarioStepDuration(step){const authored=Math.max(.5,Math.min(2,Number(state.scenario?.default_speed)||1));const pause=Math.max(1500,Number(step&&step.pause_ms)||3600);return Math.max(1500,Math.round(pause/(authored*state.scenarioSpeed)));}
+function clearScenarioTimer(){if(state.scenarioTimer){clearTimeout(state.scenarioTimer);state.scenarioTimer=null;}}
+function captureScenarioSnapshot(){return {zoom:state.zoom,panX:state.panX,panY:state.panY,selected:state.selected,selectedEdge:state.selectedEdge,mode:state.mode,activeLens:state.activeLens,depthMode:state.depthMode,path:state.path,pathOnly:state.pathOnly,allowedPlanes:new Set(state.allowedPlanes),allowedNodeFamilies:new Set(state.allowedNodeFamilies),allowedRelationFamilies:new Set(state.allowedRelationFamilies),allowedConfidences:new Set(state.allowedConfidences),search:document.getElementById('search').value,inspectorOpen:document.getElementById('inspector').classList.contains('open')};}
+function restoreScenarioSnapshot(snapshot){if(!snapshot)return;state.zoom=snapshot.zoom;state.panX=snapshot.panX;state.panY=snapshot.panY;state.selected=snapshot.selected;state.selectedEdge=snapshot.selectedEdge;state.mode=snapshot.mode;state.activeLens=snapshot.activeLens;state.depthMode=snapshot.depthMode;state.path=snapshot.path;state.pathOnly=snapshot.pathOnly;state.allowedPlanes=snapshot.allowedPlanes;state.allowedNodeFamilies=snapshot.allowedNodeFamilies;state.allowedRelationFamilies=snapshot.allowedRelationFamilies;state.allowedConfidences=snapshot.allowedConfidences;document.getElementById('search').value=snapshot.search;document.getElementById('inspector').classList.toggle('open',snapshot.inspectorOpen);}
+function scheduleScenarioAdvance(wait){
+  clearScenarioTimer();
+  if(!state.scenario || !state.scenarioPlaying) return;
+  const duration=wait||scenarioStepDuration(state.scenario.steps[state.scenarioStepIndex]);
+  state.scenarioStepEndsAt=performance.now()+duration;
+  state.scenarioTimer=setTimeout(()=>advanceScenario(1),duration);
+}
+function applyScenarioStep(index){
+  if(!state.scenario) return;
+  const step=state.scenario.steps[index]; if(!step) return;
+  state.scenarioStepIndex=index; state.scenarioStepDuration=scenarioStepDuration(step); state.scenarioTokenProgress=0; state.scenarioFrameAt=performance.now();
+  state.selected=nodeById.get(step.node_id)||null;
+  state.selectedEdge=state.scenario.playback_mode==='animated_token'?edges.find(edge=>edge.id===step.edge_id)||null:null;
+  buildVisibility(); renderUI(); fit(false);
+  if(state.scenarioPlaying) scheduleScenarioAdvance(state.scenarioStepDuration);
+}
+function startScenario(id){
+  const scenario=scenarioById.get(id); if(!scenario || !Array.isArray(scenario.steps) || !scenario.steps.length) return;
+  if(state.scenario) stopScenario(true);
+  state.scenarioSnapshot=captureScenarioSnapshot(); state.scenario=scenario; state.scenarioStepIndex=0; state.scenarioPlaying=true; state.scenarioSpeed=1; state.scenarioMenuOpen=false;
+  scenario.steps.forEach(step=>{const node=nodeById.get(step.node_id);if(node){state.allowedPlanes.add(node.plane);state.allowedNodeFamilies.add(nodeFamily(node));}const edge=edges.find(item=>item.id===step.edge_id);if(edge){state.allowedRelationFamilies.add(relationFamily(edge));state.allowedConfidences.add(edge.confidence||'not_recorded');}});
+  applyScenarioStep(0); toast('scenario: '+scenario.label);
+}
+function stopScenario(restore=true){
+  if(!state.scenario) return;
+  const label=state.scenario.label; const snapshot=state.scenarioSnapshot;
+  clearScenarioTimer(); state.scenario=null; state.scenarioStepIndex=-1; state.scenarioPlaying=false; state.scenarioTokenProgress=0; state.scenarioSnapshot=null;
+  if(restore) restoreScenarioSnapshot(snapshot);
+  buildVisibility(); renderUI();
+  if(!restore) fit(false);
+  return label;
+}
+function finishScenario(){const label=stopScenario(true);if(label)toast('completed: '+label);}
+function advanceScenario(delta){
+  if(!state.scenario) return;
+  const next=state.scenarioStepIndex+delta;
+  if(next>=state.scenario.steps.length){finishScenario();return;}
+  applyScenarioStep(Math.max(0,next));
+}
+function toggleScenarioPause(){
+  if(!state.scenario)return;
+  if(state.scenarioPlaying){state.scenarioPausedRemaining=Math.max(250,state.scenarioStepEndsAt-performance.now());state.scenarioPlaying=false;clearScenarioTimer();}
+  else {state.scenarioPlaying=true;state.scenarioFrameAt=performance.now();scheduleScenarioAdvance(state.scenarioPausedRemaining||state.scenarioStepDuration);}
+  renderScenarioUI();
+}
+function setScenarioSpeed(speed){if(!state.scenario)return;state.scenarioSpeed=speed;state.scenarioPausedRemaining=0;state.scenarioStepDuration=scenarioStepDuration(state.scenario.steps[state.scenarioStepIndex]);state.scenarioFrameAt=performance.now();if(state.scenarioPlaying)scheduleScenarioAdvance(state.scenarioStepDuration);renderScenarioUI();}
+function positionScenarioNarration(node){
+  const bubble=document.getElementById('scenarioNarration'); if(!state.scenario||!bubble.classList.contains('visible'))return;
+  const [x,y]=worldToScreen(node.x,node.y); const left=Math.max(14,Math.min(W-314,x+nodeRadius(node)+20)); const top=Math.max(14,Math.min(H-150,y-40));
+  bubble.style.left=left+'px'; bubble.style.top=top+'px';
+}
+function setMode(mode){if(state.scenario)stopScenario(true);state.mode=mode;renderUI();buildVisibility();fit(false);toast(modeDefs.find(item=>item.id===mode)?.label||mode);}
+function selectNode(n){if(state.scenario)stopScenario(true);state.selected=n;state.selectedEdge=null;document.getElementById('search').value=n?n.label:'';document.getElementById('inspector').classList.toggle('open',!!n);buildVisibility();renderDetails();updateLegend();if(studioAtlas&&state.mode==='overview')fit(false);}
+function selectEdge(edge){if(state.scenario)stopScenario(true);state.selected=edge.t;state.selectedEdge=edge;state.mode='evidence';document.getElementById('search').value=edge.t.label;document.getElementById('inspector').classList.add('open');renderUI();fit(false);toast('inspect: '+edge.relation);}
 function evidenceHtml(evidence){const items=(evidence||[]).slice(0,4); return items.length?`<div class="evlist">${items.map(ev=>`<div>${escapeHtml(ev.kind||'evidence')}: ${escapeHtml(ev.path||'')}${ev.symbol?` · ${escapeHtml(ev.symbol)}`:''}</div>`).join('')}</div>`:'<div class="evlist">no recorded evidence</div>';}
 function confidenceLabel(value){return String(value||'not_recorded').replaceAll('_',' ');}
 function familyRelations(family){return [...new Set(edges.filter(e=>relationFamily(e)===family).map(e=>e.relation))].sort();}
@@ -599,6 +711,26 @@ function renderDetails(){
   el.innerHTML=summary+selectedRelationshipHtml(state.selectedEdge)+implementation+`<div class="relgroup"><h3>Node Evidence</h3>${evidenceHtml(n.evidence)}</div><div class="relgroup"><h3>Outgoing</h3>${edgeHtml(out,'out')}</div><div class="relgroup"><h3>Incoming</h3>${edgeHtml(inn,'in')}</div>`;
   el.querySelectorAll('[data-edge]').forEach(x=>x.onclick=()=>{const edge=edges.find(q=>q.id===x.dataset.edge);if(edge)selectEdge(edge);});
 }
+function renderScenarioUI(){
+  const launcher=document.getElementById('scenarioBtn'), menu=document.getElementById('scenarioMenu'), controls=document.getElementById('scenarioPlayback'), narration=document.getElementById('scenarioNarration');
+  launcher.hidden=!studioScenarios.length;
+  if(!studioScenarios.length){menu.classList.remove('open');controls.classList.remove('active');narration.classList.remove('visible');return;}
+  launcher.classList.toggle('active',state.scenarioMenuOpen||!!state.scenario);
+  menu.classList.toggle('open',state.scenarioMenuOpen&&!state.scenario);
+  menu.innerHTML=`<div class="scenario-menu-head">Published narrated scenarios · ${studioScenarios.length}</div>`+studioScenarios.map(scenario=>`<button class="scenario-card" data-start-scenario="${escapeHtml(scenario.id)}"><strong>${escapeHtml(scenario.label)}</strong><span><em class="scenario-basis">${escapeHtml(scenarioBasisLabels[scenario.basis]||scenario.basis)}</em>${escapeHtml(scenario.description||'')}</span></button>`).join('');
+  menu.querySelectorAll('[data-start-scenario]').forEach(button=>button.onclick=()=>startScenario(button.dataset.startScenario));
+  if(!state.scenario){controls.classList.remove('active');controls.innerHTML='';narration.classList.remove('visible');narration.innerHTML='';return;}
+  const scenario=state.scenario, step=scenario.steps[state.scenarioStepIndex], count=scenario.steps.length;
+  controls.classList.add('active');
+  controls.innerHTML=`<button data-scenario-action="pause">${state.scenarioPlaying?'Pause':'Play'}</button><button data-scenario-action="prev">Previous</button><button data-scenario-action="next">Next</button><span class="scenario-progress">${escapeHtml(scenario.label)} · ${state.scenarioStepIndex+1}/${count}</span>${[1,1.5,2].map(speed=>`<button class="scenario-speed ${state.scenarioSpeed===speed?'active':''}" data-scenario-speed="${speed}">${speed}×</button>`).join('')}<button data-scenario-action="exit">Exit</button>`;
+  controls.querySelector('[data-scenario-action="pause"]').onclick=()=>toggleScenarioPause();
+  controls.querySelector('[data-scenario-action="prev"]').onclick=()=>advanceScenario(-1);
+  controls.querySelector('[data-scenario-action="next"]').onclick=()=>advanceScenario(1);
+  controls.querySelector('[data-scenario-action="exit"]').onclick=()=>stopScenario(true);
+  controls.querySelectorAll('[data-scenario-speed]').forEach(button=>button.onclick=()=>setScenarioSpeed(Number(button.dataset.scenarioSpeed)));
+  narration.classList.add('visible');
+  narration.innerHTML=`<div class="scenario-step"><span class="scenario-basis">${escapeHtml(scenarioBasisLabels[scenario.basis]||scenario.basis)}</span><strong>${escapeHtml(scenario.playback_mode==='animated_token'?'Animated path':'Guided tour')}</strong>${state.scenarioPlaying?'':'<span class="scenario-status">Paused</span>'} · step ${state.scenarioStepIndex+1}/${count}</div><h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.narration)}</p>`;
+}
 function renderUI(){
   renderTrust();
   const activeProjection=state.path&&state.path.kind==='projection'?state.path:primaryProjectionPreset;
@@ -625,7 +757,7 @@ function renderUI(){
   document.querySelectorAll('[data-relation-family]').forEach(x=>x.onchange=()=>{x.checked?state.allowedRelationFamilies.add(x.dataset.relationFamily):state.allowedRelationFamilies.delete(x.dataset.relationFamily);});
   document.querySelectorAll('[data-confidence]').forEach(x=>x.onchange=()=>{x.checked?state.allowedConfidences.add(x.dataset.confidence):state.allowedConfidences.delete(x.dataset.confidence);});
   const pathKind=p=>p.kind==='projection'?'Projection':p.kind==='task_route'?'Task Route':p.kind==='workflow'||String(p.id||'').startsWith('workflow_')?'Workflow':p.kind==='overview'||p.id==='overview'||p.id==='blueprint_core'?'Overview':'View';
-  const pathSelect=(id,sticky=false)=>{const selected=DATA.path_presets.find(p=>p.id===id); const same=state.path&&state.path.id===id; state.path=!sticky&&same?null:selected; state.pathOnly=!!(state.path&&state.path.kind==='projection'); document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly); renderUI(); fit(); toast(state.path?'path: '+state.path.label:'path cleared');};
+  const pathSelect=(id,sticky=false)=>{if(state.scenario)stopScenario(true);const selected=DATA.path_presets.find(p=>p.id===id); const same=state.path&&state.path.id===id; state.path=!sticky&&same?null:selected; state.pathOnly=!!(state.path&&state.path.kind==='projection'); document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly); renderUI(); fit(); toast(state.path?'path: '+state.path.label:'path cleared');};
   const projections=studioAtlas?DATA.path_presets.filter(p=>p.kind==='projection'):[];
   document.getElementById('presetBar').innerHTML=projections.map(p=>`<button class="preset-chip ${state.path&&state.path.id===p.id?'active':''}" data-preset="${p.id}" title="${escapeHtml(p.description)}"><small>${p.is_primary?'Primary':'View'}</small>${escapeHtml(p.label)}</button>`).join('');
   document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.preset,true));
@@ -639,7 +771,7 @@ function renderUI(){
   document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.path));
   document.querySelectorAll('[data-workflow-path]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.workflowPath));
   document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly);
-  updateLegend(); renderDetails();
+  renderScenarioUI(); updateLegend(); renderDetails();
 }
 
 function legendLineStyle(r){
@@ -693,9 +825,10 @@ function toggleFilters(open){filtersDrawer.classList.toggle('open',open);filterB
 filterBtn.onclick=()=>toggleFilters(!filtersDrawer.classList.contains('open'));
 document.getElementById('closeFilters').onclick=()=>toggleFilters(false);
 document.getElementById('closeInspector').onclick=()=>inspectorDrawer.classList.remove('open');
+document.getElementById('scenarioBtn').onclick=()=>{state.scenarioMenuOpen=!state.scenarioMenuOpen;renderScenarioUI();};
 document.getElementById('focusBtn').onclick=()=>{const q=document.getElementById('search').value.trim().toLowerCase(); const n=nodes.find(n=>n.label.toLowerCase()===q)||nodes.find(n=>n.label.toLowerCase().includes(q)); if(n){selectNode(n); state.depthMode=false; state.panX=W/2-n.x*state.zoom; state.panY=H/2-n.y*state.zoom; toast('selected '+n.label)}};
 document.getElementById('localBtn').onclick=()=>{if(!state.selected){document.getElementById('focusBtn').click()} state.depthMode=!!state.selected; if(state.depthMode){fit();toast('local graph')}};
-document.getElementById('clearFocusBtn').onclick=()=>{state.selected=null;state.selectedEdge=null;state.depthMode=false;document.getElementById('search').value='';inspectorDrawer.classList.remove('open');renderDetails();updateLegend();fit();};
+document.getElementById('clearFocusBtn').onclick=()=>{if(state.scenario)stopScenario(true);state.selected=null;state.selectedEdge=null;state.depthMode=false;document.getElementById('search').value='';inspectorDrawer.classList.remove('open');renderDetails();updateLegend();fit();};
 document.getElementById('depth').onchange=()=>{if(state.depthMode)fit();};
 document.getElementById('planesAll').onclick=()=>{DATA.stats.planes.forEach(p=>state.allowedPlanes.add(p));renderUI();fit(false);};
 document.getElementById('planesNone').onclick=()=>{state.allowedPlanes.clear();renderUI();};
@@ -712,11 +845,11 @@ document.getElementById('paintBtn').onclick=e=>{state.showPaint=!state.showPaint
 document.getElementById('labelsBtn').onclick=e=>{state.showLabels=!state.showLabels;e.target.classList.toggle('active',state.showLabels);};
 document.getElementById('edgeLabelsBtn').onclick=e=>{state.showEdgeLabels=!state.showEdgeLabels;e.target.classList.toggle('active',state.showEdgeLabels);};
 document.getElementById('charge').oninput=e=>{state.charge=+e.target.value;document.getElementById('chargeVal').textContent=state.charge.toFixed(2)};
-document.getElementById('pathOnlyBtn').onclick=e=>{state.pathOnly=!state.pathOnly;e.target.classList.toggle('active',state.pathOnly);fit();};
-document.getElementById('clearPathBtn').onclick=()=>{state.path=null; state.pathOnly=false; document.getElementById('pathOnlyBtn').classList.remove('active'); renderUI(); fit();};
+document.getElementById('pathOnlyBtn').onclick=e=>{if(state.scenario)stopScenario(true);state.pathOnly=!state.pathOnly;e.target.classList.toggle('active',state.pathOnly);fit();};
+document.getElementById('clearPathBtn').onclick=()=>{if(state.scenario)stopScenario(true);state.path=null; state.pathOnly=false; document.getElementById('pathOnlyBtn').classList.remove('active'); renderUI(); fit();};
 document.getElementById('pngBtn').onclick=()=>{const a=document.createElement('a');a.download='bunya-jido.png';a.href=canvas.toDataURL('image/png');a.click();};
 document.getElementById('jsonBtn').onclick=()=>{const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});const a=document.createElement('a');a.download='bunya_jido_graph.json';a.href=URL.createObjectURL(blob);a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
-window.addEventListener('keydown',e=>{if(e.key==='Escape'){toggleFilters(false);inspectorDrawer.classList.remove('open');} if(e.key.toLowerCase()==='f')fit(); if(e.key.toLowerCase()==='r'){state._inited=false;initLayout();}});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'){if(state.scenario){stopScenario(true);}state.scenarioMenuOpen=false;renderScenarioUI();toggleFilters(false);inspectorDrawer.classList.remove('open');} if(e.key.toLowerCase()==='f')fit(); if(e.key.toLowerCase()==='r'){state._inited=false;initLayout();}});
 resize(); renderUI(); buildVisibility(); fit(false); requestAnimationFrame(draw);
 })();
 </script>
