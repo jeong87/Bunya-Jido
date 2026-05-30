@@ -26,6 +26,9 @@ dist/
 !.bunya-jido/
 !.bunya-jido/COMPONENTS.md
 !.bunya-jido/WORKFLOWS.md
+!.bunya-jido/REPOSITORY_THESIS.md
+!.bunya-jido/PROJECTIONS.md
+!.bunya-jido/SCENARIOS.md
 !.bunya-jido/bunya-jido.blueprint.json
 !.bunya-jido/bunya-jido.agent-map.json
 !.bunya-jido/bunya-jido.agent-evaluation.json

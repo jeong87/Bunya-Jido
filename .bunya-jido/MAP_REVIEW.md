@@ -88,3 +88,17 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: V2/viewer regression tests, blueprint and agent-map validation,
   grounded diagnostics, agent-utility evaluation, stale-map review, and
   available visual inspection are required before commit.
+
+## 2026-05-30 - Studio Atlas Phase 6 Generality And Self-Map Publication
+
+- Change: Added a six-shape Studio benchmark rubric and executable rendering
+  suite, a visible label-burden diagnostic, domain-neutral Studio plane layout,
+  and public documentation/release gates for atlas quality.
+- Decision: Upgraded the committed Bunya-Jido self-map to Studio v2 with
+  authored thesis, projections, two evidence-badged behavioral scenarios, and
+  a new benchmark component and trusted rubric-maintenance route. External
+  complex-workflow review remains evaluation input only, never prompt or
+  viewer vocabulary.
+- Validation: Blueprint and agent-map validation, strict atlas-quality and
+  agent-utility evaluation, full unit tests, regenerated demo/screenshot,
+  stale-map review, and visual inspection are required before commit.

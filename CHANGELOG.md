@@ -35,6 +35,9 @@ be documented.
   primary-projection initial focus, and contextual direct-neighbor reveal.
 - Studio v2 narrated scenario playback with basis badges, animated behavioral
   paths, non-directional structural tours, and restored pre-playback view state.
+- A multi-domain Studio benchmark rubric and executable rendering suite that
+  distinguishes behavioral, structural-tour, and no-scenario repositories
+  without seeding prompts from an external complex-system example.
 
 ### Changed
 
@@ -55,6 +58,9 @@ be documented.
   platform-specific setup commands.
 - CI, demo publishing, and package release checks now require the committed
   agent-utility suite to pass without claiming live-agent behavioral proof.
+- The committed Bunya-Jido self-map now publishes a grounded Studio v2 atlas
+  with authored projections and evidence-badged scenarios; Studio layout
+  derives its planes from authored data rather than domain-specific defaults.
 
 ### Fixed
 

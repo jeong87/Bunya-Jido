@@ -32,9 +32,14 @@ def load_json(path: Path) -> dict:
 
 def stable_semantic_contract(graph: dict) -> dict:
     return {
+        "schema_version": graph["schema_version"],
         "artifact_mode": graph["artifact_mode"],
         "grounding": graph["grounding"],
         "stats": graph["stats"],
+        "primary_projection": graph["primary_projection"],
+        "scenario_policy": graph["atlas"]["scenario_policy"],
+        "scenario_count": graph["scenario_count"],
+        "atlas": graph["atlas"],
         "plane_glossary": graph["plane_glossary"],
         "nodes": [
             (node["id"], node["label"], node["plane"], node["type"])
@@ -62,9 +67,12 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         errors, warnings, metrics = validate_blueprint_obj(blueprint, root=ROOT)
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
+        self.assertEqual(blueprint["schema_version"], "bunya-jido-blueprint-v2")
         self.assertEqual(metrics["grounding_status"], "grounded")
-        self.assertEqual(metrics["node_count"], 13)
-        self.assertEqual(metrics["edge_count"], 22)
+        self.assertEqual(metrics["node_count"], 14)
+        self.assertEqual(metrics["edge_count"], 25)
+        self.assertEqual(metrics["primary_projection"], "projection:trusted_publication")
+        self.assertEqual(metrics["scenario_count"], 2)
         self.assertEqual(metrics["grounded_core_node_ratio"], 1.0)
         self.assertEqual(metrics["grounded_critical_edge_ratio"], 1.0)
 
@@ -74,20 +82,23 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
         self.assertEqual(metrics["grounding_status"], "grounded")
-        self.assertEqual(metrics["trusted_route_count"], 4)
+        self.assertEqual(metrics["trusted_route_count"], 5)
 
     def test_gallery_build_projects_expected_semantic_paths(self) -> None:
         graph, _ = graph_with_optional_blueprint(ROOT, max_files=0)
 
         self.assertEqual(graph["artifact_mode"], "semantic_blueprint")
+        self.assertEqual(graph["schema_version"], "bunya-jido-v2")
         self.assertEqual(graph["grounding"]["status"], "grounded")
         self.assertTrue(graph["grounding"]["publishable"])
-        self.assertEqual(graph["stats"]["nodes"], 13)
-        self.assertEqual(graph["stats"]["edges"], 22)
+        self.assertEqual(graph["stats"]["nodes"], 14)
+        self.assertEqual(graph["stats"]["edges"], 25)
+        self.assertEqual(graph["primary_projection"], "projection:trusted_publication")
+        self.assertEqual(graph["scenario_count"], 2)
         self.assertIn(
             {
                 "id": "semantic",
-                "label": "Semantic",
+                "label": "Semantic Contract",
                 "purpose": "Reviewed architecture and agent-route projection.",
             },
             graph["plane_glossary"],
@@ -108,6 +119,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             {
                 "task_route_change-grounding-policy",
                 "task_route_change-atlas-quality-evaluation",
+                "task_route_change-multi-domain-rubric-coverage",
                 "task_route_change-task-route-projection",
                 "task_route_change-viewer-trust-presentation",
             },
@@ -117,7 +129,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         context = generate_agent_context(ROOT, task="change task route projection")
 
         self.assertIn("- Grounding status: `grounded`", context)
-        self.assertIn("- Agent-map routes: `validated` (4 trusted route(s))", context)
+        self.assertIn("- Agent-map routes: `validated` (5 trusted route(s))", context)
         self.assertIn("- Requested route match: `matched`", context)
         self.assertIn("### change task route projection", context)
         self.assertIn("- `task_route_publication`", context)
@@ -129,6 +141,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("No matching trusted route for this request.", context)
         self.assertNotIn("### change grounding policy", context)
         self.assertNotIn("### change atlas quality evaluation", context)
+        self.assertNotIn("### change multi-domain rubric coverage", context)
         self.assertNotIn("### change task route projection", context)
         self.assertNotIn("### change viewer trust presentation", context)
 
@@ -176,7 +189,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 6)
+        self.assertEqual(report["case_count"], 7)
         self.assertEqual(
             set(report["dimensions"]),
             {
@@ -201,6 +214,8 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             "Confidence",
             "Validated Task Routes",
             "Selected Relationship",
+            "Studio Projections",
+            "Scenario",
             "Map Controls",
             'id="toolbarTrust"',
             'id="workflowBar"',
@@ -242,8 +257,8 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(report["artifact_mode"], "semantic_blueprint")
         self.assertEqual(report["grounding_status"], "grounded")
         self.assertTrue(report["semantic_publication_allowed"])
-        self.assertEqual(report["atlas_quality_status"], "not_assessed")
-        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 4, "total": 4})
+        self.assertEqual(report["atlas_quality_status"], "passed")
+        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 5, "total": 5})
 
 
 if __name__ == "__main__":

@@ -105,8 +105,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
   </div>
 </div>
 <script id="graph-data" type="application/json">{
-  "schema_version": "bunya-jido-v1",
-  "generated_at": "2026-05-30T13:24:49+00:00",
+  "schema_version": "bunya-jido-v2",
+  "generated_at": "2026-05-30T13:49:49+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
   "artifact_mode": "semantic_blueprint",
@@ -117,8 +117,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "publish_blockers": [],
     "warnings": [],
     "metrics": {
-      "node_count": 13,
-      "edge_count": 22,
+      "node_count": 14,
+      "edge_count": 25,
       "grounded_node_ratio": 1.0,
       "grounded_edge_ratio": 1.0,
       "core_node_count": 5,
@@ -129,12 +129,17 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "publish_blocker_count": 0,
       "publish_blockers": [],
       "warning_count": 0,
-      "error_count": 0
+      "error_count": 0,
+      "schema_version": "bunya-jido-blueprint-v2",
+      "primary_projection": "projection:trusted_publication",
+      "projection_count": 3,
+      "scenario_policy": "required",
+      "scenario_count": 2
     }
   },
   "stats": {
-    "nodes": 13,
-    "edges": 22,
+    "nodes": 14,
+    "edges": 25,
     "relations": [
       "calls",
       "checks",
@@ -166,7 +171,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
   "plane_glossary": [
     {
       "id": "analysis",
-      "label": "Analysis",
+      "label": "Observation",
       "purpose": "Deterministic repository observation."
     },
     {
@@ -186,12 +191,12 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     },
     {
       "id": "quality",
-      "label": "Quality",
-      "purpose": "Grounding policy and regression checks."
+      "label": "Trust And Quality",
+      "purpose": "Grounding, readability, benchmark, and regression checks."
     },
     {
       "id": "semantic",
-      "label": "Semantic",
+      "label": "Semantic Contract",
       "purpose": "Reviewed architecture and agent-route projection."
     }
   ],
@@ -221,7 +226,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/scanner.py",
           "symbol": "build_graph"
         }
-      ]
+      ],
+      "family": "observation",
+      "overview_visibility": "contextual",
+      "activation": "optional",
+      "inspector_summary": "Static discovery supports authored interpretation but is not a grounded semantic map by itself."
     },
     {
       "id": "docs:roadmap",
@@ -247,14 +256,18 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "documentation",
           "path": "docs/CONTRIBUTION_PLAN.md"
         }
-      ]
+      ],
+      "family": "surface",
+      "overview_visibility": "hidden",
+      "activation": "optional",
+      "inspector_summary": "Roadmap detail remains inspectable but is not a first-screen product landmark."
     },
     {
       "id": "docs:readme",
       "label": "Public Product Contract",
       "type": "document",
       "plane": "docs",
-      "description": "Explains artifact modes, trust expectations, and command usage.",
+      "description": "Explains artifact modes, Studio scenario expectations, trust boundaries, and command usage.",
       "source_path": "README.md",
       "tags": [
         "blueprint",
@@ -264,7 +277,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": false,
-      "degree": 1,
+      "degree": 2,
       "size": 10.0,
       "parent": "",
       "detail_level": "overview",
@@ -273,7 +286,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "documentation",
           "path": "README.md"
         }
-      ]
+      ],
+      "family": "surface",
+      "overview_visibility": "contextual",
+      "activation": "always",
+      "inspector_summary": "Public onboarding documents declared behavior and limitations."
     },
     {
       "id": "entry:cli",
@@ -305,14 +322,19 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_evaluate_atlas_quality"
         }
-      ]
+      ],
+      "family": "command",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "why_it_matters": "Every published artifact or agent-context request begins at an explicit command boundary.",
+      "inspector_summary": "Command entrypoints coordinate publication and diagnostics without defining the trust policy."
     },
     {
       "id": "presentation:renderer",
       "label": "HTML Renderer",
       "type": "component",
       "plane": "presentation",
-      "description": "Embeds the graph payload into a standalone offline HTML artifact.",
+      "description": "Embeds the published graph payload into a standalone offline HTML artifact.",
       "source_path": "src/bunya_jido/render.py",
       "tags": [
         "blueprint",
@@ -332,14 +354,19 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/render.py",
           "symbol": "render_html"
         }
-      ]
+      ],
+      "family": "projection",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "why_it_matters": "It carries only validated graph data into the portable human-facing output.",
+      "inspector_summary": "The renderer safely embeds data; it does not reinterpret or improve semantic trust."
     },
     {
       "id": "presentation:viewer",
       "label": "Interactive Viewer",
       "type": "ui",
       "plane": "presentation",
-      "description": "Displays trust, evidence, Studio projection vocabulary and presets, contextual navigation, and validated narrated scenario playback offline.",
+      "description": "Displays trust, evidence, Studio projections, contextual navigation, and validated narrated scenario playback offline.",
       "source_path": "src/bunya_jido/viewer/index.template.html",
       "tags": [
         "blueprint",
@@ -349,7 +376,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 1,
+      "degree": 2,
       "size": 22.0,
       "parent": "",
       "detail_level": "overview",
@@ -362,21 +389,21 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "kind": "source",
           "path": "src/bunya_jido/viewer/index.template.html",
-          "symbol": "contextualDirectContext"
-        },
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/viewer/index.template.html",
           "symbol": "renderScenarioUI"
         }
-      ]
+      ],
+      "family": "surface",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "why_it_matters": "It is how people read the map while preserving the provenance and limitations of authored claims.",
+      "inspector_summary": "The viewer shows authored basis badges and restores user state after playback without becoming evidence."
     },
     {
       "id": "quality:atlas",
       "label": "Atlas Quality Evaluator",
       "type": "contract",
       "plane": "quality",
-      "description": "Measures deterministic Studio v2 readability and scenario-policy signals while separating review-required interpretation.",
+      "description": "Measures deterministic Studio readability and scenario-policy signals while separating review-required interpretation.",
       "source_path": "src/bunya_jido/quality.py",
       "tags": [
         "blueprint",
@@ -386,7 +413,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 3,
+      "degree": 4,
       "size": 17.0,
       "parent": "",
       "detail_level": "overview",
@@ -396,7 +423,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/quality.py",
           "symbol": "evaluate_atlas_quality_obj"
         }
-      ]
+      ],
+      "family": "gate",
+      "overview_visibility": "visible",
+      "activation": "conditional",
+      "inspector_summary": "Quality diagnostics measure visible density and narrative contract signals without proving editorial preference."
     },
     {
       "id": "semantic:validation",
@@ -428,14 +459,19 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/schema.py",
           "symbol": "validate_blueprint_v2_atlas"
         }
-      ]
+      ],
+      "family": "gate",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "why_it_matters": "It is the boundary that prevents an attractive map from being published as trusted without evidence.",
+      "inspector_summary": "Validation resolves evidence and Studio contract references before normal publication may continue."
     },
     {
       "id": "quality:tests",
       "label": "Semantic Contract Tests",
       "type": "test",
       "plane": "quality",
-      "description": "Exercises grounding publication gates, Studio v2 contracts, viewer projection and scenario playback surfaces, and agent-map parity behavior.",
+      "description": "Exercises grounding publication gates, Studio contracts, viewer playback surfaces, and agent-map parity behavior.",
       "source_path": "tests/test_blueprint.py",
       "tags": [
         "blueprint",
@@ -461,15 +497,61 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "kind": "test",
           "path": "tests/test_projection_quality.py"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_studio_benchmark.py"
         }
-      ]
+      ],
+      "family": "evidence",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "inspector_summary": "Regression tests make the public self-map and viewer contract repeatable in CI."
+    },
+    {
+      "id": "quality:benchmark",
+      "label": "Studio Benchmark Suite",
+      "type": "test",
+      "plane": "quality",
+      "description": "Exercises distinct Studio projection and scenario choices across multiple repository shapes.",
+      "source_path": "tests/test_studio_benchmark.py",
+      "tags": [
+        "blueprint",
+        "importance/major",
+        "plane/quality",
+        "type/test"
+      ],
+      "status": "",
+      "major": true,
+      "degree": 3,
+      "size": 17.0,
+      "parent": "",
+      "detail_level": "overview",
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_studio_benchmark.py"
+        },
+        {
+          "kind": "fixture",
+          "path": "tests/fixtures/studio_benchmark_cases.json"
+        },
+        {
+          "kind": "documentation",
+          "path": "docs/STUDIO_BENCHMARK.md"
+        }
+      ],
+      "family": "evidence",
+      "overview_visibility": "visible",
+      "activation": "conditional",
+      "inspector_summary": "A rubric-driven suite guards generality without turning an external complex atlas into a generation seed."
     },
     {
       "id": "quality:ci",
       "label": "Continuous Integration",
       "type": "config",
       "plane": "quality",
-      "description": "Runs the test contract on every push and pull request for supported Python versions.",
+      "description": "Runs the test and release-gate contract on supported Python versions.",
       "source_path": ".github/workflows/ci.yml",
       "tags": [
         "blueprint",
@@ -488,14 +570,18 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "config",
           "path": ".github/workflows/ci.yml"
         }
-      ]
+      ],
+      "family": "evidence",
+      "overview_visibility": "contextual",
+      "activation": "conditional",
+      "inspector_summary": "CI repeats mechanical gates; maintainers still review editorial quality."
     },
     {
       "id": "semantic:blueprint",
       "label": "Blueprint Projection",
       "type": "component",
       "plane": "semantic",
-      "description": "Loads semantic artifacts and produces the published graph contract, including Studio projection presets.",
+      "description": "Loads semantic artifacts and produces the published graph contract, including Studio projections and scenario metadata.",
       "source_path": "src/bunya_jido/blueprint.py",
       "tags": [
         "blueprint",
@@ -520,7 +606,12 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "_path_presets_from_blueprint"
         }
-      ]
+      ],
+      "family": "projection",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "why_it_matters": "It turns reviewed semantic inputs into the graph payload later consumers are allowed to inspect.",
+      "inspector_summary": "Blueprint publication preserves validated Studio atlas data and validated task-route projections."
     },
     {
       "id": "semantic:context",
@@ -547,7 +638,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "generate_agent_context"
         }
-      ]
+      ],
+      "family": "projection",
+      "overview_visibility": "contextual",
+      "activation": "conditional",
+      "inspector_summary": "Context generation gives coding agents bounded reading, contracts, and tests after route validation."
     },
     {
       "id": "semantic:agent_map",
@@ -574,12 +669,16 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "validate_agent_map_obj"
         }
-      ]
+      ],
+      "family": "gate",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "inspector_summary": "Only grounded route references can reach agent context or appear as trusted viewer paths."
     }
   ],
   "edges": [
     {
-      "id": "e00000",
+      "id": "edge:cli_blueprint",
       "source": "entry:cli",
       "target": "semantic:blueprint",
       "source_label": "Command Line Interface",
@@ -595,10 +694,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_build"
         }
-      ]
+      ],
+      "relation_family": "invocation",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00001",
+      "id": "edge:blueprint_scanner",
       "source": "semantic:blueprint",
       "target": "analysis:scanner",
       "source_label": "Blueprint Projection",
@@ -614,10 +717,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "graph_with_optional_blueprint"
         }
-      ]
+      ],
+      "relation_family": "invocation",
+      "workflow_role": "supporting",
+      "overview_visibility": "contextual",
+      "activation": "optional"
     },
     {
-      "id": "e00002",
+      "id": "edge:scanner_blueprint",
       "source": "analysis:scanner",
       "target": "semantic:blueprint",
       "source_label": "Static Scanner",
@@ -633,10 +740,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "graph_from_blueprint"
         }
-      ]
+      ],
+      "relation_family": "observation",
+      "workflow_role": "supporting",
+      "overview_visibility": "contextual",
+      "activation": "optional"
     },
     {
-      "id": "e00003",
+      "id": "edge:blueprint_validation",
       "source": "semantic:blueprint",
       "target": "semantic:validation",
       "source_label": "Blueprint Projection",
@@ -650,12 +761,16 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "kind": "source",
           "path": "src/bunya_jido/blueprint.py",
-          "symbol": "graph_from_blueprint"
+          "symbol": "validate_blueprint_obj"
         }
-      ]
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00004",
+      "id": "edge:cli_atlas_quality",
       "source": "entry:cli",
       "target": "quality:atlas",
       "source_label": "Command Line Interface",
@@ -671,10 +786,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_evaluate_atlas_quality"
         }
-      ]
+      ],
+      "relation_family": "invocation",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "conditional"
     },
     {
-      "id": "e00005",
+      "id": "edge:validation_atlas_quality",
       "source": "semantic:validation",
       "target": "quality:atlas",
       "source_label": "Grounding Gate",
@@ -687,13 +806,17 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "evidence": [
         {
           "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "evaluate_atlas_quality"
+          "path": "src/bunya_jido/quality.py",
+          "symbol": "evaluate_atlas_quality_obj"
         }
-      ]
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "conditional"
     },
     {
-      "id": "e00006",
+      "id": "edge:blueprint_agent_map",
       "source": "semantic:blueprint",
       "target": "semantic:agent_map",
       "source_label": "Blueprint Projection",
@@ -707,12 +830,16 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "kind": "source",
           "path": "src/bunya_jido/blueprint.py",
-          "symbol": "graph_from_blueprint"
+          "symbol": "validate_agent_map_obj"
         }
-      ]
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "boundary",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00007",
+      "id": "edge:validation_renderer",
       "source": "semantic:validation",
       "target": "presentation:renderer",
       "source_label": "Grounding Gate",
@@ -728,10 +855,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_build"
         }
-      ]
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00008",
+      "id": "edge:agent_map_renderer",
       "source": "semantic:agent_map",
       "target": "presentation:renderer",
       "source_label": "Agent Route Parity",
@@ -747,10 +878,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "graph_from_blueprint"
         }
-      ]
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00009",
+      "id": "edge:cli_renderer",
       "source": "entry:cli",
       "target": "presentation:renderer",
       "source_label": "Command Line Interface",
@@ -766,10 +901,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_build"
         }
-      ]
+      ],
+      "relation_family": "invocation",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00010",
+      "id": "edge:renderer_viewer",
       "source": "presentation:renderer",
       "target": "presentation:viewer",
       "source_label": "HTML Renderer",
@@ -785,10 +924,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/render.py",
           "symbol": "render_html"
         }
-      ]
+      ],
+      "relation_family": "delivery",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00011",
+      "id": "edge:cli_context",
       "source": "entry:cli",
       "target": "semantic:context",
       "source_label": "Command Line Interface",
@@ -804,10 +947,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_context"
         }
-      ]
+      ],
+      "relation_family": "invocation",
+      "workflow_role": "primary",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
     },
     {
-      "id": "e00012",
+      "id": "edge:context_validation",
       "source": "semantic:context",
       "target": "semantic:validation",
       "source_label": "Trusted Context Generator",
@@ -823,10 +970,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "generate_agent_context"
         }
-      ]
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "primary",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
     },
     {
-      "id": "e00013",
+      "id": "edge:context_agent_map",
       "source": "semantic:context",
       "target": "semantic:agent_map",
       "source_label": "Trusted Context Generator",
@@ -842,10 +993,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "generate_agent_context"
         }
-      ]
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "primary",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
     },
     {
-      "id": "e00014",
+      "id": "edge:validation_agent_map",
       "source": "semantic:validation",
       "target": "semantic:agent_map",
       "source_label": "Grounding Gate",
@@ -861,10 +1016,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "src/bunya_jido/blueprint.py",
           "symbol": "generate_agent_context"
         }
-      ]
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00015",
+      "id": "edge:tests_validation",
       "source": "quality:tests",
       "target": "semantic:validation",
       "source_label": "Semantic Contract Tests",
@@ -883,10 +1042,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "test",
           "path": "tests/test_blueprint_v2.py"
         }
-      ]
+      ],
+      "relation_family": "verification",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00016",
+      "id": "edge:tests_atlas_quality",
       "source": "quality:tests",
       "target": "quality:atlas",
       "source_label": "Semantic Contract Tests",
@@ -901,10 +1064,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "test",
           "path": "tests/test_projection_quality.py"
         }
-      ]
+      ],
+      "relation_family": "verification",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00017",
+      "id": "edge:tests_agent_map",
       "source": "quality:tests",
       "target": "semantic:agent_map",
       "source_label": "Semantic Contract Tests",
@@ -919,10 +1086,58 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "test",
           "path": "tests/test_blueprint.py"
         }
-      ]
+      ],
+      "relation_family": "verification",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "e00018",
+      "id": "edge:benchmark_atlas_quality",
+      "source": "quality:benchmark",
+      "target": "quality:atlas",
+      "source_label": "Studio Benchmark Suite",
+      "target_label": "Atlas Quality Evaluator",
+      "relation": "checks",
+      "lens": "contract",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_studio_benchmark.py"
+        }
+      ],
+      "relation_family": "verification",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "conditional"
+    },
+    {
+      "id": "edge:benchmark_viewer",
+      "source": "quality:benchmark",
+      "target": "presentation:viewer",
+      "source_label": "Studio Benchmark Suite",
+      "target_label": "Interactive Viewer",
+      "relation": "checks",
+      "lens": "contract",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_studio_benchmark.py"
+        }
+      ],
+      "relation_family": "verification",
+      "workflow_role": "supporting",
+      "overview_visibility": "visible",
+      "activation": "conditional"
+    },
+    {
+      "id": "edge:ci_tests",
       "source": "quality:ci",
       "target": "quality:tests",
       "source_label": "Continuous Integration",
@@ -937,10 +1152,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "config",
           "path": ".github/workflows/ci.yml"
         }
-      ]
+      ],
+      "relation_family": "verification",
+      "workflow_role": "supporting",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
     },
     {
-      "id": "e00019",
+      "id": "edge:readme_cli",
       "source": "docs:readme",
       "target": "entry:cli",
       "source_label": "Public Product Contract",
@@ -955,10 +1174,36 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "documentation",
           "path": "README.md"
         }
-      ]
+      ],
+      "relation_family": "explanation",
+      "workflow_role": "supporting",
+      "overview_visibility": "contextual",
+      "activation": "always"
     },
     {
-      "id": "e00020",
+      "id": "edge:readme_benchmark",
+      "source": "docs:readme",
+      "target": "quality:benchmark",
+      "source_label": "Public Product Contract",
+      "target_label": "Studio Benchmark Suite",
+      "relation": "documents",
+      "lens": "docs",
+      "note": "",
+      "confidence": "llm_grounded",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "documentation",
+          "path": "docs/STUDIO_BENCHMARK.md"
+        }
+      ],
+      "relation_family": "explanation",
+      "workflow_role": "supporting",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
+    },
+    {
+      "id": "edge:roadmap_validation",
       "source": "docs:roadmap",
       "target": "semantic:validation",
       "source_label": "Contribution Roadmap",
@@ -973,10 +1218,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "documentation",
           "path": "docs/CONTRIBUTION_PLAN.md"
         }
-      ]
+      ],
+      "relation_family": "explanation",
+      "workflow_role": "detail",
+      "overview_visibility": "hidden",
+      "activation": "optional"
     },
     {
-      "id": "e00021",
+      "id": "edge:roadmap_agent_map",
       "source": "docs:roadmap",
       "target": "semantic:agent_map",
       "source_label": "Contribution Roadmap",
@@ -991,7 +1240,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "documentation",
           "path": "docs/CONTRIBUTION_PLAN.md"
         }
-      ]
+      ],
+      "relation_family": "explanation",
+      "workflow_role": "detail",
+      "overview_visibility": "hidden",
+      "activation": "optional"
     }
   ],
   "path_presets": [
@@ -1007,13 +1260,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "entry:cli",
         "semantic:blueprint",
         "presentation:renderer",
-        "quality:tests",
         "quality:atlas",
+        "quality:tests",
+        "quality:benchmark",
         "semantic:context",
-        "analysis:scanner",
         "presentation:viewer",
-        "docs:roadmap",
+        "analysis:scanner",
         "docs:readme",
+        "docs:roadmap",
         "quality:ci"
       ],
       "nodes": [
@@ -1022,14 +1276,130 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Command Line Interface",
         "Blueprint Projection",
         "HTML Renderer",
-        "Semantic Contract Tests",
         "Atlas Quality Evaluator",
+        "Semantic Contract Tests",
+        "Studio Benchmark Suite",
         "Trusted Context Generator",
-        "Static Scanner",
         "Interactive Viewer",
-        "Contribution Roadmap",
+        "Static Scanner",
         "Public Product Contract",
+        "Contribution Roadmap",
         "Continuous Integration"
+      ]
+    },
+    {
+      "id": "projection_projection:trusted_publication",
+      "projection_id": "projection:trusted_publication",
+      "label": "Trusted Publication",
+      "description": "How an evidence-linked interpretation becomes an offline map for humans and coding agents.",
+      "question_answered": "How is a semantic map permitted to reach readers?",
+      "kind": "projection",
+      "source": "atlas",
+      "is_primary": true,
+      "node_ids": [
+        "entry:cli",
+        "semantic:blueprint",
+        "semantic:validation",
+        "quality:atlas",
+        "quality:benchmark",
+        "semantic:agent_map",
+        "presentation:renderer",
+        "presentation:viewer"
+      ],
+      "nodes": [
+        "Command Line Interface",
+        "Blueprint Projection",
+        "Grounding Gate",
+        "Atlas Quality Evaluator",
+        "Studio Benchmark Suite",
+        "Agent Route Parity",
+        "HTML Renderer",
+        "Interactive Viewer"
+      ],
+      "plane_ids": [
+        "entry",
+        "semantic",
+        "quality",
+        "presentation"
+      ],
+      "relation_family_ids": [
+        "invocation",
+        "assurance",
+        "delivery",
+        "verification"
+      ]
+    },
+    {
+      "id": "projection_projection:agent_navigation",
+      "projection_id": "projection:agent_navigation",
+      "label": "Bounded Agent Navigation",
+      "description": "How a coding task receives route guidance only after validation.",
+      "question_answered": "How can a coding agent use the map safely?",
+      "kind": "projection",
+      "source": "atlas",
+      "is_primary": false,
+      "node_ids": [
+        "entry:cli",
+        "semantic:context",
+        "semantic:validation",
+        "semantic:agent_map",
+        "quality:tests",
+        "presentation:viewer"
+      ],
+      "nodes": [
+        "Command Line Interface",
+        "Trusted Context Generator",
+        "Grounding Gate",
+        "Agent Route Parity",
+        "Semantic Contract Tests",
+        "Interactive Viewer"
+      ],
+      "plane_ids": [
+        "entry",
+        "semantic",
+        "quality",
+        "presentation"
+      ],
+      "relation_family_ids": [
+        "invocation",
+        "assurance",
+        "verification",
+        "delivery"
+      ]
+    },
+    {
+      "id": "projection_projection:quality_contract",
+      "projection_id": "projection:quality_contract",
+      "label": "Quality Contract",
+      "description": "How readability, generality, and publication trust are mechanically checked.",
+      "question_answered": "Which checks keep the Studio output honest?",
+      "kind": "projection",
+      "source": "atlas",
+      "is_primary": false,
+      "node_ids": [
+        "quality:atlas",
+        "quality:benchmark",
+        "quality:tests",
+        "quality:ci",
+        "semantic:validation",
+        "presentation:viewer"
+      ],
+      "nodes": [
+        "Atlas Quality Evaluator",
+        "Studio Benchmark Suite",
+        "Semantic Contract Tests",
+        "Continuous Integration",
+        "Grounding Gate",
+        "Interactive Viewer"
+      ],
+      "plane_ids": [
+        "quality",
+        "semantic",
+        "presentation"
+      ],
+      "relation_family_ids": [
+        "verification",
+        "assurance"
       ]
     },
     {
@@ -1045,8 +1415,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "semantic:blueprint",
         "presentation:renderer",
         "quality:atlas",
-        "analysis:scanner",
-        "presentation:viewer"
+        "quality:benchmark",
+        "presentation:viewer",
+        "analysis:scanner"
       ],
       "nodes": [
         "Grounding Gate",
@@ -1055,21 +1426,23 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Blueprint Projection",
         "HTML Renderer",
         "Atlas Quality Evaluator",
-        "Static Scanner",
-        "Interactive Viewer"
+        "Studio Benchmark Suite",
+        "Interactive Viewer",
+        "Static Scanner"
       ]
     },
     {
       "id": "trust_contract",
       "label": "Trust Contract",
-      "description": "Validation, agent context, tests, CI, and the roadmap commitments they enforce.",
+      "description": "Validation, agent context, tests, benchmark, CI, and roadmap commitments.",
       "kind": "view",
       "source": "blueprint",
       "node_ids": [
         "semantic:validation",
         "semantic:agent_map",
-        "quality:tests",
         "quality:atlas",
+        "quality:tests",
+        "quality:benchmark",
         "semantic:context",
         "docs:roadmap",
         "quality:ci"
@@ -1077,8 +1450,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "nodes": [
         "Grounding Gate",
         "Agent Route Parity",
-        "Semantic Contract Tests",
         "Atlas Quality Evaluator",
+        "Semantic Contract Tests",
+        "Studio Benchmark Suite",
         "Trusted Context Generator",
         "Contribution Roadmap",
         "Continuous Integration"
@@ -1092,21 +1466,23 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "source": "blueprint",
       "node_ids": [
         "entry:cli",
+        "quality:benchmark",
         "presentation:viewer",
-        "docs:roadmap",
-        "docs:readme"
+        "docs:readme",
+        "docs:roadmap"
       ],
       "nodes": [
         "Command Line Interface",
+        "Studio Benchmark Suite",
         "Interactive Viewer",
-        "Contribution Roadmap",
-        "Public Product Contract"
+        "Public Product Contract",
+        "Contribution Roadmap"
       ]
     },
     {
       "id": "workflow_semantic_map_publication",
       "label": "Semantic Map Publication",
-      "description": "Build a grounded semantic graph and expose its trust state in offline HTML.",
+      "description": "Build a grounded semantic graph and expose its trust state and qualified narration in offline HTML.",
       "kind": "workflow",
       "source": "blueprint",
       "node_ids": [
@@ -1184,7 +1560,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "id": "workflow_atlas_quality_evaluation",
       "label": "Atlas Quality Evaluation",
-      "description": "Measure Studio v2 overview and scenario signals while exposing interpretation that still needs human review.",
+      "description": "Measure Studio overview and scenario signals while exposing interpretation that still needs human review.",
       "kind": "workflow",
       "source": "blueprint",
       "node_ids": [
@@ -1196,6 +1572,23 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Command Line Interface",
         "Grounding Gate",
         "Atlas Quality Evaluator"
+      ]
+    },
+    {
+      "id": "workflow_studio_benchmark_review",
+      "label": "Studio Benchmark Review",
+      "description": "Exercise differing atlas theses and scenario policies without introducing a domain seed.",
+      "kind": "workflow",
+      "source": "blueprint",
+      "node_ids": [
+        "quality:benchmark",
+        "quality:atlas",
+        "presentation:viewer"
+      ],
+      "nodes": [
+        "Studio Benchmark Suite",
+        "Atlas Quality Evaluator",
+        "Interactive Viewer"
       ]
     },
     {
@@ -1257,7 +1650,38 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "tests": [
         "tests/test_projection_quality.py",
-        "tests/test_blueprint_v2.py"
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py"
+      ]
+    },
+    {
+      "id": "task_route_change-multi-domain-rubric-coverage",
+      "label": "change multi-domain rubric coverage",
+      "description": "Adjust cross-domain rubric fixtures while preserving domain-neutral authoring.",
+      "kind": "task_route",
+      "source": "agent_map",
+      "node_ids": [
+        "quality:benchmark",
+        "quality:atlas",
+        "presentation:viewer"
+      ],
+      "nodes": [
+        "Studio Benchmark Suite",
+        "Atlas Quality Evaluator",
+        "Interactive Viewer"
+      ],
+      "workflows": [
+        "studio_benchmark_review"
+      ],
+      "must_read": [
+        "docs/STUDIO_BENCHMARK.md",
+        "tests/fixtures/studio_benchmark_cases.json",
+        "tests/test_studio_benchmark.py",
+        "src/bunya_jido/studio.py"
+      ],
+      "tests": [
+        "tests/test_studio_benchmark.py",
+        "tests/test_projection_quality.py"
       ]
     },
     {
@@ -1324,7 +1748,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "tests": [
         "tests/test_smoke.py",
         "tests/test_blueprint.py",
-        "tests/test_blueprint_v2.py"
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py"
       ]
     }
   ],
@@ -1423,6 +1848,18 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "symbol": "evaluate_atlas_quality_obj"
     },
     {
+      "kind": "test",
+      "path": "tests/test_studio_benchmark.py"
+    },
+    {
+      "kind": "fixture",
+      "path": "tests/fixtures/studio_benchmark_cases.json"
+    },
+    {
+      "kind": "documentation",
+      "path": "docs/STUDIO_BENCHMARK.md"
+    },
+    {
       "kind": "source",
       "path": "src/bunya_jido/render.py",
       "symbol": "render_html"
@@ -1458,8 +1895,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     }
   ],
   "blueprint_quality": {
-    "node_count": 13,
-    "edge_count": 22,
+    "node_count": 14,
+    "edge_count": 25,
     "grounded_node_ratio": 1.0,
     "grounded_edge_ratio": 1.0,
     "core_node_count": 5,
@@ -1471,13 +1908,381 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "publish_blockers": [],
     "warning_count": 0,
     "error_count": 0,
+    "schema_version": "bunya-jido-blueprint-v2",
+    "primary_projection": "projection:trusted_publication",
+    "projection_count": 3,
+    "scenario_policy": "required",
+    "scenario_count": 2,
     "warnings": []
   },
-  "node_count": 13,
-  "edge_count": 22,
+  "node_count": 14,
+  "edge_count": 25,
+  "blueprint_schema_version": "bunya-jido-blueprint-v2",
+  "atlas": {
+    "scenario_policy": "required",
+    "vocabularies": {
+      "node_families": [
+        {
+          "id": "command",
+          "label": "Command",
+          "description": "Invokes a user-visible operation.",
+          "glyph": "hexagon",
+          "color_role": "primary"
+        },
+        {
+          "id": "observation",
+          "label": "Observation",
+          "description": "Provides supporting discovered facts.",
+          "glyph": "dashed_tile",
+          "color_role": "muted"
+        },
+        {
+          "id": "projection",
+          "label": "Projection",
+          "description": "Transforms or emits semantic presentation data.",
+          "glyph": "rounded_square",
+          "color_role": "transform"
+        },
+        {
+          "id": "gate",
+          "label": "Trust Gate",
+          "description": "Checks whether a claim may continue.",
+          "glyph": "octagon",
+          "color_role": "warning"
+        },
+        {
+          "id": "evidence",
+          "label": "Verification",
+          "description": "Records repeatable contract evidence.",
+          "glyph": "double_ring",
+          "color_role": "evidence"
+        },
+        {
+          "id": "surface",
+          "label": "Reading Surface",
+          "description": "Explains or exposes published information.",
+          "glyph": "diamond",
+          "color_role": "human"
+        }
+      ],
+      "relation_families": [
+        {
+          "id": "invocation",
+          "label": "Invokes",
+          "description": "Starts or requests processing.",
+          "line_style": "solid",
+          "color_role": "primary"
+        },
+        {
+          "id": "observation",
+          "label": "Observes",
+          "description": "Provides supporting observations.",
+          "line_style": "dotted",
+          "color_role": "muted"
+        },
+        {
+          "id": "assurance",
+          "label": "Assures",
+          "description": "Applies or sequences a trust boundary.",
+          "line_style": "dashed",
+          "color_role": "warning"
+        },
+        {
+          "id": "delivery",
+          "label": "Delivers",
+          "description": "Projects validated information to readers.",
+          "line_style": "solid",
+          "color_role": "human"
+        },
+        {
+          "id": "verification",
+          "label": "Verifies",
+          "description": "Exercises a maintained contract.",
+          "line_style": "double",
+          "color_role": "evidence"
+        },
+        {
+          "id": "explanation",
+          "label": "Explains",
+          "description": "Documents a public expectation.",
+          "line_style": "dotted",
+          "color_role": "muted"
+        }
+      ]
+    },
+    "projections": [
+      {
+        "id": "projection:trusted_publication",
+        "label": "Trusted Publication",
+        "description": "How an evidence-linked interpretation becomes an offline map for humans and coding agents.",
+        "question_answered": "How is a semantic map permitted to reach readers?",
+        "is_primary": true,
+        "node_ids": [
+          "entry:cli",
+          "semantic:blueprint",
+          "semantic:validation",
+          "quality:atlas",
+          "quality:benchmark",
+          "semantic:agent_map",
+          "presentation:renderer",
+          "presentation:viewer"
+        ],
+        "plane_ids": [
+          "entry",
+          "semantic",
+          "quality",
+          "presentation"
+        ],
+        "relation_family_ids": [
+          "invocation",
+          "assurance",
+          "delivery",
+          "verification"
+        ],
+        "evidence": [
+          {
+            "kind": "documentation",
+            "path": ".bunya-jido/PROJECTIONS.md"
+          }
+        ]
+      },
+      {
+        "id": "projection:agent_navigation",
+        "label": "Bounded Agent Navigation",
+        "description": "How a coding task receives route guidance only after validation.",
+        "question_answered": "How can a coding agent use the map safely?",
+        "is_primary": false,
+        "node_ids": [
+          "entry:cli",
+          "semantic:context",
+          "semantic:validation",
+          "semantic:agent_map",
+          "quality:tests",
+          "presentation:viewer"
+        ],
+        "plane_ids": [
+          "entry",
+          "semantic",
+          "quality",
+          "presentation"
+        ],
+        "relation_family_ids": [
+          "invocation",
+          "assurance",
+          "verification",
+          "delivery"
+        ],
+        "evidence": [
+          {
+            "kind": "documentation",
+            "path": ".bunya-jido/PROJECTIONS.md"
+          }
+        ]
+      },
+      {
+        "id": "projection:quality_contract",
+        "label": "Quality Contract",
+        "description": "How readability, generality, and publication trust are mechanically checked.",
+        "question_answered": "Which checks keep the Studio output honest?",
+        "is_primary": false,
+        "node_ids": [
+          "quality:atlas",
+          "quality:benchmark",
+          "quality:tests",
+          "quality:ci",
+          "semantic:validation",
+          "presentation:viewer"
+        ],
+        "plane_ids": [
+          "quality",
+          "semantic",
+          "presentation"
+        ],
+        "relation_family_ids": [
+          "verification",
+          "assurance"
+        ],
+        "evidence": [
+          {
+            "kind": "documentation",
+            "path": "docs/STUDIO_BENCHMARK.md"
+          }
+        ]
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "scenario:publish_map",
+        "label": "Publish A Trusted Map",
+        "description": "Follow an authored map through its evidence gate into the offline viewer.",
+        "kind": "behavioral",
+        "basis": "documented_workflow",
+        "derived_from_workflow_ids": [
+          "semantic_map_publication"
+        ],
+        "playback_mode": "animated_token",
+        "default_speed": 1.0,
+        "steps": [
+          {
+            "id": "publish:request",
+            "node_id": "entry:cli",
+            "edge_id": "edge:cli_blueprint",
+            "title": "Request Build",
+            "narration": "A command requests a semantic map artifact.",
+            "pause_ms": 3300,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/cli.py",
+                "symbol": "cmd_build"
+              }
+            ]
+          },
+          {
+            "id": "publish:project",
+            "node_id": "semantic:blueprint",
+            "edge_id": "edge:blueprint_validation",
+            "title": "Project Meaning",
+            "narration": "Authored semantic material becomes a candidate graph contract.",
+            "pause_ms": 3500,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/blueprint.py",
+                "symbol": "graph_from_blueprint"
+              }
+            ]
+          },
+          {
+            "id": "publish:gate",
+            "node_id": "semantic:validation",
+            "edge_id": "edge:validation_renderer",
+            "title": "Require Evidence",
+            "narration": "Core claims and critical relationships must pass validation.",
+            "pause_ms": 3800,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/blueprint.py",
+                "symbol": "validate_blueprint_obj"
+              }
+            ]
+          },
+          {
+            "id": "publish:render",
+            "node_id": "presentation:renderer",
+            "edge_id": "edge:renderer_viewer",
+            "title": "Embed Payload",
+            "narration": "The renderer embeds only the publishable graph into offline HTML.",
+            "pause_ms": 3400,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/render.py",
+                "symbol": "render_html"
+              }
+            ]
+          },
+          {
+            "id": "publish:view",
+            "node_id": "presentation:viewer",
+            "title": "Read With Trust",
+            "narration": "The viewer exposes trust, evidence, projections, and this authored narration.",
+            "pause_ms": 4100,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/viewer/index.template.html",
+                "symbol": "renderScenarioUI"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "scenario:agent_context",
+        "label": "Request Bounded Agent Context",
+        "description": "Follow a task request to validated coding-agent navigation guidance.",
+        "kind": "behavioral",
+        "basis": "documented_workflow",
+        "derived_from_workflow_ids": [
+          "trusted_context_generation"
+        ],
+        "playback_mode": "animated_token",
+        "default_speed": 1.0,
+        "steps": [
+          {
+            "id": "context:request",
+            "node_id": "entry:cli",
+            "edge_id": "edge:cli_context",
+            "title": "Ask For Context",
+            "narration": "A task asks for bounded repository guidance.",
+            "pause_ms": 3300,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/cli.py",
+                "symbol": "cmd_context"
+              }
+            ]
+          },
+          {
+            "id": "context:generate",
+            "node_id": "semantic:context",
+            "edge_id": "edge:context_validation",
+            "title": "Load Candidate Route",
+            "narration": "Context generation resolves matching authored routes.",
+            "pause_ms": 3500,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/blueprint.py",
+                "symbol": "generate_agent_context"
+              }
+            ]
+          },
+          {
+            "id": "context:ground",
+            "node_id": "semantic:validation",
+            "edge_id": "edge:validation_agent_map",
+            "title": "Confirm Grounding",
+            "narration": "The underlying semantic claims must remain grounded.",
+            "pause_ms": 3600,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/blueprint.py",
+                "symbol": "validate_blueprint_obj"
+              }
+            ]
+          },
+          {
+            "id": "context:route",
+            "node_id": "semantic:agent_map",
+            "title": "Emit Trusted Route",
+            "narration": "Only validated reading, contract, and test guidance reaches the agent.",
+            "pause_ms": 4100,
+            "evidence": [
+              {
+                "kind": "source",
+                "path": "src/bunya_jido/blueprint.py",
+                "symbol": "validate_agent_map_obj"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "intent": {
+      "static_provider_overlay": "excluded"
+    }
+  },
+  "primary_projection": "projection:trusted_publication",
+  "scenario_count": 2,
+  "static_provider_overlay": "excluded",
   "agent_map_quality": {
-    "task_route_count": 4,
-    "trusted_route_count": 4,
+    "task_route_count": 5,
+    "trusted_route_count": 5,
     "grounded_route_ratio": 1.0,
     "grounding_status": "grounded",
     "publish_blocker_count": 0,
@@ -1486,7 +2291,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       0,
       1,
       2,
-      3
+      3,
+      4
     ],
     "warning_count": 0,
     "error_count": 0,
@@ -1560,12 +2366,8 @@ function glyphForFamily(id){const role=nodeRoleStyles[id]||nodeRoleStyles.compon
 const nodeFamilyCounts = {}; nodes.forEach(n=>{const family=nodeFamily(n);nodeFamilyCounts[family]=(nodeFamilyCounts[family]||0)+1;});
 const basePlaneColors = {repo:'#34d399',code:'#60a5fa',docs:'#a78bfa',config:'#facc15',runtime:'#fb7185',tests:'#22d3ee',data:'#2dd4bf',external:'#c084fc',meta:'#94a3b8',unknown:'#94a3b8',control:'#34d399',reasoning:'#60a5fa',execution:'#fb923c',memory:'#a78bfa',governance:'#facc15',validation:'#f472b6',hitl:'#22d3ee',llm:'#f0abfc',identity:'#fde68a',artifacts:'#38bdf8',domain:'#0ea5e9',entry:'#818cf8',quality:'#fb7185',toy:'#a3e635'};
 const planeColors = {...basePlaneColors};
-// Dynamic circular panel layout. The previous template had two overlapping static palettes
-// (generic repo/code/docs and AR control/reasoning/execution). A blueprint containing
-// both sets could place e.g. repo+control, docs+reasoning, external+llm at identical
-// coordinates. This builder computes panels only for planes that actually exist,
-// assigns each a radius from its node population, then relaxes panel circles until the
-// hard membership circles do not overlap. The soft halo is decorative only.
+// Studio maps derive plane ordering and emphasis from their authored atlas rather
+// than a built-in domain taxonomy. Classic maps retain stable legacy placement.
 const WORLD = {w:4200, h:4200};
 const PLANE_CENTER = {x:WORLD.w/2, y:WORLD.h/2};
 const planeLabelMeta = {
@@ -1580,12 +2382,13 @@ const preferredAngles = {
 };
 const planePriority = ['repo','control','reasoning','llm','external','execution','entry','domain','docs','artifacts','data','memory','governance','validation','quality','runtime','tests','toy','config','code','identity','meta','unknown'];
 const customPalette = ['#38bdf8','#a78bfa','#34d399','#fb923c','#f472b6','#facc15','#2dd4bf','#c084fc','#93c5fd','#fda4af','#bef264','#fdba74'];
+const authoredPlaneOrder = studioAtlas ? (DATA.plane_glossary||[]).map(plane=>plane.id).filter(Boolean) : [];
 function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
 function planeDisplayLabel(plane){return planeGlossary.get(plane)?.label || planeLabelMeta[plane] || String(plane).replace(/[_-]/g,' ');}
 function buildPlanePanels(){
   const byPlane={}; nodes.forEach(n=>{(byPlane[n.plane||'unknown']||(byPlane[n.plane||'unknown']=[])).push(n);});
   const actualPlanes = Array.from(new Set([...(DATA.stats.planes||[]), ...Object.keys(byPlane)])).filter(Boolean);
-  actualPlanes.forEach((p,i)=>{ if(!planeColors[p]) planeColors[p]=customPalette[i%customPalette.length]; });
+  actualPlanes.forEach((p,i)=>{ if(studioAtlas || !planeColors[p]) planeColors[p]=customPalette[i%customPalette.length]; });
   const panels={};
   actualPlanes.forEach((plane,i)=>{
     const arr=byPlane[plane]||[];
@@ -1593,17 +2396,24 @@ function buildPlanePanels(){
     const major=arr.filter(n=>n.major).length;
     const avgLabel=Math.max(...arr.map(n=>String(n.label||'').length), planeDisplayLabel(plane).length, 8);
     let r=118 + Math.sqrt(Math.max(1,count))*44 + Math.sqrt(Math.max(0,major))*26 + Math.min(36,avgLabel*1.3);
-    if(plane==='repo') r=clamp(150 + Math.sqrt(Math.max(1,count))*42, 170, 260);
-    if(['control','reasoning','execution','llm','artifacts','runtime','validation','governance','memory','docs'].includes(plane)) r+=18;
+    if(!studioAtlas && plane==='repo') r=clamp(150 + Math.sqrt(Math.max(1,count))*42, 170, 260);
+    if(!studioAtlas && ['control','reasoning','execution','llm','artifacts','runtime','validation','governance','memory','docs'].includes(plane)) r+=18;
     r=clamp(r, 170, count>18?470:420);
     panels[plane]={plane, cx:PLANE_CENTER.x, cy:PLANE_CENTER.y, r, label:planeDisplayLabel(plane), count};
   });
   const active = actualPlanes.map(p=>panels[p]).sort((a,b)=>{
-    const ai=planePriority.indexOf(a.plane), bi=planePriority.indexOf(b.plane);
+    const order=studioAtlas?authoredPlaneOrder:planePriority;
+    const ai=order.indexOf(a.plane), bi=order.indexOf(b.plane);
     const ap=ai<0?999:ai, bp=bi<0?999:bi;
     return ap-bp || b.r-a.r || a.plane.localeCompare(b.plane);
   });
-  const centerPlane = panels.repo ? 'repo' : (panels.control ? 'control' : (active[0]?.plane || null));
+  const primaryProjection=studioAtlas ? (studioAtlas.projections||[]).find(projection=>projection.id===DATA.primary_projection) : null;
+  const primaryNodeIds=new Set(primaryProjection?.node_ids||[]);
+  const primaryPlanes=active.slice().sort((a,b)=>{
+    const score=plane=>nodes.filter(node=>node.plane===plane.plane&&primaryNodeIds.has(node.id)).length;
+    return score(b)-score(a) || active.indexOf(a)-active.indexOf(b);
+  });
+  const centerPlane = studioAtlas ? (primaryPlanes[0]?.plane || null) : (panels.repo ? 'repo' : (panels.control ? 'control' : (active[0]?.plane || null)));
   const centerPanel = centerPlane ? panels[centerPlane] : null;
   if(centerPanel){ centerPanel.cx=PLANE_CENTER.x; centerPanel.cy=PLANE_CENTER.y; centerPanel.fixed=true; centerPanel.homeX=centerPanel.cx; centerPanel.homeY=centerPanel.cy; }
   const outer = active.filter(p=>p!==centerPanel);
@@ -1615,7 +2425,7 @@ function buildPlanePanels(){
   ring = Math.max(480, ring);
   const usedAngles=new Set();
   outer.forEach((p,i)=>{
-    let deg = preferredAngles[p.plane];
+    let deg = studioAtlas ? -90 + (360*i/Math.max(1,outer.length)) : preferredAngles[p.plane];
     if(deg==null){ deg = -90 + (360*i/Math.max(1,outer.length)); }
     while(usedAngles.has(Math.round(deg))){ deg += 17; }
     usedAngles.add(Math.round(deg));

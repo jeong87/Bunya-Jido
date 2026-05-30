@@ -120,6 +120,10 @@ class ProjectionQualityTests(unittest.TestCase):
         self.assertTrue(
             any("visible relation families" in item for item in report["deterministic_warnings"])
         )
+        self.assertTrue(
+            any("visible label characters" in item for item in report["deterministic_warnings"])
+        )
+        self.assertGreater(report["metrics"]["visible_label_character_count"], 420)
 
     def test_quality_cli_requires_v2_pass_and_diagnose_includes_summary(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

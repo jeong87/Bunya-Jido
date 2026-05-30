@@ -16,14 +16,14 @@ keeps the review rationale visible beside it.
 ### Semantic Blueprint Pipeline
 
 - **Plane:** semantic
-- **Role:** Loads semantic inputs, applies publication rules, converts them to the viewer graph, and projects task routes.
+- **Role:** Loads semantic inputs, applies publication rules, converts them to the viewer graph, and projects task routes and Studio atlas metadata.
 - **Evidence:** `src/bunya_jido/blueprint.py`
 - **Boundary:** It can publish only evidence-linked core claims and trusted task routes.
 
 ### Renderer And Viewer
 
 - **Plane:** presentation
-- **Role:** Embeds the graph payload into an offline HTML viewer and presents trust, evidence, and paths.
+- **Role:** Embeds the graph payload into an offline HTML viewer and presents trust, evidence, projection presets, and policy-qualified narrated scenarios.
 - **Evidence:** `src/bunya_jido/render.py`, `src/bunya_jido/viewer/index.template.html`
 - **Boundary:** Presentation consumes the semantic contract; it is not evidence itself.
 
@@ -48,8 +48,15 @@ keeps the review rationale visible beside it.
 ### Contract Tests And CI
 
 - **Plane:** quality
-- **Role:** Characterize the trust contract and run it for supported Python versions.
-- **Evidence:** `tests/test_blueprint.py`, `.github/workflows/ci.yml`
+- **Role:** Characterize the trust contract, Studio benchmark variety, and offline viewer surface for supported Python versions.
+- **Evidence:** `tests/test_blueprint.py`, `tests/test_studio_benchmark.py`, `.github/workflows/ci.yml`
+
+### Studio Benchmark
+
+- **Plane:** quality
+- **Role:** Checks that different repository shapes yield distinct projections and honest scenario policy choices.
+- **Evidence:** `tests/fixtures/studio_benchmark_cases.json`, `tests/test_studio_benchmark.py`, `docs/STUDIO_BENCHMARK.md`
+- **Boundary:** It measures declared contract differences; it does not prove an editorial reading is uniquely best.
 
 ### Public Narrative And Roadmap
 

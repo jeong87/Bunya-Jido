@@ -150,10 +150,10 @@ bunya-jido build --root . --out bunya-jido.html
 
 그 다음 `bunya-jido.html`을 브라우저에서 열면 됩니다.
 
-#### Studio 계획 모드
+#### Studio Atlas 모드
 
-선택적인 Studio 준비 모드는 추후 narrated atlas 렌더링에 앞서 코딩
-에이전트가 저장소에 맞는 설명 관점을 비교하도록 합니다.
+선택적인 Studio 모드는 narrated atlas를 게시하기에 앞서 코딩 에이전트가
+저장소에 맞는 설명 관점을 비교하도록 합니다.
 
 ```bash
 bunya-jido prepare --root . --atlas-mode studio --quiet
@@ -184,6 +184,15 @@ bunya-jido evaluate-atlas-quality --root . --require-pass --json
 overview 과밀이나 약한 core inspection 같은 가독성 신호를 경고합니다.
 projection 선택과 narration 의미는 자동 증명으로 가장하지 않고
 명시적인 검토 항목으로 남깁니다.
+
+이 저장소의 커밋된 self-map은 이제 Studio v2를 사용합니다. primary
+projection은 `Trusted Publication`이며, 근거 badge가 붙은 behavioral
+scenario 두 개를 게시합니다. 도구가 자기 소스 트리에만 맞춰지는 것을
+막기 위해 Studio benchmark는 워크플로우 시스템, 웹 애플리케이션, SDK,
+변환 파이프라인, runtime scenario를 꾸며내지 않는 utility를 포함한
+서로 다른 여섯 저장소 형태를 렌더링하고 검증합니다. 자세한 내용은
+[docs/STUDIO_BENCHMARK.md](docs/STUDIO_BENCHMARK.md)와
+[docs/gallery.md](docs/gallery.md)를 참고하세요.
 
 ## 생성되는 파일
 
@@ -457,7 +466,9 @@ bunya-jido build --root . --data-policy full --out bunya-jido.html
 기존 grounded-map 구현 로드맵은 PR8까지 완료되었습니다. PR9부터 PR12는
 정직한 route matching, 선택적 native agent activation, 변경 인지
 refresh routing, stale-map 검토, 제한된 효용 평가로 agent-consumption
-흐름을 확장합니다. 커밋된 Grounded
+흐름을 확장합니다. Studio Atlas 단계는 저장소별 projection, 정직한
+scenario playback, 결정적 품질 검사, 다중 도메인 benchmark를 더하며,
+커밋된 self-map은 이제 Studio v2 예시입니다. 커밋된 Grounded
 self-map은 [docs/gallery.md](docs/gallery.md), public alpha 릴리스 조건과
 게시 설정은 [docs/RELEASING.md](docs/RELEASING.md), 변경 내역은
 [CHANGELOG.md](CHANGELOG.md), 기여 요건은

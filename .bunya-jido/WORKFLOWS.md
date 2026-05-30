@@ -8,8 +8,8 @@ designed to be reviewable in the generated HTML map.
 
 1. `src/bunya_jido/cli.py` accepts a build request.
 2. `src/bunya_jido/blueprint.py` loads a blueprint and applies the grounding gate.
-3. `src/bunya_jido/render.py` embeds a publishable graph payload.
-4. `src/bunya_jido/viewer/index.template.html` exposes trust status and evidence.
+3. `src/bunya_jido/render.py` embeds a publishable Studio graph payload.
+4. `src/bunya_jido/viewer/index.template.html` exposes trust status, evidence, projection selection, and qualified scenario playback.
 
 ## Task Route Publication
 
@@ -26,4 +26,15 @@ designed to be reviewable in the generated HTML map.
 ## Continuous Contract Check
 
 1. GitHub Actions installs the project for each supported Python version.
-2. The test suite verifies semantic grounding, route parity, and representative output behavior.
+2. The test suite verifies semantic grounding, route parity, multi-domain Studio variety, and representative output behavior.
+
+## Atlas Quality Evaluation
+
+1. The CLI validates a Studio v2 blueprint and gathers objective overview metrics.
+2. `src/bunya_jido/quality.py` reports density, label burden, and scenario-policy signals separately from human editorial review.
+
+## Studio Benchmark Review
+
+1. `tests/fixtures/studio_benchmark_cases.json` declares differing repository-shape rubrics.
+2. `tests/test_studio_benchmark.py` builds compact v2 atlas outputs, validates them, and renders each through the offline viewer.
+3. `docs/STUDIO_BENCHMARK.md` records that complex external repositories are review targets rather than taxonomy seeds.

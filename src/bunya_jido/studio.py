@@ -183,7 +183,8 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
     projections, scenario policy, and scenarios beneath the `atlas` object
     after drafting them in Markdown. The agent map remains grounded in the
     semantic nodes and workflows rather than depending on editorial narration.
-    Advanced viewer projection styling and playback arrive in later phases.
+    The offline viewer presents validated projection vocabulary and published
+    scenario playback without turning narration into evidence.
 
     ## Files to create or refresh
 

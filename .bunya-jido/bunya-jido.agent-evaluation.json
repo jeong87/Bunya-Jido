@@ -41,7 +41,8 @@
         "tests": [
           "tests/test_smoke.py",
           "tests/test_blueprint.py",
-          "tests/test_blueprint_v2.py"
+          "tests/test_blueprint_v2.py",
+          "tests/test_studio_benchmark.py"
         ]
       }
     },
@@ -87,7 +88,32 @@
           "Deterministic blockers and warnings must remain separate from review-required editorial judgments."
         ],
         "tests": [
-          "tests/test_projection_quality.py"
+          "tests/test_projection_quality.py",
+          "tests/test_studio_benchmark.py"
+        ]
+      }
+    },
+    {
+      "id": "multi-domain-rubric-does-not-seed-domain-vocabulary",
+      "dimension": "boundary_discipline",
+      "query": {
+        "task": "change multi-domain rubric coverage"
+      },
+      "expect": {
+        "route_status": "matched",
+        "routes": [
+          "change multi-domain rubric coverage"
+        ],
+        "must_read": [
+          "docs/STUDIO_BENCHMARK.md",
+          "tests/fixtures/studio_benchmark_cases.json",
+          "src/bunya_jido/studio.py"
+        ],
+        "contracts": [
+          "Benchmark fixtures must demonstrate differing repository shapes without turning an external reference atlas into a prompt seed."
+        ],
+        "tests": [
+          "tests/test_studio_benchmark.py"
         ]
       }
     },
@@ -103,6 +129,7 @@
         "forbid_routes": [
           "change grounding policy",
           "change task route projection",
+          "change multi-domain rubric coverage",
           "change viewer trust presentation"
         ]
       }

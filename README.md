@@ -150,10 +150,10 @@ bunya-jido build --root . --out bunya-jido.html
 
 Open `bunya-jido.html` in your browser.
 
-#### Studio Planning Mode
+#### Studio Atlas Mode
 
-The opt-in Studio preparation mode asks a coding agent to compare
-repository-specific explanations before any future narrated atlas rendering:
+The opt-in Studio mode asks a coding agent to compare repository-specific
+explanations before publishing a narrated atlas:
 
 ```bash
 bunya-jido prepare --root . --atlas-mode studio --quiet
@@ -185,6 +185,15 @@ This quality gate blocks deterministic contract failures and reports
 readability heuristics such as dense overview graphs or weak core inspection.
 Projection choice and narration meaning remain explicitly review-required
 judgments rather than automated proof.
+
+This repository's committed self-map now uses Studio v2: its primary
+projection is `Trusted Publication`, and it publishes two evidence-badged
+behavioral scenarios. To guard against a tool shaped only for its own source
+tree, the Studio benchmark renders and validates six distinct repository
+shapes, including workflow systems, web applications, SDKs, transformation
+pipelines, and utilities with no invented runtime scenario. See
+[docs/STUDIO_BENCHMARK.md](docs/STUDIO_BENCHMARK.md) and
+[docs/gallery.md](docs/gallery.md).
 
 ## Generated Files
 
@@ -454,7 +463,10 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 The original grounded-map implementation roadmap is complete through PR8.
 PR9 through PR12 extend agent consumption with honest route matching, optional
 native agent activation, change-aware refresh routing, stale-map review, and
-bounded utility evaluation. See
+bounded utility evaluation. The Studio Atlas phases add repository-specific
+projections, truthful scenario playback, deterministic quality checks, and a
+cross-domain benchmark; the committed self-map is now its Studio v2 example.
+See
 [docs/gallery.md](docs/gallery.md) for the committed Grounded self-map,
 [docs/RELEASING.md](docs/RELEASING.md) for public-alpha release gates and
 publishing setup, [CHANGELOG.md](CHANGELOG.md) for release notes, and

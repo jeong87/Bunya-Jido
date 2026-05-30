@@ -42,6 +42,7 @@ python -m compileall -q src tests
 python -m bunya_jido validate-blueprint --root .
 python -m bunya_jido validate-agent-map --root .
 python -m bunya_jido diagnose --root . --require-grounded --json
+python -m bunya_jido evaluate-atlas-quality --root . --require-pass --json
 python -m bunya_jido evaluate-agent-utility --root . --require-pass --json
 python -m bunya_jido check-stale --root . --git-diff origin/main...HEAD --require-reviewed
 python -m build
@@ -61,6 +62,10 @@ The agent-utility gate checks the committed bounded-context acceptance cases.
 Its pass status supports a context-output contract claim only; behavioral
 claims about live coding agents require the observation protocol in
 [`AGENT_UTILITY_EVALUATION.md`](AGENT_UTILITY_EVALUATION.md).
+
+The Studio atlas-quality gate measures publishable contract and readability
+signals, while [`STUDIO_BENCHMARK.md`](STUDIO_BENCHMARK.md) records the
+cross-domain rubric. Neither gate automatically proves the best narrative.
 
 ## PyPI Trusted Publishing
 
@@ -87,7 +92,8 @@ Maintainers must complete one-time repository and PyPI setup:
 The published demo is committed under `docs/`. The
 `.github/workflows/pages.yml` workflow deploys that directory when dispatched
 by a maintainer after reviewed changes merge. It runs the semantic self-map
-tests and the strict grounded diagnostic before uploading the Pages artifact.
+tests, the strict grounded diagnostic, and the Studio atlas-quality gate before
+uploading the Pages artifact.
 
 This design deliberately publishes the reviewed committed demo, rather than
 generating an unreviewed semantic map during deployment.

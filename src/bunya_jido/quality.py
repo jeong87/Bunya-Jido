@@ -134,6 +134,10 @@ def evaluate_atlas_quality_obj(
         warnings.append(
             f"primary projection average node label length is {average_label_length}; shorten labels or defer detail"
         )
+    if len(visible_nodes) >= 12 and label_chars > 420:
+        warnings.append(
+            f"primary projection exposes {label_chars} visible label characters; defer labels or reduce the first-screen set"
+        )
     edge_density = round(len(visible_edges) / max(1, len(visible_nodes)), 2)
     if len(visible_nodes) >= 8 and edge_density > 3.0:
         warnings.append(
@@ -215,6 +219,7 @@ def evaluate_atlas_quality_obj(
             "node_family_count": node_family_count,
             "visible_relation_family_count": len(visible_relation_families),
             "average_label_length": average_label_length,
+            "visible_label_character_count": label_chars,
             "edge_density": edge_density,
             "scenario_policy": atlas.get("scenario_policy"),
             "scenario_count": len(scenarios),

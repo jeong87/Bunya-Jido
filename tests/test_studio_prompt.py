@@ -47,7 +47,7 @@ class StudioPromptTests(unittest.TestCase):
                 self.assertTrue((outdir / name).exists())
             self.assertIn("Bunya-Jido Studio Atlas Prompt", prompt)
             self.assertIn("bunya-jido-blueprint-v2", prompt)
-            self.assertIn("Advanced viewer projection styling", prompt)
+            self.assertIn("validated projection vocabulary", prompt)
             self.assertIn("none_with_reason", prompt)
             self.assertIn("Static overlays permitted", projections)
             self.assertIn("Scenario policy", scenarios)
@@ -55,6 +55,8 @@ class StudioPromptTests(unittest.TestCase):
             self.assertIn("Studio v2 schema", short_prompt)
             self.assertEqual(schema["properties"]["schema_version"]["const"], "bunya-jido-blueprint-v2")
             self.assertIn("atlas", schema["required"])
+            self.assertIn("scenario playback", prompt)
+            self.assertNotIn("arrive in later phases", prompt)
 
     def test_studio_prepare_preserves_existing_intermediate_documents(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

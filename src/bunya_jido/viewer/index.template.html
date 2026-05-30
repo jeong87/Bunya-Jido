@@ -170,12 +170,8 @@ function glyphForFamily(id){const role=nodeRoleStyles[id]||nodeRoleStyles.compon
 const nodeFamilyCounts = {}; nodes.forEach(n=>{const family=nodeFamily(n);nodeFamilyCounts[family]=(nodeFamilyCounts[family]||0)+1;});
 const basePlaneColors = {repo:'#34d399',code:'#60a5fa',docs:'#a78bfa',config:'#facc15',runtime:'#fb7185',tests:'#22d3ee',data:'#2dd4bf',external:'#c084fc',meta:'#94a3b8',unknown:'#94a3b8',control:'#34d399',reasoning:'#60a5fa',execution:'#fb923c',memory:'#a78bfa',governance:'#facc15',validation:'#f472b6',hitl:'#22d3ee',llm:'#f0abfc',identity:'#fde68a',artifacts:'#38bdf8',domain:'#0ea5e9',entry:'#818cf8',quality:'#fb7185',toy:'#a3e635'};
 const planeColors = {...basePlaneColors};
-// Dynamic circular panel layout. The previous template had two overlapping static palettes
-// (generic repo/code/docs and AR control/reasoning/execution). A blueprint containing
-// both sets could place e.g. repo+control, docs+reasoning, external+llm at identical
-// coordinates. This builder computes panels only for planes that actually exist,
-// assigns each a radius from its node population, then relaxes panel circles until the
-// hard membership circles do not overlap. The soft halo is decorative only.
+// Studio maps derive plane ordering and emphasis from their authored atlas rather
+// than a built-in domain taxonomy. Classic maps retain stable legacy placement.
 const WORLD = {w:4200, h:4200};
 const PLANE_CENTER = {x:WORLD.w/2, y:WORLD.h/2};
 const planeLabelMeta = {
@@ -190,12 +186,13 @@ const preferredAngles = {
 };
 const planePriority = ['repo','control','reasoning','llm','external','execution','entry','domain','docs','artifacts','data','memory','governance','validation','quality','runtime','tests','toy','config','code','identity','meta','unknown'];
 const customPalette = ['#38bdf8','#a78bfa','#34d399','#fb923c','#f472b6','#facc15','#2dd4bf','#c084fc','#93c5fd','#fda4af','#bef264','#fdba74'];
+const authoredPlaneOrder = studioAtlas ? (DATA.plane_glossary||[]).map(plane=>plane.id).filter(Boolean) : [];
 function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
 function planeDisplayLabel(plane){return planeGlossary.get(plane)?.label || planeLabelMeta[plane] || String(plane).replace(/[_-]/g,' ');}
 function buildPlanePanels(){
   const byPlane={}; nodes.forEach(n=>{(byPlane[n.plane||'unknown']||(byPlane[n.plane||'unknown']=[])).push(n);});
   const actualPlanes = Array.from(new Set([...(DATA.stats.planes||[]), ...Object.keys(byPlane)])).filter(Boolean);
-  actualPlanes.forEach((p,i)=>{ if(!planeColors[p]) planeColors[p]=customPalette[i%customPalette.length]; });
+  actualPlanes.forEach((p,i)=>{ if(studioAtlas || !planeColors[p]) planeColors[p]=customPalette[i%customPalette.length]; });
   const panels={};
   actualPlanes.forEach((plane,i)=>{
     const arr=byPlane[plane]||[];
@@ -203,17 +200,24 @@ function buildPlanePanels(){
     const major=arr.filter(n=>n.major).length;
     const avgLabel=Math.max(...arr.map(n=>String(n.label||'').length), planeDisplayLabel(plane).length, 8);
     let r=118 + Math.sqrt(Math.max(1,count))*44 + Math.sqrt(Math.max(0,major))*26 + Math.min(36,avgLabel*1.3);
-    if(plane==='repo') r=clamp(150 + Math.sqrt(Math.max(1,count))*42, 170, 260);
-    if(['control','reasoning','execution','llm','artifacts','runtime','validation','governance','memory','docs'].includes(plane)) r+=18;
+    if(!studioAtlas && plane==='repo') r=clamp(150 + Math.sqrt(Math.max(1,count))*42, 170, 260);
+    if(!studioAtlas && ['control','reasoning','execution','llm','artifacts','runtime','validation','governance','memory','docs'].includes(plane)) r+=18;
     r=clamp(r, 170, count>18?470:420);
     panels[plane]={plane, cx:PLANE_CENTER.x, cy:PLANE_CENTER.y, r, label:planeDisplayLabel(plane), count};
   });
   const active = actualPlanes.map(p=>panels[p]).sort((a,b)=>{
-    const ai=planePriority.indexOf(a.plane), bi=planePriority.indexOf(b.plane);
+    const order=studioAtlas?authoredPlaneOrder:planePriority;
+    const ai=order.indexOf(a.plane), bi=order.indexOf(b.plane);
     const ap=ai<0?999:ai, bp=bi<0?999:bi;
     return ap-bp || b.r-a.r || a.plane.localeCompare(b.plane);
   });
-  const centerPlane = panels.repo ? 'repo' : (panels.control ? 'control' : (active[0]?.plane || null));
+  const primaryProjection=studioAtlas ? (studioAtlas.projections||[]).find(projection=>projection.id===DATA.primary_projection) : null;
+  const primaryNodeIds=new Set(primaryProjection?.node_ids||[]);
+  const primaryPlanes=active.slice().sort((a,b)=>{
+    const score=plane=>nodes.filter(node=>node.plane===plane.plane&&primaryNodeIds.has(node.id)).length;
+    return score(b)-score(a) || active.indexOf(a)-active.indexOf(b);
+  });
+  const centerPlane = studioAtlas ? (primaryPlanes[0]?.plane || null) : (panels.repo ? 'repo' : (panels.control ? 'control' : (active[0]?.plane || null)));
   const centerPanel = centerPlane ? panels[centerPlane] : null;
   if(centerPanel){ centerPanel.cx=PLANE_CENTER.x; centerPanel.cy=PLANE_CENTER.y; centerPanel.fixed=true; centerPanel.homeX=centerPanel.cx; centerPanel.homeY=centerPanel.cy; }
   const outer = active.filter(p=>p!==centerPanel);
@@ -225,7 +229,7 @@ function buildPlanePanels(){
   ring = Math.max(480, ring);
   const usedAngles=new Set();
   outer.forEach((p,i)=>{
-    let deg = preferredAngles[p.plane];
+    let deg = studioAtlas ? -90 + (360*i/Math.max(1,outer.length)) : preferredAngles[p.plane];
     if(deg==null){ deg = -90 + (360*i/Math.max(1,outer.length)); }
     while(usedAngles.has(Math.round(deg))){ deg += 17; }
     usedAngles.add(Math.round(deg));

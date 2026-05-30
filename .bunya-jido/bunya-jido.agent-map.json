@@ -55,17 +55,51 @@
       ],
       "tests": [
         "tests/test_projection_quality.py",
-        "tests/test_blueprint_v2.py"
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py"
       ],
       "safe_edit": [
         "src/bunya_jido/quality.py",
         "src/bunya_jido/blueprint.py",
         "src/bunya_jido/cli.py",
         "tests/test_projection_quality.py",
-        "tests/test_blueprint_v2.py"
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py"
       ],
       "watch_out": [
         "A heuristic warning must not silently become a publication claim about the best explanation."
+      ]
+    },
+    {
+      "task": "change multi-domain rubric coverage",
+      "intent": "Adjust cross-domain rubric fixtures while preserving domain-neutral authoring.",
+      "start_nodes": [
+        "quality:benchmark"
+      ],
+      "workflows": [
+        "studio_benchmark_review"
+      ],
+      "must_read": [
+        "docs/STUDIO_BENCHMARK.md",
+        "tests/fixtures/studio_benchmark_cases.json",
+        "tests/test_studio_benchmark.py",
+        "src/bunya_jido/studio.py"
+      ],
+      "contracts": [
+        "Benchmark fixtures must demonstrate differing repository shapes without turning an external reference atlas into a prompt seed."
+      ],
+      "tests": [
+        "tests/test_studio_benchmark.py",
+        "tests/test_projection_quality.py"
+      ],
+      "safe_edit": [
+        "docs/STUDIO_BENCHMARK.md",
+        "tests/fixtures/studio_benchmark_cases.json",
+        "tests/test_studio_benchmark.py",
+        "src/bunya_jido/studio.py"
+      ],
+      "watch_out": [
+        "An independently reviewed complex workflow may test output quality, but its nouns must not become generic viewer or prompt vocabulary."
       ]
     },
     {
@@ -115,19 +149,22 @@
       "contracts": [
         "The viewer must display published trust information without becoming the evidence source.",
         "Studio projection labels and contextual reveal must come from validated atlas data, with classic v1 behavior preserved.",
-        "Studio scenario playback must display its authored basis, avoid implying runtime order for structural tours, and restore the prior view on exit."
+        "Studio scenario playback must display its authored basis, avoid implying runtime order for structural tours, and restore the prior view on exit.",
+        "Studio layout must follow authored plane and projection data rather than privileged domain plane names."
       ],
       "tests": [
         "tests/test_smoke.py",
         "tests/test_blueprint.py",
-        "tests/test_blueprint_v2.py"
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py"
       ],
       "safe_edit": [
         "src/bunya_jido/viewer/index.template.html",
         "src/bunya_jido/render.py",
         "src/bunya_jido/blueprint.py",
         "tests/test_smoke.py",
-        "tests/test_blueprint_v2.py"
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py"
       ],
       "watch_out": [
         "A visual change must keep the offline standalone artifact readable and truthful.",

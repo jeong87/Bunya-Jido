@@ -1,0 +1,191 @@
+{
+  "schema_version": "bunya-jido-studio-benchmark-v1",
+  "benchmark_policy": {
+    "purpose": "Exercise repository-specific Studio atlas choices without using a domain atlas as generation input.",
+    "external_complex_system_usage": "Auto-Researcher may be read only as an independent human-review target after generic behavior exists; its authored atlas is never a prompt seed or default vocabulary.",
+    "rubric_fields": [
+      "expected_thesis_traits",
+      "expected_projection_kinds",
+      "must_include_landmarks",
+      "must_not_overcentralize",
+      "scenario_expectation",
+      "human_readability_notes"
+    ]
+  },
+  "cases": [
+    {
+      "id": "workflow_agent_system",
+      "domain": "Workflow/agent system",
+      "thesis": "An approved task moves from bounded intent through execution to auditable review artifacts.",
+      "ordered_behavior_assessment": "strong",
+      "planes": [
+        {"id": "intake", "label": "Intake", "purpose": "Accept bounded work."},
+        {"id": "decision", "label": "Decision", "purpose": "Approve a plan."},
+        {"id": "run", "label": "Run", "purpose": "Execute accepted work."},
+        {"id": "audit", "label": "Audit", "purpose": "Review outputs."}
+      ],
+      "landmarks": [
+        {"id": "request", "label": "Task Request", "plane": "intake", "family": "boundary"},
+        {"id": "approval", "label": "Approval Gate", "plane": "decision", "family": "gate"},
+        {"id": "execution", "label": "Execution Backend", "plane": "run", "family": "transform"},
+        {"id": "review", "label": "Review Record", "plane": "audit", "family": "record"}
+      ],
+      "primary_projection": {"id": "decision_to_record", "label": "Decision to Record", "question": "How does accepted work become reviewable output?"},
+      "edge_relation": "advances",
+      "scenario": {"policy": "required", "kind": "behavioral", "basis": "documented_workflow", "playback_mode": "animated_token"},
+      "rubric": {
+        "expected_thesis_traits": ["approved task", "auditable review"],
+        "expected_projection_kinds": ["ordered behavior"],
+        "must_include_landmarks": ["Task Request", "Approval Gate", "Execution Backend", "Review Record"],
+        "must_not_overcentralize": ["optional repair lane"],
+        "scenario_expectation": {"min": 1, "allowed_kinds": ["behavioral"]},
+        "human_readability_notes": ["A reader should see the approval boundary before the executor."]
+      }
+    },
+    {
+      "id": "semantic_map_tool",
+      "domain": "Semantic repository map tool",
+      "thesis": "Reviewed semantic claims pass validation before becoming an offline map for humans and coding agents.",
+      "ordered_behavior_assessment": "strong",
+      "planes": [
+        {"id": "command", "label": "Command", "purpose": "Initiate map work."},
+        {"id": "contract", "label": "Contract", "purpose": "Validate claims."},
+        {"id": "publish", "label": "Publish", "purpose": "Produce an artifact."},
+        {"id": "consume", "label": "Consume", "purpose": "Use the map."}
+      ],
+      "landmarks": [
+        {"id": "cli", "label": "Build Command", "plane": "command", "family": "boundary"},
+        {"id": "validation", "label": "Grounding Gate", "plane": "contract", "family": "gate"},
+        {"id": "html", "label": "Offline Renderer", "plane": "publish", "family": "transform"},
+        {"id": "context", "label": "Human and Agent View", "plane": "consume", "family": "record"}
+      ],
+      "primary_projection": {"id": "trusted_publication", "label": "Trusted Publication", "question": "How is a map allowed to reach readers?"},
+      "edge_relation": "publishes_through",
+      "scenario": {"policy": "required", "kind": "behavioral", "basis": "documented_workflow", "playback_mode": "animated_token"},
+      "rubric": {
+        "expected_thesis_traits": ["semantic claims", "validation", "coding agents"],
+        "expected_projection_kinds": ["publication contract"],
+        "must_include_landmarks": ["Build Command", "Grounding Gate", "Offline Renderer", "Human and Agent View"],
+        "must_not_overcentralize": ["static scan hint"],
+        "scenario_expectation": {"min": 1, "allowed_kinds": ["behavioral"]},
+        "human_readability_notes": ["Trust must remain visible before narrative playback."]
+      }
+    },
+    {
+      "id": "web_state_app",
+      "domain": "Web/state application",
+      "thesis": "User intent updates authoritative state and drives a rendered response through controlled effects.",
+      "ordered_behavior_assessment": "strong",
+      "planes": [
+        {"id": "interaction", "label": "Interaction", "purpose": "Capture user actions."},
+        {"id": "state", "label": "State", "purpose": "Own current values."},
+        {"id": "effects", "label": "Effects", "purpose": "Coordinate requests."},
+        {"id": "display", "label": "Display", "purpose": "Render outcomes."}
+      ],
+      "landmarks": [
+        {"id": "event", "label": "User Event", "plane": "interaction", "family": "boundary"},
+        {"id": "store", "label": "State Store", "plane": "state", "family": "record"},
+        {"id": "effect", "label": "Effect Runner", "plane": "effects", "family": "transform"},
+        {"id": "view", "label": "Rendered View", "plane": "display", "family": "surface"}
+      ],
+      "primary_projection": {"id": "interaction_loop", "label": "Interaction Loop", "question": "How does an action become visible UI state?"},
+      "edge_relation": "updates",
+      "scenario": {"policy": "required", "kind": "behavioral", "basis": "documented_workflow", "playback_mode": "animated_token"},
+      "rubric": {
+        "expected_thesis_traits": ["user intent", "state", "rendered response"],
+        "expected_projection_kinds": ["interaction flow"],
+        "must_include_landmarks": ["User Event", "State Store", "Effect Runner", "Rendered View"],
+        "must_not_overcentralize": ["styling utility"],
+        "scenario_expectation": {"min": 1, "allowed_kinds": ["behavioral"]},
+        "human_readability_notes": ["State ownership should remain visually distinguishable from effects."]
+      }
+    },
+    {
+      "id": "sdk_client",
+      "domain": "SDK/client",
+      "thesis": "A public client surface translates caller options into transport contracts and typed results.",
+      "ordered_behavior_assessment": "partial",
+      "planes": [
+        {"id": "public_api", "label": "Public API", "purpose": "Expose calls."},
+        {"id": "configuration", "label": "Configuration", "purpose": "Shape requests."},
+        {"id": "transport", "label": "Transport", "purpose": "Reach services."},
+        {"id": "models", "label": "Models", "purpose": "Return stable values."}
+      ],
+      "landmarks": [
+        {"id": "method", "label": "Client Method", "plane": "public_api", "family": "surface"},
+        {"id": "options", "label": "Request Options", "plane": "configuration", "family": "record"},
+        {"id": "transport", "label": "HTTP Transport", "plane": "transport", "family": "boundary"},
+        {"id": "response", "label": "Typed Response", "plane": "models", "family": "record"}
+      ],
+      "primary_projection": {"id": "client_contract", "label": "Client Contract", "question": "Which public surfaces and data contracts matter to callers?"},
+      "edge_relation": "describes",
+      "scenario": {"policy": "optional", "kind": "structural_tour", "basis": "illustrative_tour", "playback_mode": "stepped_highlight"},
+      "rubric": {
+        "expected_thesis_traits": ["public client surface", "transport contracts"],
+        "expected_projection_kinds": ["public API surface"],
+        "must_include_landmarks": ["Client Method", "Request Options", "HTTP Transport", "Typed Response"],
+        "must_not_overcentralize": ["one example request"],
+        "scenario_expectation": {"min": 1, "allowed_kinds": ["structural_tour"]},
+        "human_readability_notes": ["A tour may explain the API surface but must not claim a recorded request."]
+      }
+    },
+    {
+      "id": "compiler_parser",
+      "domain": "Compiler/parser",
+      "thesis": "Source input passes explicit transformation stages before a checked output is emitted.",
+      "ordered_behavior_assessment": "strong",
+      "planes": [
+        {"id": "source", "label": "Source", "purpose": "Receive text."},
+        {"id": "syntax", "label": "Syntax", "purpose": "Create structure."},
+        {"id": "transform", "label": "Transform", "purpose": "Rewrite form."},
+        {"id": "emit", "label": "Emit", "purpose": "Produce output."}
+      ],
+      "landmarks": [
+        {"id": "input", "label": "Source Input", "plane": "source", "family": "boundary"},
+        {"id": "parse", "label": "Parser", "plane": "syntax", "family": "transform"},
+        {"id": "ir", "label": "Intermediate Form", "plane": "transform", "family": "record"},
+        {"id": "output", "label": "Emitter", "plane": "emit", "family": "transform"}
+      ],
+      "primary_projection": {"id": "transformation_stages", "label": "Transformation Stages", "question": "How is source transformed into emitted output?"},
+      "edge_relation": "transforms_to",
+      "scenario": {"policy": "required", "kind": "behavioral", "basis": "documented_workflow", "playback_mode": "animated_token"},
+      "rubric": {
+        "expected_thesis_traits": ["transformation stages", "output"],
+        "expected_projection_kinds": ["pipeline stages"],
+        "must_include_landmarks": ["Source Input", "Parser", "Intermediate Form", "Emitter"],
+        "must_not_overcentralize": ["debug formatter"],
+        "scenario_expectation": {"min": 1, "allowed_kinds": ["behavioral"]},
+        "human_readability_notes": ["The sequential stages justify animated playback."]
+      }
+    },
+    {
+      "id": "utility_library",
+      "domain": "Utility library",
+      "thesis": "A small public function family applies documented transformations without claiming a lifecycle.",
+      "ordered_behavior_assessment": "none",
+      "planes": [
+        {"id": "exports", "label": "Exports", "purpose": "Present functions."},
+        {"id": "options", "label": "Options", "purpose": "Describe variation."},
+        {"id": "rules", "label": "Rules", "purpose": "State transformations."},
+        {"id": "examples", "label": "Examples", "purpose": "Show use."}
+      ],
+      "landmarks": [
+        {"id": "function", "label": "Public Functions", "plane": "exports", "family": "surface"},
+        {"id": "option", "label": "Option Schema", "plane": "options", "family": "record"},
+        {"id": "rule", "label": "Transformation Rules", "plane": "rules", "family": "transform"},
+        {"id": "example", "label": "Usage Examples", "plane": "examples", "family": "record"}
+      ],
+      "primary_projection": {"id": "api_reading_route", "label": "API Reading Route", "question": "What should a caller understand before using this library?"},
+      "edge_relation": "explains",
+      "scenario": {"policy": "none_with_reason", "reason": "The library exposes related functions but no honest ordered playback path."},
+      "rubric": {
+        "expected_thesis_traits": ["public function", "without claiming a lifecycle"],
+        "expected_projection_kinds": ["structural API reading"],
+        "must_include_landmarks": ["Public Functions", "Option Schema", "Transformation Rules", "Usage Examples"],
+        "must_not_overcentralize": ["invented runtime loop"],
+        "scenario_expectation": {"min": 0, "allowed_kinds": []},
+        "human_readability_notes": ["No launcher is better than invented runtime behavior."]
+      }
+    }
+  ]
+}
