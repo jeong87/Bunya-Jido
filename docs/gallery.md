@@ -14,7 +14,7 @@ repository and is protected by semantic golden tests.
 | Atlas contract | Studio v2, primary projection `Trusted Publication`, machine-readable decision record, two behavioral scenarios |
 | Grounding status | `grounded` |
 | Atlas quality status | `passed`, with projection choice and narration honesty still review-required |
-| Review status | Maintainer-authored and mechanically validated on May 31, 2026 |
+| Review status | Maintainer-authored and mechanically validated on June 1, 2026 |
 | Semantic coverage | 14 nodes, 25 relationships, 5 core nodes, 13 critical relationships |
 | Grounding metrics | 100% core-node evidence; 100% critical-relationship evidence |
 | Agent routes | 6 of 6 routes validated and projected as `Task Route` paths with optional Studio reading context |

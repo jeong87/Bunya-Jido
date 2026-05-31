@@ -186,3 +186,15 @@ An entry records review work; it does not prove architectural completeness.
   and agent-map validation, grounded diagnostics, strict atlas-quality and
   agent-utility evaluation, rebuilt gallery/demo outputs, and stale-map review
   are required before commit.
+
+## 2026-06-01 - README Hero Self-Map Capture Refresh
+
+- Change: Regenerated `docs/assets/self-map-grounded.png` from the committed
+  `docs/demo.html` overview after the N3-N5 self-map upgrades.
+- Decision: This corrects a stale published screenshot that still displayed
+  `5/5 routes`; it does not change the semantic blueprint, agent routes, or
+  atlas interpretation. The refreshed image now shows the validated `6/6`
+  trusted routes and current workflow surface.
+- Validation: Confirm the demo remains generated from the committed grounded
+  self-map, visually inspect the refreshed 1440 x 900 overview capture, and
+  rerun blueprint, agent-map, utility, quality, stale-map, and unit checks.
