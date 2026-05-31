@@ -683,6 +683,49 @@ function positionScenarioNarration(node){
 function setMode(mode){if(state.scenario)stopScenario(true);state.mode=mode;renderUI();buildVisibility();fit(false);toast(modeDefs.find(item=>item.id===mode)?.label||mode);}
 function selectNode(n){if(state.scenario)stopScenario(true);state.selected=n;state.selectedEdge=null;document.getElementById('search').value=n?n.label:'';document.getElementById('inspector').classList.toggle('open',!!n);buildVisibility();renderDetails();updateLegend();if(studioAtlas&&state.mode==='overview')fit(false);}
 function selectEdge(edge){if(state.scenario)stopScenario(true);state.selected=edge.t;state.selectedEdge=edge;state.mode='evidence';document.getElementById('search').value=edge.t.label;document.getElementById('inspector').classList.add('open');renderUI();fit(false);toast('inspect: '+edge.relation);}
+const trustedTaskRoutes=(DATA.path_presets||[]).filter(path=>path.kind==='task_route');
+function selectPath(id,sticky=false){
+  if(state.scenario)stopScenario(true);
+  const selected=DATA.path_presets.find(path=>path.id===id), same=state.path&&state.path.id===id;
+  state.path=!sticky&&same?null:selected;
+  state.pathOnly=!!(state.path&&state.path.kind==='projection');
+  document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly);
+  renderUI(); fit(); toast(state.path?'path: '+state.path.label:'path cleared');
+}
+function taskRoutesForNode(node){return trustedTaskRoutes.filter(route=>(route.node_ids||[]).includes(node.id));}
+function codingAgentContextText(route){
+  const lines=['# Bunya-Jido Coding-Agent Context','','Task: '+route.label,route.description||''];
+  const emit=(title,values)=>{if(values&&values.length){lines.push('',title+':');values.forEach(value=>lines.push('- '+value));}};
+  emit('Start nodes',route.start_nodes||[]);
+  emit('Must read',route.must_read||[]);
+  emit('Contracts',route.contracts||[]);
+  emit('Tests',route.tests||[]);
+  emit('Safe edit',route.safe_edit||[]);
+  if(route.projection_context){lines.push('','Projection context:','- '+route.projection_context.id+' - '+route.projection_context.label+': '+(route.projection_context.question_answered||route.projection_context.description||''));}
+  if(route.scenario_context&&route.scenario_context.length){lines.push('','Scenario context:');route.scenario_context.forEach(scenario=>lines.push('- '+scenario.id+' - '+scenario.label+' ('+scenario.kind+', '+scenario.basis+'): '+scenario.description));}
+  lines.push('','Source: validated Bunya-Jido task route projected in this offline map.');
+  return lines.join('\n');
+}
+function copyCodingAgentContext(id){
+  const route=trustedTaskRoutes.find(item=>item.id===id); if(!route)return;
+  const text=codingAgentContextText(route);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>toast('coding-agent context copied')).catch(()=>copyContextFallback(text));
+  } else { copyContextFallback(text); }
+}
+function copyContextFallback(text){
+  const field=document.createElement('textarea');field.value=text;field.style.position='fixed';field.style.left='-9999px';document.body.appendChild(field);field.select();
+  try {document.execCommand('copy');toast('coding-agent context copied');} catch(_error){toast('copy unavailable');}
+  field.remove();
+}
+function relatedTaskRoutesHtml(node){
+  const routes=taskRoutesForNode(node); if(!routes.length)return '';
+  return `<div class="relgroup"><h3>Related Trusted Routes</h3>${routes.map(route=>`<div class="mode-note"><strong>${escapeHtml(route.label)}</strong><br>${escapeHtml(route.description||'Validated coding-agent task route.')}<div style="margin-top:8px"><button data-highlight-route="${escapeHtml(route.id)}">Highlight route</button> <button data-copy-context="${escapeHtml(route.id)}">Copy coding-agent context</button></div></div>`).join('')}</div>`;
+}
+function bindRelatedTaskRoutes(el){
+  el.querySelectorAll('[data-highlight-route]').forEach(button=>button.onclick=()=>selectPath(button.dataset.highlightRoute,true));
+  el.querySelectorAll('[data-copy-context]').forEach(button=>button.onclick=()=>copyCodingAgentContext(button.dataset.copyContext));
+}
 function evidenceHtml(evidence){const items=(evidence||[]).slice(0,4); return items.length?`<div class="evlist">${items.map(ev=>`<div>${escapeHtml(ev.kind||'evidence')}: ${escapeHtml(ev.path||'')}${ev.symbol?` · ${escapeHtml(ev.symbol)}`:''}</div>`).join('')}</div>`:'<div class="evlist">no recorded evidence</div>';}
 function confidenceLabel(value){return String(value||'not_recorded').replaceAll('_',' ');}
 function familyRelations(family){return [...new Set(edges.filter(e=>relationFamily(e)===family).map(e=>e.relation))].sort();}
@@ -705,14 +748,16 @@ function renderDetails(){
   const summary=`<div class="node-title">${escapeHtml(n.label)}</div><div><span class="badge">${escapeHtml(family)}</span><span class="badge">${escapeHtml(planeDisplayLabel(n.plane))}</span>${n.major?'<span class="badge">landmark</span>':''}</div><p class="desc">${escapeHtml(n.description||'')}</p>`;
   if(state.mode==='overview'){
     const reveal=state.contextualNodeIds.size?`<div class="mode-note"><strong>Direct context revealed</strong><br>${state.contextualNodeIds.size} contextual neighbor${state.contextualNodeIds.size===1?'':'s'} linked to this selection are temporarily visible.</div>`:'';
-    el.innerHTML=summary+reveal+`<div class="mode-note">Evidence, exact relationship verbs, and confidence stay available on demand.<div style="margin-top:8px"><button id="inspectSelectedBtn">Inspect evidence</button></div></div>`;
+    el.innerHTML=summary+reveal+relatedTaskRoutesHtml(n)+`<div class="mode-note">Evidence, exact relationship verbs, and confidence stay available on demand.<div style="margin-top:8px"><button id="inspectSelectedBtn">Inspect evidence</button></div></div>`;
     document.getElementById('inspectSelectedBtn').onclick=()=>setMode('evidence');
+    bindRelatedTaskRoutes(el);
     return;
   }
   const out=edges.filter(e=>e.source===n.id); const inn=edges.filter(e=>e.target===n.id);
   const edgeHtml=(arr,dir)=>arr.slice(0,28).map(e=>`<div class="edgeitem" data-edge="${e.id}" style="border-color:${styleForRelation(e).color||'#64748b'}"><b>${escapeHtml(relationFamilyDefs[relationFamily(e)]?.label||'Structural Support')}</b> <span class="raw-verb">${escapeHtml(e.relation)}</span> ${dir==='out'?'→ '+escapeHtml(e.target_label):'← '+escapeHtml(e.source_label)}<br><span class="muted">confidence: ${escapeHtml(confidenceLabel(e.confidence))}</span>${e.note?`<br><span class="muted">${escapeHtml(e.note)}</span>`:''}${evidenceHtml(e.evidence)}</div>`).join('')||'<div class="muted small">none</div>';
   const implementation=state.mode==='implementation'?`<div class="panel-kv"><div>raw type</div><div><span class="code">${escapeHtml(n.type)}</span></div><div>source</div><div class="source-link">${escapeHtml(n.source_path||'generated graph node')}</div><div>status</div><div>${escapeHtml(n.status||'n/a')}</div>${n.parent?`<div>parent</div><div><span class="code">${escapeHtml(n.parent)}</span></div>`:''}<div>tags</div><div>${(n.tags||[]).slice(0,8).map(t=>`<span class="code">${escapeHtml(t)}</span>`).join(' ')||'<span class="muted">none</span>'}</div></div>`:`<div class="panel-kv"><div>source</div><div class="source-link">${escapeHtml(n.source_path||'generated graph node')}</div></div>`;
-  el.innerHTML=summary+selectedRelationshipHtml(state.selectedEdge)+implementation+`<div class="relgroup"><h3>Node Evidence</h3>${evidenceHtml(n.evidence)}</div><div class="relgroup"><h3>Outgoing</h3>${edgeHtml(out,'out')}</div><div class="relgroup"><h3>Incoming</h3>${edgeHtml(inn,'in')}</div>`;
+  el.innerHTML=summary+selectedRelationshipHtml(state.selectedEdge)+implementation+relatedTaskRoutesHtml(n)+`<div class="relgroup"><h3>Node Evidence</h3>${evidenceHtml(n.evidence)}</div><div class="relgroup"><h3>Outgoing</h3>${edgeHtml(out,'out')}</div><div class="relgroup"><h3>Incoming</h3>${edgeHtml(inn,'in')}</div>`;
+  bindRelatedTaskRoutes(el);
   el.querySelectorAll('[data-edge]').forEach(x=>x.onclick=()=>{const edge=edges.find(q=>q.id===x.dataset.edge);if(edge)selectEdge(edge);});
 }
 function renderScenarioUI(){
@@ -761,10 +806,9 @@ function renderUI(){
   document.querySelectorAll('[data-relation-family]').forEach(x=>x.onchange=()=>{x.checked?state.allowedRelationFamilies.add(x.dataset.relationFamily):state.allowedRelationFamilies.delete(x.dataset.relationFamily);});
   document.querySelectorAll('[data-confidence]').forEach(x=>x.onchange=()=>{x.checked?state.allowedConfidences.add(x.dataset.confidence):state.allowedConfidences.delete(x.dataset.confidence);});
   const pathKind=p=>p.kind==='projection'?'Projection':p.kind==='task_route'?'Task Route':p.kind==='workflow'||String(p.id||'').startsWith('workflow_')?'Workflow':p.kind==='overview'||p.id==='overview'||p.id==='blueprint_core'?'Overview':'View';
-  const pathSelect=(id,sticky=false)=>{if(state.scenario)stopScenario(true);const selected=DATA.path_presets.find(p=>p.id===id); const same=state.path&&state.path.id===id; state.path=!sticky&&same?null:selected; state.pathOnly=!!(state.path&&state.path.kind==='projection'); document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly); renderUI(); fit(); toast(state.path?'path: '+state.path.label:'path cleared');};
   const projections=studioAtlas?DATA.path_presets.filter(p=>p.kind==='projection'):[];
   document.getElementById('presetBar').innerHTML=projections.map(p=>`<button class="preset-chip ${state.path&&state.path.id===p.id?'active':''}" data-preset="${p.id}" title="${escapeHtml(p.description)}"><small>${p.is_primary?'Primary':'View'}</small>${escapeHtml(p.label)}</button>`).join('');
-  document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.preset,true));
+  document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>selectPath(b.dataset.preset,true));
   const routes=DATA.path_presets.filter(p=>p.kind==='task_route'); document.getElementById('pathSummary').innerHTML=routes.length?`<div class="path-summary"><strong>${routes.length} validated task route${routes.length===1?'':'s'}</strong><br>Shared with bounded agent context.</div>`:'';
   const pathGroups=[['projection','Studio Projections'],['task_route','Validated Task Routes'],['workflow','Workflows'],['overview','Overview'],['view','Views']];
   document.getElementById('paths').innerHTML=pathGroups.map(([kind,label])=>{const items=DATA.path_presets.filter(p=>pathKind(p).toLowerCase().replace(' ','_')===kind);if(!items.length)return '';return `<div class="path-group"><h3>${label}<span>${items.length}</span></h3>${items.map(p=>`<button class="path-card ${state.path&&state.path.id===p.id?'active':''}" data-path="${p.id}"><strong>${escapeHtml(p.label)}</strong><em class="path-kind">${escapeHtml(pathKind(p))}</em><span>${escapeHtml(p.description)}</span></button>`).join('')}</div>`;}).join('');
@@ -772,8 +816,8 @@ function renderUI(){
   const workflows=operationalPaths.filter(p=>pathKind(p)==='Workflow');
   const workflowBarPaths=workflows.length?workflows:(operationalPaths.length?operationalPaths:DATA.path_presets);
   document.getElementById('workflowBar').innerHTML=workflowBarPaths.map(p=>`<button class="workflow-chip ${state.path&&state.path.id===p.id?'active':''}" data-workflow-path="${p.id}">${escapeHtml(p.label)} <em>${escapeHtml(pathKind(p))}</em></button>`).join('');
-  document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.path));
-  document.querySelectorAll('[data-workflow-path]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.workflowPath));
+  document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>selectPath(b.dataset.path));
+  document.querySelectorAll('[data-workflow-path]').forEach(b=>b.onclick=()=>selectPath(b.dataset.workflowPath));
   document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly);
   renderScenarioUI(); updateLegend(); renderDetails();
 }

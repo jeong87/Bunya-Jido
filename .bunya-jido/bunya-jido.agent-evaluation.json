@@ -24,6 +24,12 @@
         "must_read": [
           "src/bunya_jido/blueprint.py",
           "src/bunya_jido/viewer/index.template.html"
+        ],
+        "projection_context": [
+          "projection:agent_navigation"
+        ],
+        "scenario_context": [
+          "scenario:agent_context"
         ]
       }
     },
@@ -43,6 +49,13 @@
           "tests/test_blueprint.py",
           "tests/test_blueprint_v2.py",
           "tests/test_studio_benchmark.py"
+        ],
+        "projection_context": [
+          "projection:trusted_publication"
+        ],
+        "scenario_context": [
+          "scenario:publish_map",
+          "scenario:agent_context"
         ]
       }
     },

@@ -45,6 +45,9 @@ be documented.
   weak playback readability, and missing primary landmarks, plus opt-in
   `.bunya-jido/ATLAS_QUALITY_REPORT.md` output without changing the
   deterministic `--require-pass` gate.
+- Optional validated Studio `projection_context` and `scenario_context`
+  references on task routes, with bounded CLI orientation and viewer-side
+  copying of related trusted coding-agent context.
 
 ### Changed
 

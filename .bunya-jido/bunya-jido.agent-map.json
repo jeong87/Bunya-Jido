@@ -14,6 +14,10 @@
       "workflows": [
         "semantic_map_publication"
       ],
+      "projection_context": "projection:quality_contract",
+      "scenario_context": [
+        "scenario:publish_map"
+      ],
       "must_read": [
         "src/bunya_jido/blueprint.py",
         "src/bunya_jido/schema.py",
@@ -44,6 +48,10 @@
       ],
       "workflows": [
         "atlas_quality_evaluation"
+      ],
+      "projection_context": "projection:quality_contract",
+      "scenario_context": [
+        "scenario:publish_map"
       ],
       "must_read": [
         "src/bunya_jido/quality.py",
@@ -79,6 +87,8 @@
       "workflows": [
         "studio_benchmark_review"
       ],
+      "projection_context": "projection:quality_contract",
+      "scenario_context": [],
       "must_read": [
         "docs/STUDIO_BENCHMARK.md",
         "tests/fixtures/studio_benchmark_cases.json",
@@ -111,6 +121,10 @@
       "workflows": [
         "task_route_publication"
       ],
+      "projection_context": "projection:agent_navigation",
+      "scenario_context": [
+        "scenario:agent_context"
+      ],
       "must_read": [
         "src/bunya_jido/blueprint.py",
         "src/bunya_jido/viewer/index.template.html"
@@ -139,6 +153,11 @@
       ],
       "workflows": [
         "semantic_map_publication"
+      ],
+      "projection_context": "projection:trusted_publication",
+      "scenario_context": [
+        "scenario:publish_map",
+        "scenario:agent_context"
       ],
       "must_read": [
         "src/bunya_jido/viewer/index.template.html",

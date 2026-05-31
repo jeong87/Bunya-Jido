@@ -449,6 +449,80 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(graph["agent_map_quality"]["trusted_route_count"], 1)
         self.assertIn('"kind": "task_route"', html)
         self.assertIn("Task Route", html)
+        self.assertIn("Related Trusted Routes", html)
+        self.assertIn("Copy coding-agent context", html)
+
+    def test_validated_optional_studio_route_context_is_projected_but_missing_references_block(self) -> None:
+        blueprint = example_blueprint()
+        blueprint["atlas"] = {
+            "projections": [
+                {
+                    "id": "projection:agent",
+                    "label": "Agent Reading",
+                    "description": "A bounded task orientation.",
+                    "question_answered": "Where should an agent begin?",
+                }
+            ],
+            "scenarios": [
+                {
+                    "id": "scenario:change",
+                    "label": "Change Safely",
+                    "description": "Follow validated guidance.",
+                    "kind": "behavioral",
+                    "basis": "documented_workflow",
+                    "playback_mode": "animated_token",
+                }
+            ],
+        }
+        agent_map = example_agent_map()
+        route = agent_map["task_routes"][0]
+        route["projection_context"] = "projection:agent"
+        route["scenario_context"] = ["scenario:change"]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            (root / "tests").mkdir()
+            (root / "src" / "bunya_jido").mkdir(parents=True)
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (root / "src" / "bunya_jido" / "blueprint.py").write_text("# fixture\n", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(json.dumps(blueprint), encoding="utf-8")
+            (outdir / "bunya-jido.agent-map.json").write_text(json.dumps(agent_map), encoding="utf-8")
+
+            errors, warnings, metrics = validate_agent_map_obj(agent_map, root=root, blueprint=blueprint)
+            context = generate_agent_context(root, task="change builder behavior")
+            graph, _ = graph_with_optional_blueprint(root)
+
+        self.assertEqual(errors, [])
+        self.assertEqual(warnings, [])
+        self.assertEqual(metrics["trusted_route_count"], 1)
+        self.assertIn("**Start-node responsibility:**", context)
+        self.assertIn("**Projection context:**", context)
+        self.assertIn("`projection:agent` - Agent Reading", context)
+        self.assertIn("**Scenario context:**", context)
+        self.assertIn("`scenario:change` - Change Safely", context)
+        projected = next(path for path in graph["path_presets"] if path["kind"] == "task_route")
+        self.assertEqual(projected["start_nodes"], ["component:builder"])
+        self.assertEqual(projected["projection_context"]["id"], "projection:agent")
+        self.assertEqual(projected["scenario_context"][0]["id"], "scenario:change")
+
+        blocked_map = json.loads(json.dumps(agent_map))
+        blocked_map["task_routes"][0]["projection_context"] = "projection:missing"
+        _, _, blocked_metrics = validate_agent_map_obj(blocked_map, blueprint=blueprint)
+        self.assertTrue(
+            any("references projection not in blueprint" in blocker for blocker in blocked_metrics["publish_blockers"])
+        )
+
+        malformed_map = json.loads(json.dumps(agent_map))
+        malformed_map["task_routes"][0]["scenario_context"] = "scenario:change"
+        malformed_errors, _, _ = validate_agent_map_obj(malformed_map, blueprint=blueprint)
+        _, _, malformed_metrics = validate_agent_map_obj(malformed_map, blueprint=blueprint)
+        self.assertIn(
+            "task_routes[0].scenario_context must be a list of non-empty strings",
+            malformed_errors,
+        )
+        self.assertEqual(malformed_metrics["trusted_route_count"], 0)
 
     def test_changed_start_node_evidence_can_select_a_route_without_path_overlap(self) -> None:
         blueprint = example_blueprint()

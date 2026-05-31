@@ -242,6 +242,9 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
     projections, scenario policy, and scenarios beneath the `atlas` object
     after drafting them in Markdown. The agent map remains grounded in the
     semantic nodes and workflows rather than depending on editorial narration.
+    A task route may optionally name one validated `projection_context` and
+    validated `scenario_context` IDs so an agent can read the authored Studio
+    orientation relevant to the task; omit them when no bounded context helps.
     The offline viewer presents validated projection vocabulary and published
     scenario playback without turning narration into evidence.
 
@@ -315,7 +318,9 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
        the first screen would mislead.
     10. **Agent Context Designer:** Write the agent map from validated
         semantic nodes and workflows so task routes remain bounded and
-        grounded rather than depending on narration alone.
+        grounded rather than depending on narration alone. When useful, add
+        `projection_context` and `scenario_context` using only IDs published
+        in `atlas.projections` and `atlas.scenarios`.
     11. **Validator:** Validate, evaluate, and build:
 
        `bunya-jido validate-blueprint --root .`

@@ -134,8 +134,8 @@
       "importance": "major",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Validates bounded task routes against semantic nodes, workflows, required reading, and tests.",
-      "inspector_summary": "Only grounded route references can reach agent context or appear as trusted viewer paths.",
+      "description": "Validates bounded task routes against semantic nodes, workflows, required reading, tests, and optional Studio reading context.",
+      "inspector_summary": "Only grounded route and projection/scenario references can reach agent context or appear as trusted viewer paths.",
       "source_path": "src/bunya_jido/blueprint.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "validate_agent_map_obj"}
@@ -151,7 +151,7 @@
       "overview_visibility": "contextual",
       "activation": "conditional",
       "description": "Emits bounded navigation guidance only from a grounded blueprint and validated task routes.",
-      "inspector_summary": "Context generation gives coding agents bounded reading, contracts, and tests after route validation.",
+      "inspector_summary": "Context generation gives coding agents bounded reading, contracts, tests, route-linked projections, qualified scenarios, and start-node responsibility after validation.",
       "source_path": "src/bunya_jido/blueprint.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "generate_agent_context"}
@@ -183,9 +183,9 @@
       "importance": "core",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Displays trust, evidence, Studio projections, contextual navigation, and validated narrated scenario playback offline.",
+      "description": "Displays trust, evidence, Studio projections, contextual navigation, validated narrated scenario playback, and copyable trusted agent-route context offline.",
       "why_it_matters": "It is how people read the map while preserving the provenance and limitations of authored claims.",
-      "inspector_summary": "The viewer shows authored basis badges and restores user state after playback without becoming evidence.",
+      "inspector_summary": "The viewer shows authored basis badges, restores user state after playback, and copies only projected trusted routes without becoming evidence.",
       "source_path": "src/bunya_jido/viewer/index.template.html",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/viewer/index.template.html", "symbol": "renderTrust"},
@@ -303,11 +303,11 @@
     {
       "id": "task_route_publication",
       "label": "Task Route Publication",
-      "description": "Validate agent routes against the grounded blueprint before showing them as viewer paths.",
+      "description": "Validate agent routes and their optional Studio reading context before showing them as viewer paths or copyable agent guidance.",
       "kind": "behavioral",
       "ordered": true,
       "trigger": "semantic build with agent map",
-      "outcome": "Trusted task-route presets.",
+      "outcome": "Trusted task-route presets with bounded optional Studio context.",
       "confidence": "deterministic",
       "node_ids": ["entry:cli", "semantic:blueprint", "semantic:agent_map", "presentation:renderer", "presentation:viewer"],
       "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py"}]
@@ -315,11 +315,11 @@
     {
       "id": "trusted_context_generation",
       "label": "Trusted Context Generation",
-      "description": "Validate blueprint and route trust before emitting bounded navigation context.",
+      "description": "Validate blueprint and route trust before emitting bounded navigation context with optional Studio reading guidance.",
       "kind": "behavioral",
       "ordered": true,
       "trigger": "bunya-jido context",
-      "outcome": "Bounded coding-agent guidance.",
+      "outcome": "Bounded coding-agent guidance with validated projection and scenario references when authored.",
       "confidence": "deterministic",
       "node_ids": ["entry:cli", "semantic:context", "semantic:validation", "semantic:agent_map"],
       "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "generate_agent_context"}]

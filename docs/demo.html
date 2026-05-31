@@ -106,7 +106,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
-  "generated_at": "2026-05-31T12:45:48+00:00",
+  "generated_at": "2026-05-31T12:52:21+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
   "artifact_mode": "semantic_blueprint",
@@ -367,7 +367,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Interactive Viewer",
       "type": "ui",
       "plane": "presentation",
-      "description": "Displays trust, evidence, Studio projections, contextual navigation, and validated narrated scenario playback offline.",
+      "description": "Displays trust, evidence, Studio projections, contextual navigation, validated narrated scenario playback, and copyable trusted agent-route context offline.",
       "source_path": "src/bunya_jido/viewer/index.template.html",
       "tags": [
         "blueprint",
@@ -397,7 +397,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "overview_visibility": "visible",
       "activation": "always",
       "why_it_matters": "It is how people read the map while preserving the provenance and limitations of authored claims.",
-      "inspector_summary": "The viewer shows authored basis badges and restores user state after playback without becoming evidence."
+      "inspector_summary": "The viewer shows authored basis badges, restores user state after playback, and copies only projected trusted routes without becoming evidence."
     },
     {
       "id": "quality:atlas",
@@ -643,14 +643,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "family": "projection",
       "overview_visibility": "contextual",
       "activation": "conditional",
-      "inspector_summary": "Context generation gives coding agents bounded reading, contracts, and tests after route validation."
+      "inspector_summary": "Context generation gives coding agents bounded reading, contracts, tests, route-linked projections, qualified scenarios, and start-node responsibility after validation."
     },
     {
       "id": "semantic:agent_map",
       "label": "Agent Route Parity",
       "type": "contract",
       "plane": "semantic",
-      "description": "Validates bounded task routes against semantic nodes, workflows, required reading, and tests.",
+      "description": "Validates bounded task routes against semantic nodes, workflows, required reading, tests, and optional Studio reading context.",
       "source_path": "src/bunya_jido/blueprint.py",
       "tags": [
         "blueprint",
@@ -674,7 +674,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "family": "gate",
       "overview_visibility": "visible",
       "activation": "always",
-      "inspector_summary": "Only grounded route references can reach agent context or appear as trusted viewer paths."
+      "inspector_summary": "Only grounded route and projection/scenario references can reach agent context or appear as trusted viewer paths."
     }
   ],
   "edges": [
@@ -1504,7 +1504,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "id": "workflow_task_route_publication",
       "label": "Task Route Publication",
-      "description": "Validate agent routes against the grounded blueprint before showing them as viewer paths.",
+      "description": "Validate agent routes and their optional Studio reading context before showing them as viewer paths or copyable agent guidance.",
       "kind": "workflow",
       "source": "blueprint",
       "node_ids": [
@@ -1525,7 +1525,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "id": "workflow_trusted_context_generation",
       "label": "Trusted Context Generation",
-      "description": "Validate blueprint and route trust before emitting bounded navigation context.",
+      "description": "Validate blueprint and route trust before emitting bounded navigation context with optional Studio reading guidance.",
       "kind": "workflow",
       "source": "blueprint",
       "node_ids": [
@@ -1612,6 +1612,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "HTML Renderer",
         "Interactive Viewer"
       ],
+      "start_nodes": [
+        "semantic:validation"
+      ],
       "workflows": [
         "semantic_map_publication"
       ],
@@ -1620,9 +1623,34 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "src/bunya_jido/schema.py",
         "docs/CONTRIBUTION_PLAN.md"
       ],
+      "contracts": [
+        "Core node and critical edge evidence must remain inspectable before semantic publication."
+      ],
       "tests": [
         "tests/test_blueprint.py",
         "tests/test_blueprint_v2.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/schema.py",
+        "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py"
+      ],
+      "projection_context": {
+        "id": "projection:quality_contract",
+        "label": "Quality Contract",
+        "description": "How readability, generality, and publication trust are mechanically checked.",
+        "question_answered": "Which checks keep the Studio output honest?"
+      },
+      "scenario_context": [
+        {
+          "id": "scenario:publish_map",
+          "label": "Publish A Trusted Map",
+          "description": "Follow an authored map through its evidence gate into the offline viewer.",
+          "kind": "behavioral",
+          "basis": "documented_workflow",
+          "playback_mode": "animated_token"
+        }
       ]
     },
     {
@@ -1641,6 +1669,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Command Line Interface",
         "Grounding Gate"
       ],
+      "start_nodes": [
+        "quality:atlas"
+      ],
       "workflows": [
         "atlas_quality_evaluation"
       ],
@@ -1649,10 +1680,37 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "src/bunya_jido/schema.py",
         "src/bunya_jido/blueprint.py"
       ],
+      "contracts": [
+        "Deterministic blockers and warnings must remain separate from review-required editorial judgments."
+      ],
       "tests": [
         "tests/test_projection_quality.py",
         "tests/test_blueprint_v2.py",
         "tests/test_studio_benchmark.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/quality.py",
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/cli.py",
+        "tests/test_projection_quality.py",
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py"
+      ],
+      "projection_context": {
+        "id": "projection:quality_contract",
+        "label": "Quality Contract",
+        "description": "How readability, generality, and publication trust are mechanically checked.",
+        "question_answered": "Which checks keep the Studio output honest?"
+      },
+      "scenario_context": [
+        {
+          "id": "scenario:publish_map",
+          "label": "Publish A Trusted Map",
+          "description": "Follow an authored map through its evidence gate into the offline viewer.",
+          "kind": "behavioral",
+          "basis": "documented_workflow",
+          "playback_mode": "animated_token"
+        }
       ]
     },
     {
@@ -1671,6 +1729,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Atlas Quality Evaluator",
         "Interactive Viewer"
       ],
+      "start_nodes": [
+        "quality:benchmark"
+      ],
       "workflows": [
         "studio_benchmark_review"
       ],
@@ -1680,10 +1741,26 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "tests/test_studio_benchmark.py",
         "src/bunya_jido/studio.py"
       ],
+      "contracts": [
+        "Benchmark fixtures must demonstrate differing repository shapes without turning an external reference atlas into a prompt seed."
+      ],
       "tests": [
         "tests/test_studio_benchmark.py",
         "tests/test_projection_quality.py"
-      ]
+      ],
+      "safe_edit": [
+        "docs/STUDIO_BENCHMARK.md",
+        "tests/fixtures/studio_benchmark_cases.json",
+        "tests/test_studio_benchmark.py",
+        "src/bunya_jido/studio.py"
+      ],
+      "projection_context": {
+        "id": "projection:quality_contract",
+        "label": "Quality Contract",
+        "description": "How readability, generality, and publication trust are mechanically checked.",
+        "question_answered": "Which checks keep the Studio output honest?"
+      },
+      "scenario_context": []
     },
     {
       "id": "task_route_change-task-route-projection",
@@ -1705,6 +1782,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "HTML Renderer",
         "Interactive Viewer"
       ],
+      "start_nodes": [
+        "semantic:agent_map"
+      ],
       "workflows": [
         "task_route_publication"
       ],
@@ -1712,9 +1792,33 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "src/bunya_jido/blueprint.py",
         "src/bunya_jido/viewer/index.template.html"
       ],
+      "contracts": [
+        "Only routes validated against repository-relative inputs may reach trusted context or HTML paths."
+      ],
       "tests": [
         "tests/test_blueprint.py",
         "tests/test_blueprint_v2.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/viewer/index.template.html",
+        "tests/test_blueprint.py"
+      ],
+      "projection_context": {
+        "id": "projection:agent_navigation",
+        "label": "Bounded Agent Navigation",
+        "description": "How a coding task receives route guidance only after validation.",
+        "question_answered": "How can a coding agent use the map safely?"
+      },
+      "scenario_context": [
+        {
+          "id": "scenario:agent_context",
+          "label": "Request Bounded Agent Context",
+          "description": "Follow a task request to validated coding-agent navigation guidance.",
+          "kind": "behavioral",
+          "basis": "documented_workflow",
+          "playback_mode": "animated_token"
+        }
       ]
     },
     {
@@ -1737,6 +1841,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Grounding Gate",
         "HTML Renderer"
       ],
+      "start_nodes": [
+        "presentation:viewer"
+      ],
       "workflows": [
         "semantic_map_publication"
       ],
@@ -1746,11 +1853,49 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "src/bunya_jido/blueprint.py",
         "src/bunya_jido/schema.py"
       ],
+      "contracts": [
+        "The viewer must display published trust information without becoming the evidence source.",
+        "Studio projection labels and contextual reveal must come from validated atlas data, with classic v1 behavior preserved.",
+        "Studio scenario playback must display its authored basis, avoid implying runtime order for structural tours, and restore the prior view on exit.",
+        "Studio layout must follow authored plane and projection data rather than privileged domain plane names."
+      ],
       "tests": [
         "tests/test_smoke.py",
         "tests/test_blueprint.py",
         "tests/test_blueprint_v2.py",
         "tests/test_studio_benchmark.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/viewer/index.template.html",
+        "src/bunya_jido/render.py",
+        "src/bunya_jido/blueprint.py",
+        "tests/test_smoke.py",
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py"
+      ],
+      "projection_context": {
+        "id": "projection:trusted_publication",
+        "label": "Trusted Publication",
+        "description": "How an evidence-linked interpretation becomes an offline map for humans and coding agents.",
+        "question_answered": "How is a semantic map permitted to reach readers?"
+      },
+      "scenario_context": [
+        {
+          "id": "scenario:publish_map",
+          "label": "Publish A Trusted Map",
+          "description": "Follow an authored map through its evidence gate into the offline viewer.",
+          "kind": "behavioral",
+          "basis": "documented_workflow",
+          "playback_mode": "animated_token"
+        },
+        {
+          "id": "scenario:agent_context",
+          "label": "Request Bounded Agent Context",
+          "description": "Follow a task request to validated coding-agent navigation guidance.",
+          "kind": "behavioral",
+          "basis": "documented_workflow",
+          "playback_mode": "animated_token"
+        }
       ]
     }
   ],
@@ -2953,6 +3098,49 @@ function positionScenarioNarration(node){
 function setMode(mode){if(state.scenario)stopScenario(true);state.mode=mode;renderUI();buildVisibility();fit(false);toast(modeDefs.find(item=>item.id===mode)?.label||mode);}
 function selectNode(n){if(state.scenario)stopScenario(true);state.selected=n;state.selectedEdge=null;document.getElementById('search').value=n?n.label:'';document.getElementById('inspector').classList.toggle('open',!!n);buildVisibility();renderDetails();updateLegend();if(studioAtlas&&state.mode==='overview')fit(false);}
 function selectEdge(edge){if(state.scenario)stopScenario(true);state.selected=edge.t;state.selectedEdge=edge;state.mode='evidence';document.getElementById('search').value=edge.t.label;document.getElementById('inspector').classList.add('open');renderUI();fit(false);toast('inspect: '+edge.relation);}
+const trustedTaskRoutes=(DATA.path_presets||[]).filter(path=>path.kind==='task_route');
+function selectPath(id,sticky=false){
+  if(state.scenario)stopScenario(true);
+  const selected=DATA.path_presets.find(path=>path.id===id), same=state.path&&state.path.id===id;
+  state.path=!sticky&&same?null:selected;
+  state.pathOnly=!!(state.path&&state.path.kind==='projection');
+  document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly);
+  renderUI(); fit(); toast(state.path?'path: '+state.path.label:'path cleared');
+}
+function taskRoutesForNode(node){return trustedTaskRoutes.filter(route=>(route.node_ids||[]).includes(node.id));}
+function codingAgentContextText(route){
+  const lines=['# Bunya-Jido Coding-Agent Context','','Task: '+route.label,route.description||''];
+  const emit=(title,values)=>{if(values&&values.length){lines.push('',title+':');values.forEach(value=>lines.push('- '+value));}};
+  emit('Start nodes',route.start_nodes||[]);
+  emit('Must read',route.must_read||[]);
+  emit('Contracts',route.contracts||[]);
+  emit('Tests',route.tests||[]);
+  emit('Safe edit',route.safe_edit||[]);
+  if(route.projection_context){lines.push('','Projection context:','- '+route.projection_context.id+' - '+route.projection_context.label+': '+(route.projection_context.question_answered||route.projection_context.description||''));}
+  if(route.scenario_context&&route.scenario_context.length){lines.push('','Scenario context:');route.scenario_context.forEach(scenario=>lines.push('- '+scenario.id+' - '+scenario.label+' ('+scenario.kind+', '+scenario.basis+'): '+scenario.description));}
+  lines.push('','Source: validated Bunya-Jido task route projected in this offline map.');
+  return lines.join('\n');
+}
+function copyCodingAgentContext(id){
+  const route=trustedTaskRoutes.find(item=>item.id===id); if(!route)return;
+  const text=codingAgentContextText(route);
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>toast('coding-agent context copied')).catch(()=>copyContextFallback(text));
+  } else { copyContextFallback(text); }
+}
+function copyContextFallback(text){
+  const field=document.createElement('textarea');field.value=text;field.style.position='fixed';field.style.left='-9999px';document.body.appendChild(field);field.select();
+  try {document.execCommand('copy');toast('coding-agent context copied');} catch(_error){toast('copy unavailable');}
+  field.remove();
+}
+function relatedTaskRoutesHtml(node){
+  const routes=taskRoutesForNode(node); if(!routes.length)return '';
+  return `<div class="relgroup"><h3>Related Trusted Routes</h3>${routes.map(route=>`<div class="mode-note"><strong>${escapeHtml(route.label)}</strong><br>${escapeHtml(route.description||'Validated coding-agent task route.')}<div style="margin-top:8px"><button data-highlight-route="${escapeHtml(route.id)}">Highlight route</button> <button data-copy-context="${escapeHtml(route.id)}">Copy coding-agent context</button></div></div>`).join('')}</div>`;
+}
+function bindRelatedTaskRoutes(el){
+  el.querySelectorAll('[data-highlight-route]').forEach(button=>button.onclick=()=>selectPath(button.dataset.highlightRoute,true));
+  el.querySelectorAll('[data-copy-context]').forEach(button=>button.onclick=()=>copyCodingAgentContext(button.dataset.copyContext));
+}
 function evidenceHtml(evidence){const items=(evidence||[]).slice(0,4); return items.length?`<div class="evlist">${items.map(ev=>`<div>${escapeHtml(ev.kind||'evidence')}: ${escapeHtml(ev.path||'')}${ev.symbol?` · ${escapeHtml(ev.symbol)}`:''}</div>`).join('')}</div>`:'<div class="evlist">no recorded evidence</div>';}
 function confidenceLabel(value){return String(value||'not_recorded').replaceAll('_',' ');}
 function familyRelations(family){return [...new Set(edges.filter(e=>relationFamily(e)===family).map(e=>e.relation))].sort();}
@@ -2975,14 +3163,16 @@ function renderDetails(){
   const summary=`<div class="node-title">${escapeHtml(n.label)}</div><div><span class="badge">${escapeHtml(family)}</span><span class="badge">${escapeHtml(planeDisplayLabel(n.plane))}</span>${n.major?'<span class="badge">landmark</span>':''}</div><p class="desc">${escapeHtml(n.description||'')}</p>`;
   if(state.mode==='overview'){
     const reveal=state.contextualNodeIds.size?`<div class="mode-note"><strong>Direct context revealed</strong><br>${state.contextualNodeIds.size} contextual neighbor${state.contextualNodeIds.size===1?'':'s'} linked to this selection are temporarily visible.</div>`:'';
-    el.innerHTML=summary+reveal+`<div class="mode-note">Evidence, exact relationship verbs, and confidence stay available on demand.<div style="margin-top:8px"><button id="inspectSelectedBtn">Inspect evidence</button></div></div>`;
+    el.innerHTML=summary+reveal+relatedTaskRoutesHtml(n)+`<div class="mode-note">Evidence, exact relationship verbs, and confidence stay available on demand.<div style="margin-top:8px"><button id="inspectSelectedBtn">Inspect evidence</button></div></div>`;
     document.getElementById('inspectSelectedBtn').onclick=()=>setMode('evidence');
+    bindRelatedTaskRoutes(el);
     return;
   }
   const out=edges.filter(e=>e.source===n.id); const inn=edges.filter(e=>e.target===n.id);
   const edgeHtml=(arr,dir)=>arr.slice(0,28).map(e=>`<div class="edgeitem" data-edge="${e.id}" style="border-color:${styleForRelation(e).color||'#64748b'}"><b>${escapeHtml(relationFamilyDefs[relationFamily(e)]?.label||'Structural Support')}</b> <span class="raw-verb">${escapeHtml(e.relation)}</span> ${dir==='out'?'→ '+escapeHtml(e.target_label):'← '+escapeHtml(e.source_label)}<br><span class="muted">confidence: ${escapeHtml(confidenceLabel(e.confidence))}</span>${e.note?`<br><span class="muted">${escapeHtml(e.note)}</span>`:''}${evidenceHtml(e.evidence)}</div>`).join('')||'<div class="muted small">none</div>';
   const implementation=state.mode==='implementation'?`<div class="panel-kv"><div>raw type</div><div><span class="code">${escapeHtml(n.type)}</span></div><div>source</div><div class="source-link">${escapeHtml(n.source_path||'generated graph node')}</div><div>status</div><div>${escapeHtml(n.status||'n/a')}</div>${n.parent?`<div>parent</div><div><span class="code">${escapeHtml(n.parent)}</span></div>`:''}<div>tags</div><div>${(n.tags||[]).slice(0,8).map(t=>`<span class="code">${escapeHtml(t)}</span>`).join(' ')||'<span class="muted">none</span>'}</div></div>`:`<div class="panel-kv"><div>source</div><div class="source-link">${escapeHtml(n.source_path||'generated graph node')}</div></div>`;
-  el.innerHTML=summary+selectedRelationshipHtml(state.selectedEdge)+implementation+`<div class="relgroup"><h3>Node Evidence</h3>${evidenceHtml(n.evidence)}</div><div class="relgroup"><h3>Outgoing</h3>${edgeHtml(out,'out')}</div><div class="relgroup"><h3>Incoming</h3>${edgeHtml(inn,'in')}</div>`;
+  el.innerHTML=summary+selectedRelationshipHtml(state.selectedEdge)+implementation+relatedTaskRoutesHtml(n)+`<div class="relgroup"><h3>Node Evidence</h3>${evidenceHtml(n.evidence)}</div><div class="relgroup"><h3>Outgoing</h3>${edgeHtml(out,'out')}</div><div class="relgroup"><h3>Incoming</h3>${edgeHtml(inn,'in')}</div>`;
+  bindRelatedTaskRoutes(el);
   el.querySelectorAll('[data-edge]').forEach(x=>x.onclick=()=>{const edge=edges.find(q=>q.id===x.dataset.edge);if(edge)selectEdge(edge);});
 }
 function renderScenarioUI(){
@@ -3031,10 +3221,9 @@ function renderUI(){
   document.querySelectorAll('[data-relation-family]').forEach(x=>x.onchange=()=>{x.checked?state.allowedRelationFamilies.add(x.dataset.relationFamily):state.allowedRelationFamilies.delete(x.dataset.relationFamily);});
   document.querySelectorAll('[data-confidence]').forEach(x=>x.onchange=()=>{x.checked?state.allowedConfidences.add(x.dataset.confidence):state.allowedConfidences.delete(x.dataset.confidence);});
   const pathKind=p=>p.kind==='projection'?'Projection':p.kind==='task_route'?'Task Route':p.kind==='workflow'||String(p.id||'').startsWith('workflow_')?'Workflow':p.kind==='overview'||p.id==='overview'||p.id==='blueprint_core'?'Overview':'View';
-  const pathSelect=(id,sticky=false)=>{if(state.scenario)stopScenario(true);const selected=DATA.path_presets.find(p=>p.id===id); const same=state.path&&state.path.id===id; state.path=!sticky&&same?null:selected; state.pathOnly=!!(state.path&&state.path.kind==='projection'); document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly); renderUI(); fit(); toast(state.path?'path: '+state.path.label:'path cleared');};
   const projections=studioAtlas?DATA.path_presets.filter(p=>p.kind==='projection'):[];
   document.getElementById('presetBar').innerHTML=projections.map(p=>`<button class="preset-chip ${state.path&&state.path.id===p.id?'active':''}" data-preset="${p.id}" title="${escapeHtml(p.description)}"><small>${p.is_primary?'Primary':'View'}</small>${escapeHtml(p.label)}</button>`).join('');
-  document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.preset,true));
+  document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>selectPath(b.dataset.preset,true));
   const routes=DATA.path_presets.filter(p=>p.kind==='task_route'); document.getElementById('pathSummary').innerHTML=routes.length?`<div class="path-summary"><strong>${routes.length} validated task route${routes.length===1?'':'s'}</strong><br>Shared with bounded agent context.</div>`:'';
   const pathGroups=[['projection','Studio Projections'],['task_route','Validated Task Routes'],['workflow','Workflows'],['overview','Overview'],['view','Views']];
   document.getElementById('paths').innerHTML=pathGroups.map(([kind,label])=>{const items=DATA.path_presets.filter(p=>pathKind(p).toLowerCase().replace(' ','_')===kind);if(!items.length)return '';return `<div class="path-group"><h3>${label}<span>${items.length}</span></h3>${items.map(p=>`<button class="path-card ${state.path&&state.path.id===p.id?'active':''}" data-path="${p.id}"><strong>${escapeHtml(p.label)}</strong><em class="path-kind">${escapeHtml(pathKind(p))}</em><span>${escapeHtml(p.description)}</span></button>`).join('')}</div>`;}).join('');
@@ -3042,8 +3231,8 @@ function renderUI(){
   const workflows=operationalPaths.filter(p=>pathKind(p)==='Workflow');
   const workflowBarPaths=workflows.length?workflows:(operationalPaths.length?operationalPaths:DATA.path_presets);
   document.getElementById('workflowBar').innerHTML=workflowBarPaths.map(p=>`<button class="workflow-chip ${state.path&&state.path.id===p.id?'active':''}" data-workflow-path="${p.id}">${escapeHtml(p.label)} <em>${escapeHtml(pathKind(p))}</em></button>`).join('');
-  document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.path));
-  document.querySelectorAll('[data-workflow-path]').forEach(b=>b.onclick=()=>pathSelect(b.dataset.workflowPath));
+  document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>selectPath(b.dataset.path));
+  document.querySelectorAll('[data-workflow-path]').forEach(b=>b.onclick=()=>selectPath(b.dataset.workflowPath));
   document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly);
   renderScenarioUI(); updateLegend(); renderDetails();
 }

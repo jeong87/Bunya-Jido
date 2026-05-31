@@ -14,14 +14,14 @@ designed to be reviewable in the generated HTML map.
 ## Task Route Publication
 
 1. The CLI requests a semantic build.
-2. The blueprint pipeline validates agent-map references against the grounded map.
-3. Only validated task routes are projected to the HTML viewer as path presets.
+2. The blueprint pipeline validates agent-map references, including optional Studio projection and scenario context, against the grounded map.
+3. Only validated task routes are projected to the HTML viewer as path presets and copyable coding-agent context.
 
 ## Trusted Context Generation
 
 1. The CLI accepts a context request.
 2. The context generator validates the grounded blueprint.
-3. It validates task routes before emitting bounded navigation guidance.
+3. It validates task routes before emitting bounded navigation guidance with route-linked projection questions, qualified scenarios, and start-node responsibility.
 
 ## Continuous Contract Check
 

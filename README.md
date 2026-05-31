@@ -191,7 +191,10 @@ scenarios, the viewer provides narrated playback with an explicit evidence
 basis badge: behavioral paths can animate a token, while structural tours use
 step highlighting without implying runtime order. Exiting playback restores
 the previous view and filters. Classic mode and `none_with_reason` atlases
-show no scenario launcher.
+show no scenario launcher. A validated task route can optionally carry one
+Studio projection and related scenarios as bounded reading context; the
+viewer exposes related trusted routes on selected nodes and can copy that
+coding-agent context directly.
 
 For a Studio v2 blueprint, evaluate measurable first-read and scenario-policy
 signals with:
@@ -279,7 +282,7 @@ A task map for coding agents.
 
 For tasks such as "modify provider behavior," "change the storage layer," or "debug runtime failure," it records what to read first, which tests matter, what is safe to edit, and which boundaries need care.
 
-Its task routes must resolve against the semantic blueprint and repository-relative required reading and tests before they can be emitted as trusted agent context or shown as map paths.
+Its task routes must resolve against the semantic blueprint and repository-relative required reading and tests before they can be emitted as trusted agent context or shown as map paths. In Studio maps, routes may additionally reference validated `projection_context` and `scenario_context` IDs to carry a bounded reading orientation.
 
 Validate it with:
 
@@ -322,6 +325,7 @@ The generated HTML map includes:
 - authored plane-purpose glossary plus viewer-facing node and relation families
 - Studio v2 map-local glyph/line vocabularies, primary projection tabs, and contextual direct-neighbor reveal
 - Studio v2 narrated scenario playback with basis badges, pause/step/speed controls, and exit restoration
+- related trusted task routes on selected nodes with a copyable coding-agent context action
 - node-family, relation-family, and confidence filtering
 - local graph focus around a selected node
 - a trust panel showing `Static Scan`, `Grounded`, or explicit `Draft` status
@@ -333,7 +337,7 @@ The generated HTML map includes:
 
 The map is not the source of truth. The evidence remains in the repository's code, docs, configuration, tests, runtime artifacts, and validated blueprint files. Bunya-Jido projects that evidence into a form that is easier to inspect.
 
-Validated agent-map task routes now appear both in generated context output and as `Task Route` path presets in the HTML map. Missing blueprint nodes, workflows, required reading, or tests block trusted context and normal semantic publication.
+Validated agent-map task routes now appear both in generated context output and as `Task Route` path presets in the HTML map. Routes may expose validated Studio projection/scenario context and start-node responsibility in both the CLI handoff and the viewer copy action. Missing blueprint nodes, workflows, required reading, tests, or declared Studio context references block trusted context and normal semantic publication.
 
 ## Working With Coding Agents
 
@@ -345,6 +349,8 @@ bunya-jido context --root . --task "modify provider behavior" --out .bunya-jido/
 
 When a request matches a validated task route, the generated context identifies
 why it matched and supplies that route's reading, contract, and test guidance.
+If the route declares validated Studio reading context, it also identifies the
+relevant projection question, qualified scenarios, and starting responsibility.
 If no route matches, it states `No matching trusted route` instead of
 presenting an unrelated prepared path as guidance.
 

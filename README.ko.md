@@ -193,6 +193,10 @@ narrated playback도 제공합니다. behavioral path는 token으로 재생할 �
 있고, structural tour는 runtime 순서를 암시하지 않는 단계 강조로
 보여줍니다. 재생을 종료하면 이전 view와 filter가 복원됩니다. Classic
 모드와 `none_with_reason` atlas에는 scenario launcher가 나타나지 않습니다.
+검증된 task route는 선택적으로 Studio projection 하나와 연관 scenario를
+제한된 읽기 문맥으로 연결할 수 있습니다. viewer에서는 선택한 노드와
+관련된 신뢰 route를 보여주고 그 coding-agent context를 바로 복사할 수
+있습니다.
 
 Studio v2 blueprint의 첫 화면 가독성과 scenario 정책 신호는 다음
 명령으로 평가할 수 있습니다.
@@ -281,7 +285,7 @@ bunya-jido validate-blueprint --root .
 
 예를 들어 "provider 동작 수정", "저장 계층 변경", "런타임 실패 디버깅" 같은 작업마다 먼저 읽을 파일, 관련 테스트, 안전하게 수정할 수 있는 영역, 조심해야 할 경계를 기록합니다.
 
-task route는 신뢰된 에이전트 context로 출력되거나 지도 경로로 표시되기 전에 semantic blueprint 및 저장소 상대 경로의 필수 읽기 파일·테스트와의 연결이 검증되어야 합니다.
+task route는 신뢰된 에이전트 context로 출력되거나 지도 경로로 표시되기 전에 semantic blueprint 및 저장소 상대 경로의 필수 읽기 파일·테스트와의 연결이 검증되어야 합니다. Studio 지도에서는 검증된 `projection_context`와 `scenario_context` ID를 추가해 제한된 읽기 관점을 전달할 수도 있습니다.
 
 검증:
 
@@ -324,6 +328,7 @@ bunya-jido evaluate-atlas-quality --root . --require-pass --write-report  # 선�
 - 작성된 plane 목적 설명과 화면용 노드·관계 family
 - Studio v2의 map-local glyph/line vocabulary, primary projection tab, contextual direct-neighbor reveal
 - Studio v2 narrated scenario playback, basis badge, 일시정지/단계/속도 조작, 종료 시 view 복원
+- 선택한 노드의 관련 신뢰 task route와 coding-agent context 복사 동작
 - 노드 family, 관계 family, confidence 필터링
 - 선택한 노드 주변만 보는 local graph focus
 - `Static Scan`, `Grounded`, 명시적 `Draft` 상태를 보여주는 trust panel
@@ -335,7 +340,7 @@ bunya-jido evaluate-atlas-quality --root . --require-pass --write-report  # 선�
 
 지도의 근거는 저장소의 코드, 문서, 설정, 테스트, 런타임 산출물, 검증된 blueprint 파일에 있습니다. Bunya-Jido는 그 근거를 보기 좋은 형태로 투영합니다.
 
-검증된 agent map의 task route는 생성되는 context 출력과 HTML 지도의 `Task Route` path preset 양쪽에 나타납니다. blueprint 노드, 워크플로우, 필수 읽기 파일, 테스트 참조가 끊긴 route는 신뢰된 context와 일반 semantic 게시를 차단합니다.
+검증된 agent map의 task route는 생성되는 context 출력과 HTML 지도의 `Task Route` path preset 양쪽에 나타납니다. route가 검증된 Studio projection/scenario 문맥을 선언하면 CLI handoff와 viewer 복사 동작은 해당 관점과 시작 노드 책임도 함께 제공합니다. blueprint 노드, 워크플로우, 필수 읽기 파일, 테스트 또는 선언된 Studio 문맥 참조가 끊긴 route는 신뢰된 context와 일반 semantic 게시를 차단합니다.
 
 ## 코딩 에이전트와 함께 쓰기
 
@@ -346,7 +351,9 @@ bunya-jido context --root . --task "modify provider behavior" --out .bunya-jido/
 ```
 
 요청이 검증된 task route와 일치하면 생성된 context는 일치 이유와 함께
-읽어야 할 파일, 계약, 테스트 안내를 제공합니다. 일치하는 route가 없으면
+읽어야 할 파일, 계약, 테스트 안내를 제공합니다. route가 검증된 Studio
+읽기 문맥을 선언한 경우 관련 projection 질문, 성격이 표시된 scenario,
+시작 노드의 책임도 함께 제공합니다. 일치하는 route가 없으면
 무관한 준비 경로를 안내하는 대신 `No matching trusted route`라고 명시합니다.
 
 특정 노드를 중심으로 만들 수도 있습니다.

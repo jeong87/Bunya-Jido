@@ -142,6 +142,9 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("- Requested route match: `matched`", context)
         self.assertIn("### change task route projection", context)
         self.assertIn("- `task_route_publication`", context)
+        self.assertIn("**Start-node responsibility:**", context)
+        self.assertIn("`projection:agent_navigation` - Bounded Agent Navigation", context)
+        self.assertIn("`scenario:agent_context` - Request Bounded Agent Context", context)
 
     def test_unmatched_context_does_not_invent_self_map_route(self) -> None:
         context = generate_agent_context(ROOT, task="publish package to package registry")
@@ -222,6 +225,8 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             "Relation Families",
             "Confidence",
             "Validated Task Routes",
+            "Related Trusted Routes",
+            "Copy coding-agent context",
             "Selected Relationship",
             "Studio Projections",
             "Scenario",

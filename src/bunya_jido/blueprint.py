@@ -294,6 +294,8 @@ def agent_map_schema() -> dict[str, Any]:
                         "tests": {"type": "array", "items": {"type": "string"}},
                         "workflows": {"type": "array", "items": {"type": "string"}},
                         "safe_edit": {"type": "array", "items": {"type": "string"}},
+                        "projection_context": {"type": "string"},
+                        "scenario_context": {"type": "array", "items": {"type": "string"}},
                         "do_not_touch_without_reason": {"type": "array", "items": {"type": "string"}},
                         "common_failure_modes": {"type": "array", "items": {"type": "string"}},
                         "notes": {"type": "string"}
@@ -1138,12 +1140,25 @@ def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = 
         routes = []
     bp_node_by_id: dict[str, dict[str, Any]] = {}
     bp_workflow_by_id: dict[str, dict[str, Any]] = {}
+    bp_projection_by_id: dict[str, dict[str, Any]] = {}
+    bp_scenario_by_id: dict[str, dict[str, Any]] = {}
     if blueprint:
         bp_node_by_id = {str(n.get("id")): n for n in blueprint.get("nodes", []) if isinstance(n, dict) and n.get("id")}
         bp_workflow_by_id = {
             str(workflow.get("id")): workflow
             for workflow in blueprint.get("workflows", [])
             if isinstance(workflow, dict) and workflow.get("id")
+        }
+        atlas = blueprint.get("atlas") if isinstance(blueprint.get("atlas"), dict) else {}
+        bp_projection_by_id = {
+            str(projection.get("id")): projection
+            for projection in atlas.get("projections", [])
+            if isinstance(projection, dict) and projection.get("id")
+        }
+        bp_scenario_by_id = {
+            str(scenario.get("id")): scenario
+            for scenario in atlas.get("scenarios", [])
+            if isinstance(scenario, dict) and scenario.get("id")
         }
     root_path = Path(root).resolve() if root is not None else None
     for i, route in enumerate(routes):
@@ -1217,6 +1232,30 @@ def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = 
                 if hidden_nodes:
                     route_blockers.append(
                         f"task route {task} references workflow {workflow_id} with hidden repo/root nodes: {hidden_nodes[:5]}"
+                    )
+        if "projection_context" in route:
+            projection_context = route.get("projection_context")
+            if not isinstance(projection_context, str) or not projection_context.strip():
+                errors.append(f"task_routes[{i}].projection_context must be a non-empty string")
+                route_blockers.append(f"task route {task} has invalid projection_context")
+            elif projection_context not in bp_projection_by_id:
+                route_blockers.append(
+                    f"task route {task} references projection not in blueprint: {projection_context}"
+                )
+        if "scenario_context" in route:
+            scenario_context = route.get("scenario_context")
+            if not isinstance(scenario_context, list) or not all(
+                isinstance(item, str) and item.strip() for item in scenario_context
+            ):
+                errors.append(f"task_routes[{i}].scenario_context must be a list of non-empty strings")
+                route_blockers.append(f"task route {task} has invalid scenario_context")
+            else:
+                missing_scenarios = [
+                    item for item in scenario_context if item not in bp_scenario_by_id
+                ]
+                if missing_scenarios:
+                    route_blockers.append(
+                        f"task route {task} references scenarios not in blueprint: {missing_scenarios[:5]}"
                     )
         must_read = route_lists["must_read"]
         tests = route_lists["tests"]
@@ -1521,6 +1560,17 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     if agent_blockers:
         raise ValueError("Trusted context blocked by agent-map routes: " + "; ".join(agent_blockers[:8]))
     node_by_id = {str(n.get("id")): n for n in bp.get("nodes", []) if isinstance(n, dict) and n.get("id")}
+    atlas = bp.get("atlas") if isinstance(bp.get("atlas"), dict) else {}
+    projection_by_id = {
+        str(projection.get("id")): projection
+        for projection in atlas.get("projections", [])
+        if isinstance(projection, dict) and projection.get("id")
+    }
+    scenario_by_id = {
+        str(scenario.get("id")): scenario
+        for scenario in atlas.get("scenarios", [])
+        if isinstance(scenario, dict) and scenario.get("id")
+    }
     trusted_indexes = set(agent_metrics.get("projectable_route_indexes") or [])
     routes = [r for i, r in enumerate(agent_map.get("task_routes", [])) if isinstance(r, dict) and i in trusted_indexes]
     changed = [_normalize_context_path(path) for path in (changed_files or []) if str(path).strip()]
@@ -1605,6 +1655,42 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
             if vals:
                 lines.append(f"\n**{title}:**")
                 for v in vals[:30]: lines.append(f"- `{v}`")
+        start_nodes = [
+            node_by_id[node_id]
+            for node_id in r.get("start_nodes", [])
+            if node_id in node_by_id
+        ]
+        if start_nodes:
+            lines.append("\n**Start-node responsibility:**")
+            for start_node in start_nodes[:30]:
+                description = str(
+                    start_node.get("inspector_summary")
+                    or start_node.get("description")
+                    or ""
+                )
+                lines.append(
+                    f"- `{start_node.get('id')}` - {start_node.get('label', '')}: {description}"
+                )
+        projection = projection_by_id.get(str(r.get("projection_context") or ""))
+        if projection:
+            lines.append("\n**Projection context:**")
+            lines.append(
+                f"- `{projection.get('id')}` - {projection.get('label', '')}: "
+                f"{projection.get('question_answered') or projection.get('description') or ''}"
+            )
+        scenarios = [
+            scenario_by_id[scenario_id]
+            for scenario_id in r.get("scenario_context", [])
+            if scenario_id in scenario_by_id
+        ]
+        if scenarios:
+            lines.append("\n**Scenario context:**")
+            for scenario in scenarios[:30]:
+                lines.append(
+                    f"- `{scenario.get('id')}` - {scenario.get('label', '')} "
+                    f"({scenario.get('kind', 'unspecified')}, {scenario.get('basis', 'unspecified')}): "
+                    f"{scenario.get('description', '')}"
+                )
         emit_list("Start nodes", r.get("start_nodes"))
         emit_list("Workflows", r.get("workflows"))
         emit_list("Must read", r.get("must_read"))
@@ -1656,6 +1742,8 @@ def validate_agent_evaluation_obj(evaluation: Any) -> list[str]:
         "contracts",
         "tests",
         "safe_edit",
+        "projection_context",
+        "scenario_context",
     )
     for i, case in enumerate(cases):
         if not isinstance(case, dict):
@@ -1728,9 +1816,11 @@ def _context_list_values(context: str, title: str) -> list[str]:
         if line == marker:
             collecting = True
             continue
-        if collecting and line.startswith("- `") and line.endswith("`"):
-            values.append(line[3:-1])
-            continue
+        if collecting:
+            match = re.match(r"^- `([^`]+)`(?:\s|$)", line)
+            if match:
+                values.append(match.group(1))
+                continue
         if collecting:
             collecting = False
     return values
@@ -1752,6 +1842,8 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
         "contracts": "Contracts",
         "tests": "Tests",
         "safe_edit": "Safe edit",
+        "projection_context": "Projection context",
+        "scenario_context": "Scenario context",
     }
     for case in evaluation["cases"]:
         query = case["query"]
@@ -2299,6 +2391,17 @@ def _path_presets_from_blueprint(
     projectable_route_indexes: set[int] | None = None,
 ) -> list[dict[str, Any]]:
     node_by_id = {n["id"]: n for n in nodes}
+    atlas = bp.get("atlas") if isinstance(bp.get("atlas"), dict) else {}
+    projection_by_id = {
+        str(projection.get("id")): projection
+        for projection in atlas.get("projections", [])
+        if isinstance(projection, dict) and projection.get("id")
+    }
+    scenario_by_id = {
+        str(scenario.get("id")): scenario
+        for scenario in atlas.get("scenarios", [])
+        if isinstance(scenario, dict) and scenario.get("id")
+    }
     edge_by_rel = defaultdict(list)
     for e in edges:
         edge_by_rel[e["relation"]].append(e)
@@ -2419,6 +2522,12 @@ def _path_presets_from_blueprint(
                         route_ids.append(node_id)
             if route_ids:
                 task = str(route.get("task") or f"Task {index + 1}")
+                projection = projection_by_id.get(str(route.get("projection_context") or ""))
+                scenarios = [
+                    scenario_by_id[scenario_id]
+                    for scenario_id in route.get("scenario_context", [])
+                    if scenario_id in scenario_by_id
+                ]
                 presets.append({
                     "id": slug("task_route_" + task, 70),
                     "label": task,
@@ -2427,9 +2536,29 @@ def _path_presets_from_blueprint(
                     "source": "agent_map",
                     "node_ids": route_ids[:60],
                     "nodes": [node_by_id[node_id]["label"] for node_id in route_ids[:60]],
+                    "start_nodes": list(route.get("start_nodes") or []),
                     "workflows": list(route.get("workflows") or []),
                     "must_read": list(route.get("must_read") or []),
+                    "contracts": list(route.get("contracts") or []),
                     "tests": list(route.get("tests") or []),
+                    "safe_edit": list(route.get("safe_edit") or []),
+                    "projection_context": {
+                        "id": str(projection.get("id")),
+                        "label": str(projection.get("label") or ""),
+                        "description": str(projection.get("description") or ""),
+                        "question_answered": str(projection.get("question_answered") or ""),
+                    } if projection else None,
+                    "scenario_context": [
+                        {
+                            "id": str(scenario.get("id")),
+                            "label": str(scenario.get("label") or ""),
+                            "description": str(scenario.get("description") or ""),
+                            "kind": str(scenario.get("kind") or ""),
+                            "basis": str(scenario.get("basis") or ""),
+                            "playback_mode": str(scenario.get("playback_mode") or ""),
+                        }
+                        for scenario in scenarios
+                    ],
                 })
     core = sorted(
         nodes,

@@ -16,14 +16,14 @@ keeps the review rationale visible beside it.
 ### Semantic Blueprint Pipeline
 
 - **Plane:** semantic
-- **Role:** Loads semantic inputs, applies publication rules, preserves Studio editorial decision records, converts them to the viewer graph, and projects task routes and Studio atlas metadata.
+- **Role:** Loads semantic inputs, applies publication rules, preserves Studio editorial decision records, converts them to the viewer graph, and projects validated task routes with optional Studio reading context.
 - **Evidence:** `src/bunya_jido/blueprint.py`
 - **Boundary:** It can publish only evidence-linked core claims and trusted task routes.
 
 ### Renderer And Viewer
 
 - **Plane:** presentation
-- **Role:** Embeds the graph payload into an offline HTML viewer and presents trust, evidence, projection presets, and policy-qualified narrated scenarios.
+- **Role:** Embeds the graph payload into an offline HTML viewer and presents trust, evidence, projection presets, policy-qualified narrated scenarios, and copyable validated agent-route context.
 - **Evidence:** `src/bunya_jido/render.py`, `src/bunya_jido/viewer/index.template.html`
 - **Boundary:** Presentation consumes the semantic contract; it is not evidence itself.
 
@@ -39,9 +39,9 @@ keeps the review rationale visible beside it.
 ### Grounding Gate And Agent Routes
 
 - **Plane:** quality / semantic
-- **Role:** Enforces core-node and critical-edge evidence, checks Studio decision-record consistency, validates task route references, and blocks untrusted context.
+- **Role:** Enforces core-node and critical-edge evidence, checks Studio decision-record consistency, validates task route references including optional projection and scenario context, and blocks untrusted context.
 - **Evidence:** `src/bunya_jido/blueprint.py`, `tests/test_blueprint.py`
-- **Boundary:** A route is trusted only after its nodes, workflow, required reading, and tests resolve.
+- **Boundary:** A route is trusted only after its nodes, workflow, required reading, tests, and any published Studio context references resolve.
 
 ### Atlas Quality Evaluator
 

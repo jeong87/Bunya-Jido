@@ -158,3 +158,16 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Blueprint and agent-map validation, grounded diagnostics, strict
   atlas-quality and agent-utility evaluation, rebuilt committed demo,
   stale-map review, and the full unit suite are required before commit.
+
+## 2026-05-31 - Coding-Agent-Native Atlas N4 Agent Reading Context
+
+- Change: Added optional validated `projection_context` and
+  `scenario_context` task-route references, bounded CLI context that explains
+  route reading context and start-node responsibility, and viewer actions for
+  related trusted routes and copyable coding-agent context.
+- Decision: This extends the existing Agent Route Parity, Trusted Context
+  Generator, and Interactive Viewer contracts. Only references already
+  validated against the published Studio atlas can reach either output.
+- Validation: Blueprint and agent-map validation, grounded diagnostics, strict
+  atlas-quality and agent-utility evaluation, rebuilt committed demo,
+  stale-map review, and the full unit suite are required before commit.
