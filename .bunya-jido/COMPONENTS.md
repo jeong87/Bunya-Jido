@@ -43,6 +43,13 @@ keeps the review rationale visible beside it.
 - **Evidence:** `src/bunya_jido/blueprint.py`, `tests/test_blueprint.py`
 - **Boundary:** A route is trusted only after its nodes, workflow, required reading, and tests resolve.
 
+### Atlas Quality Evaluator
+
+- **Plane:** quality
+- **Role:** Measures first-read burden and scenario narration honesty, exposes review-required signals separately from blockers, and optionally writes a maintainer-readable quality report.
+- **Evidence:** `src/bunya_jido/quality.py`, `src/bunya_jido/cli.py`, `tests/test_projection_quality.py`
+- **Boundary:** It may detect narration that deserves review, but it does not prove the best editorial explanation or block solely on that judgment.
+
 ## Verification And Documentation
 
 ### Contract Tests And CI

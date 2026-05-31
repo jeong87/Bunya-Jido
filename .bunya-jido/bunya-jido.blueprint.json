@@ -30,7 +30,7 @@
       "importance": "core",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Dispatches build, validation, preparation, atlas-quality evaluation, and trusted context commands.",
+      "description": "Dispatches build, validation, preparation, atlas-quality evaluation and optional review reports, and trusted context commands.",
       "why_it_matters": "Every published artifact or agent-context request begins at an explicit command boundary.",
       "inspector_summary": "Command entrypoints coordinate publication and diagnostics without defining the trust policy.",
       "source_path": "src/bunya_jido/cli.py",
@@ -100,8 +100,8 @@
       "importance": "major",
       "overview_visibility": "visible",
       "activation": "conditional",
-      "description": "Measures deterministic Studio readability and scenario-policy signals while surfacing missing decision rationale as review-required interpretation.",
-      "inspector_summary": "Quality diagnostics measure visible density, narrative signals, and recorded editorial context without proving preference.",
+      "description": "Measures deterministic Studio readability and scenario-policy signals while surfacing missing decision rationale and misleading narration as review-required interpretation.",
+      "inspector_summary": "Quality diagnostics measure visible density, narration honesty, and recorded editorial context; optional reports expose review work without proving preference.",
       "source_path": "src/bunya_jido/quality.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/quality.py", "symbol": "evaluate_atlas_quality_obj"}
@@ -236,7 +236,7 @@
       "importance": "support",
       "overview_visibility": "contextual",
       "activation": "always",
-      "description": "Explains artifact modes, Studio scenario expectations, trust boundaries, and command usage.",
+      "description": "Explains artifact modes, Studio scenario expectations, quality review reporting, trust boundaries, and command usage.",
       "inspector_summary": "Public onboarding documents declared behavior and limitations.",
       "source_path": "README.md",
       "evidence": [
@@ -339,11 +339,11 @@
     {
       "id": "atlas_quality_evaluation",
       "label": "Atlas Quality Evaluation",
-      "description": "Measure Studio overview and scenario signals while exposing interpretation that still needs human review.",
+      "description": "Measure Studio overview and scenario narration signals while exposing interpretation that still needs human review.",
       "kind": "behavioral",
       "ordered": true,
       "trigger": "bunya-jido evaluate-atlas-quality",
-      "outcome": "Objective metrics and separated review warnings.",
+      "outcome": "Objective metrics, separated review warnings, and optional local Markdown review output.",
       "confidence": "deterministic",
       "node_ids": ["entry:cli", "semantic:validation", "quality:atlas"],
       "evidence": [{"kind": "source", "path": "src/bunya_jido/quality.py"}]

@@ -41,6 +41,10 @@ be documented.
 - An optional Studio v2 `atlas.decision_record` contract that retains
   projection/scenario alternatives and over-centralization risks while
   detecting contradictions with the published primary projection.
+- Additive Studio atlas-quality review reporting for misleading narration,
+  weak playback readability, and missing primary landmarks, plus opt-in
+  `.bunya-jido/ATLAS_QUALITY_REPORT.md` output without changing the
+  deterministic `--require-pass` gate.
 
 ### Changed
 

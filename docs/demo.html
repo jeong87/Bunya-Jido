@@ -106,7 +106,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
-  "generated_at": "2026-05-31T12:37:36+00:00",
+  "generated_at": "2026-05-31T12:45:48+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
   "artifact_mode": "semantic_blueprint",
@@ -268,7 +268,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Public Product Contract",
       "type": "document",
       "plane": "docs",
-      "description": "Explains artifact modes, Studio scenario expectations, trust boundaries, and command usage.",
+      "description": "Explains artifact modes, Studio scenario expectations, quality review reporting, trust boundaries, and command usage.",
       "source_path": "README.md",
       "tags": [
         "blueprint",
@@ -298,7 +298,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Command Line Interface",
       "type": "component",
       "plane": "entry",
-      "description": "Dispatches build, validation, preparation, atlas-quality evaluation, and trusted context commands.",
+      "description": "Dispatches build, validation, preparation, atlas-quality evaluation and optional review reports, and trusted context commands.",
       "source_path": "src/bunya_jido/cli.py",
       "tags": [
         "blueprint",
@@ -404,7 +404,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Atlas Quality Evaluator",
       "type": "contract",
       "plane": "quality",
-      "description": "Measures deterministic Studio readability and scenario-policy signals while surfacing missing decision rationale as review-required interpretation.",
+      "description": "Measures deterministic Studio readability and scenario-policy signals while surfacing missing decision rationale and misleading narration as review-required interpretation.",
       "source_path": "src/bunya_jido/quality.py",
       "tags": [
         "blueprint",
@@ -428,7 +428,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "family": "gate",
       "overview_visibility": "visible",
       "activation": "conditional",
-      "inspector_summary": "Quality diagnostics measure visible density, narrative signals, and recorded editorial context without proving preference."
+      "inspector_summary": "Quality diagnostics measure visible density, narration honesty, and recorded editorial context; optional reports expose review work without proving preference."
     },
     {
       "id": "semantic:validation",
@@ -1561,7 +1561,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "id": "workflow_atlas_quality_evaluation",
       "label": "Atlas Quality Evaluation",
-      "description": "Measure Studio overview and scenario signals while exposing interpretation that still needs human review.",
+      "description": "Measure Studio overview and scenario narration signals while exposing interpretation that still needs human review.",
       "kind": "workflow",
       "source": "blueprint",
       "node_ids": [

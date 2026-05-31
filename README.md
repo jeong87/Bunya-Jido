@@ -202,8 +202,18 @@ bunya-jido evaluate-atlas-quality --root . --require-pass --json
 
 This quality gate blocks deterministic contract failures and reports
 readability heuristics such as dense overview graphs or weak core inspection.
-Projection choice and narration meaning remain explicitly review-required
-judgments rather than automated proof.
+It also reports review-required narration signals when a structural tour
+sounds like runtime execution, playback copy is too thin or too burdensome,
+or a scenario misses the selected projection's landmarks. Projection choice
+and narration meaning remain explicitly review-required judgments rather than
+automated proof; review-only findings do not change `status: "passed"` or
+`--require-pass`. For an optional maintainer-readable summary:
+
+```bash
+bunya-jido evaluate-atlas-quality --root . --require-pass --write-report
+```
+
+This writes `.bunya-jido/ATLAS_QUALITY_REPORT.md` in the local workspace.
 
 This repository's committed self-map now uses Studio v2: its primary
 projection is `Trusted Publication`, it preserves a machine-readable editorial
@@ -235,7 +245,9 @@ A mapped repository can additionally track `.bunya-jido/MAP_REVIEW.md` to
 record a reviewed no-structure-change decision for `check-stale`.
 With `--atlas-mode studio`, preparation also creates `ATLAS_INTERVIEW.md` as
 an internal checklist plus `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, and
-`SCENARIOS.md`, and emits the Studio v2 blueprint schema.
+`SCENARIOS.md`, and emits the Studio v2 blueprint schema. Running
+`evaluate-atlas-quality --write-report` additionally writes the optional local
+`ATLAS_QUALITY_REPORT.md` review summary.
 
 ### `COMPONENTS.md`
 
@@ -290,13 +302,16 @@ map is actually eligible for grounded publication:
 bunya-jido diagnose --root .
 bunya-jido diagnose --root . --require-grounded --json
 bunya-jido evaluate-atlas-quality --root . --require-pass --json  # Studio v2
+bunya-jido evaluate-atlas-quality --root . --require-pass --write-report  # optional review summary
 ```
 
 `--require-grounded` exits unsuccessfully for a static scan or a blocked
 semantic blueprint. Release automation uses this exact gate rather than
 assuming a generated map is trusted.
-`evaluate-atlas-quality` applies to Studio v2 blueprints and keeps measurable
-warnings separate from editorial review.
+`evaluate-atlas-quality` applies to Studio v2 blueprints, keeps measurable
+warnings separate from editorial review, and emits additive
+`review_required`/warning-count fields for automation that wants to surface
+human follow-up without blocking publication.
 
 ## HTML Map
 

@@ -267,6 +267,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(report["grounding_status"], "grounded")
         self.assertTrue(report["semantic_publication_allowed"])
         self.assertEqual(report["atlas_quality_status"], "passed")
+        self.assertTrue(report["atlas_quality"]["review_required"])
         self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 5, "total": 5})
 
 

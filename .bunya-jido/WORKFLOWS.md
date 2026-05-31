@@ -31,7 +31,8 @@ designed to be reviewable in the generated HTML map.
 ## Atlas Quality Evaluation
 
 1. The CLI validates a Studio v2 blueprint and gathers objective overview metrics.
-2. `src/bunya_jido/quality.py` reports density, label burden, and scenario-policy signals separately from human editorial review.
+2. `src/bunya_jido/quality.py` reports density, label burden, and misleading scenario-narration signals separately from human editorial review.
+3. On request, the CLI writes `.bunya-jido/ATLAS_QUALITY_REPORT.md` as a local review summary without changing the publication gate.
 
 ## Studio Benchmark Review
 

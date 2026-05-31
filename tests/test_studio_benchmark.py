@@ -234,6 +234,14 @@ class StudioBenchmarkTests(unittest.TestCase):
             self.assertTrue(metrics["decision_record_present"], case["id"])
             self.assertEqual(metrics["grounding_status"], "grounded", case["id"])
             self.assertEqual(report["status"], "passed", case["id"])
+            self.assertFalse(
+                any(
+                    "runtime-action language" in warning
+                    or "recorded or deterministic runtime evidence" in warning
+                    for warning in report["review_required_warnings"]
+                ),
+                case["id"],
+            )
             self.assertEqual(graph["schema_version"], "bunya-jido-v2", case["id"])
             self.assertIn(case["primary_projection"]["label"], html)
             self.assertIn("scenarioBtn", html)

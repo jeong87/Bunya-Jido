@@ -13,7 +13,7 @@ repository and is protected by semantic golden tests.
 | Artifact mode | `semantic_blueprint` |
 | Atlas contract | Studio v2, primary projection `Trusted Publication`, machine-readable decision record, two behavioral scenarios |
 | Grounding status | `grounded` |
-| Atlas quality status | `passed`, with editorial projection choice still review-required |
+| Atlas quality status | `passed`, with projection choice and narration honesty still review-required |
 | Review status | Maintainer-authored and mechanically validated on May 30, 2026 |
 | Semantic coverage | 14 nodes, 25 relationships, 5 core nodes, 12 critical relationships |
 | Grounding metrics | 100% core-node evidence; 100% critical-relationship evidence |
@@ -41,6 +41,7 @@ python -m bunya_jido build --root . --max-files 0 --out docs/demo.html
 - Grounded status is visible in the HTML output rather than being an undocumented build assumption.
 - Studio projection and scenario labels are authored from this repository's thesis; playback carries a documented-workflow basis badge rather than claiming observed runtime traces.
 - The blueprint retains the compared projections, scenario choices, and centrality risks in `atlas.decision_record`, while quality checks still leave editorial judgment review-required.
+- Atlas-quality reporting keeps review-only narration signals separate from blockers and can write an optional local Markdown review summary.
 - The benchmark suite exercises six different repository shapes so this promoted self-map is not the only quality target. See [`STUDIO_BENCHMARK.md`](STUDIO_BENCHMARK.md).
 - The canvas-first overview keeps controls out of the initial reading surface while preserving them in an on-demand drawer.
 - Zone fields, semantic role glyphs, and a restrained relation palette make the first read compact, while selected relationships retain their exact verb, confidence, and evidence in `Inspect Evidence`.

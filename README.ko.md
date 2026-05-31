@@ -203,8 +203,18 @@ bunya-jido evaluate-atlas-quality --root . --require-pass --json
 
 이 quality gate는 결정적으로 확인할 수 있는 계약 위반을 차단하고,
 overview 과밀이나 약한 core inspection 같은 가독성 신호를 경고합니다.
-projection 선택과 narration 의미는 자동 증명으로 가장하지 않고
-명시적인 검토 항목으로 남깁니다.
+또한 structural tour가 실제 실행처럼 서술되는 경우, playback 문장이
+너무 짧거나 긴 경우, 선택된 projection의 landmark를 방문하지 않는
+경우를 검토 신호로 보고합니다. projection 선택과 narration 의미는 자동
+증명으로 가장하지 않고 명시적인 검토 항목으로 남기며, 검토 전용
+신호만으로 `status: "passed"`나 `--require-pass` 의미는 바뀌지
+않습니다. 선택적으로 사람이 읽는 요약을 쓰려면 다음을 실행합니다.
+
+```bash
+bunya-jido evaluate-atlas-quality --root . --require-pass --write-report
+```
+
+이 명령은 로컬 작업공간의 `.bunya-jido/ATLAS_QUALITY_REPORT.md`를 씁니다.
 
 이 저장소의 커밋된 self-map은 이제 Studio v2를 사용합니다. primary
 projection은 `Trusted Publication`이며, machine-readable editorial
@@ -237,7 +247,9 @@ decision record와 근거 badge가 붙은 behavioral scenario 두 개를
 남기기 위해 `.bunya-jido/MAP_REVIEW.md`를 추가로 추적할 수 있습니다.
 `--atlas-mode studio`를 사용하면 내부 체크리스트인 `ATLAS_INTERVIEW.md`,
 편집 입력인 `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`, 그리고
-Studio v2 blueprint schema도 생성됩니다.
+Studio v2 blueprint schema도 생성됩니다. `evaluate-atlas-quality --write-report`를
+실행하면 선택적인 로컬 검토 요약인
+`ATLAS_QUALITY_REPORT.md`도 작성됩니다.
 
 ### `COMPONENTS.md`
 
@@ -292,13 +304,16 @@ LLM 없이 결정적으로 생성되는 정적 스캔 결과입니다.
 bunya-jido diagnose --root .
 bunya-jido diagnose --root . --require-grounded --json
 bunya-jido evaluate-atlas-quality --root . --require-pass --json  # Studio v2
+bunya-jido evaluate-atlas-quality --root . --require-pass --write-report  # 선택적인 검토 요약
 ```
 
 `--require-grounded`는 정적 스캔이거나 차단된 semantic blueprint이면
 실패 상태로 종료합니다. 릴리스 자동화도 생성 결과를 신뢰한다고
 가정하지 않고 이 검증 조건을 그대로 사용합니다.
 `evaluate-atlas-quality`는 Studio v2 blueprint에 적용되며, 측정 가능한
-경고와 편집 관점의 검토 항목을 분리해 보고합니다.
+경고와 편집 관점의 검토 항목을 분리해 보고합니다. 자동화가 게시를
+막지 않으면서 사람의 후속 검토를 표시할 수 있도록 additive
+`review_required` 및 warning count 필드도 제공합니다.
 
 ## HTML 지도
 

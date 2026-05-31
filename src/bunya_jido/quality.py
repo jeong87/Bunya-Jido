@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
@@ -9,6 +10,130 @@ ATLAS_QUALITY_LIMITATION = (
     "Deterministic atlas quality checks identify measurable contract and readability "
     "signals; they do not prove that a projection or narration is the best explanation."
 )
+ATLAS_QUALITY_REPORT_FILE = "ATLAS_QUALITY_REPORT.md"
+_RUNTIME_ACTION_RE = re.compile(r"\b(executes?|runs?|triggers?|emits?)\b", re.IGNORECASE)
+_TRACE_CLAIM_RE = re.compile(
+    r"\b(deterministic(?:ally)?|recorded|observed|execution\s+trace|runtime\s+trace|actual\s+runtime)\b",
+    re.IGNORECASE,
+)
+_GENERIC_SCENARIO_TITLE_RE = re.compile(
+    r"^(scenario|flow|tour)(?:\s+\d+)?$", re.IGNORECASE
+)
+
+
+def _quality_summary(
+    blockers: list[str], warnings: list[str], review_warnings: list[str]
+) -> dict[str, Any]:
+    return {
+        "review_required": bool(review_warnings),
+        "blocker_count": len(blockers),
+        "warning_count": len(warnings) + len(review_warnings),
+        "deterministic_warning_count": len(warnings),
+        "review_required_warning_count": len(review_warnings),
+    }
+
+
+def _scenario_review_warnings(
+    scenario: dict[str, Any],
+    steps: list[dict[str, Any]],
+    *,
+    primary_landmark_ids: set[str],
+) -> list[str]:
+    scenario_id = str(scenario.get("id") or "<unknown>")
+    findings: list[str] = []
+    narration_text = " ".join(str(step.get("narration") or "") for step in steps)
+    if scenario.get("kind") == "structural_tour" and _RUNTIME_ACTION_RE.search(
+        narration_text
+    ):
+        findings.append(
+            f"Review scenario {scenario_id}: structural_tour narration uses runtime-action language; present it as a reading path."
+        )
+    if scenario.get("basis") == "illustrative_tour" and _TRACE_CLAIM_RE.search(
+        narration_text
+    ):
+        findings.append(
+            f"Review scenario {scenario_id}: illustrative_tour narration sounds like recorded or deterministic runtime evidence."
+        )
+    label = str(scenario.get("label") or "").strip()
+    if _GENERIC_SCENARIO_TITLE_RE.fullmatch(label):
+        findings.append(
+            f"Review scenario {scenario_id}: its title '{label}' is too generic to explain the reading path."
+        )
+    narrations = [
+        str(step.get("narration") or "").strip()
+        for step in steps
+        if str(step.get("narration") or "").strip()
+    ]
+    if narrations:
+        short_count = sum(len(narration) < 28 for narration in narrations)
+        long_count = sum(len(narration) > 180 for narration in narrations)
+        if short_count > len(narrations) / 2:
+            findings.append(
+                f"Review scenario {scenario_id}: most step narration is too brief to explain its landmarks."
+            )
+        if long_count > len(narrations) / 2:
+            findings.append(
+                f"Review scenario {scenario_id}: most step narration is too long for readable playback."
+            )
+    visited_node_ids = {
+        str(step.get("node_id"))
+        for step in steps
+        if step.get("node_id") is not None
+    }
+    if (
+        visited_node_ids
+        and primary_landmark_ids
+        and not visited_node_ids.intersection(primary_landmark_ids)
+    ):
+        findings.append(
+            f"Review scenario {scenario_id}: it does not visit a primary landmark from the selected projection."
+        )
+    return findings
+
+
+def render_atlas_quality_markdown(report: dict[str, Any]) -> str:
+    def bullet_lines(items: list[str]) -> str:
+        return "\n".join(f"- {item}" for item in items) if items else "- None."
+
+    lines = [
+        "# Atlas Quality Report",
+        "",
+        f"- Status: `{report.get('status', 'not_assessed')}`",
+        f"- Blueprint schema: `{report.get('blueprint_schema_version') or 'not provided'}`",
+        f"- Deterministic blockers: `{report.get('blocker_count', 0)}`",
+        f"- Deterministic warnings: `{report.get('deterministic_warning_count', 0)}`",
+        f"- Review required: `{'yes' if report.get('review_required') else 'no'}`",
+        f"- Review-required warnings: `{report.get('review_required_warning_count', 0)}`",
+        "",
+        "## Scope",
+        "",
+        str(report.get("limitation") or ATLAS_QUALITY_LIMITATION),
+        "",
+    ]
+    if report.get("status") == "not_assessed":
+        lines.extend(["## Assessment", "", str(report.get("reason") or "Not assessed."), ""])
+        return "\n".join(lines)
+    lines.extend(["## Metrics", ""])
+    for key, value in (report.get("metrics") or {}).items():
+        lines.append(f"- `{key}`: `{value}`")
+    lines.extend(
+        [
+            "",
+            "## Deterministic Blockers",
+            "",
+            bullet_lines(report.get("deterministic_blockers") or []),
+            "",
+            "## Deterministic Warnings",
+            "",
+            bullet_lines(report.get("deterministic_warnings") or []),
+            "",
+            "## Review Required",
+            "",
+            bullet_lines(report.get("review_required_warnings") or []),
+            "",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def evaluate_atlas_quality_obj(
@@ -30,6 +155,7 @@ def evaluate_atlas_quality_obj(
             "deterministic_warnings": [],
             "review_required_warnings": [],
             "metrics": {},
+            **_quality_summary([], [], []),
         }
 
     validation_metrics = validation_metrics or {}
@@ -71,6 +197,11 @@ def evaluate_atlas_quality_obj(
         for node_id in (primary or {}).get("node_ids") or []
         if str(node_id) in node_by_id
     ]
+    primary_landmark_ids = {
+        node_id
+        for node_id in primary_node_ids
+        if node_by_id[node_id].get("importance") in {"core", "major"}
+    }
     if not primary:
         blockers.append("Studio v2 atlas has no selected primary projection")
     elif not primary_node_ids:
@@ -181,6 +312,13 @@ def evaluate_atlas_quality_obj(
             review_warnings.append(
                 f"Review scenario {scenario_id} narration against its semantic relations and evidence basis."
             )
+        review_warnings.extend(
+            _scenario_review_warnings(
+                scenario,
+                steps,
+                primary_landmark_ids=primary_landmark_ids,
+            )
+        )
 
     decision_record_present = isinstance(atlas.get("decision_record"), dict)
     if not decision_record_present:
@@ -230,4 +368,5 @@ def evaluate_atlas_quality_obj(
             "scenario_count": len(scenarios),
             "decision_record_present": decision_record_present,
         },
+        **_quality_summary(blockers, warnings, review_warnings),
     }

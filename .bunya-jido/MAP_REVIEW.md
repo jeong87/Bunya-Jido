@@ -146,3 +146,15 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Blueprint and agent-map validation, grounded diagnostics, strict
   atlas-quality and agent-utility evaluation, rebuilt committed demo,
   stale-map review, and the full unit suite are required before commit.
+
+## 2026-05-31 - Coding-Agent-Native Atlas N3 Quality Reporting
+
+- Change: Added narration-honesty and readability review diagnostics, additive
+  atlas-quality review summary fields, and optional local
+  `ATLAS_QUALITY_REPORT.md` output.
+- Decision: This extends the existing Atlas Quality Evaluator contract rather
+  than creating a new semantic component or route. Review-only findings remain
+  separate from deterministic blockers and do not change `--require-pass`.
+- Validation: Blueprint and agent-map validation, grounded diagnostics, strict
+  atlas-quality and agent-utility evaluation, rebuilt committed demo,
+  stale-map review, and the full unit suite are required before commit.

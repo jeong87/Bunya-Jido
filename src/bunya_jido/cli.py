@@ -24,6 +24,7 @@ from .blueprint import (
     validate_agent_map_file,
     validate_blueprint_file,
 )
+from .quality import ATLAS_QUALITY_REPORT_FILE, render_atlas_quality_markdown
 from .render import render_html, write_json
 from .scanner import build_graph
 
@@ -302,6 +303,7 @@ def _diagnostic_report(args: argparse.Namespace) -> dict[str, Any]:
         "scenario_count": bp_metrics.get("scenario_count", 0),
         "atlas_quality_status": atlas_quality["status"],
         "atlas_quality": {
+            "review_required": bool(atlas_quality.get("review_required")),
             "deterministic_blocker_count": len(
                 atlas_quality.get("deterministic_blockers") or []
             ),
@@ -472,6 +474,11 @@ def cmd_evaluate_atlas_quality(args: argparse.Namespace) -> int:
     except (OSError, ValueError) as exc:
         print(f"Atlas quality evaluation blocked: {exc}", file=sys.stderr)
         return 2
+    if args.write_report:
+        report_path = Path(args.root).resolve() / ".bunya-jido" / ATLAS_QUALITY_REPORT_FILE
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(render_atlas_quality_markdown(report), encoding="utf-8")
+        report["written_report"] = f".bunya-jido/{ATLAS_QUALITY_REPORT_FILE}"
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))
     else:
@@ -492,6 +499,8 @@ def cmd_evaluate_atlas_quality(args: argparse.Namespace) -> int:
                 print(f"- warning: {warning}")
             for warning in report["review_required_warnings"]:
                 print(f"- review: {warning}")
+        if args.write_report:
+            print(f"Report written: {report['written_report']}")
         print(f"Limit: {report['limitation']}")
     if args.require_pass and report["status"] != "passed":
         return 2
@@ -611,6 +620,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_atlas_quality.add_argument("--blueprint", default=None, help="Blueprint JSON path. Default: .bunya-jido/bunya-jido.blueprint.json")
     p_atlas_quality.add_argument("--require-pass", action="store_true", help="Exit with status 2 unless a Studio v2 atlas has no deterministic blockers.")
     p_atlas_quality.add_argument("--json", action="store_true", help="Print a machine-readable atlas-quality report.")
+    p_atlas_quality.add_argument("--write-report", action="store_true", help="Write an optional Markdown report to .bunya-jido/ATLAS_QUALITY_REPORT.md.")
     p_atlas_quality.set_defaults(func=cmd_evaluate_atlas_quality)
 
     p_guides = sub.add_parser("install-agent-guides", help="Write Bunya-Jido agent guidance snippets or activate managed project instructions.")

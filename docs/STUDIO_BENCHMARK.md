@@ -23,7 +23,9 @@ quality, and renders each output through the offline viewer.
 The test enforces distinct theses and primary projection labels, records an
 editorial decision record for each generated Studio atlas, accepts all three
 scenario policies, and specifically prevents SDK or utility fixtures from
-being presented as invented runtime lifecycles.
+being presented as invented runtime lifecycles. Quality assertions also keep
+the SDK structural tour free of narration that claims runtime execution or a
+recorded deterministic trace.
 
 ## Complex Workflow Review Policy
 
