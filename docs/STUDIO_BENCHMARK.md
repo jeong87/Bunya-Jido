@@ -50,3 +50,8 @@ python -m bunya_jido evaluate-atlas-quality --root . --require-pass --json
 
 The first command proves multi-domain contract and renderer behavior. The
 second checks the committed Bunya-Jido Studio self-map after publication.
+
+The synthetic matrix is supplemented by the evidence-backed curated
+`examples/coverage/studio.blueprint.json` gallery item. Its published HTML and
+screenshot demonstrate an honest `none_with_reason` reading over real
+committed fixture files; see [`gallery.md`](gallery.md).

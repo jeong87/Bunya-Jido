@@ -2258,6 +2258,9 @@ def graph_from_blueprint(
         for sn in static_graph.get("nodes", []):
             if sn.get("type") not in {"api_provider"}:
                 continue
+            hint_origin = str(sn.get("hint_origin") or "")
+            if hint_origin in {"generated_prompt", "schema"}:
+                continue
             if str(sn.get("label", "")).lower() in existing_labels:
                 continue
             sid = _normalize_node_id(sn.get("id", ""))
@@ -2268,6 +2271,10 @@ def graph_from_blueprint(
                 "status": "", "major": not is_v2, "degree": 0, "size": 16,
                 "evidence": [{"kind": "static_scan", "path": f".bunya-jido/{STATIC_SCAN_FILE}"}],
             }
+            if hint_origin:
+                overlay_node["hint_origin"] = hint_origin
+                overlay_node["hint_type"] = str(sn.get("hint_type") or "provider")
+                overlay_node["tags"].append(f"hint-origin/{hint_origin}")
             if is_v2:
                 overlay_node.update(
                     {

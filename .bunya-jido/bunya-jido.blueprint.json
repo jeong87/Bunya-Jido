@@ -48,8 +48,8 @@
       "importance": "major",
       "overview_visibility": "contextual",
       "activation": "optional",
-      "description": "Creates deterministic scan graphs and supporting repository observations.",
-      "inspector_summary": "Static discovery supports authored interpretation but is not a grounded semantic map by itself.",
+      "description": "Creates deterministic scan graphs and provenance-tagged supporting repository observations.",
+      "inspector_summary": "Static observations assist authoring; generated example provider hints are excluded from Studio landmarks.",
       "source_path": "src/bunya_jido/scanner.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/scanner.py", "symbol": "build_graph"}
@@ -288,6 +288,18 @@
     {"id": "edge:roadmap_agent_map", "source": "docs:roadmap", "target": "semantic:agent_map", "relation": "documents", "relation_family": "explanation", "workflow_role": "detail", "overview_visibility": "hidden", "activation": "optional", "confidence": "llm_grounded", "evidence": [{"kind": "documentation", "path": "docs/CONTRIBUTION_PLAN.md"}]}
   ],
   "workflows": [
+    {
+      "id": "static_evidence_discovery",
+      "label": "Static Evidence Discovery",
+      "description": "Collect bounded discovery evidence while preserving provider-hint origin and excluding generated example pollution.",
+      "kind": "behavioral",
+      "ordered": true,
+      "trigger": "bunya-jido scan or semantic build with contextual overlay",
+      "outcome": "Static observations whose provider hints carry inspectable provenance.",
+      "confidence": "deterministic",
+      "node_ids": ["entry:cli", "analysis:scanner", "semantic:blueprint", "semantic:validation"],
+      "evidence": [{"kind": "source", "path": "src/bunya_jido/scanner.py"}, {"kind": "test", "path": "tests/test_scanner_coverage.py"}]
+    },
     {
       "id": "semantic_map_publication",
       "label": "Semantic Map Publication",

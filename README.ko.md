@@ -228,7 +228,9 @@ decision record와 근거 badge가 붙은 behavioral scenario 두 개를
 변환 파이프라인, runtime scenario를 꾸며내지 않는 utility를 포함한
 서로 다른 여섯 저장소 형태를 렌더링하고 검증합니다. 자세한 내용은
 [docs/STUDIO_BENCHMARK.md](docs/STUDIO_BENCHMARK.md)와
-[docs/gallery.md](docs/gallery.md)를 참고하세요.
+[docs/gallery.md](docs/gallery.md)를 참고하세요. gallery에는
+`none_with_reason` scenario 정책으로 다른 비런타임 읽기를 보여주는,
+실제 fixture 근거 기반 coverage atlas도 함께 게시됩니다.
 
 ## 생성되는 파일
 
@@ -297,7 +299,7 @@ bunya-jido validate-agent-map --root .
 
 LLM 없이 결정적으로 생성되는 정적 스캔 결과입니다.
 
-파일, 모듈, import, 문서, 설정, 런타임 산출물, 외부 API 힌트를 담습니다. 코딩 에이전트가 blueprint를 만들 때 raw evidence로 사용합니다.
+파일, 모듈, import, 문서, 설정, 런타임 산출물, 외부 API 힌트를 담습니다. provider hint evidence에는 출처와 종류 metadata가 붙고, 생성 prompt, schema 또는 viewer template 안의 token 예시는 Studio overlay 노드로 승격되지 않습니다. 코딩 에이전트가 blueprint를 만들 때 남은 관찰값을 raw evidence로 사용합니다.
 
 ## 진단
 
@@ -429,7 +431,7 @@ bunya-jido evaluate-agent-utility --root . --require-pass --json
 현재 가장 적합한 대상은 워크플로우가 복잡한 Python 저장소이며, 특히 개발 도구, 연구, 자동화, 에이전트 기반 프로젝트에 잘 맞습니다.
 
 - Python 모듈/import 및 심볼 스캔이 현재 코드 분석의 주된 표면입니다.
-- Markdown 문서, 일반적인 패키지/설정 파일, 일부 런타임/데이터 산출물, provider/API 힌트를 탐색 근거로 활용합니다.
+- Markdown 문서, 일반적인 패키지/설정 파일, 일부 런타임/데이터 산출물, provenance가 표시된 provider/API 힌트를 탐색 근거로 활용하며, 생성 prompt/schema/template 예시는 Studio overlay에서 걸러집니다.
 - JavaScript와 TypeScript 파일도 제한적으로 스캔하지만, 로컬 모듈 해석 범위는 아직 발전 중입니다.
 
 Bunya-Jido는 아직 언어별로 동등한 시맨틱 분석 범위나, 작성된 아키텍처 지도의 정확성을 자동으로 증명한다고 주장하지 않습니다.

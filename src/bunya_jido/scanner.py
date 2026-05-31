@@ -58,6 +58,15 @@ API_HINTS = {
     "azure": ("Azure API", "AZURE"),
 }
 
+HINT_ORIGIN_PRIORITY = {
+    "generated_prompt": 0,
+    "schema": 0,
+    "docs": 1,
+    "test": 1,
+    "source_code": 2,
+    "config": 2,
+}
+
 PLANE_BY_KIND = {
     "root": "repo",
     "repo": "repo",
@@ -135,6 +144,8 @@ class Node:
     major: bool = False
     degree: int = 0
     size: float = 7.0
+    hint_origin: str = ""
+    hint_type: str = ""
 
     def to_json(self) -> dict[str, Any]:
         d = self.__dict__.copy()
@@ -493,8 +504,47 @@ class RepoScanner:
             return ""
         return self.g.add_node(f"external:{name.lower()}", name, "external", "external", source_path=source_path, description="External dependency or imported package.")
 
-    def _api_node(self, label: str, tag: str) -> str:
-        return self.g.add_node(f"api:{slug(label)}", label, "api_provider", "external", tags=[f"api/{tag.lower()}"], description="Detected API, model server, or hosted service hint.", major=True, size=18)
+    def _hint_origin(self, rel: str, text: str = "") -> str:
+        lowered = rel.lower()
+        name = Path(rel).name.lower()
+        stem = Path(rel).stem.lower()
+        if name in CONFIG_FILES or lowered.startswith(".github/"):
+            return "config"
+        if "schema" in stem or name.endswith(".schema.json") or "/schemas/" in lowered:
+            return "schema"
+        if (
+            "prompt" in stem
+            or "template" in stem
+            or "/prompts/" in lowered
+            or re.search(r"\bdef\s+\w*(?:prompt|template)\w*\s*\(", text.lower())
+        ):
+            return "generated_prompt"
+        if classify_path(rel, Path(rel).suffix.lower())[0] == "test":
+            return "test"
+        if Path(rel).suffix.lower() in {".md", ".rst"}:
+            return "docs"
+        return "source_code"
+
+    def _api_node(self, label: str, tag: str, *, hint_origin: str = "", source_path: str = "") -> str:
+        node_id = self.g.add_node(
+            f"api:{slug(label)}",
+            label,
+            "api_provider",
+            "external",
+            tags=[f"api/{tag.lower()}", f"hint-origin/{hint_origin}"] if hint_origin else [f"api/{tag.lower()}"],
+            description="Detected API, model server, or hosted service hint.",
+            source_path=source_path,
+            major=True,
+            size=18,
+            hint_origin=hint_origin,
+            hint_type="provider",
+        )
+        node = self.g.nodes[node_id]
+        if HINT_ORIGIN_PRIORITY.get(hint_origin, -1) > HINT_ORIGIN_PRIORITY.get(node.hint_origin, -1):
+            node.hint_origin = hint_origin
+            node.hint_type = "provider"
+            node.source_path = source_path
+        return node_id
 
     def _parse_pyproject(self, p: Path, config_node: str) -> None:
         if not tomllib:
@@ -638,7 +688,9 @@ class RepoScanner:
         lowered = import_name.lower()
         for hint, (label, tag) in API_HINTS.items():
             if lowered.startswith(hint) or first.lower() == hint:
-                api = self._api_node(label, tag)
+                origin = self._hint_origin(rel)
+                evidence.update({"hint_origin": origin, "hint_type": "provider"})
+                api = self._api_node(label, tag, hint_origin=origin, source_path=rel)
                 self.g.add_edge(source_node, api, "api_calls", "api", evidence=evidence)
                 return
         if first in self.internal_first_components:
@@ -680,8 +732,20 @@ class RepoScanner:
                     api_added = False
                     for hint, (label, tag) in API_HINTS.items():
                         if hint in first.lower():
-                            api = self._api_node(label, tag)
-                            self.g.add_edge(node, api, "api_calls", "api", evidence={"kind": "js_import", "path": rel})
+                            origin = self._hint_origin(rel)
+                            api = self._api_node(label, tag, hint_origin=origin, source_path=rel)
+                            self.g.add_edge(
+                                node,
+                                api,
+                                "api_calls",
+                                "api",
+                                evidence={
+                                    "kind": "js_import",
+                                    "path": rel,
+                                    "hint_origin": origin,
+                                    "hint_type": "provider",
+                                },
+                            )
                             api_added = True
                             break
                     if not api_added:
@@ -810,6 +874,9 @@ class RepoScanner:
 
     def _scan_text_for_api_edges(self, text: str, source_node: str, rel: str) -> None:
         lowered = text.lower()
+        hint_origin = self._hint_origin(rel, text)
+        if hint_origin in {"generated_prompt", "schema"}:
+            return
         env_patterns = {
             "OPENAI": "External OpenAI API", "ANTHROPIC": "External Anthropic API", "GEMINI": "External Gemini API",
             "GOOGLE_API": "External Gemini API", "QWEN": "Local Qwen / Model Server", "OLLAMA": "Local Ollama / Model Server",
@@ -819,8 +886,21 @@ class RepoScanner:
         }
         for token, label in env_patterns.items():
             if token.lower() in lowered:
-                api = self._api_node(label, token)
-                self.g.add_edge(source_node, api, "api_calls", "api", confidence="inferred", evidence={"kind": "api_text_hint", "path": rel, "token": token})
+                api = self._api_node(label, token, hint_origin=hint_origin, source_path=rel)
+                self.g.add_edge(
+                    source_node,
+                    api,
+                    "api_calls",
+                    "api",
+                    confidence="inferred",
+                    evidence={
+                        "kind": "api_text_hint",
+                        "path": rel,
+                        "token": token,
+                        "hint_origin": hint_origin,
+                        "hint_type": "provider",
+                    },
+                )
 
 
 def build_graph(root: str | Path, mode: str = "auto", max_files: int = 5000, max_nodes: int = 700, max_edges: int = 1800, include_hidden: bool = False, show_root: bool = False, data_policy: str = "summary", max_data_files: int = 25) -> dict[str, Any]:

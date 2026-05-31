@@ -6,6 +6,41 @@
   },
   "task_routes": [
     {
+      "task": "change scanner hint provenance",
+      "intent": "Modify provider/API hint discovery or Studio overlay provenance without promoting generated example text as architecture.",
+      "start_nodes": [
+        "analysis:scanner"
+      ],
+      "workflows": [
+        "static_evidence_discovery"
+      ],
+      "projection_context": "projection:quality_contract",
+      "scenario_context": [],
+      "must_read": [
+        "src/bunya_jido/scanner.py",
+        "src/bunya_jido/blueprint.py",
+        "docs/SCANNER_COVERAGE.md"
+      ],
+      "contracts": [
+        "Provider hints from generated prompts, schemas, or viewer templates must not become Studio overlay landmarks."
+      ],
+      "tests": [
+        "tests/test_scanner_coverage.py",
+        "tests/test_blueprint_v2.py",
+        "tests/test_gallery.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/scanner.py",
+        "src/bunya_jido/blueprint.py",
+        "tests/test_scanner_coverage.py",
+        "tests/test_blueprint_v2.py",
+        "docs/SCANNER_COVERAGE.md"
+      ],
+      "watch_out": [
+        "Suppress generated example hints without discarding source or configuration provenance."
+      ]
+    },
+    {
       "task": "change grounding policy",
       "intent": "Modify publication blockers or grounding metrics while preserving the trust contract.",
       "start_nodes": [

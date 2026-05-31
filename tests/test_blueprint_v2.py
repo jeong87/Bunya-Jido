@@ -454,6 +454,35 @@ class BlueprintV2Tests(unittest.TestCase):
         self.assertEqual(provider["detail_level"], "detail")
         self.assertFalse(provider["major"])
 
+        with_provenance = graph_from_blueprint(
+            blueprint,
+            static_graph={
+                "nodes": [
+                    {
+                        "id": "api:source",
+                        "label": "Source Provider",
+                        "type": "api_provider",
+                        "hint_origin": "source_code",
+                        "hint_type": "provider",
+                    },
+                    {
+                        "id": "api:prompt",
+                        "label": "Prompt Example Provider",
+                        "type": "api_provider",
+                        "hint_origin": "generated_prompt",
+                        "hint_type": "provider",
+                    },
+                ]
+            },
+        )
+        source_provider = next(
+            node for node in with_provenance["nodes"] if node["label"] == "Source Provider"
+        )
+        self.assertEqual(source_provider["hint_origin"], "source_code")
+        self.assertFalse(
+            any(node["label"] == "Prompt Example Provider" for node in with_provenance["nodes"])
+        )
+
         missing_family = valid_v2_blueprint()
         missing_family["atlas"]["intent"]["static_provider_overlay"] = "contextual"
         errors, _, _ = validate_blueprint_obj(missing_family)

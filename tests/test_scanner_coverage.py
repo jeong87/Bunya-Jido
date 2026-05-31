@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from bunya_jido.scanner import build_graph
 
@@ -72,15 +73,45 @@ class ScannerCoverageFixtureTests(unittest.TestCase):
         )
 
         hint_text = node_id_for_path(graph, "src/coverage_app/hint_text.py")
-        self.assertTrue(
-            any(
+        hint_edge = next(
+            edge
+            for edge in graph["edges"]
+            if (
                 edge["source"] == hint_text
                 and edge["relation"] == "api_calls"
                 and edge["confidence"] == "inferred"
                 and edge["evidence"][0]["kind"] == "api_text_hint"
-                for edge in graph["edges"]
             )
         )
+        self.assertEqual(hint_edge["evidence"][0]["hint_origin"], "source_code")
+        self.assertEqual(hint_edge["evidence"][0]["hint_type"], "provider")
+        provider = next(
+            node for node in graph["nodes"] if node["id"] == hint_edge["target"]
+        )
+        self.assertEqual(provider["hint_origin"], "source_code")
+        self.assertEqual(provider["hint_type"], "provider")
+
+    def test_generated_prompt_and_schema_text_do_not_publish_provider_hints(self) -> None:
+        graph = build_graph(COVERAGE_EXAMPLE)
+        prompt = node_id_for_path(graph, "src/coverage_app/prompt_template.py")
+        schema = node_id_for_path(graph, "src/coverage_app/provider_schema.py")
+
+        self.assertEqual(edges_from(graph, prompt, "api_calls"), [])
+        self.assertEqual(edges_from(graph, schema, "api_calls"), [])
+
+    def test_source_provider_evidence_wins_over_an_earlier_generated_origin(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "a_prompt_template.py").write_text("import openai\n", encoding="utf-8")
+            (root / "z_runtime.py").write_text("OPENAI_API_KEY = 'required'\n", encoding="utf-8")
+
+            graph = build_graph(root)
+            provider = next(
+                node for node in graph["nodes"] if node["label"] == "External OpenAI API"
+            )
+
+        self.assertEqual(provider["hint_origin"], "source_code")
+        self.assertEqual(provider["source_path"], "z_runtime.py")
 
     def test_markdown_runtime_and_data_policy_outputs_are_bounded(self) -> None:
         graph = build_graph(COVERAGE_EXAMPLE)

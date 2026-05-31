@@ -171,3 +171,18 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Blueprint and agent-map validation, grounded diagnostics, strict
   atlas-quality and agent-utility evaluation, rebuilt committed demo,
   stale-map review, and the full unit suite are required before commit.
+
+## 2026-05-31 - Coding-Agent-Native Atlas N5 Provenance And Gallery
+
+- Change: Added provider-hint provenance metadata and generated-example
+  suppression, a trusted scanner-provenance route, and an evidence-backed
+  curated coverage-fixture Studio gallery item with published HTML and screenshot review.
+- Decision: Provider/API hints remain contextual scanner observations. They
+  cannot become authored primary landmarks merely because prompt, schema, or
+  template text mentions a provider. The curated miniature demonstrates an
+  honest `none_with_reason` reading distinct from this repository's behavioral
+  self-map.
+- Validation: Scanner coverage, Studio and gallery regression tests, blueprint
+  and agent-map validation, grounded diagnostics, strict atlas-quality and
+  agent-utility evaluation, rebuilt gallery/demo outputs, and stale-map review
+  are required before commit.

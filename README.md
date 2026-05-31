@@ -225,7 +225,9 @@ tree, the Studio benchmark renders and validates six distinct repository
 shapes, including workflow systems, web applications, SDKs, transformation
 pipelines, and utilities with no invented runtime scenario. See
 [docs/STUDIO_BENCHMARK.md](docs/STUDIO_BENCHMARK.md) and
-[docs/gallery.md](docs/gallery.md).
+[docs/gallery.md](docs/gallery.md). The gallery also publishes an
+evidence-backed coverage-fixture atlas whose `none_with_reason` scenario
+policy demonstrates a different, non-runtime reading.
 
 ## Generated Files
 
@@ -294,7 +296,7 @@ bunya-jido validate-agent-map --root .
 
 A deterministic scan result produced without an LLM.
 
-It includes files, modules, imports, docs, configuration, runtime artifacts, and external API hints. The coding agent uses it as raw evidence while writing the blueprint.
+It includes files, modules, imports, docs, configuration, runtime artifacts, and external API hints. Provider hint evidence carries origin/type metadata, and token examples inside generated prompts, schemas, or viewer templates are not promoted as Studio overlay nodes. The coding agent uses the remaining observations as raw evidence while writing the blueprint.
 
 ## Diagnostics
 
@@ -423,7 +425,7 @@ These files are meant to be pasted or attached before handing work to a coding a
 The current strongest fit is Python repositories with nontrivial workflows, especially developer tooling, research, automation, and agent-oriented projects.
 
 - Python module/import and symbol scanning is the primary code-scanning surface today.
-- Markdown documentation, common package/config files, selected runtime/data artifacts, and provider/API hints are used as discovery evidence.
+- Markdown documentation, common package/config files, selected runtime/data artifacts, and provenance-tagged provider/API hints are used as discovery evidence; generated prompt/schema/template examples are filtered from Studio overlays.
 - JavaScript and TypeScript files are scanned on a limited basis, but local module-resolution coverage is still developing.
 
 Bunya-Jido does not yet claim equivalent semantic coverage across languages or automatic proof that an authored architecture map is correct.

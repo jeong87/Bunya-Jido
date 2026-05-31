@@ -48,6 +48,9 @@ be documented.
 - Optional validated Studio `projection_context` and `scenario_context`
   references on task routes, with bounded CLI orientation and viewer-side
   copying of related trusted coding-agent context.
+- Provenance-tagged provider/API hints that suppress generated prompt/schema
+  example pollution from Studio overlays, plus a published evidence-backed
+  coverage-fixture gallery atlas with an honest `none_with_reason` policy.
 
 ### Changed
 

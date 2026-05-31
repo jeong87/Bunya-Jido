@@ -32,9 +32,9 @@ keeps the review rationale visible beside it.
 ### Static Scanner
 
 - **Plane:** analysis
-- **Role:** Builds deterministic scan graphs and supplies supporting repository observations to semantic generation.
+- **Role:** Builds deterministic scan graphs, marks provider-hint origin and type, excludes generated prompt/schema/template example pollution, and supplies supporting observations to semantic generation.
 - **Evidence:** `src/bunya_jido/scanner.py`
-- **Boundary:** A static scan is useful context, not a grounded semantic blueprint.
+- **Boundary:** A static scan is useful context, not a grounded semantic blueprint; source/config hints remain contextual evidence, not primary authored landmarks.
 
 ### Grounding Gate And Agent Routes
 

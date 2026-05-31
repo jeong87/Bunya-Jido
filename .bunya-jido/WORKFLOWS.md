@@ -4,6 +4,12 @@ These paths explain the workflows encoded in
 `bunya-jido.blueprint.json`. Each path uses repository evidence and is
 designed to be reviewable in the generated HTML map.
 
+## Static Evidence Discovery
+
+1. `src/bunya_jido/scanner.py` collects source, configuration, artifact, and limited client-surface evidence.
+2. Provider/API hints receive `hint_origin` and `hint_type` metadata, while generated prompt/schema/template example text is not emitted as provider evidence.
+3. `src/bunya_jido/blueprint.py` may carry only admissible contextual overlay nodes into a Studio atlas; authored projections remain primary.
+
 ## Semantic Map Publication
 
 1. `src/bunya_jido/cli.py` accepts a build request.

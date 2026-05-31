@@ -7,6 +7,35 @@
   "limitation": "This deterministic suite verifies generated bounded context against authored expectations; it does not measure whether a live coding agent follows that context.",
   "cases": [
     {
+      "id": "scanner-provenance-boundary",
+      "dimension": "boundary_discipline",
+      "query": {
+        "task": "change scanner hint provenance"
+      },
+      "expect": {
+        "route_status": "matched",
+        "routes": [
+          "change scanner hint provenance"
+        ],
+        "must_read": [
+          "src/bunya_jido/scanner.py",
+          "src/bunya_jido/blueprint.py",
+          "docs/SCANNER_COVERAGE.md"
+        ],
+        "contracts": [
+          "Provider hints from generated prompts, schemas, or viewer templates must not become Studio overlay landmarks."
+        ],
+        "tests": [
+          "tests/test_scanner_coverage.py",
+          "tests/test_blueprint_v2.py",
+          "tests/test_gallery.py"
+        ],
+        "projection_context": [
+          "projection:quality_contract"
+        ]
+      }
+    },
+    {
       "id": "route-projection-first-read",
       "dimension": "first_read_accuracy",
       "query": {
@@ -160,6 +189,7 @@
         "routes": [
           "change grounding policy",
           "change task route projection",
+          "change scanner hint provenance",
           "change atlas quality evaluation",
           "change viewer trust presentation"
         ]

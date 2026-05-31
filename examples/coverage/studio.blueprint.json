@@ -1,0 +1,191 @@
+{
+  "schema_version": "bunya-jido-blueprint-v2",
+  "project": {
+    "name": "coverage-fixture",
+    "summary": "A curated miniature repository used to verify discovery evidence without inventing application behavior.",
+    "thesis": "This fixture is best read through the evidence surfaces it exposes to the scanner, not as an ordered runtime product.",
+    "primary_projection_id": "projection:evidence_surfaces",
+    "ordered_behavior_assessment": "none"
+  },
+  "planes": [
+    {"id": "implementation", "label": "Implementation", "purpose": "Small source surfaces that supply observable scan evidence."},
+    {"id": "configuration", "label": "Configuration", "purpose": "Declared package and command inputs."},
+    {"id": "artifact", "label": "Artifact", "purpose": "Bounded recorded example output."},
+    {"id": "client", "label": "Client", "purpose": "Limited JavaScript/TypeScript discovery boundary."}
+  ],
+  "nodes": [
+    {
+      "id": "source:worker",
+      "label": "Python Worker Surface",
+      "type": "component",
+      "family": "surface",
+      "plane": "implementation",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Provides an imported provider and a local module relationship for scanner evidence.",
+      "why_it_matters": "It verifies source-backed discovery without claiming a live provider request.",
+      "inspector_summary": "The source is inspectable; API hints remain heuristic.",
+      "evidence": [{"kind": "source", "path": "src/coverage_app/worker.py"}]
+    },
+    {
+      "id": "config:package",
+      "label": "Package Declarations",
+      "type": "contract",
+      "family": "record",
+      "plane": "configuration",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Declares dependencies and packaging evidence read by the scanner.",
+      "why_it_matters": "It distinguishes declared inputs from inferred token hints.",
+      "inspector_summary": "Package metadata is direct configuration evidence, not inferred runtime behavior.",
+      "evidence": [{"kind": "config", "path": "pyproject.toml"}]
+    },
+    {
+      "id": "artifact:status",
+      "label": "Recorded Status Sample",
+      "type": "artifact",
+      "family": "record",
+      "plane": "artifact",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Supplies a bounded JSON runtime-like sample for deterministic extraction.",
+      "evidence": [{"kind": "artifact", "path": "runs/status.json"}]
+    },
+    {
+      "id": "client:typescript",
+      "label": "TypeScript Discovery Limit",
+      "type": "interface",
+      "family": "boundary",
+      "plane": "client",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Documents discovery of a TypeScript surface while local import resolution remains limited.",
+      "evidence": [{"kind": "source", "path": "web/main.ts"}]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:source_config",
+      "source": "source:worker",
+      "target": "config:package",
+      "relation": "is_described_by",
+      "relation_family": "evidence_link",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "confidence": "llm_grounded",
+      "evidence": [{"kind": "documentation", "path": "README.md"}]
+    },
+    {
+      "id": "edge:config_artifact",
+      "source": "config:package",
+      "target": "artifact:status",
+      "relation": "is_reviewed_with",
+      "relation_family": "evidence_link",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "confidence": "llm_grounded",
+      "evidence": [{"kind": "documentation", "path": "docs/contract.md"}]
+    },
+    {
+      "id": "edge:artifact_client",
+      "source": "artifact:status",
+      "target": "client:typescript",
+      "relation": "contrasts_with",
+      "relation_family": "evidence_link",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "confidence": "llm_grounded",
+      "evidence": [{"kind": "documentation", "path": "README.md"}]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "route:evidence_reading",
+      "label": "Evidence Reading Route",
+      "description": "Read independent scanner evidence surfaces without claiming an execution order.",
+      "kind": "structural",
+      "ordered": false,
+      "node_ids": ["source:worker", "config:package", "artifact:status", "client:typescript"],
+      "evidence": [{"kind": "documentation", "path": "README.md"}]
+    }
+  ],
+  "atlas": {
+    "scenario_policy": "none_with_reason",
+    "scenario_policy_reason": "This miniature fixture tests discovery categories, not an evidenced ordered user workflow.",
+    "decision_record": {
+      "repository_thesis_summary": "This fixture is best read through the evidence surfaces it exposes to the scanner, not as an ordered runtime product.",
+      "selected_projection_id": "projection:evidence_surfaces",
+      "projection_candidates": [
+        {
+          "id": "projection:evidence_surfaces",
+          "label": "Evidence Surfaces",
+          "question_answered": "Which bounded evidence categories does this miniature repository exercise?",
+          "selected": true,
+          "grounding_strength": "strong",
+          "first_screen_value": "high",
+          "distortion_risks": ["It is a scanner fixture rather than a complete application architecture."],
+          "selection_reason": "It is the honest purpose of this curated repository."
+        },
+        {
+          "id": "projection:provider_boundary",
+          "label": "Provider Boundary",
+          "question_answered": "Which external provider might this fixture mention?",
+          "selected": false,
+          "grounding_strength": "partial",
+          "first_screen_value": "low",
+          "distortion_risks": ["A heuristic provider hint could dominate a fixture whose purpose is coverage."],
+          "selection_reason": "Provider detection is evidence to inspect, not the primary explanation."
+        }
+      ],
+      "scenario_candidates": [
+        {
+          "id": "scenario:none",
+          "label": "No Runtime Walkthrough",
+          "selected": false,
+          "kind": "structural_tour",
+          "reason": "The reading is structural and does not need playback.",
+          "rejection_reason": "Playback would overstate an ordered lifecycle."
+        }
+      ],
+      "over_centralization_risks": [
+        {
+          "node_or_family": "provider hint",
+          "risk": "Token-only provider discovery could look like a primary external integration.",
+          "mitigation": "Keep provider evidence contextual and carry hint provenance."
+        }
+      ]
+    },
+    "vocabularies": {
+      "node_families": [
+        {"id": "surface", "label": "Source Surface", "description": "Observable source input.", "glyph": "rounded_square"},
+        {"id": "record", "label": "Record", "description": "Inspectable declarative or recorded input.", "glyph": "double_ring"},
+        {"id": "boundary", "label": "Discovery Boundary", "description": "A supported-but-limited scanner surface.", "glyph": "hexagon"}
+      ],
+      "relation_families": [
+        {"id": "evidence_link", "label": "Read Beside", "description": "Links evidence surfaces in a review order, not runtime.", "line_style": "dotted"}
+      ]
+    },
+    "projections": [
+      {
+        "id": "projection:evidence_surfaces",
+        "label": "Evidence Surfaces",
+        "description": "A grounded reading of the committed scanner-coverage miniature.",
+        "question_answered": "Which bounded evidence categories does this miniature repository exercise?",
+        "is_primary": true,
+        "node_ids": ["source:worker", "config:package", "artifact:status", "client:typescript"],
+        "plane_ids": ["implementation", "configuration", "artifact", "client"],
+        "relation_family_ids": ["evidence_link"],
+        "evidence": [{"kind": "documentation", "path": "README.md"}]
+      }
+    ],
+    "scenarios": [],
+    "intent": {"static_provider_overlay": "excluded"}
+  }
+}

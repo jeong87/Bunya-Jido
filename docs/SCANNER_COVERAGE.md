@@ -23,7 +23,7 @@ The matrix describes the default `auto` mode unless a row says otherwise.
 | Requirements files | Supported selected format | `requirements.txt` | Dependency nodes from non-option requirement lines | No recursive resolution, lockfile interpretation, or environment solve |
 | Runtime artifacts | Supported selected artifacts | `runs/events.jsonl`, `runs/status.json` | Runtime file nodes; JSONL event nodes; selected JSON key nodes | Reads bounded samples and selected keys; not runtime truth or telemetry ingestion |
 | Data artifacts | Policy-controlled discovery | `data/sample.csv` | Directory summary by default; file nodes with `--data-policy sample` or `full` | Defaults to omitting individual dataset files for privacy and scale |
-| Provider / API hints | Heuristic discovery only | `worker.py`, `hint_text.py` | `api_provider` nodes and `api_calls` edges with source evidence | Token text can be a false positive; it does not prove a live integration |
+| Provider / API hints | Heuristic discovery only with provenance | `worker.py`, `hint_text.py`, `prompt_template.py`, `provider_schema.py` | `api_provider` nodes and `api_calls` edges include `hint_origin` and `hint_type`; prompt/schema example text is suppressed | Source/config token text remains contextual evidence, not proof of a live integration |
 | Other languages and artifact formats | Not claimed | None | None | Requires an adapter proposal and fixtures before any support claim |
 
 ## Measured Fixture Commands
@@ -40,7 +40,9 @@ In the default scan, `data/` is represented as a summarized directory and
 `data/sample.csv` is deliberately absent. With `--data-policy sample`, the CSV
 appears as a data node. The JS/TS fixture intentionally demonstrates the
 current unresolved relative-import behavior rather than implying target
-resolution.
+resolution. Provider coverage also records `source_code` provenance for a
+source hint while asserting that authoring prompt and schema-example text do
+not emit provider edges.
 
 ## JavaScript / TypeScript Decision
 
@@ -93,5 +95,9 @@ their default collection behavior.
   `.parquet`, `.npy`, `.npz`, and `.ipynb` files. Heavy data-like directories
   are not walked under the default `summary` policy.
 - Provider/API hint scanning reads imports plus token-like text in recognized
-  config, Python, and JS/TS files. It records the source path and token name,
-  never a credential value, but remains heuristic evidence only.
+  config, Python, and JS/TS files. Emitted hint evidence records
+  `hint_origin` (`source_code`, `config`, `test`, or `docs` when applicable)
+  and `hint_type: provider`, plus the source path and token name, never a
+  credential value. Text identified as generated prompt/template or schema
+  example material is not emitted as provider evidence. Studio contextual
+  overlay projection also refuses generated-prompt and schema-origin nodes.

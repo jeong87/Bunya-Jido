@@ -87,7 +87,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
         self.assertEqual(metrics["grounding_status"], "grounded")
-        self.assertEqual(metrics["trusted_route_count"], 5)
+        self.assertEqual(metrics["trusted_route_count"], 6)
 
     def test_gallery_build_projects_expected_semantic_paths(self) -> None:
         graph, _ = graph_with_optional_blueprint(ROOT, max_files=0)
@@ -126,6 +126,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(
             route_ids,
             {
+                "task_route_change-scanner-hint-provenance",
                 "task_route_change-grounding-policy",
                 "task_route_change-atlas-quality-evaluation",
                 "task_route_change-multi-domain-rubric-coverage",
@@ -138,7 +139,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         context = generate_agent_context(ROOT, task="change task route projection")
 
         self.assertIn("- Grounding status: `grounded`", context)
-        self.assertIn("- Agent-map routes: `validated` (5 trusted route(s))", context)
+        self.assertIn("- Agent-map routes: `validated` (6 trusted route(s))", context)
         self.assertIn("- Requested route match: `matched`", context)
         self.assertIn("### change task route projection", context)
         self.assertIn("- `task_route_publication`", context)
@@ -146,12 +147,24 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("`projection:agent_navigation` - Bounded Agent Navigation", context)
         self.assertIn("`scenario:agent_context` - Request Bounded Agent Context", context)
 
+    def test_scanner_provenance_has_a_bounded_quality_route(self) -> None:
+        context = generate_agent_context(ROOT, task="change scanner hint provenance")
+
+        self.assertIn("### change scanner hint provenance", context)
+        self.assertIn("- `src/bunya_jido/scanner.py`", context)
+        self.assertIn(
+            "Provider hints from generated prompts, schemas, or viewer templates",
+            context,
+        )
+        self.assertIn("`projection:quality_contract` - Quality Contract", context)
+
     def test_unmatched_context_does_not_invent_self_map_route(self) -> None:
         context = generate_agent_context(ROOT, task="publish package to package registry")
 
         self.assertIn("- Requested route match: `not_found`", context)
         self.assertIn("No matching trusted route for this request.", context)
         self.assertNotIn("### change grounding policy", context)
+        self.assertNotIn("### change scanner hint provenance", context)
         self.assertNotIn("### change atlas quality evaluation", context)
         self.assertNotIn("### change multi-domain rubric coverage", context)
         self.assertNotIn("### change task route projection", context)
@@ -201,7 +214,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 7)
+        self.assertEqual(report["case_count"], 8)
         self.assertEqual(
             set(report["dimensions"]),
             {
@@ -273,7 +286,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertTrue(report["semantic_publication_allowed"])
         self.assertEqual(report["atlas_quality_status"], "passed")
         self.assertTrue(report["atlas_quality"]["review_required"])
-        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 5, "total": 5})
+        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 6, "total": 6})
 
 
 if __name__ == "__main__":

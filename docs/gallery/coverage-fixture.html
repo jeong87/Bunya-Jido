@@ -107,8 +107,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
   "generated_at": "2026-05-31T13:01:48+00:00",
-  "title": "Bunya-Jido · Bunya-Jido",
-  "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
+  "title": "Bunya-Jido · coverage-fixture",
+  "description": "A curated miniature repository used to verify discovery evidence without inventing application behavior.",
   "artifact_mode": "semantic_blueprint",
   "grounding": {
     "status": "grounded",
@@ -117,12 +117,12 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "publish_blockers": [],
     "warnings": [],
     "metrics": {
-      "node_count": 14,
-      "edge_count": 25,
+      "node_count": 4,
+      "edge_count": 3,
       "grounded_node_ratio": 1.0,
       "grounded_edge_ratio": 1.0,
-      "core_node_count": 5,
-      "critical_edge_count": 13,
+      "core_node_count": 2,
+      "critical_edge_count": 2,
       "grounded_core_node_ratio": 1.0,
       "grounded_critical_edge_ratio": 1.0,
       "grounding_status": "grounded",
@@ -131,89 +131,69 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "warning_count": 0,
       "error_count": 0,
       "schema_version": "bunya-jido-blueprint-v2",
-      "primary_projection": "projection:trusted_publication",
-      "projection_count": 3,
-      "scenario_policy": "required",
-      "scenario_count": 2,
+      "primary_projection": "projection:evidence_surfaces",
+      "projection_count": 1,
+      "scenario_policy": "none_with_reason",
+      "scenario_count": 0,
       "decision_record_present": true
     }
   },
   "stats": {
-    "nodes": 14,
-    "edges": 25,
+    "nodes": 4,
+    "edges": 3,
     "relations": [
-      "calls",
-      "checks",
-      "documents",
-      "feeds",
-      "gates",
-      "precedes",
-      "projects_to",
-      "runs",
-      "validates"
+      "contrasts_with",
+      "is_described_by",
+      "is_reviewed_with"
     ],
     "planes": [
-      "analysis",
-      "docs",
-      "entry",
-      "presentation",
-      "quality",
-      "semantic"
+      "artifact",
+      "client",
+      "configuration",
+      "implementation"
     ],
     "types": [
+      "artifact",
       "component",
-      "config",
       "contract",
-      "document",
-      "test",
-      "ui"
+      "interface"
     ]
   },
   "plane_glossary": [
     {
-      "id": "analysis",
-      "label": "Observation",
-      "purpose": "Deterministic repository observation."
+      "id": "artifact",
+      "label": "Artifact",
+      "purpose": "Bounded recorded example output."
     },
     {
-      "id": "docs",
-      "label": "Documentation",
-      "purpose": "Product contract and implementation roadmap."
+      "id": "client",
+      "label": "Client",
+      "purpose": "Limited JavaScript/TypeScript discovery boundary."
     },
     {
-      "id": "entry",
-      "label": "Entry",
-      "purpose": "User commands and orchestration."
+      "id": "configuration",
+      "label": "Configuration",
+      "purpose": "Declared package and command inputs."
     },
     {
-      "id": "presentation",
-      "label": "Presentation",
-      "purpose": "Offline visualization of published graphs."
-    },
-    {
-      "id": "quality",
-      "label": "Trust And Quality",
-      "purpose": "Grounding, readability, benchmark, and regression checks."
-    },
-    {
-      "id": "semantic",
-      "label": "Semantic Contract",
-      "purpose": "Reviewed architecture and agent-route projection."
+      "id": "implementation",
+      "label": "Implementation",
+      "purpose": "Small source surfaces that supply observable scan evidence."
     }
   ],
   "nodes": [
     {
-      "id": "analysis:scanner",
-      "label": "Static Scanner",
-      "type": "component",
-      "plane": "analysis",
-      "description": "Creates deterministic scan graphs and provenance-tagged supporting repository observations.",
-      "source_path": "src/bunya_jido/scanner.py",
+      "id": "artifact:status",
+      "label": "Recorded Status Sample",
+      "type": "artifact",
+      "plane": "artifact",
+      "description": "Supplies a bounded JSON runtime-like sample for deterministic extraction.",
+      "source_path": "runs/status.json",
       "tags": [
         "blueprint",
         "importance/major",
-        "plane/analysis",
-        "type/component"
+        "plane/artifact",
+        "type/artifact"
       ],
       "status": "",
       "major": true,
@@ -223,950 +203,115 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "detail_level": "overview",
       "evidence": [
         {
-          "kind": "source",
-          "path": "src/bunya_jido/scanner.py",
-          "symbol": "build_graph"
+          "kind": "artifact",
+          "path": "runs/status.json"
         }
       ],
-      "family": "observation",
-      "overview_visibility": "contextual",
-      "activation": "optional",
-      "inspector_summary": "Static observations assist authoring; generated example provider hints are excluded from Studio landmarks."
-    },
-    {
-      "id": "docs:roadmap",
-      "label": "Contribution Roadmap",
-      "type": "document",
-      "plane": "docs",
-      "description": "Defines staged work and acceptance criteria for grounded semantic maps.",
-      "source_path": "docs/CONTRIBUTION_PLAN.md",
-      "tags": [
-        "blueprint",
-        "importance/support",
-        "plane/docs",
-        "type/document"
-      ],
-      "status": "",
-      "major": false,
-      "degree": 2,
-      "size": 10.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "documentation",
-          "path": "docs/CONTRIBUTION_PLAN.md"
-        }
-      ],
-      "family": "surface",
-      "overview_visibility": "hidden",
-      "activation": "optional",
-      "inspector_summary": "Roadmap detail remains inspectable but is not a first-screen product landmark."
-    },
-    {
-      "id": "docs:readme",
-      "label": "Public Product Contract",
-      "type": "document",
-      "plane": "docs",
-      "description": "Explains artifact modes, Studio scenario expectations, quality review reporting, trust boundaries, and command usage.",
-      "source_path": "README.md",
-      "tags": [
-        "blueprint",
-        "importance/support",
-        "plane/docs",
-        "type/document"
-      ],
-      "status": "",
-      "major": false,
-      "degree": 2,
-      "size": 10.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "documentation",
-          "path": "README.md"
-        }
-      ],
-      "family": "surface",
-      "overview_visibility": "contextual",
-      "activation": "always",
-      "inspector_summary": "Public onboarding documents declared behavior and limitations."
-    },
-    {
-      "id": "entry:cli",
-      "label": "Command Line Interface",
-      "type": "component",
-      "plane": "entry",
-      "description": "Dispatches build, validation, preparation, atlas-quality evaluation and optional review reports, and trusted context commands.",
-      "source_path": "src/bunya_jido/cli.py",
-      "tags": [
-        "blueprint",
-        "importance/core",
-        "plane/entry",
-        "type/component"
-      ],
-      "status": "",
-      "major": true,
-      "degree": 5,
-      "size": 22.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/cli.py",
-          "symbol": "cmd_build"
-        },
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/cli.py",
-          "symbol": "cmd_evaluate_atlas_quality"
-        }
-      ],
-      "family": "command",
+      "family": "record",
       "overview_visibility": "visible",
-      "activation": "always",
-      "why_it_matters": "Every published artifact or agent-context request begins at an explicit command boundary.",
-      "inspector_summary": "Command entrypoints coordinate publication and diagnostics without defining the trust policy."
+      "activation": "always"
     },
     {
-      "id": "presentation:renderer",
-      "label": "HTML Renderer",
-      "type": "component",
-      "plane": "presentation",
-      "description": "Embeds the published graph payload into a standalone offline HTML artifact.",
-      "source_path": "src/bunya_jido/render.py",
-      "tags": [
-        "blueprint",
-        "importance/core",
-        "plane/presentation",
-        "type/component"
-      ],
-      "status": "",
-      "major": true,
-      "degree": 4,
-      "size": 22.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/render.py",
-          "symbol": "render_html"
-        }
-      ],
-      "family": "projection",
-      "overview_visibility": "visible",
-      "activation": "always",
-      "why_it_matters": "It carries only validated graph data into the portable human-facing output.",
-      "inspector_summary": "The renderer safely embeds data; it does not reinterpret or improve semantic trust."
-    },
-    {
-      "id": "presentation:viewer",
-      "label": "Interactive Viewer",
-      "type": "ui",
-      "plane": "presentation",
-      "description": "Displays trust, evidence, Studio projections, contextual navigation, validated narrated scenario playback, and copyable trusted agent-route context offline.",
-      "source_path": "src/bunya_jido/viewer/index.template.html",
-      "tags": [
-        "blueprint",
-        "importance/core",
-        "plane/presentation",
-        "type/ui"
-      ],
-      "status": "",
-      "major": true,
-      "degree": 2,
-      "size": 22.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/viewer/index.template.html",
-          "symbol": "renderTrust"
-        },
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/viewer/index.template.html",
-          "symbol": "renderScenarioUI"
-        }
-      ],
-      "family": "surface",
-      "overview_visibility": "visible",
-      "activation": "always",
-      "why_it_matters": "It is how people read the map while preserving the provenance and limitations of authored claims.",
-      "inspector_summary": "The viewer shows authored basis badges, restores user state after playback, and copies only projected trusted routes without becoming evidence."
-    },
-    {
-      "id": "quality:atlas",
-      "label": "Atlas Quality Evaluator",
-      "type": "contract",
-      "plane": "quality",
-      "description": "Measures deterministic Studio readability and scenario-policy signals while surfacing missing decision rationale and misleading narration as review-required interpretation.",
-      "source_path": "src/bunya_jido/quality.py",
+      "id": "client:typescript",
+      "label": "TypeScript Discovery Limit",
+      "type": "interface",
+      "plane": "client",
+      "description": "Documents discovery of a TypeScript surface while local import resolution remains limited.",
+      "source_path": "web/main.ts",
       "tags": [
         "blueprint",
         "importance/major",
-        "plane/quality",
-        "type/contract"
+        "plane/client",
+        "type/interface"
       ],
       "status": "",
       "major": true,
-      "degree": 4,
-      "size": 17.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/quality.py",
-          "symbol": "evaluate_atlas_quality_obj"
-        }
-      ],
-      "family": "gate",
-      "overview_visibility": "visible",
-      "activation": "conditional",
-      "inspector_summary": "Quality diagnostics measure visible density, narration honesty, and recorded editorial context; optional reports expose review work without proving preference."
-    },
-    {
-      "id": "semantic:validation",
-      "label": "Grounding Gate",
-      "type": "contract",
-      "plane": "quality",
-      "description": "Blocks semantic publication when core evidence, critical relationships, Studio decision records, or v2 atlas contracts cannot be trusted.",
-      "source_path": "src/bunya_jido/blueprint.py",
-      "tags": [
-        "blueprint",
-        "importance/core",
-        "plane/quality",
-        "type/contract"
-      ],
-      "status": "",
-      "major": true,
-      "degree": 7,
-      "size": 22.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "validate_blueprint_obj"
-        },
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/schema.py",
-          "symbol": "validate_blueprint_v2_atlas"
-        }
-      ],
-      "family": "gate",
-      "overview_visibility": "visible",
-      "activation": "always",
-      "why_it_matters": "It is the boundary that prevents an attractive map from being published as trusted without evidence.",
-      "inspector_summary": "Validation resolves evidence and Studio contract references, including declared primary-selection consistency, before normal publication may continue."
-    },
-    {
-      "id": "quality:tests",
-      "label": "Semantic Contract Tests",
-      "type": "test",
-      "plane": "quality",
-      "description": "Exercises grounding publication gates, Studio contracts, viewer playback surfaces, and agent-map parity behavior.",
-      "source_path": "tests/test_blueprint.py",
-      "tags": [
-        "blueprint",
-        "importance/major",
-        "plane/quality",
-        "type/test"
-      ],
-      "status": "",
-      "major": true,
-      "degree": 4,
-      "size": 17.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "test",
-          "path": "tests/test_blueprint.py"
-        },
-        {
-          "kind": "test",
-          "path": "tests/test_blueprint_v2.py"
-        },
-        {
-          "kind": "test",
-          "path": "tests/test_projection_quality.py"
-        },
-        {
-          "kind": "test",
-          "path": "tests/test_studio_benchmark.py"
-        }
-      ],
-      "family": "evidence",
-      "overview_visibility": "visible",
-      "activation": "always",
-      "inspector_summary": "Regression tests make the public self-map and viewer contract repeatable in CI."
-    },
-    {
-      "id": "quality:benchmark",
-      "label": "Studio Benchmark Suite",
-      "type": "test",
-      "plane": "quality",
-      "description": "Exercises distinct Studio projection and scenario choices across multiple repository shapes.",
-      "source_path": "tests/test_studio_benchmark.py",
-      "tags": [
-        "blueprint",
-        "importance/major",
-        "plane/quality",
-        "type/test"
-      ],
-      "status": "",
-      "major": true,
-      "degree": 3,
-      "size": 17.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "test",
-          "path": "tests/test_studio_benchmark.py"
-        },
-        {
-          "kind": "fixture",
-          "path": "tests/fixtures/studio_benchmark_cases.json"
-        },
-        {
-          "kind": "documentation",
-          "path": "docs/STUDIO_BENCHMARK.md"
-        }
-      ],
-      "family": "evidence",
-      "overview_visibility": "visible",
-      "activation": "conditional",
-      "inspector_summary": "A rubric-driven suite guards generality without turning an external complex atlas into a generation seed."
-    },
-    {
-      "id": "quality:ci",
-      "label": "Continuous Integration",
-      "type": "config",
-      "plane": "quality",
-      "description": "Runs the test and release-gate contract on supported Python versions.",
-      "source_path": ".github/workflows/ci.yml",
-      "tags": [
-        "blueprint",
-        "importance/support",
-        "plane/quality",
-        "type/config"
-      ],
-      "status": "",
-      "major": false,
       "degree": 1,
-      "size": 10.0,
+      "size": 17.0,
+      "parent": "",
+      "detail_level": "overview",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "web/main.ts"
+        }
+      ],
+      "family": "boundary",
+      "overview_visibility": "visible",
+      "activation": "always"
+    },
+    {
+      "id": "config:package",
+      "label": "Package Declarations",
+      "type": "contract",
+      "plane": "configuration",
+      "description": "Declares dependencies and packaging evidence read by the scanner.",
+      "source_path": "pyproject.toml",
+      "tags": [
+        "blueprint",
+        "importance/core",
+        "plane/configuration",
+        "type/contract"
+      ],
+      "status": "",
+      "major": true,
+      "degree": 2,
+      "size": 22.0,
       "parent": "",
       "detail_level": "overview",
       "evidence": [
         {
           "kind": "config",
-          "path": ".github/workflows/ci.yml"
+          "path": "pyproject.toml"
         }
       ],
-      "family": "evidence",
-      "overview_visibility": "contextual",
-      "activation": "conditional",
-      "inspector_summary": "CI repeats mechanical gates; maintainers still review editorial quality."
+      "family": "record",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "why_it_matters": "It distinguishes declared inputs from inferred token hints.",
+      "inspector_summary": "Package metadata is direct configuration evidence, not inferred runtime behavior."
     },
     {
-      "id": "semantic:blueprint",
-      "label": "Blueprint Projection",
+      "id": "source:worker",
+      "label": "Python Worker Surface",
       "type": "component",
-      "plane": "semantic",
-      "description": "Loads semantic artifacts and produces the published graph contract, including Studio projections, decision records, and scenario metadata.",
-      "source_path": "src/bunya_jido/blueprint.py",
+      "plane": "implementation",
+      "description": "Provides an imported provider and a local module relationship for scanner evidence.",
+      "source_path": "src/coverage_app/worker.py",
       "tags": [
         "blueprint",
         "importance/core",
-        "plane/semantic",
+        "plane/implementation",
         "type/component"
       ],
       "status": "",
       "major": true,
-      "degree": 5,
+      "degree": 1,
       "size": 22.0,
       "parent": "",
       "detail_level": "overview",
       "evidence": [
         {
           "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "graph_with_optional_blueprint"
-        },
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "_path_presets_from_blueprint"
+          "path": "src/coverage_app/worker.py"
         }
       ],
-      "family": "projection",
+      "family": "surface",
       "overview_visibility": "visible",
       "activation": "always",
-      "why_it_matters": "It turns reviewed semantic inputs into the graph payload later consumers are allowed to inspect.",
-      "inspector_summary": "Blueprint publication preserves validated Studio editorial choices, atlas data, and task-route projections."
-    },
-    {
-      "id": "semantic:context",
-      "label": "Trusted Context Generator",
-      "type": "component",
-      "plane": "semantic",
-      "description": "Emits bounded navigation guidance only from a grounded blueprint and validated task routes.",
-      "source_path": "src/bunya_jido/blueprint.py",
-      "tags": [
-        "blueprint",
-        "importance/major",
-        "plane/semantic",
-        "type/component"
-      ],
-      "status": "",
-      "major": true,
-      "degree": 3,
-      "size": 17.0,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "generate_agent_context"
-        }
-      ],
-      "family": "projection",
-      "overview_visibility": "contextual",
-      "activation": "conditional",
-      "inspector_summary": "Context generation gives coding agents bounded reading, contracts, tests, route-linked projections, qualified scenarios, and start-node responsibility after validation."
-    },
-    {
-      "id": "semantic:agent_map",
-      "label": "Agent Route Parity",
-      "type": "contract",
-      "plane": "semantic",
-      "description": "Validates bounded task routes against semantic nodes, workflows, required reading, tests, and optional Studio reading context.",
-      "source_path": "src/bunya_jido/blueprint.py",
-      "tags": [
-        "blueprint",
-        "importance/major",
-        "plane/semantic",
-        "type/contract"
-      ],
-      "status": "",
-      "major": true,
-      "degree": 6,
-      "size": 17.44948974278318,
-      "parent": "",
-      "detail_level": "overview",
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "validate_agent_map_obj"
-        }
-      ],
-      "family": "gate",
-      "overview_visibility": "visible",
-      "activation": "always",
-      "inspector_summary": "Only grounded route and projection/scenario references can reach agent context or appear as trusted viewer paths."
+      "why_it_matters": "It verifies source-backed discovery without claiming a live provider request.",
+      "inspector_summary": "The source is inspectable; API hints remain heuristic."
     }
   ],
   "edges": [
     {
-      "id": "edge:cli_blueprint",
-      "source": "entry:cli",
-      "target": "semantic:blueprint",
-      "source_label": "Command Line Interface",
-      "target_label": "Blueprint Projection",
-      "relation": "calls",
-      "lens": "call",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/cli.py",
-          "symbol": "cmd_build"
-        }
-      ],
-      "relation_family": "invocation",
-      "workflow_role": "primary",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:blueprint_scanner",
-      "source": "semantic:blueprint",
-      "target": "analysis:scanner",
-      "source_label": "Blueprint Projection",
-      "target_label": "Static Scanner",
-      "relation": "calls",
-      "lens": "call",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "graph_with_optional_blueprint"
-        }
-      ],
-      "relation_family": "invocation",
-      "workflow_role": "supporting",
-      "overview_visibility": "contextual",
-      "activation": "optional"
-    },
-    {
-      "id": "edge:scanner_blueprint",
-      "source": "analysis:scanner",
-      "target": "semantic:blueprint",
-      "source_label": "Static Scanner",
-      "target_label": "Blueprint Projection",
-      "relation": "feeds",
-      "lens": "call",
-      "note": "",
-      "confidence": "llm_grounded",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "graph_from_blueprint"
-        }
-      ],
-      "relation_family": "observation",
-      "workflow_role": "supporting",
-      "overview_visibility": "contextual",
-      "activation": "optional"
-    },
-    {
-      "id": "edge:blueprint_validation",
-      "source": "semantic:blueprint",
-      "target": "semantic:validation",
-      "source_label": "Blueprint Projection",
-      "target_label": "Grounding Gate",
-      "relation": "validates",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "validate_blueprint_obj"
-        }
-      ],
-      "relation_family": "assurance",
-      "workflow_role": "primary",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:cli_atlas_quality",
-      "source": "entry:cli",
-      "target": "quality:atlas",
-      "source_label": "Command Line Interface",
-      "target_label": "Atlas Quality Evaluator",
-      "relation": "calls",
-      "lens": "call",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/cli.py",
-          "symbol": "cmd_evaluate_atlas_quality"
-        }
-      ],
-      "relation_family": "invocation",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "conditional"
-    },
-    {
-      "id": "edge:validation_atlas_quality",
-      "source": "semantic:validation",
-      "target": "quality:atlas",
-      "source_label": "Grounding Gate",
-      "target_label": "Atlas Quality Evaluator",
-      "relation": "precedes",
+      "id": "edge:source_config",
+      "source": "source:worker",
+      "target": "config:package",
+      "source_label": "Python Worker Surface",
+      "target_label": "Package Declarations",
+      "relation": "is_described_by",
       "lens": "architecture",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/quality.py",
-          "symbol": "evaluate_atlas_quality_obj"
-        }
-      ],
-      "relation_family": "assurance",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "conditional"
-    },
-    {
-      "id": "edge:blueprint_agent_map",
-      "source": "semantic:blueprint",
-      "target": "semantic:agent_map",
-      "source_label": "Blueprint Projection",
-      "target_label": "Agent Route Parity",
-      "relation": "validates",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "validate_agent_map_obj"
-        }
-      ],
-      "relation_family": "assurance",
-      "workflow_role": "boundary",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:validation_renderer",
-      "source": "semantic:validation",
-      "target": "presentation:renderer",
-      "source_label": "Grounding Gate",
-      "target_label": "HTML Renderer",
-      "relation": "gates",
-      "lens": "contract",
-      "note": "",
-      "confidence": "llm_grounded",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/cli.py",
-          "symbol": "cmd_build"
-        }
-      ],
-      "relation_family": "assurance",
-      "workflow_role": "primary",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:agent_map_renderer",
-      "source": "semantic:agent_map",
-      "target": "presentation:renderer",
-      "source_label": "Agent Route Parity",
-      "target_label": "HTML Renderer",
-      "relation": "gates",
-      "lens": "contract",
-      "note": "",
-      "confidence": "llm_grounded",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "graph_from_blueprint"
-        }
-      ],
-      "relation_family": "assurance",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:cli_renderer",
-      "source": "entry:cli",
-      "target": "presentation:renderer",
-      "source_label": "Command Line Interface",
-      "target_label": "HTML Renderer",
-      "relation": "calls",
-      "lens": "call",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/cli.py",
-          "symbol": "cmd_build"
-        }
-      ],
-      "relation_family": "invocation",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:renderer_viewer",
-      "source": "presentation:renderer",
-      "target": "presentation:viewer",
-      "source_label": "HTML Renderer",
-      "target_label": "Interactive Viewer",
-      "relation": "projects_to",
-      "lens": "runtime",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/render.py",
-          "symbol": "render_html"
-        }
-      ],
-      "relation_family": "delivery",
-      "workflow_role": "primary",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:cli_context",
-      "source": "entry:cli",
-      "target": "semantic:context",
-      "source_label": "Command Line Interface",
-      "target_label": "Trusted Context Generator",
-      "relation": "calls",
-      "lens": "call",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/cli.py",
-          "symbol": "cmd_context"
-        }
-      ],
-      "relation_family": "invocation",
-      "workflow_role": "primary",
-      "overview_visibility": "contextual",
-      "activation": "conditional"
-    },
-    {
-      "id": "edge:context_validation",
-      "source": "semantic:context",
-      "target": "semantic:validation",
-      "source_label": "Trusted Context Generator",
-      "target_label": "Grounding Gate",
-      "relation": "validates",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "generate_agent_context"
-        }
-      ],
-      "relation_family": "assurance",
-      "workflow_role": "primary",
-      "overview_visibility": "contextual",
-      "activation": "conditional"
-    },
-    {
-      "id": "edge:context_agent_map",
-      "source": "semantic:context",
-      "target": "semantic:agent_map",
-      "source_label": "Trusted Context Generator",
-      "target_label": "Agent Route Parity",
-      "relation": "validates",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "generate_agent_context"
-        }
-      ],
-      "relation_family": "assurance",
-      "workflow_role": "primary",
-      "overview_visibility": "contextual",
-      "activation": "conditional"
-    },
-    {
-      "id": "edge:validation_agent_map",
-      "source": "semantic:validation",
-      "target": "semantic:agent_map",
-      "source_label": "Grounding Gate",
-      "target_label": "Agent Route Parity",
-      "relation": "precedes",
-      "lens": "architecture",
-      "note": "",
-      "confidence": "llm_grounded",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "source",
-          "path": "src/bunya_jido/blueprint.py",
-          "symbol": "generate_agent_context"
-        }
-      ],
-      "relation_family": "assurance",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:tests_validation",
-      "source": "quality:tests",
-      "target": "semantic:validation",
-      "source_label": "Semantic Contract Tests",
-      "target_label": "Grounding Gate",
-      "relation": "checks",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "test",
-          "path": "tests/test_blueprint.py"
-        },
-        {
-          "kind": "test",
-          "path": "tests/test_blueprint_v2.py"
-        }
-      ],
-      "relation_family": "verification",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:tests_atlas_quality",
-      "source": "quality:tests",
-      "target": "quality:atlas",
-      "source_label": "Semantic Contract Tests",
-      "target_label": "Atlas Quality Evaluator",
-      "relation": "checks",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "test",
-          "path": "tests/test_projection_quality.py"
-        }
-      ],
-      "relation_family": "verification",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:tests_agent_map",
-      "source": "quality:tests",
-      "target": "semantic:agent_map",
-      "source_label": "Semantic Contract Tests",
-      "target_label": "Agent Route Parity",
-      "relation": "checks",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "test",
-          "path": "tests/test_blueprint.py"
-        }
-      ],
-      "relation_family": "verification",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "always"
-    },
-    {
-      "id": "edge:benchmark_atlas_quality",
-      "source": "quality:benchmark",
-      "target": "quality:atlas",
-      "source_label": "Studio Benchmark Suite",
-      "target_label": "Atlas Quality Evaluator",
-      "relation": "checks",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "test",
-          "path": "tests/test_studio_benchmark.py"
-        }
-      ],
-      "relation_family": "verification",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "conditional"
-    },
-    {
-      "id": "edge:benchmark_viewer",
-      "source": "quality:benchmark",
-      "target": "presentation:viewer",
-      "source_label": "Studio Benchmark Suite",
-      "target_label": "Interactive Viewer",
-      "relation": "checks",
-      "lens": "contract",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "test",
-          "path": "tests/test_studio_benchmark.py"
-        }
-      ],
-      "relation_family": "verification",
-      "workflow_role": "supporting",
-      "overview_visibility": "visible",
-      "activation": "conditional"
-    },
-    {
-      "id": "edge:ci_tests",
-      "source": "quality:ci",
-      "target": "quality:tests",
-      "source_label": "Continuous Integration",
-      "target_label": "Semantic Contract Tests",
-      "relation": "runs",
-      "lens": "run",
-      "note": "",
-      "confidence": "deterministic",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "config",
-          "path": ".github/workflows/ci.yml"
-        }
-      ],
-      "relation_family": "verification",
-      "workflow_role": "supporting",
-      "overview_visibility": "contextual",
-      "activation": "conditional"
-    },
-    {
-      "id": "edge:readme_cli",
-      "source": "docs:readme",
-      "target": "entry:cli",
-      "source_label": "Public Product Contract",
-      "target_label": "Command Line Interface",
-      "relation": "documents",
-      "lens": "docs",
       "note": "",
       "confidence": "llm_grounded",
       "directed": true,
@@ -1176,76 +321,54 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "path": "README.md"
         }
       ],
-      "relation_family": "explanation",
-      "workflow_role": "supporting",
-      "overview_visibility": "contextual",
+      "relation_family": "evidence_link",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
       "activation": "always"
     },
     {
-      "id": "edge:readme_benchmark",
-      "source": "docs:readme",
-      "target": "quality:benchmark",
-      "source_label": "Public Product Contract",
-      "target_label": "Studio Benchmark Suite",
-      "relation": "documents",
-      "lens": "docs",
+      "id": "edge:config_artifact",
+      "source": "config:package",
+      "target": "artifact:status",
+      "source_label": "Package Declarations",
+      "target_label": "Recorded Status Sample",
+      "relation": "is_reviewed_with",
+      "lens": "architecture",
       "note": "",
       "confidence": "llm_grounded",
       "directed": true,
       "evidence": [
         {
           "kind": "documentation",
-          "path": "docs/STUDIO_BENCHMARK.md"
+          "path": "docs/contract.md"
         }
       ],
-      "relation_family": "explanation",
-      "workflow_role": "supporting",
-      "overview_visibility": "contextual",
-      "activation": "conditional"
+      "relation_family": "evidence_link",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always"
     },
     {
-      "id": "edge:roadmap_validation",
-      "source": "docs:roadmap",
-      "target": "semantic:validation",
-      "source_label": "Contribution Roadmap",
-      "target_label": "Grounding Gate",
-      "relation": "documents",
-      "lens": "docs",
+      "id": "edge:artifact_client",
+      "source": "artifact:status",
+      "target": "client:typescript",
+      "source_label": "Recorded Status Sample",
+      "target_label": "TypeScript Discovery Limit",
+      "relation": "contrasts_with",
+      "lens": "architecture",
       "note": "",
       "confidence": "llm_grounded",
       "directed": true,
       "evidence": [
         {
           "kind": "documentation",
-          "path": "docs/CONTRIBUTION_PLAN.md"
+          "path": "README.md"
         }
       ],
-      "relation_family": "explanation",
-      "workflow_role": "detail",
-      "overview_visibility": "hidden",
-      "activation": "optional"
-    },
-    {
-      "id": "edge:roadmap_agent_map",
-      "source": "docs:roadmap",
-      "target": "semantic:agent_map",
-      "source_label": "Contribution Roadmap",
-      "target_label": "Agent Route Parity",
-      "relation": "documents",
-      "lens": "docs",
-      "note": "",
-      "confidence": "llm_grounded",
-      "directed": true,
-      "evidence": [
-        {
-          "kind": "documentation",
-          "path": "docs/CONTRIBUTION_PLAN.md"
-        }
-      ],
-      "relation_family": "explanation",
-      "workflow_role": "detail",
-      "overview_visibility": "hidden",
-      "activation": "optional"
+      "relation_family": "evidence_link",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always"
     }
   ],
   "path_presets": [
@@ -1256,717 +379,66 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "kind": "overview",
       "source": "blueprint",
       "node_ids": [
-        "semantic:validation",
-        "semantic:agent_map",
-        "entry:cli",
-        "semantic:blueprint",
-        "presentation:renderer",
-        "quality:atlas",
-        "quality:tests",
-        "quality:benchmark",
-        "semantic:context",
-        "presentation:viewer",
-        "analysis:scanner",
-        "docs:readme",
-        "docs:roadmap",
-        "quality:ci"
+        "config:package",
+        "artifact:status",
+        "source:worker",
+        "client:typescript"
       ],
       "nodes": [
-        "Grounding Gate",
-        "Agent Route Parity",
-        "Command Line Interface",
-        "Blueprint Projection",
-        "HTML Renderer",
-        "Atlas Quality Evaluator",
-        "Semantic Contract Tests",
-        "Studio Benchmark Suite",
-        "Trusted Context Generator",
-        "Interactive Viewer",
-        "Static Scanner",
-        "Public Product Contract",
-        "Contribution Roadmap",
-        "Continuous Integration"
+        "Package Declarations",
+        "Recorded Status Sample",
+        "Python Worker Surface",
+        "TypeScript Discovery Limit"
       ]
     },
     {
-      "id": "projection_projection:trusted_publication",
-      "projection_id": "projection:trusted_publication",
-      "label": "Trusted Publication",
-      "description": "How an evidence-linked interpretation becomes an offline map for humans and coding agents.",
-      "question_answered": "How is a semantic map permitted to reach readers?",
+      "id": "projection_projection:evidence_surfaces",
+      "projection_id": "projection:evidence_surfaces",
+      "label": "Evidence Surfaces",
+      "description": "A grounded reading of the committed scanner-coverage miniature.",
+      "question_answered": "Which bounded evidence categories does this miniature repository exercise?",
       "kind": "projection",
       "source": "atlas",
       "is_primary": true,
       "node_ids": [
-        "entry:cli",
-        "semantic:blueprint",
-        "semantic:validation",
-        "quality:atlas",
-        "quality:benchmark",
-        "semantic:agent_map",
-        "presentation:renderer",
-        "presentation:viewer"
+        "source:worker",
+        "config:package",
+        "artifact:status",
+        "client:typescript"
       ],
       "nodes": [
-        "Command Line Interface",
-        "Blueprint Projection",
-        "Grounding Gate",
-        "Atlas Quality Evaluator",
-        "Studio Benchmark Suite",
-        "Agent Route Parity",
-        "HTML Renderer",
-        "Interactive Viewer"
+        "Python Worker Surface",
+        "Package Declarations",
+        "Recorded Status Sample",
+        "TypeScript Discovery Limit"
       ],
       "plane_ids": [
-        "entry",
-        "semantic",
-        "quality",
-        "presentation"
+        "implementation",
+        "configuration",
+        "artifact",
+        "client"
       ],
       "relation_family_ids": [
-        "invocation",
-        "assurance",
-        "delivery",
-        "verification"
+        "evidence_link"
       ]
     },
     {
-      "id": "projection_projection:agent_navigation",
-      "projection_id": "projection:agent_navigation",
-      "label": "Bounded Agent Navigation",
-      "description": "How a coding task receives route guidance only after validation.",
-      "question_answered": "How can a coding agent use the map safely?",
-      "kind": "projection",
-      "source": "atlas",
-      "is_primary": false,
-      "node_ids": [
-        "entry:cli",
-        "semantic:context",
-        "semantic:validation",
-        "semantic:agent_map",
-        "quality:tests",
-        "presentation:viewer"
-      ],
-      "nodes": [
-        "Command Line Interface",
-        "Trusted Context Generator",
-        "Grounding Gate",
-        "Agent Route Parity",
-        "Semantic Contract Tests",
-        "Interactive Viewer"
-      ],
-      "plane_ids": [
-        "entry",
-        "semantic",
-        "quality",
-        "presentation"
-      ],
-      "relation_family_ids": [
-        "invocation",
-        "assurance",
-        "verification",
-        "delivery"
-      ]
-    },
-    {
-      "id": "projection_projection:quality_contract",
-      "projection_id": "projection:quality_contract",
-      "label": "Quality Contract",
-      "description": "How readability, generality, and publication trust are mechanically checked.",
-      "question_answered": "Which checks keep the Studio output honest?",
-      "kind": "projection",
-      "source": "atlas",
-      "is_primary": false,
-      "node_ids": [
-        "quality:atlas",
-        "quality:benchmark",
-        "quality:tests",
-        "quality:ci",
-        "semantic:validation",
-        "presentation:viewer"
-      ],
-      "nodes": [
-        "Atlas Quality Evaluator",
-        "Studio Benchmark Suite",
-        "Semantic Contract Tests",
-        "Continuous Integration",
-        "Grounding Gate",
-        "Interactive Viewer"
-      ],
-      "plane_ids": [
-        "quality",
-        "semantic",
-        "presentation"
-      ],
-      "relation_family_ids": [
-        "verification",
-        "assurance"
-      ]
-    },
-    {
-      "id": "product_architecture",
-      "label": "Product Architecture",
-      "description": "Core implementation flow from command to trusted offline presentation.",
-      "kind": "view",
-      "source": "blueprint",
-      "node_ids": [
-        "semantic:validation",
-        "semantic:agent_map",
-        "entry:cli",
-        "semantic:blueprint",
-        "presentation:renderer",
-        "quality:atlas",
-        "quality:benchmark",
-        "presentation:viewer",
-        "analysis:scanner"
-      ],
-      "nodes": [
-        "Grounding Gate",
-        "Agent Route Parity",
-        "Command Line Interface",
-        "Blueprint Projection",
-        "HTML Renderer",
-        "Atlas Quality Evaluator",
-        "Studio Benchmark Suite",
-        "Interactive Viewer",
-        "Static Scanner"
-      ]
-    },
-    {
-      "id": "trust_contract",
-      "label": "Trust Contract",
-      "description": "Validation, agent context, tests, benchmark, CI, and roadmap commitments.",
-      "kind": "view",
-      "source": "blueprint",
-      "node_ids": [
-        "semantic:validation",
-        "semantic:agent_map",
-        "quality:atlas",
-        "quality:tests",
-        "quality:benchmark",
-        "semantic:context",
-        "docs:roadmap",
-        "quality:ci"
-      ],
-      "nodes": [
-        "Grounding Gate",
-        "Agent Route Parity",
-        "Atlas Quality Evaluator",
-        "Semantic Contract Tests",
-        "Studio Benchmark Suite",
-        "Trusted Context Generator",
-        "Contribution Roadmap",
-        "Continuous Integration"
-      ]
-    },
-    {
-      "id": "documentation_surface",
-      "label": "Documentation Surface",
-      "description": "Public narrative and the command/viewer surfaces it explains.",
-      "kind": "view",
-      "source": "blueprint",
-      "node_ids": [
-        "entry:cli",
-        "quality:benchmark",
-        "presentation:viewer",
-        "docs:readme",
-        "docs:roadmap"
-      ],
-      "nodes": [
-        "Command Line Interface",
-        "Studio Benchmark Suite",
-        "Interactive Viewer",
-        "Public Product Contract",
-        "Contribution Roadmap"
-      ]
-    },
-    {
-      "id": "workflow_static_evidence_discovery",
-      "label": "Static Evidence Discovery",
-      "description": "Collect bounded discovery evidence while preserving provider-hint origin and excluding generated example pollution.",
+      "id": "workflow_route:evidence_reading",
+      "label": "Evidence Reading Route",
+      "description": "Read independent scanner evidence surfaces without claiming an execution order.",
       "kind": "workflow",
       "source": "blueprint",
       "node_ids": [
-        "entry:cli",
-        "analysis:scanner",
-        "semantic:blueprint",
-        "semantic:validation"
+        "source:worker",
+        "config:package",
+        "artifact:status",
+        "client:typescript"
       ],
       "nodes": [
-        "Command Line Interface",
-        "Static Scanner",
-        "Blueprint Projection",
-        "Grounding Gate"
-      ]
-    },
-    {
-      "id": "workflow_semantic_map_publication",
-      "label": "Semantic Map Publication",
-      "description": "Build a grounded semantic graph and expose its trust state and qualified narration in offline HTML.",
-      "kind": "workflow",
-      "source": "blueprint",
-      "node_ids": [
-        "entry:cli",
-        "semantic:blueprint",
-        "semantic:validation",
-        "presentation:renderer",
-        "presentation:viewer"
-      ],
-      "nodes": [
-        "Command Line Interface",
-        "Blueprint Projection",
-        "Grounding Gate",
-        "HTML Renderer",
-        "Interactive Viewer"
-      ]
-    },
-    {
-      "id": "workflow_task_route_publication",
-      "label": "Task Route Publication",
-      "description": "Validate agent routes and their optional Studio reading context before showing them as viewer paths or copyable agent guidance.",
-      "kind": "workflow",
-      "source": "blueprint",
-      "node_ids": [
-        "entry:cli",
-        "semantic:blueprint",
-        "semantic:agent_map",
-        "presentation:renderer",
-        "presentation:viewer"
-      ],
-      "nodes": [
-        "Command Line Interface",
-        "Blueprint Projection",
-        "Agent Route Parity",
-        "HTML Renderer",
-        "Interactive Viewer"
-      ]
-    },
-    {
-      "id": "workflow_trusted_context_generation",
-      "label": "Trusted Context Generation",
-      "description": "Validate blueprint and route trust before emitting bounded navigation context with optional Studio reading guidance.",
-      "kind": "workflow",
-      "source": "blueprint",
-      "node_ids": [
-        "entry:cli",
-        "semantic:context",
-        "semantic:validation",
-        "semantic:agent_map"
-      ],
-      "nodes": [
-        "Command Line Interface",
-        "Trusted Context Generator",
-        "Grounding Gate",
-        "Agent Route Parity"
-      ]
-    },
-    {
-      "id": "workflow_continuous_contract_check",
-      "label": "Continuous Contract Check",
-      "description": "Run characterization and golden checks in CI against the published semantic contract.",
-      "kind": "workflow",
-      "source": "blueprint",
-      "node_ids": [
-        "quality:ci",
-        "quality:tests",
-        "semantic:validation"
-      ],
-      "nodes": [
-        "Continuous Integration",
-        "Semantic Contract Tests",
-        "Grounding Gate"
-      ]
-    },
-    {
-      "id": "workflow_atlas_quality_evaluation",
-      "label": "Atlas Quality Evaluation",
-      "description": "Measure Studio overview and scenario narration signals while exposing interpretation that still needs human review.",
-      "kind": "workflow",
-      "source": "blueprint",
-      "node_ids": [
-        "entry:cli",
-        "semantic:validation",
-        "quality:atlas"
-      ],
-      "nodes": [
-        "Command Line Interface",
-        "Grounding Gate",
-        "Atlas Quality Evaluator"
-      ]
-    },
-    {
-      "id": "workflow_studio_benchmark_review",
-      "label": "Studio Benchmark Review",
-      "description": "Exercise differing atlas theses and scenario policies without introducing a domain seed.",
-      "kind": "workflow",
-      "source": "blueprint",
-      "node_ids": [
-        "quality:benchmark",
-        "quality:atlas",
-        "presentation:viewer"
-      ],
-      "nodes": [
-        "Studio Benchmark Suite",
-        "Atlas Quality Evaluator",
-        "Interactive Viewer"
-      ]
-    },
-    {
-      "id": "task_route_change-scanner-hint-provenance",
-      "label": "change scanner hint provenance",
-      "description": "Modify provider/API hint discovery or Studio overlay provenance without promoting generated example text as architecture.",
-      "kind": "task_route",
-      "source": "agent_map",
-      "node_ids": [
-        "analysis:scanner",
-        "entry:cli",
-        "semantic:blueprint",
-        "semantic:validation"
-      ],
-      "nodes": [
-        "Static Scanner",
-        "Command Line Interface",
-        "Blueprint Projection",
-        "Grounding Gate"
-      ],
-      "start_nodes": [
-        "analysis:scanner"
-      ],
-      "workflows": [
-        "static_evidence_discovery"
-      ],
-      "must_read": [
-        "src/bunya_jido/scanner.py",
-        "src/bunya_jido/blueprint.py",
-        "docs/SCANNER_COVERAGE.md"
-      ],
-      "contracts": [
-        "Provider hints from generated prompts, schemas, or viewer templates must not become Studio overlay landmarks."
-      ],
-      "tests": [
-        "tests/test_scanner_coverage.py",
-        "tests/test_blueprint_v2.py",
-        "tests/test_gallery.py"
-      ],
-      "safe_edit": [
-        "src/bunya_jido/scanner.py",
-        "src/bunya_jido/blueprint.py",
-        "tests/test_scanner_coverage.py",
-        "tests/test_blueprint_v2.py",
-        "docs/SCANNER_COVERAGE.md"
-      ],
-      "projection_context": {
-        "id": "projection:quality_contract",
-        "label": "Quality Contract",
-        "description": "How readability, generality, and publication trust are mechanically checked.",
-        "question_answered": "Which checks keep the Studio output honest?"
-      },
-      "scenario_context": []
-    },
-    {
-      "id": "task_route_change-grounding-policy",
-      "label": "change grounding policy",
-      "description": "Modify publication blockers or grounding metrics while preserving the trust contract.",
-      "kind": "task_route",
-      "source": "agent_map",
-      "node_ids": [
-        "semantic:validation",
-        "entry:cli",
-        "semantic:blueprint",
-        "presentation:renderer",
-        "presentation:viewer"
-      ],
-      "nodes": [
-        "Grounding Gate",
-        "Command Line Interface",
-        "Blueprint Projection",
-        "HTML Renderer",
-        "Interactive Viewer"
-      ],
-      "start_nodes": [
-        "semantic:validation"
-      ],
-      "workflows": [
-        "semantic_map_publication"
-      ],
-      "must_read": [
-        "src/bunya_jido/blueprint.py",
-        "src/bunya_jido/schema.py",
-        "docs/CONTRIBUTION_PLAN.md"
-      ],
-      "contracts": [
-        "Core node and critical edge evidence must remain inspectable before semantic publication."
-      ],
-      "tests": [
-        "tests/test_blueprint.py",
-        "tests/test_blueprint_v2.py"
-      ],
-      "safe_edit": [
-        "src/bunya_jido/blueprint.py",
-        "src/bunya_jido/schema.py",
-        "tests/test_blueprint.py",
-        "tests/test_blueprint_v2.py"
-      ],
-      "projection_context": {
-        "id": "projection:quality_contract",
-        "label": "Quality Contract",
-        "description": "How readability, generality, and publication trust are mechanically checked.",
-        "question_answered": "Which checks keep the Studio output honest?"
-      },
-      "scenario_context": [
-        {
-          "id": "scenario:publish_map",
-          "label": "Publish A Trusted Map",
-          "description": "Follow an authored map through its evidence gate into the offline viewer.",
-          "kind": "behavioral",
-          "basis": "documented_workflow",
-          "playback_mode": "animated_token"
-        }
-      ]
-    },
-    {
-      "id": "task_route_change-atlas-quality-evaluation",
-      "label": "change atlas quality evaluation",
-      "description": "Modify deterministic Studio readability or scenario-quality diagnostics without presenting subjective editorial judgment as proof.",
-      "kind": "task_route",
-      "source": "agent_map",
-      "node_ids": [
-        "quality:atlas",
-        "entry:cli",
-        "semantic:validation"
-      ],
-      "nodes": [
-        "Atlas Quality Evaluator",
-        "Command Line Interface",
-        "Grounding Gate"
-      ],
-      "start_nodes": [
-        "quality:atlas"
-      ],
-      "workflows": [
-        "atlas_quality_evaluation"
-      ],
-      "must_read": [
-        "src/bunya_jido/quality.py",
-        "src/bunya_jido/schema.py",
-        "src/bunya_jido/blueprint.py"
-      ],
-      "contracts": [
-        "Deterministic blockers and warnings must remain separate from review-required editorial judgments."
-      ],
-      "tests": [
-        "tests/test_projection_quality.py",
-        "tests/test_blueprint_v2.py",
-        "tests/test_studio_benchmark.py"
-      ],
-      "safe_edit": [
-        "src/bunya_jido/quality.py",
-        "src/bunya_jido/blueprint.py",
-        "src/bunya_jido/cli.py",
-        "tests/test_projection_quality.py",
-        "tests/test_blueprint_v2.py",
-        "tests/test_studio_benchmark.py"
-      ],
-      "projection_context": {
-        "id": "projection:quality_contract",
-        "label": "Quality Contract",
-        "description": "How readability, generality, and publication trust are mechanically checked.",
-        "question_answered": "Which checks keep the Studio output honest?"
-      },
-      "scenario_context": [
-        {
-          "id": "scenario:publish_map",
-          "label": "Publish A Trusted Map",
-          "description": "Follow an authored map through its evidence gate into the offline viewer.",
-          "kind": "behavioral",
-          "basis": "documented_workflow",
-          "playback_mode": "animated_token"
-        }
-      ]
-    },
-    {
-      "id": "task_route_change-multi-domain-rubric-coverage",
-      "label": "change multi-domain rubric coverage",
-      "description": "Adjust cross-domain rubric fixtures while preserving domain-neutral authoring.",
-      "kind": "task_route",
-      "source": "agent_map",
-      "node_ids": [
-        "quality:benchmark",
-        "quality:atlas",
-        "presentation:viewer"
-      ],
-      "nodes": [
-        "Studio Benchmark Suite",
-        "Atlas Quality Evaluator",
-        "Interactive Viewer"
-      ],
-      "start_nodes": [
-        "quality:benchmark"
-      ],
-      "workflows": [
-        "studio_benchmark_review"
-      ],
-      "must_read": [
-        "docs/STUDIO_BENCHMARK.md",
-        "tests/fixtures/studio_benchmark_cases.json",
-        "tests/test_studio_benchmark.py",
-        "src/bunya_jido/studio.py"
-      ],
-      "contracts": [
-        "Benchmark fixtures must demonstrate differing repository shapes without turning an external reference atlas into a prompt seed."
-      ],
-      "tests": [
-        "tests/test_studio_benchmark.py",
-        "tests/test_projection_quality.py"
-      ],
-      "safe_edit": [
-        "docs/STUDIO_BENCHMARK.md",
-        "tests/fixtures/studio_benchmark_cases.json",
-        "tests/test_studio_benchmark.py",
-        "src/bunya_jido/studio.py"
-      ],
-      "projection_context": {
-        "id": "projection:quality_contract",
-        "label": "Quality Contract",
-        "description": "How readability, generality, and publication trust are mechanically checked.",
-        "question_answered": "Which checks keep the Studio output honest?"
-      },
-      "scenario_context": []
-    },
-    {
-      "id": "task_route_change-task-route-projection",
-      "label": "change task route projection",
-      "description": "Adjust agent-map validation or the task-route paths shown in rendered maps.",
-      "kind": "task_route",
-      "source": "agent_map",
-      "node_ids": [
-        "semantic:agent_map",
-        "entry:cli",
-        "semantic:blueprint",
-        "presentation:renderer",
-        "presentation:viewer"
-      ],
-      "nodes": [
-        "Agent Route Parity",
-        "Command Line Interface",
-        "Blueprint Projection",
-        "HTML Renderer",
-        "Interactive Viewer"
-      ],
-      "start_nodes": [
-        "semantic:agent_map"
-      ],
-      "workflows": [
-        "task_route_publication"
-      ],
-      "must_read": [
-        "src/bunya_jido/blueprint.py",
-        "src/bunya_jido/viewer/index.template.html"
-      ],
-      "contracts": [
-        "Only routes validated against repository-relative inputs may reach trusted context or HTML paths."
-      ],
-      "tests": [
-        "tests/test_blueprint.py",
-        "tests/test_blueprint_v2.py"
-      ],
-      "safe_edit": [
-        "src/bunya_jido/blueprint.py",
-        "src/bunya_jido/viewer/index.template.html",
-        "tests/test_blueprint.py"
-      ],
-      "projection_context": {
-        "id": "projection:agent_navigation",
-        "label": "Bounded Agent Navigation",
-        "description": "How a coding task receives route guidance only after validation.",
-        "question_answered": "How can a coding agent use the map safely?"
-      },
-      "scenario_context": [
-        {
-          "id": "scenario:agent_context",
-          "label": "Request Bounded Agent Context",
-          "description": "Follow a task request to validated coding-agent navigation guidance.",
-          "kind": "behavioral",
-          "basis": "documented_workflow",
-          "playback_mode": "animated_token"
-        }
-      ]
-    },
-    {
-      "id": "task_route_change-viewer-trust-presentation",
-      "label": "change viewer trust presentation",
-      "description": "Improve how grounded status, evidence, semantic paths, authored alternate views, or narrated walkthroughs are presented offline.",
-      "kind": "task_route",
-      "source": "agent_map",
-      "node_ids": [
-        "presentation:viewer",
-        "entry:cli",
-        "semantic:blueprint",
-        "semantic:validation",
-        "presentation:renderer"
-      ],
-      "nodes": [
-        "Interactive Viewer",
-        "Command Line Interface",
-        "Blueprint Projection",
-        "Grounding Gate",
-        "HTML Renderer"
-      ],
-      "start_nodes": [
-        "presentation:viewer"
-      ],
-      "workflows": [
-        "semantic_map_publication"
-      ],
-      "must_read": [
-        "src/bunya_jido/viewer/index.template.html",
-        "src/bunya_jido/render.py",
-        "src/bunya_jido/blueprint.py",
-        "src/bunya_jido/schema.py"
-      ],
-      "contracts": [
-        "The viewer must display published trust information without becoming the evidence source.",
-        "Studio projection labels and contextual reveal must come from validated atlas data, with classic v1 behavior preserved.",
-        "Studio scenario playback must display its authored basis, avoid implying runtime order for structural tours, and restore the prior view on exit.",
-        "Studio layout must follow authored plane and projection data rather than privileged domain plane names."
-      ],
-      "tests": [
-        "tests/test_smoke.py",
-        "tests/test_blueprint.py",
-        "tests/test_blueprint_v2.py",
-        "tests/test_studio_benchmark.py"
-      ],
-      "safe_edit": [
-        "src/bunya_jido/viewer/index.template.html",
-        "src/bunya_jido/render.py",
-        "src/bunya_jido/blueprint.py",
-        "tests/test_smoke.py",
-        "tests/test_blueprint_v2.py",
-        "tests/test_studio_benchmark.py"
-      ],
-      "projection_context": {
-        "id": "projection:trusted_publication",
-        "label": "Trusted Publication",
-        "description": "How an evidence-linked interpretation becomes an offline map for humans and coding agents.",
-        "question_answered": "How is a semantic map permitted to reach readers?"
-      },
-      "scenario_context": [
-        {
-          "id": "scenario:publish_map",
-          "label": "Publish A Trusted Map",
-          "description": "Follow an authored map through its evidence gate into the offline viewer.",
-          "kind": "behavioral",
-          "basis": "documented_workflow",
-          "playback_mode": "animated_token"
-        },
-        {
-          "id": "scenario:agent_context",
-          "label": "Request Bounded Agent Context",
-          "description": "Follow a task request to validated coding-agent navigation guidance.",
-          "kind": "behavioral",
-          "basis": "documented_workflow",
-          "playback_mode": "animated_token"
-        }
+        "Python Worker Surface",
+        "Package Declarations",
+        "Recorded Status Sample",
+        "TypeScript Discovery Limit"
       ]
     }
   ],
@@ -1977,147 +449,34 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "lenses": [
         "architecture"
       ]
-    },
-    {
-      "id": "call",
-      "label": "Call",
-      "lenses": [
-        "call"
-      ]
-    },
-    {
-      "id": "contract",
-      "label": "Contract",
-      "lenses": [
-        "contract"
-      ]
-    },
-    {
-      "id": "docs",
-      "label": "Docs",
-      "lenses": [
-        "docs"
-      ]
-    },
-    {
-      "id": "run",
-      "label": "Run",
-      "lenses": [
-        "run"
-      ]
-    },
-    {
-      "id": "runtime",
-      "label": "Runtime",
-      "lenses": [
-        "runtime"
-      ]
-    },
-    {
-      "id": "architecture",
-      "label": "Architecture",
-      "relations": [
-        "calls",
-        "feeds"
-      ]
-    },
-    {
-      "id": "runtime",
-      "label": "Runtime",
-      "relations": [
-        "runs"
-      ]
-    },
-    {
-      "id": "contracts",
-      "label": "Contracts",
-      "relations": [
-        "gates",
-        "validates"
-      ]
     }
   ],
   "groups": [],
   "source_documents": [
     {
       "kind": "source",
-      "path": "src/bunya_jido/cli.py",
-      "symbol": "cmd_build"
-    },
-    {
-      "kind": "source",
-      "path": "src/bunya_jido/scanner.py",
-      "symbol": "build_graph"
-    },
-    {
-      "kind": "source",
-      "path": "src/bunya_jido/blueprint.py",
-      "symbol": "graph_with_optional_blueprint"
-    },
-    {
-      "kind": "source",
-      "path": "src/bunya_jido/schema.py",
-      "symbol": "validate_blueprint_v2_atlas"
-    },
-    {
-      "kind": "source",
-      "path": "src/bunya_jido/quality.py",
-      "symbol": "evaluate_atlas_quality_obj"
-    },
-    {
-      "kind": "test",
-      "path": "tests/test_studio_benchmark.py"
-    },
-    {
-      "kind": "fixture",
-      "path": "tests/fixtures/studio_benchmark_cases.json"
-    },
-    {
-      "kind": "documentation",
-      "path": "docs/STUDIO_BENCHMARK.md"
-    },
-    {
-      "kind": "source",
-      "path": "src/bunya_jido/render.py",
-      "symbol": "render_html"
-    },
-    {
-      "kind": "source",
-      "path": "src/bunya_jido/viewer/index.template.html",
-      "symbol": "renderTrust"
-    },
-    {
-      "kind": "test",
-      "path": "tests/test_blueprint.py"
-    },
-    {
-      "kind": "test",
-      "path": "tests/test_blueprint_v2.py"
-    },
-    {
-      "kind": "test",
-      "path": "tests/test_projection_quality.py"
+      "path": "src/coverage_app/worker.py"
     },
     {
       "kind": "config",
-      "path": ".github/workflows/ci.yml"
+      "path": "pyproject.toml"
     },
     {
-      "kind": "documentation",
-      "path": "README.md"
+      "kind": "artifact",
+      "path": "runs/status.json"
     },
     {
-      "kind": "documentation",
-      "path": "docs/CONTRIBUTION_PLAN.md"
+      "kind": "source",
+      "path": "web/main.ts"
     }
   ],
   "blueprint_quality": {
-    "node_count": 14,
-    "edge_count": 25,
+    "node_count": 4,
+    "edge_count": 3,
     "grounded_node_ratio": 1.0,
     "grounded_edge_ratio": 1.0,
-    "core_node_count": 5,
-    "critical_edge_count": 13,
+    "core_node_count": 2,
+    "critical_edge_count": 2,
     "grounded_core_node_ratio": 1.0,
     "grounded_critical_edge_ratio": 1.0,
     "grounding_status": "grounded",
@@ -2126,471 +485,135 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "warning_count": 0,
     "error_count": 0,
     "schema_version": "bunya-jido-blueprint-v2",
-    "primary_projection": "projection:trusted_publication",
-    "projection_count": 3,
-    "scenario_policy": "required",
-    "scenario_count": 2,
+    "primary_projection": "projection:evidence_surfaces",
+    "projection_count": 1,
+    "scenario_policy": "none_with_reason",
+    "scenario_count": 0,
     "decision_record_present": true,
     "warnings": []
   },
-  "node_count": 14,
-  "edge_count": 25,
+  "node_count": 4,
+  "edge_count": 3,
   "blueprint_schema_version": "bunya-jido-blueprint-v2",
   "atlas": {
-    "scenario_policy": "required",
+    "scenario_policy": "none_with_reason",
+    "scenario_policy_reason": "This miniature fixture tests discovery categories, not an evidenced ordered user workflow.",
     "decision_record": {
-      "repository_thesis_summary": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context only after explicit trust gates pass.",
-      "selected_projection_id": "projection:trusted_publication",
+      "repository_thesis_summary": "This fixture is best read through the evidence surfaces it exposes to the scanner, not as an ordered runtime product.",
+      "selected_projection_id": "projection:evidence_surfaces",
       "projection_candidates": [
         {
-          "id": "projection:trusted_publication",
-          "label": "Trusted Publication",
-          "question_answered": "How is a semantic map permitted to reach readers?",
+          "id": "projection:evidence_surfaces",
+          "label": "Evidence Surfaces",
+          "question_answered": "Which bounded evidence categories does this miniature repository exercise?",
           "selected": true,
           "grounding_strength": "strong",
           "first_screen_value": "high",
           "distortion_risks": [
-            "Bounded agent navigation may appear secondary unless retained as an authored alternate view."
+            "It is a scanner fixture rather than a complete application architecture."
           ],
-          "selection_reason": "It explains the shared human and coding-agent artifact while keeping evidence and publication gates visible first."
+          "selection_reason": "It is the honest purpose of this curated repository."
         },
         {
-          "id": "projection:agent_navigation",
-          "label": "Bounded Agent Navigation",
-          "question_answered": "How can a coding agent use the map safely?",
+          "id": "projection:provider_boundary",
+          "label": "Provider Boundary",
+          "question_answered": "Which external provider might this fixture mention?",
           "selected": false,
-          "grounding_strength": "strong",
-          "first_screen_value": "medium",
+          "grounding_strength": "partial",
+          "first_screen_value": "low",
           "distortion_risks": [
-            "It could make the human-facing map look like a secondary product surface."
+            "A heuristic provider hint could dominate a fixture whose purpose is coverage."
           ],
-          "selection_reason": "It remains an important alternate view, but does not introduce the shared artifact as clearly as Trusted Publication."
-        },
-        {
-          "id": "projection:quality_contract",
-          "label": "Quality Contract",
-          "question_answered": "Which checks keep the Studio output honest?",
-          "selected": false,
-          "grounding_strength": "strong",
-          "first_screen_value": "medium",
-          "distortion_risks": [
-            "It over-centralizes validation machinery over the published map experience."
-          ],
-          "selection_reason": "It supports publication trust and belongs as a secondary quality-focused projection."
+          "selection_reason": "Provider detection is evidence to inspect, not the primary explanation."
         }
       ],
       "scenario_candidates": [
         {
-          "id": "scenario:publish_map",
-          "label": "Publish A Trusted Map",
-          "selected": true,
-          "kind": "behavioral",
-          "reason": "It follows the documented build, validation, and render path with source-backed steps.",
-          "rejection_reason": ""
-        },
-        {
-          "id": "scenario:agent_context",
-          "label": "Request Bounded Agent Context",
-          "selected": true,
-          "kind": "behavioral",
-          "reason": "It follows the documented route-validation path from a task request to bounded guidance.",
-          "rejection_reason": ""
+          "id": "scenario:none",
+          "label": "No Runtime Walkthrough",
+          "selected": false,
+          "kind": "structural_tour",
+          "reason": "The reading is structural and does not need playback.",
+          "rejection_reason": "Playback would overstate an ordered lifecycle."
         }
       ],
       "over_centralization_risks": [
         {
-          "node_or_family": "analysis:scanner",
-          "risk": "Static evidence collection could be mistaken for the authored product meaning.",
-          "mitigation": "Keep scanner evidence contextual and outside the primary landmark path."
-        },
-        {
-          "node_or_family": "quality:ci",
-          "risk": "Automation could appear to prove editorial truth rather than repeat deterministic checks.",
-          "mitigation": "Keep CI contextual and state that projection quality remains review-required."
+          "node_or_family": "provider hint",
+          "risk": "Token-only provider discovery could look like a primary external integration.",
+          "mitigation": "Keep provider evidence contextual and carry hint provenance."
         }
       ]
     },
     "vocabularies": {
       "node_families": [
         {
-          "id": "command",
-          "label": "Command",
-          "description": "Invokes a user-visible operation.",
-          "glyph": "hexagon",
-          "color_role": "primary"
-        },
-        {
-          "id": "observation",
-          "label": "Observation",
-          "description": "Provides supporting discovered facts.",
-          "glyph": "dashed_tile",
-          "color_role": "muted"
-        },
-        {
-          "id": "projection",
-          "label": "Projection",
-          "description": "Transforms or emits semantic presentation data.",
-          "glyph": "rounded_square",
-          "color_role": "transform"
-        },
-        {
-          "id": "gate",
-          "label": "Trust Gate",
-          "description": "Checks whether a claim may continue.",
-          "glyph": "octagon",
-          "color_role": "warning"
-        },
-        {
-          "id": "evidence",
-          "label": "Verification",
-          "description": "Records repeatable contract evidence.",
-          "glyph": "double_ring",
-          "color_role": "evidence"
-        },
-        {
           "id": "surface",
-          "label": "Reading Surface",
-          "description": "Explains or exposes published information.",
-          "glyph": "diamond",
-          "color_role": "human"
+          "label": "Source Surface",
+          "description": "Observable source input.",
+          "glyph": "rounded_square"
+        },
+        {
+          "id": "record",
+          "label": "Record",
+          "description": "Inspectable declarative or recorded input.",
+          "glyph": "double_ring"
+        },
+        {
+          "id": "boundary",
+          "label": "Discovery Boundary",
+          "description": "A supported-but-limited scanner surface.",
+          "glyph": "hexagon"
         }
       ],
       "relation_families": [
         {
-          "id": "invocation",
-          "label": "Invokes",
-          "description": "Starts or requests processing.",
-          "line_style": "solid",
-          "color_role": "primary"
-        },
-        {
-          "id": "observation",
-          "label": "Observes",
-          "description": "Provides supporting observations.",
-          "line_style": "dotted",
-          "color_role": "muted"
-        },
-        {
-          "id": "assurance",
-          "label": "Assures",
-          "description": "Applies or sequences a trust boundary.",
-          "line_style": "dashed",
-          "color_role": "warning"
-        },
-        {
-          "id": "delivery",
-          "label": "Delivers",
-          "description": "Projects validated information to readers.",
-          "line_style": "solid",
-          "color_role": "human"
-        },
-        {
-          "id": "verification",
-          "label": "Verifies",
-          "description": "Exercises a maintained contract.",
-          "line_style": "double",
-          "color_role": "evidence"
-        },
-        {
-          "id": "explanation",
-          "label": "Explains",
-          "description": "Documents a public expectation.",
-          "line_style": "dotted",
-          "color_role": "muted"
+          "id": "evidence_link",
+          "label": "Read Beside",
+          "description": "Links evidence surfaces in a review order, not runtime.",
+          "line_style": "dotted"
         }
       ]
     },
     "projections": [
       {
-        "id": "projection:trusted_publication",
-        "label": "Trusted Publication",
-        "description": "How an evidence-linked interpretation becomes an offline map for humans and coding agents.",
-        "question_answered": "How is a semantic map permitted to reach readers?",
+        "id": "projection:evidence_surfaces",
+        "label": "Evidence Surfaces",
+        "description": "A grounded reading of the committed scanner-coverage miniature.",
+        "question_answered": "Which bounded evidence categories does this miniature repository exercise?",
         "is_primary": true,
         "node_ids": [
-          "entry:cli",
-          "semantic:blueprint",
-          "semantic:validation",
-          "quality:atlas",
-          "quality:benchmark",
-          "semantic:agent_map",
-          "presentation:renderer",
-          "presentation:viewer"
+          "source:worker",
+          "config:package",
+          "artifact:status",
+          "client:typescript"
         ],
         "plane_ids": [
-          "entry",
-          "semantic",
-          "quality",
-          "presentation"
+          "implementation",
+          "configuration",
+          "artifact",
+          "client"
         ],
         "relation_family_ids": [
-          "invocation",
-          "assurance",
-          "delivery",
-          "verification"
+          "evidence_link"
         ],
         "evidence": [
           {
             "kind": "documentation",
-            "path": ".bunya-jido/PROJECTIONS.md"
-          }
-        ]
-      },
-      {
-        "id": "projection:agent_navigation",
-        "label": "Bounded Agent Navigation",
-        "description": "How a coding task receives route guidance only after validation.",
-        "question_answered": "How can a coding agent use the map safely?",
-        "is_primary": false,
-        "node_ids": [
-          "entry:cli",
-          "semantic:context",
-          "semantic:validation",
-          "semantic:agent_map",
-          "quality:tests",
-          "presentation:viewer"
-        ],
-        "plane_ids": [
-          "entry",
-          "semantic",
-          "quality",
-          "presentation"
-        ],
-        "relation_family_ids": [
-          "invocation",
-          "assurance",
-          "verification",
-          "delivery"
-        ],
-        "evidence": [
-          {
-            "kind": "documentation",
-            "path": ".bunya-jido/PROJECTIONS.md"
-          }
-        ]
-      },
-      {
-        "id": "projection:quality_contract",
-        "label": "Quality Contract",
-        "description": "How readability, generality, and publication trust are mechanically checked.",
-        "question_answered": "Which checks keep the Studio output honest?",
-        "is_primary": false,
-        "node_ids": [
-          "quality:atlas",
-          "quality:benchmark",
-          "quality:tests",
-          "quality:ci",
-          "semantic:validation",
-          "presentation:viewer"
-        ],
-        "plane_ids": [
-          "quality",
-          "semantic",
-          "presentation"
-        ],
-        "relation_family_ids": [
-          "verification",
-          "assurance"
-        ],
-        "evidence": [
-          {
-            "kind": "documentation",
-            "path": "docs/STUDIO_BENCHMARK.md"
+            "path": "README.md"
           }
         ]
       }
     ],
-    "scenarios": [
-      {
-        "id": "scenario:publish_map",
-        "label": "Publish A Trusted Map",
-        "description": "Follow an authored map through its evidence gate into the offline viewer.",
-        "kind": "behavioral",
-        "basis": "documented_workflow",
-        "derived_from_workflow_ids": [
-          "semantic_map_publication"
-        ],
-        "playback_mode": "animated_token",
-        "default_speed": 1.0,
-        "steps": [
-          {
-            "id": "publish:request",
-            "node_id": "entry:cli",
-            "edge_id": "edge:cli_blueprint",
-            "title": "Request Build",
-            "narration": "A command requests a semantic map artifact.",
-            "pause_ms": 3300,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/cli.py",
-                "symbol": "cmd_build"
-              }
-            ]
-          },
-          {
-            "id": "publish:project",
-            "node_id": "semantic:blueprint",
-            "edge_id": "edge:blueprint_validation",
-            "title": "Project Meaning",
-            "narration": "Authored semantic material becomes a candidate graph contract.",
-            "pause_ms": 3500,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/blueprint.py",
-                "symbol": "graph_from_blueprint"
-              }
-            ]
-          },
-          {
-            "id": "publish:gate",
-            "node_id": "semantic:validation",
-            "edge_id": "edge:validation_renderer",
-            "title": "Require Evidence",
-            "narration": "Core claims and critical relationships must pass validation.",
-            "pause_ms": 3800,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/blueprint.py",
-                "symbol": "validate_blueprint_obj"
-              }
-            ]
-          },
-          {
-            "id": "publish:render",
-            "node_id": "presentation:renderer",
-            "edge_id": "edge:renderer_viewer",
-            "title": "Embed Payload",
-            "narration": "The renderer embeds only the publishable graph into offline HTML.",
-            "pause_ms": 3400,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/render.py",
-                "symbol": "render_html"
-              }
-            ]
-          },
-          {
-            "id": "publish:view",
-            "node_id": "presentation:viewer",
-            "title": "Read With Trust",
-            "narration": "The viewer exposes trust, evidence, projections, and this authored narration.",
-            "pause_ms": 4100,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/viewer/index.template.html",
-                "symbol": "renderScenarioUI"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "scenario:agent_context",
-        "label": "Request Bounded Agent Context",
-        "description": "Follow a task request to validated coding-agent navigation guidance.",
-        "kind": "behavioral",
-        "basis": "documented_workflow",
-        "derived_from_workflow_ids": [
-          "trusted_context_generation"
-        ],
-        "playback_mode": "animated_token",
-        "default_speed": 1.0,
-        "steps": [
-          {
-            "id": "context:request",
-            "node_id": "entry:cli",
-            "edge_id": "edge:cli_context",
-            "title": "Ask For Context",
-            "narration": "A task asks for bounded repository guidance.",
-            "pause_ms": 3300,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/cli.py",
-                "symbol": "cmd_context"
-              }
-            ]
-          },
-          {
-            "id": "context:generate",
-            "node_id": "semantic:context",
-            "edge_id": "edge:context_validation",
-            "title": "Load Candidate Route",
-            "narration": "Context generation resolves matching authored routes.",
-            "pause_ms": 3500,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/blueprint.py",
-                "symbol": "generate_agent_context"
-              }
-            ]
-          },
-          {
-            "id": "context:ground",
-            "node_id": "semantic:validation",
-            "edge_id": "edge:validation_agent_map",
-            "title": "Confirm Grounding",
-            "narration": "The underlying semantic claims must remain grounded.",
-            "pause_ms": 3600,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/blueprint.py",
-                "symbol": "validate_blueprint_obj"
-              }
-            ]
-          },
-          {
-            "id": "context:route",
-            "node_id": "semantic:agent_map",
-            "title": "Emit Trusted Route",
-            "narration": "Only validated reading, contract, and test guidance reaches the agent.",
-            "pause_ms": 4100,
-            "evidence": [
-              {
-                "kind": "source",
-                "path": "src/bunya_jido/blueprint.py",
-                "symbol": "validate_agent_map_obj"
-              }
-            ]
-          }
-        ]
-      }
-    ],
+    "scenarios": [],
     "intent": {
       "static_provider_overlay": "excluded"
     }
   },
-  "primary_projection": "projection:trusted_publication",
-  "scenario_count": 2,
+  "primary_projection": "projection:evidence_surfaces",
+  "scenario_count": 0,
   "static_provider_overlay": "excluded",
-  "agent_map_quality": {
-    "task_route_count": 6,
-    "trusted_route_count": 6,
-    "grounded_route_ratio": 1.0,
-    "grounding_status": "grounded",
-    "publish_blocker_count": 0,
-    "publish_blockers": [],
-    "projectable_route_indexes": [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5
-    ],
-    "warning_count": 0,
-    "error_count": 0,
-    "warnings": []
-  },
-  "blueprint_path": ".bunya-jido/bunya-jido.blueprint.json",
-  "agent_map_path": ".bunya-jido/bunya-jido.agent-map.json"
+  "blueprint_path": "studio.blueprint.json"
 }</script>
 <script>
 (() => {
