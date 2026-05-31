@@ -35,7 +35,7 @@ python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
 2. 그 저장소 루트에서 코딩 에이전트에게 다음 문장을 그대로 지시합니다.
 
 ```text
-Run `bunya-jido prepare --root . --atlas-mode studio --quiet`, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and `bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix errors and grounding blockers; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
+Run `bunya-jido prepare --root . --atlas-mode studio --quiet`, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Use `.bunya-jido/ATLAS_INTERVIEW.md` as an internal checklist while creating or refreshing `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and `bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix errors and grounding blockers; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
 ```
 
 완료되면 브라우저에서 `bunya-jido.html`을 엽니다.
@@ -175,9 +175,11 @@ bunya-jido build --root . --out bunya-jido.html
 bunya-jido prepare --root . --atlas-mode studio --quiet
 ```
 
-Studio 준비는 `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`도
-추가로 생성합니다. 이 문서들은 primary projection과 정직한 scenario
-정책(`required`, `optional`, `none_with_reason`)을 검토하기 위한 것입니다.
+Studio 준비는 내부 체크리스트인 `ATLAS_INTERVIEW.md`와
+`REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`도 추가로
+생성합니다. 코딩 에이전트는 역할별 pass를 거쳐 primary projection과
+정직한 scenario 정책(`required`, `optional`, `none_with_reason`)을
+검토합니다.
 Studio 준비는 이제 additive `bunya-jido-blueprint-v2` schema를 생성하며,
 `validate-blueprint`, `build`, `diagnose`는 vocabulary, projection, scenario
 계약을 처리합니다. 오프라인 viewer는 이제 map-local node/relation
@@ -229,9 +231,9 @@ scenario 두 개를 게시합니다. 도구가 자기 소스 트리에만 맞춰
 
 지도 저장소는 `check-stale`에서 구조 변경이 필요 없다고 검토한 결정을
 남기기 위해 `.bunya-jido/MAP_REVIEW.md`를 추가로 추적할 수 있습니다.
-`--atlas-mode studio`를 사용하면 향후 v2 atlas를 위한 편집 입력으로
-`REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`와 Studio v2
-blueprint schema도 생성됩니다.
+`--atlas-mode studio`를 사용하면 내부 체크리스트인 `ATLAS_INTERVIEW.md`,
+편집 입력인 `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`, 그리고
+Studio v2 blueprint schema도 생성됩니다.
 
 ### `COMPONENTS.md`
 

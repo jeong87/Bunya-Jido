@@ -25,6 +25,7 @@ class StudioPromptTests(unittest.TestCase):
             self.assertFalse((outdir / "REPOSITORY_THESIS.md").exists())
             self.assertFalse((outdir / "PROJECTIONS.md").exists())
             self.assertFalse((outdir / "SCENARIOS.md").exists())
+            self.assertFalse((outdir / "ATLAS_INTERVIEW.md").exists())
             self.assertNotIn("Studio Atlas Prompt", prompt)
 
     def test_studio_prepare_creates_editorial_inputs_and_v2_schema(self) -> None:
@@ -40,10 +41,11 @@ class StudioPromptTests(unittest.TestCase):
             short_prompt = (outdir / "CODEX_ONE_LINER.txt").read_text(encoding="utf-8")
             scenarios = (outdir / "SCENARIOS.md").read_text(encoding="utf-8")
             projections = (outdir / "PROJECTIONS.md").read_text(encoding="utf-8")
+            interview = (outdir / "ATLAS_INTERVIEW.md").read_text(encoding="utf-8")
             schema = json.loads((outdir / "bunya-jido-blueprint.schema.json").read_text(encoding="utf-8"))
 
             self.assertEqual(result, 0)
-            for name in ("REPOSITORY_THESIS.md", "PROJECTIONS.md", "SCENARIOS.md"):
+            for name in ("REPOSITORY_THESIS.md", "PROJECTIONS.md", "SCENARIOS.md", "ATLAS_INTERVIEW.md"):
                 self.assertTrue((outdir / name).exists())
             self.assertIn("Bunya-Jido Studio Atlas Prompt", prompt)
             self.assertIn("bunya-jido-blueprint-v2", prompt)
@@ -51,12 +53,19 @@ class StudioPromptTests(unittest.TestCase):
             self.assertIn("none_with_reason", prompt)
             self.assertIn("Static overlays permitted", projections)
             self.assertIn("Scenario policy", scenarios)
+            self.assertIn("documented_workflow | deterministic_trace | grounded_inference | illustrative_tour", scenarios)
+            self.assertIn("internal checklist", interview)
+            self.assertIn("ATLAS_INTERVIEW.md", prompt)
+            self.assertIn("Projection Critic", prompt)
+            self.assertIn("evaluate-atlas-quality --root . --require-pass --json", prompt)
             self.assertIn("--atlas-mode studio", short_prompt)
             self.assertIn("Studio v2 schema", short_prompt)
+            self.assertIn("ATLAS_INTERVIEW.md", short_prompt)
+            self.assertIn("evaluate-atlas-quality --root . --require-pass --json", short_prompt)
             self.assertEqual(schema["properties"]["schema_version"]["const"], "bunya-jido-blueprint-v2")
             self.assertIn("atlas", schema["required"])
             self.assertIn("scenario playback", prompt)
-            self.assertNotIn("arrive in later phases", prompt)
+            self.assertNotIn("viewer features planned for later phases", prompt)
 
     def test_studio_prepare_preserves_existing_intermediate_documents(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -72,6 +81,7 @@ class StudioPromptTests(unittest.TestCase):
             self.assertEqual(paths["components"].read_text(encoding="utf-8"), "authored components\n")
             self.assertEqual(paths["workflows"].read_text(encoding="utf-8"), "authored workflows\n")
             self.assertTrue(paths["repository_thesis"].exists())
+            self.assertTrue(paths["atlas_interview"].exists())
 
     def test_unknown_atlas_mode_is_rejected_by_library_api(self) -> None:
         with self.assertRaisesRegex(ValueError, "Unsupported atlas mode"):

@@ -35,7 +35,7 @@ python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
 2. From that repository root, give your coding agent(gpt5.5-xhigh is recommended) this prompt:
 
 ```text
-Run `bunya-jido prepare --root . --atlas-mode studio --quiet`, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Create or refresh `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and `bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix errors and grounding blockers; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
+Run `bunya-jido prepare --root . --atlas-mode studio --quiet`, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Use `.bunya-jido/ATLAS_INTERVIEW.md` as an internal checklist while creating or refreshing `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and `bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix errors and grounding blockers; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
 ```
 
 Open `bunya-jido.html` in your browser.
@@ -174,10 +174,11 @@ compare repository-specific explanations before publishing a narrated atlas:
 bunya-jido prepare --root . --atlas-mode studio --quiet
 ```
 
-Studio preparation additionally creates `REPOSITORY_THESIS.md`,
-`PROJECTIONS.md`, and `SCENARIOS.md`. These documents ask for a primary
-projection and an honest scenario policy: `required`, `optional`, or
-`none_with_reason`. Studio preparation now generates the additive
+Studio preparation additionally creates `ATLAS_INTERVIEW.md`,
+`REPOSITORY_THESIS.md`, `PROJECTIONS.md`, and `SCENARIOS.md`. The interview is
+an internal checklist; the authored documents ask the coding agent, in
+role-based passes, to select a primary projection and an honest scenario
+policy: `required`, `optional`, or `none_with_reason`. Studio preparation generates the additive
 `bunya-jido-blueprint-v2` schema, and `validate-blueprint`, `build`, and
 `diagnose` accept its vocabulary, projection, and scenario contract. The
 offline viewer now renders map-local node/relation families, starts on the
@@ -229,8 +230,9 @@ pipelines, and utilities with no invented runtime scenario. See
 
 A mapped repository can additionally track `.bunya-jido/MAP_REVIEW.md` to
 record a reviewed no-structure-change decision for `check-stale`.
-With `--atlas-mode studio`, preparation also creates `REPOSITORY_THESIS.md`,
-`PROJECTIONS.md`, and `SCENARIOS.md` and emits the Studio v2 blueprint schema.
+With `--atlas-mode studio`, preparation also creates `ATLAS_INTERVIEW.md` as
+an internal checklist plus `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, and
+`SCENARIOS.md`, and emits the Studio v2 blueprint schema.
 
 ### `COMPONENTS.md`
 

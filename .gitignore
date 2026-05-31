@@ -38,6 +38,7 @@ preview*.html
 
 # Local upgrade design inputs
 docs/BUNYA_JIDO_STUDIO_ATLAS_UPGRADE_PLAN_FOR_CODEX.md
+docs/BUNYA_JIDO_CODING_AGENT_NATIVE_ATLAS_GUIDE.md
 
 # Editor and OS noise
 .DS_Store

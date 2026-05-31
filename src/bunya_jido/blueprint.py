@@ -16,6 +16,7 @@ from .schema import (
     validate_blueprint_v2_atlas,
 )
 from .studio import (
+    atlas_interview_template,
     make_studio_blueprint_prompt,
     projections_template,
     repository_thesis_template,
@@ -33,6 +34,7 @@ WORKFLOWS_FILE = "WORKFLOWS.md"
 REPOSITORY_THESIS_FILE = "REPOSITORY_THESIS.md"
 PROJECTIONS_FILE = "PROJECTIONS.md"
 SCENARIOS_FILE = "SCENARIOS.md"
+ATLAS_INTERVIEW_FILE = "ATLAS_INTERVIEW.md"
 MAP_REVIEW_FILE = "MAP_REVIEW.md"
 AGENT_HANDOFF_FILE = "AGENT_HANDOFF.md"
 PROMPT_FILE = "BUNYA_JIDO_BLUEPRINT_PROMPT.md"
@@ -789,6 +791,7 @@ def prepare_blueprint_workspace(
         "repository_thesis": outdir / REPOSITORY_THESIS_FILE,
         "projections": outdir / PROJECTIONS_FILE,
         "scenarios": outdir / SCENARIOS_FILE,
+        "atlas_interview": outdir / ATLAS_INTERVIEW_FILE,
         "agent_map": outdir / AGENT_MAP_FILE,
         "handoff": outdir / AGENT_HANDOFF_FILE,
         "prompt": outdir / PROMPT_FILE,
@@ -809,6 +812,7 @@ def prepare_blueprint_workspace(
             ("repository_thesis", repository_thesis_template),
             ("projections", projections_template),
             ("scenarios", scenarios_template),
+            ("atlas_interview", atlas_interview_template),
         ):
             if not paths[key].exists():
                 paths[key].write_text(template(project_name), encoding="utf-8")
@@ -816,9 +820,12 @@ def prepare_blueprint_workspace(
     if atlas_mode == "studio":
         short_prompt = (
             "Run `bunya-jido prepare --root . --atlas-mode studio --quiet` if needed, then read and execute "
-            "`.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Refresh the five Studio Markdown inputs, keep "
-            "the blueprint compatible with the Studio v2 schema and the agent map grounded in its semantic layer, validate them, "
-            "then run `bunya-jido build --root . --out bunya-jido.html` and report the HTML path.\n"
+            "`.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Use `.bunya-jido/ATLAS_INTERVIEW.md` as an internal "
+            "checklist while refreshing the five authored Studio Markdown inputs; keep the blueprint compatible "
+            "with the Studio v2 schema and the agent map grounded in its semantic layer; run "
+            "`bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and "
+            "`bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix blockers; then run "
+            "`bunya-jido build --root . --out bunya-jido.html` and report the HTML path.\n"
         )
     else:
         short_prompt = (
@@ -842,6 +849,7 @@ def prepare_blueprint_workspace(
             print(f"  {paths['repository_thesis']}")
             print(f"  {paths['projections']}")
             print(f"  {paths['scenarios']}")
+            print(f"  {paths['atlas_interview']}")
         print(f"  {paths['blueprint']}")
         print(f"  {paths['agent_map']}")
     return paths

@@ -121,3 +121,14 @@ An entry records review work; it does not prove architectural completeness.
   workflow. It does not change the semantic self-map, scenarios, or routes.
 - Validation: Self-map tests, strict semantic and atlas gates, agent-utility
   evaluation, and stale-map review are required before publication.
+
+## 2026-05-31 - Coding-Agent-Native Atlas N1 Prompt Contract
+
+- Change: Fixed the Studio scenario basis template drift, added a generated
+  `ATLAS_INTERVIEW.md` internal checklist, strengthened Studio prompting with
+  role passes and the atlas-quality gate, and aligned both READMEs.
+- Decision: This expands authoring guidance within the existing Semantic
+  Blueprint Pipeline; it does not introduce a new published node, viewer path,
+  scenario, or trusted task route, so the current self-map remains accurate.
+- Validation: Blueprint and agent-map validation, grounded diagnostics, strict
+  atlas-quality and agent-utility evaluation, and all 65 unit tests passed.

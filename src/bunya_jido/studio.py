@@ -154,7 +154,7 @@ def scenarios_template(project_name: str) -> str:
     ### Scenario 1: <name>
 
     - **Kind:** behavioral | structural_tour | example_usage | boundary | troubleshooting
-    - **Basis:** documented | deterministic | grounded_inference | illustrative
+    - **Basis:** documented_workflow | deterministic_trace | grounded_inference | illustrative_tour
     - **Derived from workflow/projection:**
     - **Why playback helps:**
     - **Steps:** node / transition / narration / evidence
@@ -167,6 +167,54 @@ def scenarios_template(project_name: str) -> str:
     """).strip() + "\n"
 
 
+def atlas_interview_template(project_name: str) -> str:
+    return textwrap.dedent(f"""
+    # Atlas Interview - {project_name}
+
+    This is an internal checklist for the coding agent composing a Studio atlas.
+    Use it while writing the authored Studio documents and blueprint. It is not
+    a required publication artifact and need not be filled in separately unless
+    a maintainer asks for a recorded interview.
+
+    ## Public face
+
+    - What does a user or integrator encounter first: CLI, API, UI route,
+      generated output, configuration, or another surface?
+
+    ## Central organizing idea
+
+    - What does this repository transform, coordinate, expose, or preserve?
+    - Which tempting explanation would distort it?
+
+    ## Responsibility regions
+
+    - What responsibilities matter independently of folder layout?
+    - What belongs in the first 30 seconds of reading?
+    - What should remain contextual or hidden until selected?
+
+    ## Boundaries
+
+    - Where are external calls, persistence, plugins, policy/security,
+      compatibility, and generated-output boundaries?
+
+    ## Ordered behavior
+
+    - Is there evidenced execution or user-action order?
+    - If not, what structural reading tour would help without implying runtime?
+    - What scenario claims must not be made?
+
+    ## Centrality risk
+
+    - Which optional, conditional, detail, or failure-only components would
+      mislead a reader if over-centralized?
+
+    ## Agent tasks
+
+    - Which task routes, must-read files, contracts, and tests help a coding
+      agent safely begin likely maintenance work?
+    """).strip() + "\n"
+
+
 def make_studio_blueprint_prompt(project_name: str) -> str:
     return textwrap.dedent(f"""
     # Bunya-Jido Studio Atlas Prompt - {project_name}
@@ -176,7 +224,7 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
     keys. Do not assume this repository is an agent system, workflow engine,
     web application, SDK, compiler, or library before inspecting evidence.
 
-    ## Phase 2 publication boundary
+    ## Studio publication boundary
 
     Studio authoring is opt-in. In Studio mode, the machine-readable blueprint
     contract is `bunya-jido-blueprint-v2`: write repository-local vocabulary,
@@ -196,6 +244,10 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
     6. `.bunya-jido/bunya-jido.blueprint.json` (Studio v2 contract)
     7. `.bunya-jido/bunya-jido.agent-map.json`
 
+    Before writing those outputs, use `.bunya-jido/ATLAS_INTERVIEW.md` as an
+    internal checklist. It is generated to improve your editorial reasoning,
+    not as a required authored or publication artifact.
+
     Inputs include the repository itself, the generated deterministic static
     scan, and the generated Studio v2 blueprint and agent-map schemas. Treat source,
     docs, tests, and inspectable artifacts as the evidence source.
@@ -204,39 +256,60 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
 
     - Derive the map vocabulary from this repository; do not transplant domain labels.
     - Consider two to four projection candidates before selecting a primary reading.
+    - Do not assume a workflow is the primary projection. An API surface, state
+      loop, transformation pipeline, plugin topology, data lineage, deployment
+      boundary, component composition, or structural library tour may explain
+      the repository more honestly.
     - Keep grounded semantic claims distinct from future presentation or narration choices.
     - Choose `required`, `optional`, or `none_with_reason` as the scenario policy.
     - Use a behavioral scenario only for evidenced ordered behavior.
-    - Use a structural tour only when it aids reading without implying runtime order.
+    - A scenario is a reading aid, not a required runtime claim. Use a structural
+      tour only when it aids reading without implying runtime order.
     - If no scenario is honest or useful, explain `none_with_reason`.
     - Static/provider overlays are excluded from Studio primary projection by default.
       If a contextual overlay is justified, declare its existing map-local node family.
 
-    ## Working sequence
+    ## Role-pass working sequence
 
-    1. Read the static scan, repository docs/config, representative source,
-       tests, examples, and relevant artifacts.
-    2. Write `COMPONENTS.md` as a responsibility inventory without imposing
-       a preselected visual taxonomy.
-    3. Write `WORKFLOWS.md` as evidenced behaviors and structural reading
-       routes, explicitly distinguishing ordered from non-ordered material.
-    4. Write `REPOSITORY_THESIS.md` stating how this repository is best read
-       and what it is not best explained as.
-    5. Write `PROJECTIONS.md` comparing candidate first-screen explanations
-       and selecting one primary projection.
-    6. Write `SCENARIOS.md` with the scenario policy and up to five justified
-       scenario candidates, or an honest no-scenario rationale.
-    7. Write the Studio v2 blueprint and the agent map only with facts
-       supported by the generated schemas and repository evidence. Keep the
-       semantic contract separate from `atlas` presentation choices.
-    8. Validate and build:
+    1. **Cartographer:** Read the static scan, repository docs/config,
+       representative source, tests, examples, relevant artifacts, and
+       `ATLAS_INTERVIEW.md`; write `COMPONENTS.md` without imposing a
+       preselected visual taxonomy.
+    2. **Behavior and Route Analyst:** Write `WORKFLOWS.md` as evidenced
+       behaviors and structural reading routes, explicitly distinguishing
+       ordered from non-ordered material.
+    3. **Repository Thesis Author:** Write `REPOSITORY_THESIS.md` stating how
+       this repository is best read and what it is not best explained as.
+    4. **Projection Critic:** Write `PROJECTIONS.md`, comparing two to four
+       candidate first-screen explanations, recording distortion risks, and
+       selecting one primary projection.
+    5. **Scenario Editor:** Write `SCENARIOS.md` with the scenario policy and
+       up to five justified scenario candidates, or an honest no-scenario
+       rationale. A structural tour must describe a reading path rather than
+       execution order.
+    6. **Vocabulary Designer:** Define map-local node and relation families
+       whose meanings fit repository evidence instead of imported examples.
+    7. **Atlas Composer:** Write the Studio v2 blueprint using grounded
+       projection, visibility, scenario, and vocabulary choices.
+    8. **Evidence Auditor:** Verify core nodes, critical edges, and scenario
+       steps against evidence paths and confidence before publication.
+    9. **Visual Editor:** Check first-read density, label burden, centrality,
+       projections, and scenario pacing; revise authored atlas choices where
+       the first screen would mislead.
+    10. **Agent Context Designer:** Write the agent map from validated
+        semantic nodes and workflows so task routes remain bounded and
+        grounded rather than depending on narration alone.
+    11. **Validator:** Validate, evaluate, and build:
 
        `bunya-jido validate-blueprint --root .`
 
        `bunya-jido validate-agent-map --root .`
 
+       `bunya-jido evaluate-atlas-quality --root . --require-pass --json`
+
        `bunya-jido build --root . --out bunya-jido.html`
 
     Confirm the generated HTML path and clearly distinguish validated Studio v2
-    contract data from viewer features planned for later phases.
+    contract data, deterministic quality signals, and review-required editorial
+    judgments.
     """).strip() + "\n"
