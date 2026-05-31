@@ -16,7 +16,7 @@ keeps the review rationale visible beside it.
 ### Semantic Blueprint Pipeline
 
 - **Plane:** semantic
-- **Role:** Loads semantic inputs, applies publication rules, converts them to the viewer graph, and projects task routes and Studio atlas metadata.
+- **Role:** Loads semantic inputs, applies publication rules, preserves Studio editorial decision records, converts them to the viewer graph, and projects task routes and Studio atlas metadata.
 - **Evidence:** `src/bunya_jido/blueprint.py`
 - **Boundary:** It can publish only evidence-linked core claims and trusted task routes.
 
@@ -39,7 +39,7 @@ keeps the review rationale visible beside it.
 ### Grounding Gate And Agent Routes
 
 - **Plane:** quality / semantic
-- **Role:** Enforces core-node and critical-edge evidence, validates task route references, and blocks untrusted context.
+- **Role:** Enforces core-node and critical-edge evidence, checks Studio decision-record consistency, validates task route references, and blocks untrusted context.
 - **Evidence:** `src/bunya_jido/blueprint.py`, `tests/test_blueprint.py`
 - **Boundary:** A route is trusted only after its nodes, workflow, required reading, and tests resolve.
 

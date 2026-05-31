@@ -108,6 +108,49 @@ def valid_v2_blueprint() -> dict:
         ],
         "atlas": {
             "scenario_policy": "required",
+            "decision_record": {
+                "repository_thesis_summary": "Commands cross a grounded validation boundary.",
+                "selected_projection_id": "projection:primary",
+                "projection_candidates": [
+                    {
+                        "id": "projection:primary",
+                        "label": "Authoring Flow",
+                        "question_answered": "How is a candidate map checked?",
+                        "selected": True,
+                        "grounding_strength": "strong",
+                        "first_screen_value": "high",
+                        "distortion_risks": [],
+                        "selection_reason": "It follows the grounded publication path.",
+                    },
+                    {
+                        "id": "projection:api_surface",
+                        "label": "API Surface",
+                        "question_answered": "What can callers invoke?",
+                        "selected": False,
+                        "grounding_strength": "partial",
+                        "first_screen_value": "medium",
+                        "distortion_risks": ["It hides the validation boundary."],
+                        "selection_reason": "It is useful but less complete for publication.",
+                    },
+                ],
+                "scenario_candidates": [
+                    {
+                        "id": "scenario:publication",
+                        "label": "Validate an Atlas",
+                        "selected": True,
+                        "kind": "behavioral",
+                        "reason": "The workflow has grounded ordered evidence.",
+                        "rejection_reason": "",
+                    }
+                ],
+                "over_centralization_risks": [
+                    {
+                        "node_or_family": "quality",
+                        "risk": "The check could appear to be the whole product.",
+                        "mitigation": "Keep authoring and validation in the same primary path.",
+                    }
+                ],
+            },
             "vocabularies": {
                 "node_families": [
                     {
@@ -216,11 +259,13 @@ class BlueprintV2Tests(unittest.TestCase):
             "steps",
             schema["properties"]["atlas"]["properties"]["scenarios"]["items"]["properties"],
         )
+        self.assertIn("decision_record", schema["properties"]["atlas"]["properties"])
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
         self.assertEqual(metrics["grounding_status"], "grounded")
         self.assertEqual(metrics["primary_projection"], "projection:primary")
         self.assertEqual(metrics["scenario_count"], 1)
+        self.assertTrue(metrics["decision_record_present"])
         self.assertEqual(graph["schema_version"], "bunya-jido-v2")
         self.assertEqual(graph["atlas"]["scenario_policy"], "required")
         self.assertEqual(graph["primary_projection"], "projection:primary")
@@ -263,11 +308,83 @@ class BlueprintV2Tests(unittest.TestCase):
             errors,
         )
 
+    def test_v2_decision_record_is_optional_but_primary_selection_must_match(self) -> None:
+        without_record = valid_v2_blueprint()
+        without_record["atlas"].pop("decision_record")
+
+        errors, warnings, metrics = validate_blueprint_obj(without_record)
+
+        self.assertEqual(errors, [])
+        self.assertFalse(metrics["decision_record_present"])
+        self.assertTrue(
+            any("atlas.decision_record is not present" in warning for warning in warnings)
+        )
+
+        mismatch = valid_v2_blueprint()
+        mismatch["atlas"]["decision_record"]["selected_projection_id"] = (
+            "projection:api_surface"
+        )
+        errors, _, _ = validate_blueprint_obj(mismatch)
+
+        self.assertIn(
+            "v2 atlas.decision_record.selected_projection_id must match project.primary_projection_id",
+            errors,
+        )
+
+        selected_candidate_mismatch = valid_v2_blueprint()
+        selected_candidate_mismatch["atlas"]["decision_record"]["projection_candidates"][
+            0
+        ]["id"] = "projection:unpublished"
+        errors, _, _ = validate_blueprint_obj(selected_candidate_mismatch)
+
+        self.assertIn(
+            "v2 atlas.decision_record selected projection candidate id must match selected_projection_id",
+            errors,
+        )
+
+    def test_v2_decision_record_rejects_incomplete_candidate_contract(self) -> None:
+        blueprint = valid_v2_blueprint()
+        record = blueprint["atlas"]["decision_record"]
+        record["projection_candidates"][1].pop("distortion_risks")
+        record["projection_candidates"][1]["selected"] = True
+        record["scenario_candidates"][0].pop("rejection_reason")
+
+        errors, _, _ = validate_blueprint_obj(blueprint)
+
+        self.assertIn(
+            "v2 decision projection candidate projection:api_surface distortion_risks must be a list",
+            errors,
+        )
+        self.assertIn(
+            "v2 atlas.decision_record.projection_candidates must mark exactly one selected candidate",
+            errors,
+        )
+        self.assertIn(
+            "v2 decision scenario candidate scenario:publication missing rejection_reason",
+            errors,
+        )
+
+        scenario_mismatch = valid_v2_blueprint()
+        scenario_mismatch["atlas"]["decision_record"]["scenario_candidates"][0][
+            "id"
+        ] = "scenario:unpublished"
+        errors, _, _ = validate_blueprint_obj(scenario_mismatch)
+        self.assertIn(
+            "v2 atlas.decision_record selected scenario candidate ids must match published scenarios",
+            errors,
+        )
+
     def test_v2_scenario_policy_supports_honest_no_scenario_and_blocks_contradictions(self) -> None:
         no_scenario = valid_v2_blueprint()
         no_scenario["atlas"]["scenario_policy"] = "none_with_reason"
         no_scenario["atlas"]["scenario_policy_reason"] = "No honest ordered tour is needed."
         no_scenario["atlas"]["scenarios"] = []
+        no_scenario["atlas"]["decision_record"]["scenario_candidates"][0][
+            "selected"
+        ] = False
+        no_scenario["atlas"]["decision_record"]["scenario_candidates"][0][
+            "rejection_reason"
+        ] = "No honest ordered tour is needed."
 
         errors, _, metrics = validate_blueprint_obj(no_scenario)
         self.assertEqual(errors, [])
@@ -426,6 +543,10 @@ class BlueprintV2Tests(unittest.TestCase):
         blueprint["atlas"]["scenario_policy"] = "none_with_reason"
         blueprint["atlas"]["scenario_policy_reason"] = "A narrated tour would imply unsupported order."
         blueprint["atlas"]["scenarios"] = []
+        blueprint["atlas"]["decision_record"]["scenario_candidates"][0]["selected"] = False
+        blueprint["atlas"]["decision_record"]["scenario_candidates"][0][
+            "rejection_reason"
+        ] = "A narrated tour would imply unsupported order."
 
         graph = graph_from_blueprint(blueprint)
         with tempfile.TemporaryDirectory() as tmpdir:

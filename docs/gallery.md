@@ -11,7 +11,7 @@ repository and is protected by semantic golden tests.
 | Artifact | Repository self-map |
 | Source inputs | `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, `.bunya-jido/bunya-jido.agent-map.json` |
 | Artifact mode | `semantic_blueprint` |
-| Atlas contract | Studio v2, primary projection `Trusted Publication`, two behavioral scenarios |
+| Atlas contract | Studio v2, primary projection `Trusted Publication`, machine-readable decision record, two behavioral scenarios |
 | Grounding status | `grounded` |
 | Atlas quality status | `passed`, with editorial projection choice still review-required |
 | Review status | Maintainer-authored and mechanically validated on May 30, 2026 |
@@ -40,6 +40,7 @@ python -m bunya_jido build --root . --max-files 0 --out docs/demo.html
 - The same committed artifact can expose workflows to humans and bounded task routes to coding agents.
 - Grounded status is visible in the HTML output rather than being an undocumented build assumption.
 - Studio projection and scenario labels are authored from this repository's thesis; playback carries a documented-workflow basis badge rather than claiming observed runtime traces.
+- The blueprint retains the compared projections, scenario choices, and centrality risks in `atlas.decision_record`, while quality checks still leave editorial judgment review-required.
 - The benchmark suite exercises six different repository shapes so this promoted self-map is not the only quality target. See [`STUDIO_BENCHMARK.md`](STUDIO_BENCHMARK.md).
 - The canvas-first overview keeps controls out of the initial reading surface while preserving them in an on-demand drawer.
 - Zone fields, semantic role glyphs, and a restrained relation palette make the first read compact, while selected relationships retain their exact verb, confidence, and evidence in `Inspect Evidence`.

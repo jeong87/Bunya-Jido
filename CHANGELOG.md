@@ -38,6 +38,9 @@ be documented.
 - A multi-domain Studio benchmark rubric and executable rendering suite that
   distinguishes behavioral, structural-tour, and no-scenario repositories
   without seeding prompts from an external complex-system example.
+- An optional Studio v2 `atlas.decision_record` contract that retains
+  projection/scenario alternatives and over-centralization risks while
+  detecting contradictions with the published primary projection.
 
 ### Changed
 

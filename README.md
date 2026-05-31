@@ -178,7 +178,10 @@ Studio preparation additionally creates `ATLAS_INTERVIEW.md`,
 `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, and `SCENARIOS.md`. The interview is
 an internal checklist; the authored documents ask the coding agent, in
 role-based passes, to select a primary projection and an honest scenario
-policy: `required`, `optional`, or `none_with_reason`. Studio preparation generates the additive
+policy: `required`, `optional`, or `none_with_reason`. Newly authored Studio
+blueprints also record optional `atlas.decision_record` metadata so the chosen
+projection, considered alternatives, and centrality risks remain reviewable;
+older v2 artifacts without it remain compatible. Studio preparation generates the additive
 `bunya-jido-blueprint-v2` schema, and `validate-blueprint`, `build`, and
 `diagnose` accept its vocabulary, projection, and scenario contract. The
 offline viewer now renders map-local node/relation families, starts on the
@@ -203,8 +206,8 @@ Projection choice and narration meaning remain explicitly review-required
 judgments rather than automated proof.
 
 This repository's committed self-map now uses Studio v2: its primary
-projection is `Trusted Publication`, and it publishes two evidence-badged
-behavioral scenarios. To guard against a tool shaped only for its own source
+projection is `Trusted Publication`, it preserves a machine-readable editorial
+decision record, and it publishes two evidence-badged behavioral scenarios. To guard against a tool shaped only for its own source
 tree, the Studio benchmark renders and validates six distinct repository
 shapes, including workflow systems, web applications, SDKs, transformation
 pipelines, and utilities with no invented runtime scenario. See

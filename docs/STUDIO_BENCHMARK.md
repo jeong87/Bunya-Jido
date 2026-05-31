@@ -20,9 +20,10 @@ quality, and renders each output through the offline viewer.
 | Compiler/parser | Transformation stages | Grounded behavioral playback |
 | Utility library | API reading route | `none_with_reason` |
 
-The test enforces distinct theses and primary projection labels, accepts all
-three scenario policies, and specifically prevents SDK or utility fixtures
-from being presented as invented runtime lifecycles.
+The test enforces distinct theses and primary projection labels, records an
+editorial decision record for each generated Studio atlas, accepts all three
+scenario policies, and specifically prevents SDK or utility fixtures from
+being presented as invented runtime lifecycles.
 
 ## Complex Workflow Review Policy
 

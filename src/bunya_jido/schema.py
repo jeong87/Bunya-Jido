@@ -117,6 +117,95 @@ def blueprint_schema_v2(v1_schema: dict[str, Any]) -> dict[str, Any]:
                 "enum": ["required", "optional", "none_with_reason"]
             },
             "scenario_policy_reason": {"type": "string"},
+            "decision_record": {
+                "type": "object",
+                "required": [
+                    "repository_thesis_summary",
+                    "selected_projection_id",
+                    "projection_candidates",
+                    "scenario_candidates",
+                    "over_centralization_risks",
+                ],
+                "properties": {
+                    "repository_thesis_summary": {"type": "string"},
+                    "selected_projection_id": {"type": "string"},
+                    "projection_candidates": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "id",
+                                "label",
+                                "question_answered",
+                                "selected",
+                                "grounding_strength",
+                                "first_screen_value",
+                                "distortion_risks",
+                                "selection_reason",
+                            ],
+                            "properties": {
+                                "id": {"type": "string"},
+                                "label": {"type": "string"},
+                                "question_answered": {"type": "string"},
+                                "selected": {"type": "boolean"},
+                                "grounding_strength": {
+                                    "enum": ["strong", "partial", "weak"]
+                                },
+                                "first_screen_value": {
+                                    "enum": ["high", "medium", "low"]
+                                },
+                                "distortion_risks": {
+                                    "type": "array",
+                                    "items": {"type": "string"},
+                                },
+                                "selection_reason": {"type": "string"},
+                            },
+                        },
+                    },
+                    "scenario_candidates": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": [
+                                "id",
+                                "label",
+                                "selected",
+                                "kind",
+                                "reason",
+                                "rejection_reason",
+                            ],
+                            "properties": {
+                                "id": {"type": "string"},
+                                "label": {"type": "string"},
+                                "selected": {"type": "boolean"},
+                                "kind": {
+                                    "enum": [
+                                        "behavioral",
+                                        "structural_tour",
+                                        "example_usage",
+                                        "boundary",
+                                        "troubleshooting",
+                                    ]
+                                },
+                                "reason": {"type": "string"},
+                                "rejection_reason": {"type": "string"},
+                            },
+                        },
+                    },
+                    "over_centralization_risks": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "required": ["node_or_family", "risk", "mitigation"],
+                            "properties": {
+                                "node_or_family": {"type": "string"},
+                                "risk": {"type": "string"},
+                                "mitigation": {"type": "string"},
+                            },
+                        },
+                    },
+                },
+            },
             "vocabularies": {
                 "type": "object",
                 "required": ["node_families", "relation_families"],
@@ -371,6 +460,7 @@ def validate_blueprint_v2_atlas(
         errors,
         blockers,
     )
+    _validate_decision_record(atlas, project, scenarios, errors, warnings)
     intent = atlas.get("intent") if isinstance(atlas.get("intent"), dict) else {}
     if intent.get("static_provider_overlay") not in {None, "excluded", "contextual"}:
         errors.append(
@@ -399,6 +489,7 @@ def _atlas_metrics(
         "projection_count": len(projections),
         "scenario_policy": atlas.get("scenario_policy"),
         "scenario_count": len(scenarios),
+        "decision_record_present": isinstance(atlas.get("decision_record"), dict),
     }
 
 
@@ -620,6 +711,153 @@ def _validate_scenario_policy(
     if len(scenarios) > 5:
         blockers.append("v2 atlas may publish at most 5 scenarios")
     return scenarios
+
+
+def _validate_decision_record(
+    atlas: dict[str, Any],
+    project: dict[str, Any],
+    scenarios: list[Any],
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    if "decision_record" not in atlas:
+        warnings.append(
+            "v2 atlas.decision_record is not present; editorial selection reasoning is not machine-readable"
+        )
+        return
+    record = atlas.get("decision_record")
+    if not isinstance(record, dict):
+        errors.append("v2 atlas.decision_record must be an object")
+        return
+
+    if not record.get("repository_thesis_summary"):
+        errors.append("v2 atlas.decision_record.repository_thesis_summary is required")
+    selected_projection_id = record.get("selected_projection_id")
+    if not selected_projection_id:
+        errors.append("v2 atlas.decision_record.selected_projection_id is required")
+    elif selected_projection_id != project.get("primary_projection_id"):
+        errors.append(
+            "v2 atlas.decision_record.selected_projection_id must match project.primary_projection_id"
+        )
+
+    projection_candidates = record.get("projection_candidates")
+    if not isinstance(projection_candidates, list) or not projection_candidates:
+        errors.append(
+            "v2 atlas.decision_record.projection_candidates must be a non-empty list"
+        )
+        projection_candidates = []
+    selected_candidate_ids: list[str] = []
+    for index, candidate in enumerate(projection_candidates):
+        if not isinstance(candidate, dict):
+            errors.append(
+                f"v2 atlas.decision_record.projection_candidates[{index}] must be an object"
+            )
+            continue
+        candidate_id = str(candidate.get("id") or f"index {index}")
+        for key in ("id", "label", "question_answered", "selection_reason"):
+            if not candidate.get(key):
+                errors.append(
+                    f"v2 decision projection candidate {candidate_id} missing {key}"
+                )
+        if not isinstance(candidate.get("selected"), bool):
+            errors.append(
+                f"v2 decision projection candidate {candidate_id} selected must be boolean"
+            )
+        elif candidate["selected"]:
+            selected_candidate_ids.append(candidate_id)
+        if candidate.get("grounding_strength") not in {"strong", "partial", "weak"}:
+            errors.append(
+                f"v2 decision projection candidate {candidate_id} has invalid grounding_strength"
+            )
+        if candidate.get("first_screen_value") not in {"high", "medium", "low"}:
+            errors.append(
+                f"v2 decision projection candidate {candidate_id} has invalid first_screen_value"
+            )
+        if not isinstance(candidate.get("distortion_risks"), list):
+            errors.append(
+                f"v2 decision projection candidate {candidate_id} distortion_risks must be a list"
+            )
+    if projection_candidates and len(selected_candidate_ids) != 1:
+        errors.append(
+            "v2 atlas.decision_record.projection_candidates must mark exactly one selected candidate"
+        )
+    elif (
+        selected_candidate_ids
+        and selected_projection_id
+        and selected_candidate_ids[0] != selected_projection_id
+    ):
+        errors.append(
+            "v2 atlas.decision_record selected projection candidate id must match selected_projection_id"
+        )
+    if projection_candidates and not 2 <= len(projection_candidates) <= 4:
+        warnings.append(
+            "v2 atlas.decision_record should compare two to four projection candidates"
+        )
+
+    scenario_candidates = record.get("scenario_candidates")
+    if not isinstance(scenario_candidates, list):
+        errors.append("v2 atlas.decision_record.scenario_candidates must be a list")
+        scenario_candidates = []
+    selected_scenario_ids: set[str] = set()
+    for index, candidate in enumerate(scenario_candidates):
+        if not isinstance(candidate, dict):
+            errors.append(
+                f"v2 atlas.decision_record.scenario_candidates[{index}] must be an object"
+            )
+            continue
+        candidate_id = str(candidate.get("id") or f"index {index}")
+        for key in ("id", "label", "kind", "reason"):
+            if not candidate.get(key):
+                errors.append(
+                    f"v2 decision scenario candidate {candidate_id} missing {key}"
+                )
+        if "rejection_reason" not in candidate:
+            errors.append(
+                f"v2 decision scenario candidate {candidate_id} missing rejection_reason"
+            )
+        if not isinstance(candidate.get("selected"), bool):
+            errors.append(
+                f"v2 decision scenario candidate {candidate_id} selected must be boolean"
+            )
+        elif candidate["selected"]:
+            selected_scenario_ids.add(candidate_id)
+        if candidate.get("kind") not in {
+            "behavioral",
+            "structural_tour",
+            "example_usage",
+            "boundary",
+            "troubleshooting",
+        }:
+            errors.append(
+                f"v2 decision scenario candidate {candidate_id} has invalid kind"
+            )
+    published_scenario_ids = {
+        str(scenario.get("id"))
+        for scenario in scenarios
+        if isinstance(scenario, dict) and scenario.get("id")
+    }
+    if selected_scenario_ids != published_scenario_ids:
+        errors.append(
+            "v2 atlas.decision_record selected scenario candidate ids must match published scenarios"
+        )
+
+    risks = record.get("over_centralization_risks")
+    if not isinstance(risks, list):
+        errors.append(
+            "v2 atlas.decision_record.over_centralization_risks must be a list"
+        )
+    else:
+        for index, risk in enumerate(risks):
+            if not isinstance(risk, dict):
+                errors.append(
+                    f"v2 atlas.decision_record.over_centralization_risks[{index}] must be an object"
+                )
+                continue
+            for key in ("node_or_family", "risk", "mitigation"):
+                if not risk.get(key):
+                    errors.append(
+                        f"v2 atlas.decision_record.over_centralization_risks[{index}] missing {key}"
+                    )
 
 
 def _validate_scenarios(

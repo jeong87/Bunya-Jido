@@ -100,8 +100,58 @@ def benchmark_blueprint(case: dict) -> dict:
                 ],
             }
         )
+    projection_id = f"projection:{case['primary_projection']['id']}"
+    scenario_candidates = [
+        {
+            "id": f"scenario:{case['id']}",
+            "label": case["primary_projection"]["label"],
+            "selected": has_scenario,
+            "kind": scenario_spec.get("kind", "structural_tour"),
+            "reason": (
+                "The selected scenario explains the authored primary reading."
+                if has_scenario
+                else "No narrated path is selected for this repository shape."
+            ),
+            "rejection_reason": "" if has_scenario else scenario_spec["reason"],
+        }
+    ]
     atlas = {
         "scenario_policy": scenario_spec["policy"],
+        "decision_record": {
+            "repository_thesis_summary": case["thesis"],
+            "selected_projection_id": projection_id,
+            "projection_candidates": [
+                {
+                    "id": projection_id,
+                    "label": case["primary_projection"]["label"],
+                    "question_answered": case["primary_projection"]["question"],
+                    "selected": True,
+                    "grounding_strength": "strong",
+                    "first_screen_value": "high",
+                    "distortion_risks": list(case["rubric"]["must_not_overcentralize"]),
+                    "selection_reason": "It best answers the benchmark's first-read question.",
+                },
+                {
+                    "id": f"projection_candidate:{case['id']}:detail_first",
+                    "label": "Detail-First Alternative",
+                    "question_answered": "Which supporting details exist?",
+                    "selected": False,
+                    "grounding_strength": "partial",
+                    "first_screen_value": "low",
+                    "distortion_risks": ["It hides the declared primary reading."],
+                    "selection_reason": "It is intentionally rejected as a weaker first screen.",
+                },
+            ],
+            "scenario_candidates": scenario_candidates,
+            "over_centralization_risks": [
+                {
+                    "node_or_family": item,
+                    "risk": "This detail could distort the benchmark's primary reading.",
+                    "mitigation": "Keep it outside the primary landmark set.",
+                }
+                for item in case["rubric"]["must_not_overcentralize"]
+            ],
+        },
         "vocabularies": {
             "node_families": [
                 {
@@ -123,7 +173,7 @@ def benchmark_blueprint(case: dict) -> dict:
         },
         "projections": [
             {
-                "id": f"projection:{case['primary_projection']['id']}",
+                "id": projection_id,
                 "label": case["primary_projection"]["label"],
                 "description": case["thesis"],
                 "question_answered": case["primary_projection"]["question"],
@@ -145,7 +195,7 @@ def benchmark_blueprint(case: dict) -> dict:
             "name": case["id"],
             "summary": case["domain"],
             "thesis": case["thesis"],
-            "primary_projection_id": f"projection:{case['primary_projection']['id']}",
+            "primary_projection_id": projection_id,
             "ordered_behavior_assessment": case["ordered_behavior_assessment"],
         },
         "planes": case["planes"],
@@ -179,7 +229,9 @@ class StudioBenchmarkTests(unittest.TestCase):
                 )
 
             self.assertEqual(errors, [], case["id"])
+            self.assertEqual(warnings, [], case["id"])
             self.assertEqual(metrics["publish_blockers"], [], case["id"])
+            self.assertTrue(metrics["decision_record_present"], case["id"])
             self.assertEqual(metrics["grounding_status"], "grounded", case["id"])
             self.assertEqual(report["status"], "passed", case["id"])
             self.assertEqual(graph["schema_version"], "bunya-jido-v2", case["id"])

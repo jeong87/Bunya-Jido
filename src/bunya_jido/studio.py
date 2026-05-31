@@ -129,6 +129,15 @@ def projections_template(project_name: str) -> str:
     - **Secondary views to retain:**
     - **Components that must not be over-centralized:**
     - **Static overlays permitted in the primary view, if any:**
+
+    ## Machine-readable decision record
+
+    Carry candidate comparison and selection reasoning into optional
+    `atlas.decision_record` in the Studio v2 blueprint. Set
+    `selected_projection_id` to the same value as
+    `project.primary_projection_id`, and use that same ID for the selected
+    projection candidate. Older v2 artifacts remain compatible without a
+    decision record, but newly authored maps should include it.
     """).strip() + "\n"
 
 
@@ -163,7 +172,9 @@ def scenarios_template(project_name: str) -> str:
     ## Rejected scenario ideas
 
     Record ideas rejected because they would overstate runtime order or add no
-    useful reading path.
+    useful reading path. Preserve selected and rejected scenario reasoning in
+    optional `atlas.decision_record.scenario_candidates` for newly authored
+    Studio v2 maps; selected candidate IDs must match published scenario IDs.
     """).strip() + "\n"
 
 
@@ -256,6 +267,10 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
 
     - Derive the map vocabulary from this repository; do not transplant domain labels.
     - Consider two to four projection candidates before selecting a primary reading.
+    - For newly authored Studio maps, write optional `atlas.decision_record`
+      so candidate comparisons, selected scenarios, and over-centralization
+      risks remain machine-readable. Set its `selected_projection_id` equal
+      to `project.primary_projection_id`; legacy v2 maps without it remain valid.
     - Do not assume a workflow is the primary projection. An API surface, state
       loop, transformation pipeline, plugin topology, data lineage, deployment
       boundary, component composition, or structural library tour may explain
@@ -282,7 +297,8 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
        this repository is best read and what it is not best explained as.
     4. **Projection Critic:** Write `PROJECTIONS.md`, comparing two to four
        candidate first-screen explanations, recording distortion risks, and
-       selecting one primary projection.
+       selecting one primary projection. Prepare the same rationale for
+       `atlas.decision_record`.
     5. **Scenario Editor:** Write `SCENARIOS.md` with the scenario policy and
        up to five justified scenario candidates, or an honest no-scenario
        rationale. A structural tour must describe a reading path rather than
@@ -290,7 +306,8 @@ def make_studio_blueprint_prompt(project_name: str) -> str:
     6. **Vocabulary Designer:** Define map-local node and relation families
        whose meanings fit repository evidence instead of imported examples.
     7. **Atlas Composer:** Write the Studio v2 blueprint using grounded
-       projection, visibility, scenario, and vocabulary choices.
+       projection, visibility, scenario, and vocabulary choices, including
+       `atlas.decision_record` for this newly authored map.
     8. **Evidence Auditor:** Verify core nodes, critical edges, and scenario
        steps against evidence paths and confidence before publication.
     9. **Visual Editor:** Check first-read density, label burden, centrality,

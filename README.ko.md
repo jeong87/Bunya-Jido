@@ -179,7 +179,10 @@ Studio 준비는 내부 체크리스트인 `ATLAS_INTERVIEW.md`와
 `REPOSITORY_THESIS.md`, `PROJECTIONS.md`, `SCENARIOS.md`도 추가로
 생성합니다. 코딩 에이전트는 역할별 pass를 거쳐 primary projection과
 정직한 scenario 정책(`required`, `optional`, `none_with_reason`)을
-검토합니다.
+검토합니다. 새로 작성하는 Studio blueprint는 선택된 projection, 비교한
+대안, 과도한 중심화 위험을 다시 검토할 수 있도록 선택적인
+`atlas.decision_record`도 기록합니다. 이 필드가 없는 기존 v2 산출물도
+계속 호환됩니다.
 Studio 준비는 이제 additive `bunya-jido-blueprint-v2` schema를 생성하며,
 `validate-blueprint`, `build`, `diagnose`는 vocabulary, projection, scenario
 계약을 처리합니다. 오프라인 viewer는 이제 map-local node/relation
@@ -204,8 +207,9 @@ projection 선택과 narration 의미는 자동 증명으로 가장하지 않고
 명시적인 검토 항목으로 남깁니다.
 
 이 저장소의 커밋된 self-map은 이제 Studio v2를 사용합니다. primary
-projection은 `Trusted Publication`이며, 근거 badge가 붙은 behavioral
-scenario 두 개를 게시합니다. 도구가 자기 소스 트리에만 맞춰지는 것을
+projection은 `Trusted Publication`이며, machine-readable editorial
+decision record와 근거 badge가 붙은 behavioral scenario 두 개를
+게시합니다. 도구가 자기 소스 트리에만 맞춰지는 것을
 막기 위해 Studio benchmark는 워크플로우 시스템, 웹 애플리케이션, SDK,
 변환 파이프라인, runtime scenario를 꾸며내지 않는 utility를 포함한
 서로 다른 여섯 저장소 형태를 렌더링하고 검증합니다. 자세한 내용은

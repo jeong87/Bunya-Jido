@@ -182,6 +182,11 @@ def evaluate_atlas_quality_obj(
                 f"Review scenario {scenario_id} narration against its semantic relations and evidence basis."
             )
 
+    decision_record_present = isinstance(atlas.get("decision_record"), dict)
+    if not decision_record_present:
+        review_warnings.append(
+            "Review Studio editorial choices because atlas.decision_record is not present."
+        )
     if primary:
         review_warnings.append(
             "Review whether the selected primary projection is the clearest honest explanation of this repository."
@@ -223,5 +228,6 @@ def evaluate_atlas_quality_obj(
             "edge_density": edge_density,
             "scenario_policy": atlas.get("scenario_policy"),
             "scenario_count": len(scenarios),
+            "decision_record_present": decision_record_present,
         },
     }

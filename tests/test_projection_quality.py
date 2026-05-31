@@ -52,6 +52,18 @@ class ProjectionQualityTests(unittest.TestCase):
             any("structural tour does not imply runtime order" in item for item in report["review_required_warnings"])
         )
 
+    def test_missing_optional_decision_record_requests_review_without_blocking(self) -> None:
+        blueprint = valid_v2_blueprint()
+        blueprint["atlas"].pop("decision_record")
+
+        report = quality_report(blueprint)
+
+        self.assertEqual(report["status"], "passed")
+        self.assertFalse(report["metrics"]["decision_record_present"])
+        self.assertTrue(
+            any("atlas.decision_record is not present" in item for item in report["review_required_warnings"])
+        )
+
     def test_required_scenario_gap_blocks_quality_gate(self) -> None:
         blueprint = valid_v2_blueprint()
         blueprint["atlas"]["scenarios"] = []

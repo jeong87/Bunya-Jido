@@ -132,3 +132,17 @@ An entry records review work; it does not prove architectural completeness.
   scenario, or trusted task route, so the current self-map remains accurate.
 - Validation: Blueprint and agent-map validation, grounded diagnostics, strict
   atlas-quality and agent-utility evaluation, and all 65 unit tests passed.
+
+## 2026-05-31 - Coding-Agent-Native Atlas N2 Decision Record
+
+- Change: Added optional Studio v2 `atlas.decision_record`, consistency checks
+  for published projection and scenario selections, an editorial-review signal
+  for older maps that omit it, and aligned prompts, benchmarks, docs, and the
+  committed self-map.
+- Decision: This extends the existing Blueprint Projection, Grounding Gate,
+  and Atlas Quality Evaluator contracts; no new map node or trusted route is
+  introduced. The self-map now records its own primary projection and scenario
+  rationale.
+- Validation: Blueprint and agent-map validation, grounded diagnostics, strict
+  atlas-quality and agent-utility evaluation, rebuilt committed demo,
+  stale-map review, and the full unit suite are required before commit.

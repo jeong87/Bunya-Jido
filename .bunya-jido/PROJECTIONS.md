@@ -41,3 +41,14 @@
 - **Components that must not be over-centralized:** Static Scanner and CI are
   support evidence, not the authored meaning of a map.
 - **Static overlays permitted in the primary view, if any:** None.
+
+## Machine-readable decision record
+
+- The Studio v2 blueprint retains all three projection candidates and marks
+  `projection:trusted_publication` as `selected_projection_id`.
+- Both published behavioral scenarios remain selected because they document
+  separately grounded product journeys: trusted map publication and bounded
+  coding-agent context generation.
+- Static scan hints and CI remain support evidence rather than first-screen
+  landmarks, preventing deterministic support machinery from becoming the
+  product thesis.

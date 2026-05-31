@@ -64,9 +64,9 @@
       "importance": "core",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Loads semantic artifacts and produces the published graph contract, including Studio projections and scenario metadata.",
+      "description": "Loads semantic artifacts and produces the published graph contract, including Studio projections, decision records, and scenario metadata.",
       "why_it_matters": "It turns reviewed semantic inputs into the graph payload later consumers are allowed to inspect.",
-      "inspector_summary": "Blueprint publication preserves validated Studio atlas data and validated task-route projections.",
+      "inspector_summary": "Blueprint publication preserves validated Studio editorial choices, atlas data, and task-route projections.",
       "source_path": "src/bunya_jido/blueprint.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "graph_with_optional_blueprint"},
@@ -82,9 +82,9 @@
       "importance": "core",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Blocks semantic publication when core evidence, critical relationships, or Studio v2 atlas contracts cannot be trusted.",
+      "description": "Blocks semantic publication when core evidence, critical relationships, Studio decision records, or v2 atlas contracts cannot be trusted.",
       "why_it_matters": "It is the boundary that prevents an attractive map from being published as trusted without evidence.",
-      "inspector_summary": "Validation resolves evidence and Studio contract references before normal publication may continue.",
+      "inspector_summary": "Validation resolves evidence and Studio contract references, including declared primary-selection consistency, before normal publication may continue.",
       "source_path": "src/bunya_jido/blueprint.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "validate_blueprint_obj"},
@@ -100,8 +100,8 @@
       "importance": "major",
       "overview_visibility": "visible",
       "activation": "conditional",
-      "description": "Measures deterministic Studio readability and scenario-policy signals while separating review-required interpretation.",
-      "inspector_summary": "Quality diagnostics measure visible density and narrative contract signals without proving editorial preference.",
+      "description": "Measures deterministic Studio readability and scenario-policy signals while surfacing missing decision rationale as review-required interpretation.",
+      "inspector_summary": "Quality diagnostics measure visible density, narrative signals, and recorded editorial context without proving preference.",
       "source_path": "src/bunya_jido/quality.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/quality.py", "symbol": "evaluate_atlas_quality_obj"}
@@ -383,6 +383,72 @@
   ],
   "atlas": {
     "scenario_policy": "required",
+    "decision_record": {
+      "repository_thesis_summary": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context only after explicit trust gates pass.",
+      "selected_projection_id": "projection:trusted_publication",
+      "projection_candidates": [
+        {
+          "id": "projection:trusted_publication",
+          "label": "Trusted Publication",
+          "question_answered": "How is a semantic map permitted to reach readers?",
+          "selected": true,
+          "grounding_strength": "strong",
+          "first_screen_value": "high",
+          "distortion_risks": ["Bounded agent navigation may appear secondary unless retained as an authored alternate view."],
+          "selection_reason": "It explains the shared human and coding-agent artifact while keeping evidence and publication gates visible first."
+        },
+        {
+          "id": "projection:agent_navigation",
+          "label": "Bounded Agent Navigation",
+          "question_answered": "How can a coding agent use the map safely?",
+          "selected": false,
+          "grounding_strength": "strong",
+          "first_screen_value": "medium",
+          "distortion_risks": ["It could make the human-facing map look like a secondary product surface."],
+          "selection_reason": "It remains an important alternate view, but does not introduce the shared artifact as clearly as Trusted Publication."
+        },
+        {
+          "id": "projection:quality_contract",
+          "label": "Quality Contract",
+          "question_answered": "Which checks keep the Studio output honest?",
+          "selected": false,
+          "grounding_strength": "strong",
+          "first_screen_value": "medium",
+          "distortion_risks": ["It over-centralizes validation machinery over the published map experience."],
+          "selection_reason": "It supports publication trust and belongs as a secondary quality-focused projection."
+        }
+      ],
+      "scenario_candidates": [
+        {
+          "id": "scenario:publish_map",
+          "label": "Publish A Trusted Map",
+          "selected": true,
+          "kind": "behavioral",
+          "reason": "It follows the documented build, validation, and render path with source-backed steps.",
+          "rejection_reason": ""
+        },
+        {
+          "id": "scenario:agent_context",
+          "label": "Request Bounded Agent Context",
+          "selected": true,
+          "kind": "behavioral",
+          "reason": "It follows the documented route-validation path from a task request to bounded guidance.",
+          "rejection_reason": ""
+        }
+      ],
+      "over_centralization_risks": [
+        {
+          "node_or_family": "analysis:scanner",
+          "risk": "Static evidence collection could be mistaken for the authored product meaning.",
+          "mitigation": "Keep scanner evidence contextual and outside the primary landmark path."
+        },
+        {
+          "node_or_family": "quality:ci",
+          "risk": "Automation could appear to prove editorial truth rather than repeat deterministic checks.",
+          "mitigation": "Keep CI contextual and state that projection quality remains review-required."
+        }
+      ]
+    },
     "vocabularies": {
       "node_families": [
         {"id": "command", "label": "Command", "description": "Invokes a user-visible operation.", "glyph": "hexagon", "color_role": "primary"},

@@ -57,6 +57,8 @@ class StudioPromptTests(unittest.TestCase):
             self.assertIn("internal checklist", interview)
             self.assertIn("ATLAS_INTERVIEW.md", prompt)
             self.assertIn("Projection Critic", prompt)
+            self.assertIn("atlas.decision_record", prompt)
+            self.assertIn("selected_projection_id", prompt)
             self.assertIn("evaluate-atlas-quality --root . --require-pass --json", prompt)
             self.assertIn("--atlas-mode studio", short_prompt)
             self.assertIn("Studio v2 schema", short_prompt)

@@ -73,6 +73,11 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(metrics["edge_count"], 25)
         self.assertEqual(metrics["primary_projection"], "projection:trusted_publication")
         self.assertEqual(metrics["scenario_count"], 2)
+        self.assertTrue(metrics["decision_record_present"])
+        self.assertEqual(
+            blueprint["atlas"]["decision_record"]["selected_projection_id"],
+            "projection:trusted_publication",
+        )
         self.assertEqual(metrics["grounded_core_node_ratio"], 1.0)
         self.assertEqual(metrics["grounded_critical_edge_ratio"], 1.0)
 
@@ -95,6 +100,10 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(graph["stats"]["edges"], 25)
         self.assertEqual(graph["primary_projection"], "projection:trusted_publication")
         self.assertEqual(graph["scenario_count"], 2)
+        self.assertEqual(
+            graph["atlas"]["decision_record"]["selected_projection_id"],
+            "projection:trusted_publication",
+        )
         self.assertIn(
             {
                 "id": "semantic",
