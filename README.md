@@ -225,9 +225,11 @@ tree, the Studio benchmark renders and validates six distinct repository
 shapes, including workflow systems, web applications, SDKs, transformation
 pipelines, and utilities with no invented runtime scenario. See
 [docs/STUDIO_BENCHMARK.md](docs/STUDIO_BENCHMARK.md) and
-[docs/gallery.md](docs/gallery.md). The gallery also publishes an
-evidence-backed coverage-fixture atlas whose `none_with_reason` scenario
-policy demonstrates a different, non-runtime reading.
+[docs/gallery.md](docs/gallery.md). The published gallery includes this
+self-map, a provenance-focused coverage fixture, and evidence-backed SDK,
+web-state, compiler, and utility miniatures. Together they show structural
+tours, grounded behavioral playback, and honest `none_with_reason` output
+without forcing every repository into one lifecycle.
 
 ## Generated Files
 

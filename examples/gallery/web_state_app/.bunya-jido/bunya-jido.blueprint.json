@@ -1,0 +1,148 @@
+{
+  "schema_version": "bunya-jido-blueprint-v2",
+  "project": {
+    "name": "pulse-counter-web-app",
+    "summary": "A curated stateful web miniature with an evidenced interaction loop.",
+    "thesis": "User intent updates authoritative state and drives a rendered response through a controlled effect.",
+    "primary_projection_id": "projection:interaction_loop",
+    "ordered_behavior_assessment": "strong"
+  },
+  "planes": [
+    {"id": "interaction", "label": "Interaction", "purpose": "Capture user intent."},
+    {"id": "state", "label": "State", "purpose": "Own authoritative values."},
+    {"id": "effects", "label": "Effects", "purpose": "Load derived information."},
+    {"id": "display", "label": "Display", "purpose": "Render visible output."}
+  ],
+  "nodes": [
+    {
+      "id": "input:increment",
+      "label": "Increment Handler",
+      "type": "interface",
+      "family": "event",
+      "plane": "interaction",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Accepts the user increment intent and begins the documented update path.",
+      "why_it_matters": "It identifies the visible interaction boundary.",
+      "inspector_summary": "onIncrement initiates the documented interaction path.",
+      "evidence": [{"kind": "source", "path": "src/counter.ts", "symbol": "onIncrement"}]
+    },
+    {
+      "id": "state:counter",
+      "label": "State Reducer",
+      "type": "component",
+      "family": "record",
+      "plane": "state",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Owns the count update produced from an explicit increment action.",
+      "why_it_matters": "It distinguishes authoritative state ownership from presentation.",
+      "inspector_summary": "reduceCounter applies the typed increment action.",
+      "evidence": [{"kind": "source", "path": "src/counter.ts", "symbol": "reduceCounter"}]
+    },
+    {
+      "id": "effect:message",
+      "label": "Message Effect",
+      "type": "component",
+      "family": "transform",
+      "plane": "effects",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Adds effect-backed message data after the count has changed.",
+      "inspector_summary": "loadMessage is explicitly called after reduction.",
+      "evidence": [{"kind": "source", "path": "src/counter.ts", "symbol": "loadMessage"}]
+    },
+    {
+      "id": "view:counter",
+      "label": "Rendered Counter",
+      "type": "artifact",
+      "family": "surface",
+      "plane": "display",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Produces the output markup visible after the updated message is available.",
+      "inspector_summary": "renderCounter displays the final documented state.",
+      "evidence": [{"kind": "source", "path": "src/counter.ts", "symbol": "renderCounter"}]
+    }
+  ],
+  "edges": [
+    {"id": "edge:event_state", "source": "input:increment", "target": "state:counter", "relation": "dispatches_to", "relation_family": "interaction_flow", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/counter.ts", "symbol": "onIncrement"}]},
+    {"id": "edge:state_effect", "source": "state:counter", "target": "effect:message", "relation": "precedes", "relation_family": "interaction_flow", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/counter.ts", "symbol": "onIncrement"}]},
+    {"id": "edge:effect_view", "source": "effect:message", "target": "view:counter", "relation": "presents_through", "relation_family": "interaction_flow", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/counter.ts", "symbol": "onIncrement"}]}
+  ],
+  "workflows": [
+    {
+      "id": "workflow:increment_render",
+      "label": "Increment And Render",
+      "description": "Follow a documented UI action through state, effect, and rendered response.",
+      "kind": "behavioral",
+      "ordered": true,
+      "node_ids": ["input:increment", "state:counter", "effect:message", "view:counter"],
+      "evidence": [{"kind": "documentation", "path": "README.md"}, {"kind": "source", "path": "src/counter.ts", "symbol": "onIncrement"}]
+    }
+  ],
+  "atlas": {
+    "scenario_policy": "required",
+    "decision_record": {
+      "repository_thesis_summary": "User intent updates authoritative state and drives a rendered response through a controlled effect.",
+      "selected_projection_id": "projection:interaction_loop",
+      "projection_candidates": [
+        {"id": "projection:interaction_loop", "label": "Interaction Loop", "question_answered": "How does an increment become visible counter state?", "selected": true, "grounding_strength": "strong", "first_screen_value": "high", "distortion_risks": ["The miniature omits larger application routing."], "selection_reason": "The documented entrypoint calls each visible responsibility in order."},
+        {"id": "projection:component_catalog", "label": "Component Catalog", "question_answered": "Which UI-related functions exist?", "selected": false, "grounding_strength": "partial", "first_screen_value": "low", "distortion_risks": ["It hides state ownership and sequence."], "selection_reason": "The documented interaction loop is more informative."}
+      ],
+      "scenario_candidates": [
+        {"id": "scenario:increment_render", "label": "Increment And Render", "selected": true, "kind": "behavioral", "reason": "The source documents an ordered interaction path.", "rejection_reason": ""}
+      ],
+      "over_centralization_risks": [
+        {"node_or_family": "Rendered Counter", "risk": "The output surface could conceal state ownership.", "mitigation": "Keep the reducer visible as a core landmark."}
+      ]
+    },
+    "vocabularies": {
+      "node_families": [
+        {"id": "event", "label": "Event", "description": "Receives user intent.", "glyph": "hexagon"},
+        {"id": "record", "label": "State", "description": "Owns authoritative values.", "glyph": "double_ring"},
+        {"id": "transform", "label": "Effect", "description": "Derives additional response information.", "glyph": "rounded_square"},
+        {"id": "surface", "label": "View", "description": "Displays resulting state.", "glyph": "diamond"}
+      ],
+      "relation_families": [
+        {"id": "interaction_flow", "label": "Interaction Flow", "description": "Advances the documented user-state response path.", "line_style": "solid"}
+      ]
+    },
+    "projections": [
+      {
+        "id": "projection:interaction_loop",
+        "label": "Interaction Loop",
+        "description": "A grounded stateful UI update reading.",
+        "question_answered": "How does an increment become visible counter state?",
+        "is_primary": true,
+        "node_ids": ["input:increment", "state:counter", "effect:message", "view:counter"],
+        "plane_ids": ["interaction", "state", "effects", "display"],
+        "relation_family_ids": ["interaction_flow"],
+        "evidence": [{"kind": "documentation", "path": ".bunya-jido/PROJECTIONS.md"}]
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "scenario:increment_render",
+        "label": "Increment And Render",
+        "description": "Follow the implemented user-to-view update path.",
+        "kind": "behavioral",
+        "basis": "documented_workflow",
+        "derived_from_workflow_ids": ["workflow:increment_render"],
+        "playback_mode": "animated_token",
+        "default_speed": 1.0,
+        "steps": [
+          {"id": "step:event", "node_id": "input:increment", "edge_id": "edge:event_state", "title": "Receive Intent", "narration": "The increment handler receives the documented user intent.", "evidence": [{"kind": "source", "path": "src/counter.ts"}]},
+          {"id": "step:state", "node_id": "state:counter", "edge_id": "edge:state_effect", "title": "Update Count", "narration": "The reducer produces the authoritative updated count state.", "evidence": [{"kind": "source", "path": "src/counter.ts"}]},
+          {"id": "step:effect", "node_id": "effect:message", "edge_id": "edge:effect_view", "title": "Load Message", "narration": "The controlled effect adds message data for the updated count.", "evidence": [{"kind": "source", "path": "src/counter.ts"}]},
+          {"id": "step:view", "node_id": "view:counter", "title": "Present View", "narration": "The renderer presents the resulting counter message in markup.", "evidence": [{"kind": "source", "path": "src/counter.ts"}]}
+        ]
+      }
+    ],
+    "intent": {"static_provider_overlay": "excluded"}
+  }
+}

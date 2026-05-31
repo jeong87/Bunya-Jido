@@ -51,6 +51,9 @@ be documented.
 - Provenance-tagged provider/API hints that suppress generated prompt/schema
   example pollution from Studio overlays, plus a published evidence-backed
   coverage-fixture gallery atlas with an honest `none_with_reason` policy.
+- Evidence-backed gallery miniatures for SDK/client, web-state,
+  compiler/parser, and utility-library readings, each with a reviewed Studio
+  HTML output and screenshot regression surface.
 
 ### Changed
 

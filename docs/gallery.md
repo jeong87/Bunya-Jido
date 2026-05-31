@@ -80,12 +80,97 @@ python -m bunya_jido build --root examples/coverage --blueprint examples/coverag
 
 ![Curated scanner coverage fixture atlas showing four evidence surfaces and no narrated scenario](gallery/coverage-fixture.png)
 
+## Published Domain Miniatures
+
+The following four committed miniatures turn the benchmark's different
+repository readings into evidence-backed, inspectable Studio outputs. Each
+miniature includes source evidence and its own `.bunya-jido` editorial inputs,
+so it passes deterministic quality checks without borrowing the self-map's
+interpretation.
+
+### Small SDK / Client
+
+| Record | Value |
+|---|---|
+| Artifact | Acorn Weather SDK curated miniature |
+| Source inputs | `examples/gallery/sdk_client/` |
+| Thesis | A public client surface translates caller options into a transport boundary and typed results |
+| Primary projection | `Client Contract` |
+| Scenario policy | `optional`; one `structural_tour` reading with `illustrative_tour` basis |
+| Quality result | `passed`; zero deterministic warnings; structural narration remains review-required |
+| Known limitation | Documents a caller-facing contract, not an observed HTTP exchange |
+| Screenshot | [`gallery/sdk-client.png`](gallery/sdk-client.png) |
+| Published HTML | [`gallery/sdk-client.html`](gallery/sdk-client.html) |
+
+![SDK client contract atlas showing public method, request options, transport boundary, and typed response](gallery/sdk-client.png)
+
+### Web / State Application
+
+| Record | Value |
+|---|---|
+| Artifact | Pulse Counter curated miniature |
+| Source inputs | `examples/gallery/web_state_app/` |
+| Thesis | User intent updates authoritative state and drives a rendered response through a controlled effect |
+| Primary projection | `Interaction Loop` |
+| Scenario policy | `required`; one grounded `behavioral` walkthrough |
+| Quality result | `passed`; zero deterministic warnings; projection choice remains review-required |
+| Known limitation | Models one bounded counter interaction rather than a full web application |
+| Screenshot | [`gallery/web-state-app.png`](gallery/web-state-app.png) |
+| Published HTML | [`gallery/web-state-app.html`](gallery/web-state-app.html) |
+
+![Web state atlas showing interaction, reducer, effect, and rendered response](gallery/web-state-app.png)
+
+### Compiler / Parser
+
+| Record | Value |
+|---|---|
+| Artifact | Pebble Compiler curated miniature |
+| Source inputs | `examples/gallery/compiler_parser/` |
+| Thesis | Source input passes explicit transformation stages before a checked output is emitted |
+| Primary projection | `Transformation Stages` |
+| Scenario policy | `required`; one grounded `behavioral` pipeline walkthrough |
+| Quality result | `passed`; zero deterministic warnings; projection choice remains review-required |
+| Known limitation | Demonstrates the success path only, without parser-error recovery |
+| Screenshot | [`gallery/compiler-parser.png`](gallery/compiler-parser.png) |
+| Published HTML | [`gallery/compiler-parser.html`](gallery/compiler-parser.html) |
+
+![Compiler atlas showing source input, parser, intermediate form, and emitter](gallery/compiler-parser.png)
+
+### Utility Library
+
+| Record | Value |
+|---|---|
+| Artifact | Clear Text Utilities curated miniature |
+| Source inputs | `examples/gallery/utility_library/` |
+| Thesis | A small public function family applies documented transformations without claiming a lifecycle |
+| Primary projection | `API Reading Route` |
+| Scenario policy | `none_with_reason` |
+| Quality result | `passed`; zero deterministic warnings; projection choice remains review-required |
+| Known limitation | Shows a compact helper family, not package discovery across a broad library |
+| Screenshot | [`gallery/utility-library.png`](gallery/utility-library.png) |
+| Published HTML | [`gallery/utility-library.html`](gallery/utility-library.html) |
+
+![Utility-library atlas showing an API reading route without a fabricated scenario](gallery/utility-library.png)
+
+**Generation commands:**
+
+```bash
+python -m bunya_jido build --root examples/gallery/sdk_client --blueprint examples/gallery/sdk_client/.bunya-jido/bunya-jido.blueprint.json --max-files 0 --out docs/gallery/sdk-client.html
+python -m bunya_jido build --root examples/gallery/web_state_app --blueprint examples/gallery/web_state_app/.bunya-jido/bunya-jido.blueprint.json --max-files 0 --out docs/gallery/web-state-app.html
+python -m bunya_jido build --root examples/gallery/compiler_parser --blueprint examples/gallery/compiler_parser/.bunya-jido/bunya-jido.blueprint.json --max-files 0 --out docs/gallery/compiler-parser.html
+python -m bunya_jido build --root examples/gallery/utility_library --blueprint examples/gallery/utility_library/.bunya-jido/bunya-jido.blueprint.json --max-files 0 --out docs/gallery/utility-library.html
+```
+
 ## Fixture Policy
 
 The minimal example remains a static-scan smoke fixture for command and
 rendering behavior. `examples/coverage/` is promoted only as a curated,
-evidence-backed miniature for scanner/provenance behavior. Neither miniature
-is evidence of broad repository support.
+evidence-backed miniature for scanner/provenance behavior. The four
+`examples/gallery/` miniatures are promoted as reviewable evidence for
+distinct SDK, UI-state, transformation-pipeline, and utility-library readings.
+These examples establish that the renderer can honestly publish different
+repository interpretations; they are not evidence of exhaustive ecosystem
+support.
 
 No sanitized complex-system map is promoted because a redistributable,
 evidence-backed source has not been established. New gallery examples should
@@ -94,10 +179,10 @@ publication.
 
 ## Publishing Workflow
 
-`docs/demo.html` and its screenshot are reviewed, committed gallery outputs.
-Before updating either file, run the validation and generation commands above,
-inspect the resulting offline HTML, refresh `assets/self-map-grounded.png` from
-the clean `Overview` state at 1440 x 900, and run:
+`docs/demo.html`, `docs/gallery/*.html`, and their screenshots are reviewed,
+committed gallery outputs. Before updating any promoted item, run its
+validation, quality, and generation commands, inspect the resulting offline
+HTML, refresh its clean `Overview` capture at 1440 x 900, and run:
 
 ```bash
 python -m unittest tests.test_self_map

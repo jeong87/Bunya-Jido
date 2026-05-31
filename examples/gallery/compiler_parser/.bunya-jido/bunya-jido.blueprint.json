@@ -1,0 +1,147 @@
+{
+  "schema_version": "bunya-jido-blueprint-v2",
+  "project": {
+    "name": "pebble-compiler",
+    "summary": "A curated parser/compiler miniature with explicit transformation stages.",
+    "thesis": "Source input passes explicit transformation stages before a checked output is emitted.",
+    "primary_projection_id": "projection:transformation_stages",
+    "ordered_behavior_assessment": "strong"
+  },
+  "planes": [
+    {"id": "source", "label": "Source", "purpose": "Receive public text input."},
+    {"id": "syntax", "label": "Syntax", "purpose": "Parse source structure."},
+    {"id": "transform", "label": "Transform", "purpose": "Lower syntax to an intermediate form."},
+    {"id": "emit", "label": "Emit", "purpose": "Produce target output."}
+  ],
+  "nodes": [
+    {
+      "id": "input:source",
+      "label": "Source Input",
+      "type": "interface",
+      "family": "boundary",
+      "plane": "source",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Begins compilation at the public compile_source function accepting source text.",
+      "why_it_matters": "It defines the public input boundary of the pipeline.",
+      "inspector_summary": "compile_source supplies source text to the ordered transformation.",
+      "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py", "symbol": "compile_source"}]
+    },
+    {
+      "id": "stage:parser",
+      "label": "Parser",
+      "type": "component",
+      "family": "transform",
+      "plane": "syntax",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Converts source text into the explicit SyntaxTree representation.",
+      "why_it_matters": "It is the first transformation stage evidenced in source.",
+      "inspector_summary": "parse creates SyntaxTree before lowering begins.",
+      "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py", "symbol": "parse"}]
+    },
+    {
+      "id": "stage:ir",
+      "label": "Intermediate Form",
+      "type": "artifact",
+      "family": "record",
+      "plane": "transform",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Captures the lowered instruction representation consumed by the emitter.",
+      "inspector_summary": "IntermediateForm records the result of lower.",
+      "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py", "symbol": "IntermediateForm"}]
+    },
+    {
+      "id": "stage:emitter",
+      "label": "Emitter",
+      "type": "component",
+      "family": "transform",
+      "plane": "emit",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Formats lowered instructions into the final emitted text output.",
+      "inspector_summary": "emit returns the pipeline output.",
+      "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py", "symbol": "emit"}]
+    }
+  ],
+  "edges": [
+    {"id": "edge:source_parser", "source": "input:source", "target": "stage:parser", "relation": "parses_through", "relation_family": "stage_flow", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py", "symbol": "compile_source"}]},
+    {"id": "edge:parser_ir", "source": "stage:parser", "target": "stage:ir", "relation": "lowers_to", "relation_family": "stage_flow", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py", "symbol": "lower"}]},
+    {"id": "edge:ir_emitter", "source": "stage:ir", "target": "stage:emitter", "relation": "emits_through", "relation_family": "stage_flow", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py", "symbol": "compile_source"}]}
+  ],
+  "workflows": [
+    {
+      "id": "workflow:compile_source",
+      "label": "Compile Source",
+      "description": "Transform text through parsing, lowering, and emission.",
+      "kind": "behavioral",
+      "ordered": true,
+      "node_ids": ["input:source", "stage:parser", "stage:ir", "stage:emitter"],
+      "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py", "symbol": "compile_source"}, {"kind": "documentation", "path": "README.md"}]
+    }
+  ],
+  "atlas": {
+    "scenario_policy": "required",
+    "decision_record": {
+      "repository_thesis_summary": "Source input passes explicit transformation stages before a checked output is emitted.",
+      "selected_projection_id": "projection:transformation_stages",
+      "projection_candidates": [
+        {"id": "projection:transformation_stages", "label": "Transformation Stages", "question_answered": "How is source transformed into emitted output?", "selected": true, "grounding_strength": "strong", "first_screen_value": "high", "distortion_risks": ["The miniature does not model error recovery."], "selection_reason": "The implementation explicitly composes the ordered stages."},
+        {"id": "projection:symbol_inventory", "label": "Symbol Inventory", "question_answered": "Which parser symbols are defined?", "selected": false, "grounding_strength": "partial", "first_screen_value": "low", "distortion_risks": ["It conceals the transformation sequence."], "selection_reason": "The pipeline is the stronger architectural explanation."}
+      ],
+      "scenario_candidates": [
+        {"id": "scenario:compile_source", "label": "Compile Source", "selected": true, "kind": "behavioral", "reason": "The public function records the ordered transformation.", "rejection_reason": ""}
+      ],
+      "over_centralization_risks": [
+        {"node_or_family": "Intermediate Form", "risk": "The intermediate representation could hide the input/output contract.", "mitigation": "Retain source and emitter as visible landmarks."}
+      ]
+    },
+    "vocabularies": {
+      "node_families": [
+        {"id": "boundary", "label": "Input Boundary", "description": "Receives public input.", "glyph": "hexagon"},
+        {"id": "transform", "label": "Stage", "description": "Produces the next pipeline form.", "glyph": "rounded_square"},
+        {"id": "record", "label": "Intermediate Record", "description": "Carries lowered representation.", "glyph": "double_ring"}
+      ],
+      "relation_families": [
+        {"id": "stage_flow", "label": "Transforms To", "description": "Advances the evidenced compilation stages.", "line_style": "solid"}
+      ]
+    },
+    "projections": [
+      {
+        "id": "projection:transformation_stages",
+        "label": "Transformation Stages",
+        "description": "An evidence-grounded compile pipeline.",
+        "question_answered": "How is source transformed into emitted output?",
+        "is_primary": true,
+        "node_ids": ["input:source", "stage:parser", "stage:ir", "stage:emitter"],
+        "plane_ids": ["source", "syntax", "transform", "emit"],
+        "relation_family_ids": ["stage_flow"],
+        "evidence": [{"kind": "documentation", "path": ".bunya-jido/PROJECTIONS.md"}]
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "scenario:compile_source",
+        "label": "Compile Source",
+        "description": "Follow the implemented transformation pipeline.",
+        "kind": "behavioral",
+        "basis": "documented_workflow",
+        "derived_from_workflow_ids": ["workflow:compile_source"],
+        "playback_mode": "animated_token",
+        "default_speed": 1.0,
+        "steps": [
+          {"id": "step:source", "node_id": "input:source", "edge_id": "edge:source_parser", "title": "Accept Source", "narration": "The public compile function accepts the source text input.", "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py"}]},
+          {"id": "step:parse", "node_id": "stage:parser", "edge_id": "edge:parser_ir", "title": "Parse Syntax", "narration": "The parser converts that input into a SyntaxTree representation.", "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py"}]},
+          {"id": "step:lower", "node_id": "stage:ir", "edge_id": "edge:ir_emitter", "title": "Lower Form", "narration": "Lowering produces the intermediate instruction form for output.", "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py"}]},
+          {"id": "step:emit", "node_id": "stage:emitter", "title": "Emit Output", "narration": "The emitter produces the final textual output of compilation.", "evidence": [{"kind": "source", "path": "src/pebble/pipeline.py"}]}
+        ]
+      }
+    ],
+    "intent": {"static_provider_overlay": "excluded"}
+  }
+}

@@ -1,0 +1,209 @@
+{
+  "schema_version": "bunya-jido-blueprint-v2",
+  "project": {
+    "name": "acorn-weather-sdk",
+    "summary": "A curated client-library miniature with explicit public contracts.",
+    "thesis": "A public client surface translates caller options into a transport boundary and typed results.",
+    "primary_projection_id": "projection:client_contract",
+    "ordered_behavior_assessment": "partial"
+  },
+  "planes": [
+    {"id": "public_api", "label": "Public API", "purpose": "Caller-visible entrypoints."},
+    {"id": "configuration", "label": "Configuration", "purpose": "Caller-selected inputs."},
+    {"id": "transport", "label": "Transport", "purpose": "Service communication boundary."},
+    {"id": "models", "label": "Models", "purpose": "Stable returned values."}
+  ],
+  "nodes": [
+    {
+      "id": "api:forecast",
+      "label": "Client Method",
+      "type": "interface",
+      "family": "surface",
+      "plane": "public_api",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Exposes WeatherClient.forecast as the public SDK method available to callers.",
+      "why_it_matters": "It is the API surface a user chooses first.",
+      "inspector_summary": "Public method documented and implemented in the client module.",
+      "evidence": [{"kind": "source", "path": "src/acorn_sdk/client.py", "symbol": "WeatherClient.forecast"}]
+    },
+    {
+      "id": "config:options",
+      "label": "Request Options",
+      "type": "contract",
+      "family": "record",
+      "plane": "configuration",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Defines city and units as typed caller inputs to the forecast request surface.",
+      "why_it_matters": "It names what callers can configure without exposing transport details.",
+      "inspector_summary": "Caller-owned options are represented as a frozen data contract.",
+      "evidence": [{"kind": "source", "path": "src/acorn_sdk/client.py", "symbol": "ForecastOptions"}]
+    },
+    {
+      "id": "boundary:http",
+      "label": "HTTP Transport",
+      "type": "component",
+      "family": "boundary",
+      "plane": "transport",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Separates public SDK calls from the service communication implementation.",
+      "inspector_summary": "The transport is a boundary, not a recorded request trace.",
+      "evidence": [{"kind": "source", "path": "src/acorn_sdk/client.py", "symbol": "HttpTransport"}]
+    },
+    {
+      "id": "model:forecast",
+      "label": "Typed Response",
+      "type": "artifact",
+      "family": "record",
+      "plane": "models",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Defines the stable forecast value returned through the public client contract.",
+      "inspector_summary": "The typed model is the caller-facing result shape.",
+      "evidence": [{"kind": "source", "path": "src/acorn_sdk/client.py", "symbol": "Forecast"}]
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge:method_options",
+      "source": "api:forecast",
+      "target": "config:options",
+      "relation": "accepts",
+      "relation_family": "contract_reading",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "confidence": "llm_grounded",
+      "evidence": [{"kind": "documentation", "path": "README.md"}]
+    },
+    {
+      "id": "edge:options_transport",
+      "source": "config:options",
+      "target": "boundary:http",
+      "relation": "shapes_boundary",
+      "relation_family": "contract_reading",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "confidence": "llm_grounded",
+      "evidence": [{"kind": "documentation", "path": "README.md"}]
+    },
+    {
+      "id": "edge:transport_response",
+      "source": "boundary:http",
+      "target": "model:forecast",
+      "relation": "exposes_shape",
+      "relation_family": "contract_reading",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "confidence": "llm_grounded",
+      "evidence": [{"kind": "documentation", "path": "README.md"}]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "route:client_contract",
+      "label": "Client Contract Reading",
+      "description": "Read the SDK surfaces a caller must understand without claiming observed execution.",
+      "kind": "structural",
+      "ordered": false,
+      "node_ids": ["api:forecast", "config:options", "boundary:http", "model:forecast"],
+      "evidence": [{"kind": "documentation", "path": ".bunya-jido/PROJECTIONS.md"}]
+    }
+  ],
+  "atlas": {
+    "scenario_policy": "optional",
+    "decision_record": {
+      "repository_thesis_summary": "A public client surface translates caller options into a transport boundary and typed results.",
+      "selected_projection_id": "projection:client_contract",
+      "projection_candidates": [
+        {
+          "id": "projection:client_contract",
+          "label": "Client Contract",
+          "question_answered": "Which public surfaces and data contracts matter to callers?",
+          "selected": true,
+          "grounding_strength": "strong",
+          "first_screen_value": "high",
+          "distortion_risks": ["It does not demonstrate a live network exchange."],
+          "selection_reason": "The source and documentation expose a caller-oriented contract."
+        },
+        {
+          "id": "projection:request_trace",
+          "label": "Request Trace",
+          "question_answered": "What happens during one remote call?",
+          "selected": false,
+          "grounding_strength": "weak",
+          "first_screen_value": "low",
+          "distortion_risks": ["No recorded remote call exists in this miniature."],
+          "selection_reason": "A runtime trace would overclaim the available evidence."
+        }
+      ],
+      "scenario_candidates": [
+        {
+          "id": "scenario:surface_reading",
+          "label": "Public Surface Reading",
+          "selected": true,
+          "kind": "structural_tour",
+          "reason": "A structural tour teaches the contract without claiming runtime.",
+          "rejection_reason": ""
+        }
+      ],
+      "over_centralization_risks": [
+        {
+          "node_or_family": "HTTP Transport",
+          "risk": "Transport detail could appear to be the public product.",
+          "mitigation": "Keep the public client method as the first landmark."
+        }
+      ]
+    },
+    "vocabularies": {
+      "node_families": [
+        {"id": "surface", "label": "Public Surface", "description": "Caller-visible API entrypoint.", "glyph": "diamond"},
+        {"id": "record", "label": "Typed Record", "description": "Typed caller input or output.", "glyph": "double_ring"},
+        {"id": "boundary", "label": "Transport Boundary", "description": "Separates API from communication.", "glyph": "hexagon"}
+      ],
+      "relation_families": [
+        {"id": "contract_reading", "label": "Read Along Contract", "description": "Connects caller-facing surfaces without runtime assertion.", "line_style": "dotted"}
+      ]
+    },
+    "projections": [
+      {
+        "id": "projection:client_contract",
+        "label": "Client Contract",
+        "description": "A public SDK reading centered on stable caller-facing surfaces.",
+        "question_answered": "Which public surfaces and data contracts matter to callers?",
+        "is_primary": true,
+        "node_ids": ["api:forecast", "config:options", "boundary:http", "model:forecast"],
+        "plane_ids": ["public_api", "configuration", "transport", "models"],
+        "relation_family_ids": ["contract_reading"],
+        "evidence": [{"kind": "documentation", "path": ".bunya-jido/PROJECTIONS.md"}]
+      }
+    ],
+    "scenarios": [
+      {
+        "id": "scenario:surface_reading",
+        "label": "Public Surface Reading",
+        "description": "Inspect a caller-oriented API contract without implying a captured request.",
+        "kind": "structural_tour",
+        "basis": "illustrative_tour",
+        "derived_from_workflow_ids": ["route:client_contract"],
+        "playback_mode": "stepped_highlight",
+        "default_speed": 1.0,
+        "steps": [
+          {"id": "step:method", "node_id": "api:forecast", "title": "Choose A Method", "narration": "Begin with the public method that a caller can select.", "evidence": [{"kind": "documentation", "path": "README.md"}]},
+          {"id": "step:options", "node_id": "config:options", "title": "Read Options", "narration": "Read the typed options as caller-owned configuration.", "evidence": [{"kind": "source", "path": "src/acorn_sdk/client.py"}]},
+          {"id": "step:boundary", "node_id": "boundary:http", "title": "Inspect Boundary", "narration": "Inspect the transport boundary described behind the public API.", "evidence": [{"kind": "source", "path": "src/acorn_sdk/client.py"}]},
+          {"id": "step:response", "node_id": "model:forecast", "title": "Read Result Shape", "narration": "Finish with the typed value made visible to callers.", "evidence": [{"kind": "source", "path": "src/acorn_sdk/client.py"}]}
+        ]
+      }
+    ],
+    "intent": {"static_provider_overlay": "excluded"}
+  }
+}

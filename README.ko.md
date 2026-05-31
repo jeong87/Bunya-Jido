@@ -228,9 +228,11 @@ decision record와 근거 badge가 붙은 behavioral scenario 두 개를
 변환 파이프라인, runtime scenario를 꾸며내지 않는 utility를 포함한
 서로 다른 여섯 저장소 형태를 렌더링하고 검증합니다. 자세한 내용은
 [docs/STUDIO_BENCHMARK.md](docs/STUDIO_BENCHMARK.md)와
-[docs/gallery.md](docs/gallery.md)를 참고하세요. gallery에는
-`none_with_reason` scenario 정책으로 다른 비런타임 읽기를 보여주는,
-실제 fixture 근거 기반 coverage atlas도 함께 게시됩니다.
+[docs/gallery.md](docs/gallery.md)를 참고하세요. 공개 gallery에는 이
+self-map, provenance 중심 coverage fixture, 그리고 근거가 있는 SDK,
+web-state, compiler, utility miniature가 함께 게시됩니다. 이 사례들은
+모든 저장소에 같은 lifecycle을 강제하지 않으면서 structural tour,
+grounded behavioral playback, 정직한 `none_with_reason` 결과를 보여줍니다.
 
 ## 생성되는 파일
 

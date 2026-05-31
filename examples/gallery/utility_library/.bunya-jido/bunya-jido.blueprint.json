@@ -1,0 +1,132 @@
+{
+  "schema_version": "bunya-jido-blueprint-v2",
+  "project": {
+    "name": "clear-text-utilities",
+    "summary": "A curated helper-library miniature without a fabricated lifecycle.",
+    "thesis": "A small public function family applies documented transformations without claiming a lifecycle.",
+    "primary_projection_id": "projection:api_reading_route",
+    "ordered_behavior_assessment": "none"
+  },
+  "planes": [
+    {"id": "exports", "label": "Exports", "purpose": "Expose helper functions."},
+    {"id": "options", "label": "Options", "purpose": "Describe caller variation."},
+    {"id": "rules", "label": "Rules", "purpose": "Implement transformations."},
+    {"id": "examples", "label": "Examples", "purpose": "Show independent use."}
+  ],
+  "nodes": [
+    {
+      "id": "api:functions",
+      "label": "Public Functions",
+      "type": "interface",
+      "family": "surface",
+      "plane": "exports",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Exposes slugify and wrap_label as independent public text helpers.",
+      "why_it_matters": "These helpers are the library surface a caller chooses.",
+      "inspector_summary": "Two independent exported helper functions define the public surface.",
+      "evidence": [{"kind": "source", "path": "src/clear_text/formatters.py", "symbol": "slugify"}]
+    },
+    {
+      "id": "config:options",
+      "label": "Option Schema",
+      "type": "contract",
+      "family": "record",
+      "plane": "options",
+      "importance": "core",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Defines separator and width options shared by helper calls.",
+      "why_it_matters": "It describes variation without imposing call order.",
+      "inspector_summary": "FormatOptions is a declarative public contract.",
+      "evidence": [{"kind": "source", "path": "src/clear_text/formatters.py", "symbol": "FormatOptions"}]
+    },
+    {
+      "id": "rules:transform",
+      "label": "Transformation Rules",
+      "type": "component",
+      "family": "transform",
+      "plane": "rules",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Applies independent string formatting rules within each helper.",
+      "inspector_summary": "Rules are per-call logic, not lifecycle stages.",
+      "evidence": [{"kind": "source", "path": "src/clear_text/formatters.py"}]
+    },
+    {
+      "id": "docs:examples",
+      "label": "Usage Examples",
+      "type": "document",
+      "family": "example",
+      "plane": "examples",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "always",
+      "description": "Shows representative independent calls without defining a temporal path.",
+      "inspector_summary": "Examples help readers choose helpers but do not claim workflow.",
+      "evidence": [{"kind": "source", "path": "src/clear_text/formatters.py", "symbol": "USAGE_EXAMPLES"}, {"kind": "documentation", "path": "README.md"}]
+    }
+  ],
+  "edges": [
+    {"id": "edge:function_options", "source": "api:functions", "target": "config:options", "relation": "accepts_options", "relation_family": "api_reading", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "llm_grounded", "evidence": [{"kind": "documentation", "path": "README.md"}]},
+    {"id": "edge:options_rules", "source": "config:options", "target": "rules:transform", "relation": "shapes_rules", "relation_family": "api_reading", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "llm_grounded", "evidence": [{"kind": "source", "path": "src/clear_text/formatters.py"}]},
+    {"id": "edge:rules_examples", "source": "rules:transform", "target": "docs:examples", "relation": "is_shown_by", "relation_family": "api_reading", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "llm_grounded", "evidence": [{"kind": "documentation", "path": "README.md"}]}
+  ],
+  "workflows": [
+    {
+      "id": "route:api_reading",
+      "label": "API Reading Route",
+      "description": "Read available helper surfaces without implying execution order.",
+      "kind": "structural",
+      "ordered": false,
+      "node_ids": ["api:functions", "config:options", "rules:transform", "docs:examples"],
+      "evidence": [{"kind": "documentation", "path": ".bunya-jido/PROJECTIONS.md"}]
+    }
+  ],
+  "atlas": {
+    "scenario_policy": "none_with_reason",
+    "scenario_policy_reason": "The library exposes independent helper calls; an ordered playback would invent a lifecycle.",
+    "decision_record": {
+      "repository_thesis_summary": "A small public function family applies documented transformations without claiming a lifecycle.",
+      "selected_projection_id": "projection:api_reading_route",
+      "projection_candidates": [
+        {"id": "projection:api_reading_route", "label": "API Reading Route", "question_answered": "What should a caller understand before choosing a helper?", "selected": true, "grounding_strength": "strong", "first_screen_value": "high", "distortion_risks": ["It intentionally avoids runtime storytelling."], "selection_reason": "It preserves the independent nature of the public functions."},
+        {"id": "projection:execution_loop", "label": "Execution Loop", "question_answered": "How do helpers progress through a lifecycle?", "selected": false, "grounding_strength": "weak", "first_screen_value": "low", "distortion_risks": ["The library has no such lifecycle."], "selection_reason": "A lifecycle projection would be invented."}
+      ],
+      "scenario_candidates": [
+        {"id": "scenario:none", "label": "No Ordered Playback", "selected": false, "kind": "structural_tour", "reason": "A scenario is unnecessary for independent calls.", "rejection_reason": "No honest ordered route exists."}
+      ],
+      "over_centralization_risks": [
+        {"node_or_family": "Usage Examples", "risk": "One example could appear to be a required workflow.", "mitigation": "Keep examples visible as guidance while publishing no scenario."}
+      ]
+    },
+    "vocabularies": {
+      "node_families": [
+        {"id": "surface", "label": "API Surface", "description": "Caller-selectable helper.", "glyph": "diamond"},
+        {"id": "record", "label": "Option Record", "description": "Declarative public parameters.", "glyph": "double_ring"},
+        {"id": "transform", "label": "Rule", "description": "Independent formatting behavior.", "glyph": "rounded_square"},
+        {"id": "example", "label": "Example", "description": "Non-ordered usage reference.", "glyph": "dashed_tile"}
+      ],
+      "relation_families": [
+        {"id": "api_reading", "label": "Read Beside", "description": "Relates API documentation surfaces without time order.", "line_style": "dotted"}
+      ]
+    },
+    "projections": [
+      {
+        "id": "projection:api_reading_route",
+        "label": "API Reading Route",
+        "description": "A structural public-helper reading with no fabricated runtime.",
+        "question_answered": "What should a caller understand before choosing a helper?",
+        "is_primary": true,
+        "node_ids": ["api:functions", "config:options", "rules:transform", "docs:examples"],
+        "plane_ids": ["exports", "options", "rules", "examples"],
+        "relation_family_ids": ["api_reading"],
+        "evidence": [{"kind": "documentation", "path": ".bunya-jido/PROJECTIONS.md"}]
+      }
+    ],
+    "scenarios": [],
+    "intent": {"static_provider_overlay": "excluded"}
+  }
+}

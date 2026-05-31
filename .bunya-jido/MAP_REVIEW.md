@@ -198,3 +198,16 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Confirm the demo remains generated from the committed grounded
   self-map, visually inspect the refreshed 1440 x 900 overview capture, and
   rerun blueprint, agent-map, utility, quality, stale-map, and unit checks.
+
+## 2026-06-01 - Coding-Agent-Native Atlas N5 Published Domain Gallery
+
+- Change: Added evidence-backed Studio miniatures for SDK/client, web-state,
+  compiler/parser, and utility-library readings with generated HTML outputs
+  and reviewed 1440 x 900 captures.
+- Decision: These examples complete the roadmap's real-gallery proof without
+  changing Bunya-Jido's self-map structure. They preserve distinct scenario
+  choices: structural SDK reading, grounded behavioral UI/compiler paths, and
+  utility output with no invented lifecycle.
+- Validation: Each miniature must pass blueprint and atlas-quality validation,
+  published HTML and PNG contracts are checked by `tests/test_gallery.py`, and
+  the repository's full trust and stale-map gates remain required.
