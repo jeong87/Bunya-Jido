@@ -269,6 +269,8 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             "semanticOverviewHtml",
             "pathStepIndex",
             "e.directed!==false",
+            "--layer-scenario:18",
+            "z-index:var(--layer-scenario)",
         ):
             self.assertIn(control, html)
         marker = '<script id="graph-data" type="application/json">'

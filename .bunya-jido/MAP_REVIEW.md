@@ -240,3 +240,14 @@ An entry records review work; it does not prove architectural completeness.
   validation, grounded diagnostics, strict atlas-quality and agent-utility
   evaluation, rebuilt committed demo and hero capture, stale-map review, and
   the full unit suite are required before commit.
+
+## 2026-06-05 - Scenario Surface Layer Ordering
+
+- Change: Moved the scenario menu, narration, and playback controls above the
+  selected-node Inspector while keeping them below the main toolbar.
+- Decision: This is a presentation-layer bug fix within the existing
+  Interactive Viewer contract. It does not change self-map structure,
+  scenario meaning, or evidence.
+- Validation: The viewer regression test asserts `drawer < scenario <
+  toolbar`, and the committed self-map demo and hero capture are regenerated
+  before the full repository checks.

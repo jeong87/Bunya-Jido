@@ -94,6 +94,8 @@ be documented.
 
 ### Fixed
 
+- Scenario menus, narration, and playback controls now remain visible above an
+  open selected-node Inspector while staying below the main toolbar.
 - Python 3.10 static scanning now parses `pyproject.toml` through a conditional
   `tomli` fallback, matching the advertised Python support matrix.
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 import tempfile
 import unittest
 from contextlib import redirect_stdout
@@ -63,6 +64,15 @@ class SmokeTests(unittest.TestCase):
         self.assertIn("pathStepIndex", html)
         self.assertIn("e.directed!==false", html)
         self.assertIn('role="img"', html)
+        layers = {
+            name: int(value)
+            for name, value in re.findall(
+                r"--layer-(drawer|scenario|toolbar):(\d+)", html
+            )
+        }
+        self.assertGreater(layers["scenario"], layers["drawer"])
+        self.assertGreater(layers["toolbar"], layers["scenario"])
+        self.assertEqual(html.count("z-index:var(--layer-scenario)"), 3)
 
     def test_diagnose_reports_static_scan_as_not_grounded(self) -> None:
         stdout = io.StringIO()
