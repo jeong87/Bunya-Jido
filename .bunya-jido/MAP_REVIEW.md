@@ -225,3 +225,18 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Each miniature must pass blueprint and atlas-quality validation,
   published HTML and PNG contracts are checked by `tests/test_gallery.py`, and
   the repository's full trust and stale-map gates remain required.
+
+## 2026-06-05 - Human-First Viewer Orientation
+
+- Change: Preserved the existing canvas-first constellation design while
+  adding a repository summary and guided-tour entry, a keyboard-accessible
+  outline, semantic inspector cards, directional relation cues, numbered
+  workflow landmarks, and narrow-screen overflow handling.
+- Decision: This extends the existing Interactive Viewer and Semantic Map
+  Publication contracts. It does not add a new semantic component or allow the
+  presentation layer to reinterpret evidence; every new human-facing detail is
+  projected from existing published graph data.
+- Validation: Viewer and Studio regression tests, blueprint and agent-map
+  validation, grounded diagnostics, strict atlas-quality and agent-utility
+  evaluation, rebuilt committed demo and hero capture, stale-map review, and
+  the full unit suite are required before commit.

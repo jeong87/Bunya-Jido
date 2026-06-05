@@ -246,6 +246,19 @@
     {
       "task": "change viewer trust presentation",
       "intent": "Improve how grounded status, evidence, semantic paths, authored alternate views, or narrated walkthroughs are presented offline.",
+      "match_terms": [
+        "viewer UI",
+        "human-facing map UX",
+        "repository outline",
+        "semantic inspector"
+      ],
+      "when_to_use": [
+        "offline HTML viewer navigation, orientation, accessibility, or responsive presentation",
+        "human-facing semantic map comprehension"
+      ],
+      "when_not_to_use": [
+        "CLI-only context routing without viewer changes"
+      ],
       "start_nodes": [
         "presentation:viewer"
       ],
@@ -265,6 +278,8 @@
       ],
       "contracts": [
         "The viewer must display published trust information without becoming the evidence source.",
+        "Human-facing orientation and inspector details must come from published graph data without reinterpreting authored claims.",
+        "The canvas-first visual design must retain a keyboard-accessible repository outline and readable narrow-screen controls.",
         "Studio projection labels and contextual reveal must come from validated atlas data, with classic v1 behavior preserved.",
         "Studio scenario playback must display its authored basis, avoid implying runtime order for structural tours, and restore the prior view on exit.",
         "Studio layout must follow authored plane and projection data rather than privileged domain plane names."
@@ -273,6 +288,7 @@
         "tests/test_smoke.py",
         "tests/test_blueprint.py",
         "tests/test_blueprint_v2.py",
+        "tests/test_self_map.py",
         "tests/test_studio_benchmark.py"
       ],
       "safe_edit": [
@@ -281,6 +297,7 @@
         "src/bunya_jido/blueprint.py",
         "tests/test_smoke.py",
         "tests/test_blueprint_v2.py",
+        "tests/test_self_map.py",
         "tests/test_studio_benchmark.py"
       ],
       "watch_out": [

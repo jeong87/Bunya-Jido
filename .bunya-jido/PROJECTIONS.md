@@ -9,7 +9,9 @@
 - **Possible planes and project-local vocabulary:** entry, semantic, quality,
   presentation; commands, projections, gates, evidence, surfaces.
 - **Grounding strength:** Strong; each boundary has source or test evidence.
-- **First-screen value:** Shows the publication boundary before any playback.
+- **First-screen value:** Shows the publication boundary before any playback,
+  while the repository summary, outline, and guided-tour entry explain how a
+  human reader can begin.
 - **Distortion risks:** Hiding the agent-route contract as a secondary detail.
 - **Scenario potential:** Strong documented behavioral path.
 

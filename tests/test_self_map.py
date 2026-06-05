@@ -258,11 +258,17 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             "Studio Projections",
             "Scenario",
             "Map Controls",
+            "Repository Outline",
+            "Start guided tour",
             'id="toolbarTrust"',
             'id="workflowBar"',
+            'id="repositorySummary"',
             "nodeRoleStyles",
             "drawNodeShape",
             "relationFamilyVisuals",
+            "semanticOverviewHtml",
+            "pathStepIndex",
+            "e.directed!==false",
         ):
             self.assertIn(control, html)
         marker = '<script id="graph-data" type="application/json">'

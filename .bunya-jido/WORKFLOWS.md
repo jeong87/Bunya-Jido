@@ -15,7 +15,7 @@ designed to be reviewable in the generated HTML map.
 1. `src/bunya_jido/cli.py` accepts a build request.
 2. `src/bunya_jido/blueprint.py` loads a blueprint and applies the grounding gate.
 3. `src/bunya_jido/render.py` embeds a publishable Studio graph payload.
-4. `src/bunya_jido/viewer/index.template.html` exposes trust status, evidence, projection selection, and qualified scenario playback.
+4. `src/bunya_jido/viewer/index.template.html` exposes a human-first repository summary and outline, semantic inspector context, trust status, evidence, projection selection, directional path cues, and qualified scenario playback.
 
 ## Task Route Publication
 

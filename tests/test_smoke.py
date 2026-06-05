@@ -57,6 +57,12 @@ class SmokeTests(unittest.TestCase):
         self.assertIn("nodeRoleStyles", html)
         self.assertIn("drawNodeShape", html)
         self.assertIn("relationFamilyVisuals", html)
+        self.assertIn("Repository Outline", html)
+        self.assertIn('id="repositorySummary"', html)
+        self.assertIn("semanticOverviewHtml", html)
+        self.assertIn("pathStepIndex", html)
+        self.assertIn("e.directed!==false", html)
+        self.assertIn('role="img"', html)
 
     def test_diagnose_reports_static_scan_as_not_grounded(self) -> None:
         stdout = io.StringIO()

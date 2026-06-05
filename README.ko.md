@@ -328,10 +328,13 @@ bunya-jido evaluate-atlas-quality --root . --require-pass --write-report  # 선�
 생성된 HTML 지도에는 다음 기능이 들어갑니다.
 
 - 시맨틱 역할 표식과 워크플로우 launcher bar가 있는 canvas-first 별자리 overview
+- guided-tour 진입점과 키보드로 탐색 가능한 repository outline을 포함한 간결한 저장소 요약
 - 책임 영역별 plane cluster
 - 작성된 plane 목적 설명과 화면용 노드·관계 family
 - Studio v2의 map-local glyph/line vocabulary, primary projection tab, contextual direct-neighbor reveal
 - Studio v2 narrated scenario playback, basis badge, 일시정지/단계/속도 조작, 종료 시 view 복원
+- 작성된 목적, 입력, 출력, 제약을 보여주는 semantic inspector card
+- 별자리 layout을 유지하면서 관계 방향과 workflow 순서를 보여주는 미묘한 화살표와 단계 번호
 - 선택한 노드의 관련 신뢰 task route와 coding-agent context 복사 동작
 - 노드 family, 관계 family, confidence 필터링
 - 선택한 노드 주변만 보는 local graph focus
@@ -341,6 +344,7 @@ bunya-jido evaluate-atlas-quality --root . --require-pass --write-report  # 선�
 - blueprint view, 워크플로우, 검증된 agent-map task route를 구분해 보여주는 path preset
 - PNG와 JSON export
 - blueprint가 제공하는 경우 implementation detail 확장
+- 좁은 화면에서 가로 탐색 가능한 compact control과 drawer 기반 outline 접근
 
 지도의 근거는 저장소의 코드, 문서, 설정, 테스트, 런타임 산출물, 검증된 blueprint 파일에 있습니다. Bunya-Jido는 그 근거를 보기 좋은 형태로 투영합니다.
 

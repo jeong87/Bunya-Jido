@@ -184,13 +184,28 @@
       "importance": "core",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Displays trust, evidence, Studio projections, contextual navigation, validated narrated scenario playback, and copyable trusted agent-route context offline.",
-      "why_it_matters": "It is how people read the map while preserving the provenance and limitations of authored claims.",
-      "inspector_summary": "The viewer shows authored basis badges, restores user state after playback, and copies only projected trusted routes without becoming evidence.",
+      "description": "Displays human-first repository orientation, semantic inspector context, trust, evidence, Studio projections, contextual navigation, validated narrated scenario playback, and copyable trusted agent-route context offline.",
+      "why_it_matters": "It is how people first understand and then inspect the map while preserving the provenance and limitations of authored claims.",
+      "inputs": [
+        "Published semantic graph data",
+        "Validated projections, workflows, scenarios, and task routes"
+      ],
+      "outputs": [
+        "Interactive offline repository map",
+        "Keyboard-accessible repository outline",
+        "Evidence and semantic inspector views"
+      ],
+      "constraints": [
+        "Presentation must not become evidence or reinterpret authored claims.",
+        "Human orientation must preserve the existing canvas-first visual design."
+      ],
+      "inspector_summary": "The viewer gives people a repository summary, outline, directional path cues, semantic inspector cards, and evidence-backed playback without becoming evidence.",
       "source_path": "src/bunya_jido/viewer/index.template.html",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/viewer/index.template.html", "symbol": "renderTrust"},
-        {"kind": "source", "path": "src/bunya_jido/viewer/index.template.html", "symbol": "renderScenarioUI"}
+        {"kind": "source", "path": "src/bunya_jido/viewer/index.template.html", "symbol": "renderScenarioUI"},
+        {"kind": "source", "path": "src/bunya_jido/viewer/index.template.html", "symbol": "renderRepositoryOutline"},
+        {"kind": "source", "path": "src/bunya_jido/viewer/index.template.html", "symbol": "semanticOverviewHtml"}
       ]
     },
     {

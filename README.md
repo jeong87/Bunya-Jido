@@ -325,10 +325,13 @@ human follow-up without blocking publication.
 The generated HTML map includes:
 
 - a canvas-first constellation overview with semantic role glyphs and a workflow launcher bar
+- a compact repository summary with a guided-tour entry and keyboard-accessible repository outline
 - responsibility-oriented plane clusters
 - authored plane-purpose glossary plus viewer-facing node and relation families
 - Studio v2 map-local glyph/line vocabularies, primary projection tabs, and contextual direct-neighbor reveal
 - Studio v2 narrated scenario playback with basis badges, pause/step/speed controls, and exit restoration
+- semantic inspector cards for authored purpose, inputs, outputs, and constraints
+- subtle direction arrows and numbered workflow landmarks without changing the constellation layout
 - related trusted task routes on selected nodes with a copyable coding-agent context action
 - node-family, relation-family, and confidence filtering
 - local graph focus around a selected node
@@ -338,6 +341,7 @@ The generated HTML map includes:
 - labeled path presets for blueprint views, workflows, and validated agent-map task routes
 - PNG and JSON export
 - implementation-detail expansion when the blueprint provides detail nodes
+- horizontally navigable compact controls and drawer-based outline access on narrow screens
 
 The map is not the source of truth. The evidence remains in the repository's code, docs, configuration, tests, runtime artifacts, and validated blueprint files. Bunya-Jido projects that evidence into a form that is easier to inspect.
 

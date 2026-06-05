@@ -54,6 +54,10 @@ def valid_v2_blueprint() -> dict:
                 "activation": "always",
                 "description": "Produces a validated semantic payload.",
                 "why_it_matters": "It converts authored meaning into an artifact.",
+                "inspector_summary": "The builder is the central publication transform.",
+                "inputs": ["Authored semantic structure"],
+                "outputs": ["Validated semantic payload"],
+                "constraints": ["Publication requires grounded evidence."],
                 "evidence": evidence,
             },
             {
@@ -271,6 +275,11 @@ class BlueprintV2Tests(unittest.TestCase):
         self.assertEqual(graph["primary_projection"], "projection:primary")
         self.assertEqual(graph["static_provider_overlay"], "excluded")
         self.assertNotIn("Provider", {node["label"] for node in graph["nodes"]})
+        builder = next(node for node in graph["nodes"] if node["id"] == "component:builder")
+        self.assertEqual(builder["inspector_summary"], "The builder is the central publication transform.")
+        self.assertEqual(builder["inputs"], ["Authored semantic structure"])
+        self.assertEqual(builder["outputs"], ["Validated semantic payload"])
+        self.assertEqual(builder["constraints"], ["Publication requires grounded evidence."])
         projection = next(
             path for path in graph["path_presets"] if path["kind"] == "projection"
         )
@@ -624,6 +633,12 @@ class BlueprintV2Tests(unittest.TestCase):
         self.assertIn("startScenario", html)
         self.assertIn("drawScenarioOverlay", html)
         self.assertIn("restoreScenarioSnapshot", html)
+        self.assertIn('id="repositorySummary"', html)
+        self.assertIn('id="repositoryOutline"', html)
+        self.assertIn("semanticOverviewHtml", html)
+        self.assertIn("pathStepIndex", html)
+        self.assertIn("e.directed!==false", html)
+        self.assertIn('role="img"', html)
 
 
 if __name__ == "__main__":

@@ -14,7 +14,8 @@
 - **Basis:** documented workflow
 - **Derived from workflow/projection:** `semantic_map_publication`, Trusted Publication
 - **Why playback helps:** It shows that a renderer receives only a graph which
-  passed the grounding gate before the viewer presents it.
+  passed the grounding gate before the viewer presents it, and gives a human
+  reader a clear guided-tour entry from the repository summary.
 - **Steps:** CLI build request -> Blueprint Projection -> Grounding Gate ->
   HTML Renderer -> Interactive Viewer.
 - **What must not be implied:** The viewer supplies new evidence.

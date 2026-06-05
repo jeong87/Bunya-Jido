@@ -13,13 +13,14 @@
 body{background:radial-gradient(circle at 48% 44%,rgba(18,35,61,.9),rgba(7,12,21,1) 58%),#070c15}
 button,input,select{font:inherit}
 #app{height:100%;width:100vw;display:grid;grid-template-rows:var(--toolbar-h) 1fr}
-#toolbar{height:var(--toolbar-h);display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(7,12,21,.86);backdrop-filter:blur(10px);z-index:20}
+#toolbar{height:var(--toolbar-h);display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);background:rgba(7,12,21,.86);backdrop-filter:blur(10px);z-index:20;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+#toolbar>*{flex:0 0 auto}
 .brand{display:flex;align-items:center;min-width:236px;gap:10px}.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#60a5fa,#22d3ee 40%,#a78bfa 68%,#fb923c);box-shadow:0 0 22px rgba(56,189,248,.22)}
 h1{font-size:14px;line-height:1.15;margin:0}.sub{font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.35}
 .toolbar-group{display:flex;align-items:center;gap:5px;padding:4px;border-radius:12px;background:rgba(13,21,38,.7);border:1px solid rgba(122,146,184,.12)}
 .toolbar-spacer{flex:1;min-width:10px}
 button,.chip{height:34px;background:transparent;border:1px solid rgba(122,146,184,.16);color:#aebdd3;border-radius:9px;padding:0 11px;font-size:11px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
-button:hover,.chip:hover{border-color:rgba(56,189,248,.48);background:rgba(56,189,248,.08);color:#e0f2fe}button.active,.chip.active{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.36);color:#e0f2fe;box-shadow:0 0 0 1px rgba(56,189,248,.09) inset}.btnrow{display:flex;flex-wrap:wrap;gap:7px}.danger.active{border-color:#fb7185;background:rgba(251,113,133,.14)}
+button:hover,.chip:hover{border-color:rgba(56,189,248,.48);background:rgba(56,189,248,.08);color:#e0f2fe}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid rgba(56,189,248,.78);outline-offset:2px}button.active,.chip.active{background:rgba(56,189,248,.12);border-color:rgba(56,189,248,.36);color:#e0f2fe;box-shadow:0 0 0 1px rgba(56,189,248,.09) inset}.btnrow{display:flex;flex-wrap:wrap;gap:7px}.danger.active{border-color:#fb7185;background:rgba(251,113,133,.14)}
 #modeButtons .mode-card{width:auto;padding:0 11px;border-color:transparent}#modeButtons .mode-card strong{font-size:11px;font-weight:500}#modeButtons .mode-card span{display:none}
 .toolbar-action{white-space:nowrap}
 .search-wrap{height:42px;display:flex;align-items:center;gap:5px;padding:4px;border:1px solid rgba(122,146,184,.14);background:rgba(13,21,38,.7);border-radius:12px;width:min(325px,24vw)}
@@ -35,7 +36,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 .section,.panel-section{border:1px solid rgba(148,163,184,.12);background:rgba(15,23,42,.48);border-radius:13px;margin:0 0 11px;padding:11px}.section h2,.panel-section h2{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#cbd5e1;margin:0 0 10px}
 .checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{display:flex;align-items:center;gap:7px;font-size:11px;color:#d0d9ea}.check input{width:auto}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 12px currentColor}.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.stat{background:#0b1220;border:1px solid rgba(148,163,184,.13);border-radius:12px;padding:8px}.stat b{font-size:17px}.stat span{display:block;color:var(--muted);font-size:10px;margin-top:1px}
 #stage{position:absolute;inset:0;min-width:0;overflow:hidden}#graph{width:100%;height:100%;display:block;cursor:grab}#graph.dragging{cursor:grabbing}
-#mapSummary{position:absolute;left:18px;top:16px;pointer-events:none;border:1px solid rgba(122,146,184,.16);background:rgba(8,14,26,.72);backdrop-filter:blur(10px);border-radius:12px;padding:10px 12px;min-width:234px}.hudtitle{font-size:12px;font-weight:700}.hudmeta{color:#9fb0c9;font-size:11px;margin-top:4px}.summary-trust{display:flex;align-items:center;gap:7px;margin:9px 0;color:#92a7c5;font-size:10px}.summary-trust .trust-state{margin:0;padding:3px 7px;font-size:10px}
+#mapSummary{position:absolute;left:18px;top:16px;pointer-events:auto;border:1px solid rgba(122,146,184,.16);background:rgba(8,14,26,.76);backdrop-filter:blur(10px);border-radius:12px;padding:10px 12px;width:278px;max-width:calc(100% - 36px);box-shadow:0 14px 36px rgba(0,0,0,.18)}.hudtitle{font-size:12px;font-weight:700}.hudmeta{color:#9fb0c9;font-size:11px;margin-top:4px}.repo-summary{color:#b6c5da;font-size:10.5px;line-height:1.45;margin-top:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.summary-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.summary-actions button{height:29px;padding:0 9px;font-size:10px}.summary-trust{display:flex;align-items:center;gap:7px;margin:9px 0;color:#92a7c5;font-size:10px}.summary-trust .trust-state{margin:0;padding:3px 7px;font-size:10px}
 #projectionSummary{display:none;margin-top:8px;border-top:1px solid rgba(122,146,184,.15);padding-top:7px;font-size:10px;line-height:1.42;color:#9fb0c9}#projectionSummary.visible{display:block}#projectionSummary strong{display:block;color:#bfdbfe;font-size:10px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
 #presetBar{position:absolute;left:50%;top:16px;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(8,14,26,.88);border:1px solid rgba(122,146,184,.18);border-radius:14px;box-shadow:var(--shadow);max-width:min(680px,calc(100% - 580px));overflow:auto;z-index:2}#presetBar:empty{display:none}.preset-chip{white-space:nowrap;height:36px;padding:0 12px;border-radius:9px;border-color:transparent;color:#aabbd4;background:transparent;font-size:11px}.preset-chip small{font-size:9px;color:#5de6ff;text-transform:uppercase;margin-right:5px}.preset-chip.active small{color:#bae6fd}
 #workflowBar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);display:flex;gap:6px;padding:6px;background:rgba(8,14,26,.88);border:1px solid rgba(122,146,184,.18);border-radius:14px;box-shadow:var(--shadow);max-width:calc(100% - 42px);overflow:auto;z-index:2}.workflow-chip{white-space:nowrap;height:34px;padding:0 12px;border-radius:9px;border-color:transparent;color:#aabbd4;background:transparent;font-size:11px}.workflow-chip em{font-size:9px;text-transform:uppercase;font-style:normal;color:#647e9f}
@@ -45,6 +46,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 #scenarioNarration{position:absolute;display:none;width:min(300px,calc(100% - 30px));padding:11px 12px;background:rgba(8,14,26,.96);border:1px solid rgba(56,189,248,.28);border-radius:13px;box-shadow:var(--shadow);z-index:4;pointer-events:none}#scenarioNarration.visible{display:block}#scenarioNarration .scenario-step{font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:#8ea4c4;margin-bottom:6px}#scenarioNarration .scenario-step strong{color:#bae6fd}#scenarioNarration h3{font-size:12px;margin:0 0 5px;color:#f1f5f9}#scenarioNarration p{font-size:11px;color:#c7d4e8;line-height:1.45;margin:0}.scenario-status{color:#fcd34d;margin-left:5px}
 .toast{position:absolute;top:18px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.86);border:1px solid rgba(56,189,248,.22);border-radius:999px;padding:8px 13px;font-size:12px;color:#bfdbfe;opacity:0;transition:.25s;pointer-events:none}.toast.show{opacity:1}.legend{position:absolute;right:18px;bottom:70px;background:rgba(8,14,26,.78);backdrop-filter:blur(12px);border:1px solid rgba(148,163,184,.14);border-radius:11px;padding:8px 11px;display:flex;flex-wrap:wrap;gap:8px;max-width:600px}.legend span{font-size:10px;color:#cbd5e1;display:flex;align-items:center;gap:5px}.legend i{width:26px;height:8px;display:inline-block;border-radius:2px;vertical-align:middle}.edge-glyph{width:24px;height:8px;display:inline-block;vertical-align:middle;flex:0 0 24px}.edge-filter-list .check label{min-width:0}.edge-filter-list .check label span.rel-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .node-title{font-size:20px;font-weight:800;margin:0 0 5px}.badge{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(148,163,184,.17);background:#0b1220;border-radius:999px;padding:4px 8px;margin:0 5px 5px 0;font-size:10px;color:#dbeafe}.desc{color:#cbd5e1;font-size:12px;line-height:1.5}.muted{color:var(--muted)}.small{font-size:11px}.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;color:#bae6fd;background:#0b1220;border:1px solid rgba(148,163,184,.12);border-radius:8px;padding:1px 5px}.relgroup{margin-top:10px}.relgroup h3{font-size:11px;color:#e2e8f0;margin:0 0 6px}.edgeitem{border-left:2px solid #334155;padding:6px 0 6px 9px;margin:4px 0;font-size:11px;color:#cbd5e1;line-height:1.35}.edgeitem b{color:#e0f2fe}.edgeitem:hover{background:rgba(148,163,184,.06);cursor:pointer}.panel-kv{display:grid;grid-template-columns:82px 1fr;gap:6px;font-size:11px;margin-top:10px}.panel-kv div:first-child{color:#8ca0bb}.path-card{display:block;width:100%;text-align:left;border-radius:12px;margin:7px 0;padding:9px 10px}.path-card strong{font-size:12px}.path-card span{display:block;margin-top:3px;color:#9fb0c9;line-height:1.3}.path-kind{display:inline-block;margin-left:6px;border:1px solid rgba(56,189,248,.3);border-radius:999px;padding:2px 5px;color:#93c5fd;font-size:9px;font-style:normal;text-transform:uppercase;vertical-align:1px}.range{display:grid;grid-template-columns:1fr 44px;align-items:center;gap:8px}input[type=range]{padding:0}.footer-note{font-size:10px;line-height:1.45;color:#7f90aa}.kbd{font-size:10px;border:1px solid rgba(148,163,184,.25);background:#0b1220;border-radius:6px;padding:1px 5px;color:#cbd5e1}.pillrow{display:flex;flex-wrap:wrap;gap:6px}.edge-filter-list{max-height:230px;overflow:auto;padding-right:4px}.edge-filter-list .check{justify-content:space-between}.edge-filter-list label{display:flex;align-items:center;gap:7px}.count{color:#7f90aa;font-size:10px}.source-link{word-break:break-all;color:#93c5fd}.empty{padding:30px 10px;text-align:center;color:#94a3b8;font-size:12px;line-height:1.5}
+.semantic-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}.semantic-card{border:1px solid rgba(148,163,184,.12);background:#0b1220;border-radius:10px;padding:8px}.semantic-card h3{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#93c5fd;margin:0 0 5px}.semantic-card p,.semantic-card li{font-size:10.5px;line-height:1.4;color:#c2d0e3}.semantic-card p{margin:0}.semantic-card ul{padding-left:15px;margin:0}.semantic-card li+li{margin-top:3px}.outline-intro{color:#9fb0c9;font-size:11px;line-height:1.45;margin-bottom:9px}.outline-group{margin-top:10px}.outline-group h3{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:#93c5fd;margin:0 0 6px}.outline-card{display:block;width:100%;height:auto;min-height:38px;text-align:left;padding:7px 9px;margin:5px 0}.outline-card strong{display:block;color:#e5edf8;font-size:11px}.outline-card span{display:block;color:#8ca0bb;font-size:10px;line-height:1.35;margin-top:2px}
 .trust-state{display:inline-flex;border:1px solid rgba(148,163,184,.22);border-radius:999px;padding:4px 8px;font-size:11px;font-weight:700;margin-bottom:8px}.trust-state.grounded{color:#a7f3d0;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.11)}.trust-state.draft{color:#fde68a;border-color:rgba(250,204,21,.4);background:rgba(250,204,21,.1)}.trust-state.not_assessed{color:#bae6fd;border-color:rgba(56,189,248,.35);background:rgba(56,189,248,.1)}.trust-kv{display:grid;grid-template-columns:88px 1fr;gap:5px;font-size:11px;line-height:1.4}.trust-kv div:nth-child(odd){color:#8ca0bb}.trust-alert{color:#fda4af;margin-top:8px;font-size:11px;line-height:1.4}.evlist{font-size:10px;color:#9fb0c9;margin-top:4px;word-break:break-all}.evlist div{margin:2px 0}
 .mode-grid{display:grid;gap:7px}.mode-card{display:block;border-radius:11px;text-align:left;padding:8px 9px;width:100%}.mode-card strong{display:block;font-size:11px}.mode-card span{display:block;font-size:10px;line-height:1.35;color:#8ca0bb;margin-top:3px}.mode-card.active span{color:#bfd7f5}
 .glossary-list,.taxonomy-list{display:grid;gap:7px}.glossary-card,.family-card{border:1px solid rgba(148,163,184,.13);background:#0b1220;border-radius:10px;padding:7px 8px}.glossary-card label,.family-card label{display:flex;align-items:center;gap:7px;color:#e2e8f0;font-size:11px}.glossary-card input,.family-card input{width:auto}.glossary-card p,.family-verbs{margin:5px 0 0 20px;color:#8ca0bb;font-size:10px;line-height:1.35}.family-count{margin-left:auto;color:#7f90aa;font-size:10px}.confidence-grid{display:flex;flex-wrap:wrap;gap:7px}.confidence-chip{display:inline-flex;align-items:center;gap:6px;color:#e2e8f0;font-size:11px;border-radius:9px;padding:6px 8px}
@@ -56,7 +58,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 .legend .legend-note{font-size:10px;color:#8ca0bb;opacity:.9}
 
 @media(max-width:1200px){.brand{min-width:180px}.sub{display:none}.search-wrap{width:220px}}
-@media(max-width:900px){#toolbar{gap:7px;padding:10px}.brand{min-width:auto}.brand h1{display:none}.drawer{width:min(360px,calc(100% - 28px))}#inspector{width:min(390px,calc(100% - 28px))}.legend{display:none}#scenarioMenu{top:64px}#scenarioPlayback{bottom:64px;justify-content:flex-start}#scenarioNarration{width:min(280px,calc(100% - 26px))}}
+@media(max-width:900px){:root{--toolbar-h:56px}#toolbar{gap:7px;padding:7px 10px}.brand{min-width:auto}.brand h1,.brand .sub{display:none}.logo{width:30px;height:30px}.search-wrap{width:220px;flex:0 0 220px}.drawer{top:10px;bottom:10px;width:min(360px,calc(100% - 20px))}#filters{left:10px}#inspector{right:10px;width:min(390px,calc(100% - 20px))}#presetBar{left:10px;right:10px;top:10px;transform:none;max-width:none}#mapSummary{left:10px;top:64px;width:min(278px,calc(100% - 20px));max-height:calc(100% - 138px);overflow:auto}.statgrid{display:none}.semantic-grid{grid-template-columns:1fr}.legend{display:none}#workflowBar{left:10px;right:10px;bottom:10px;transform:none;max-width:none}#scenarioMenu{top:64px}#scenarioPlayback{bottom:58px;justify-content:flex-start}#scenarioNarration{width:min(280px,calc(100% - 26px))}}
 </style>
 </head>
 <body>
@@ -68,24 +70,25 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     <button class="toolbar-action" id="clearPathBtn">Clear highlight</button>
     <button class="toolbar-action" id="scenarioBtn" hidden>▶ Scenarios</button>
     <div class="toolbar-spacer"></div>
-    <div class="search-wrap"><input id="search" list="nodeList" placeholder="Find a role or artifact"/><datalist id="nodeList"></datalist><button id="focusBtn">Focus</button></div>
-    <button class="toolbar-action" id="filterBtn">Filters</button>
+    <div class="search-wrap"><input id="search" list="nodeList" aria-label="Find a role or artifact" placeholder="Find a role or artifact"/><datalist id="nodeList"></datalist><button id="focusBtn">Focus</button></div>
+    <button class="toolbar-action" id="filterBtn" aria-expanded="false">Filters</button>
   </header>
   <div id="workspace">
     <main id="stage">
-      <canvas id="graph"></canvas>
-      <div id="mapSummary"><div class="hudtitle" id="hudTitle">Bunya-Jido</div><div class="hudmeta" id="hudMeta">Force graph initialized</div><div id="projectionSummary"></div><div class="summary-trust" id="toolbarTrust"></div><div class="statgrid"><div class="stat"><b id="statNodes">0</b><span>visible nodes</span></div><div class="stat"><b id="statEdges">0</b><span>visible edges</span></div><div class="stat"><b id="statLens">All</b><span>lens</span></div></div></div>
+      <canvas id="graph" role="img" tabindex="0" aria-label="Interactive semantic repository map. Use the repository outline for keyboard navigation."></canvas>
+      <div id="mapSummary"><div class="hudtitle" id="hudTitle">Bunya-Jido</div><div class="hudmeta" id="hudMeta">Force graph initialized</div><div class="repo-summary" id="repositorySummary"></div><div class="summary-actions"><button id="startHereBtn">Start guided tour</button><button id="outlineBtn">Repository outline</button></div><div id="projectionSummary"></div><div class="summary-trust" id="toolbarTrust"></div><div class="statgrid"><div class="stat"><b id="statNodes">0</b><span>visible nodes</span></div><div class="stat"><b id="statEdges">0</b><span>visible edges</span></div><div class="stat"><b id="statLens">All</b><span>lens</span></div></div></div>
       <div class="legend" id="legend"></div>
       <div id="presetBar" aria-label="Studio projection presets"></div>
       <div id="workflowBar" aria-label="Operational workflows"></div>
       <div id="scenarioMenu" aria-label="Narrated scenarios"></div>
       <div id="scenarioNarration" aria-live="polite"></div>
       <div id="scenarioPlayback" aria-label="Scenario playback controls"></div>
-      <div class="toast" id="toast"></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </main>
     <aside class="drawer" id="filters">
       <div class="drawer-head"><h2>Map Controls</h2><button id="closeFilters">Close</button></div>
       <div class="scroll">
+        <div class="panel-section" id="outlineSection"><h2>Repository Outline</h2><div id="repositoryOutline"></div></div>
         <div class="panel-section"><h2>Trust</h2><div id="trustPanel"></div></div>
         <div class="panel-section"><h2>Lens</h2><div class="btnrow" id="lensButtons" aria-label="Lens"></div></div>
         <div class="panel-section"><h2>Search / Local Graph</h2><div class="btnrow"><button id="localBtn">Local depth</button><button id="clearFocusBtn">Clear focus</button></div><div style="margin-top:9px"><label class="small muted">Depth</label><select id="depth"><option value="0">0 · selected only highlight</option><option value="1">1 · immediate neighbors</option><option value="2" selected>2 · operating neighborhood</option><option value="3">3 · wide neighborhood</option></select></div></div>
@@ -549,6 +552,10 @@ function drawStyledEdge(e,x1,y1,x2,y2,hi){
   } else {
     ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
   }
+  if(e.directed!==false&&(hi||state.zoom>.9)){
+    const angle=Math.atan2(y2-y1,x2-x1), size=hi?7:5;
+    ctx.setLineDash([]);ctx.fillStyle=style.color;ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-Math.cos(angle-Math.PI/6)*size,y2-Math.sin(angle-Math.PI/6)*size);ctx.lineTo(x2-Math.cos(angle+Math.PI/6)*size,y2-Math.sin(angle+Math.PI/6)*size);ctx.closePath();ctx.fill();
+  }
   ctx.setLineDash([]); ctx.restore();
 }
 function clipLine(x1,y1,x2,y2,r1,r2){const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy)||1,ux=dx/d,uy=dy/d;return {x1:x1+ux*(r1+4),y1:y1+uy*(r1+4),x2:x2-ux*(r2+4),y2:y2-uy*(r2+4)};}
@@ -590,6 +597,7 @@ function draw(){
   const grad=ctx.createRadialGradient(W*.48,H*.38,0,W*.5,H*.5,Math.max(W,H)); grad.addColorStop(0,'#0d1b31'); grad.addColorStop(.52,'#080f1c'); grad.addColorStop(1,'#050811'); ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
   const vis=nodes.filter(n=>state.visibleNodes.has(n.id)); const vedges=edges.filter(e=>state.visibleEdges.has(e.id)); drawPaint(vis);
   const pathSet=state.path?new Set(state.path.node_ids):new Set();
+  const pathStepIndex=state.path&&state.path.kind==='workflow'?new Map(state.path.node_ids.map((id,index)=>[id,index+1])):new Map();
   const selectedNeighbors=new Set();
   if(state.selected){vedges.forEach(e=>{if(e.source===state.selected.id||e.target===state.selected.id){selectedNeighbors.add(e.source);selectedNeighbors.add(e.target);}});}
   vedges.forEach(e=>{
@@ -615,6 +623,7 @@ function draw(){
     ctx.font=`650 ${markSize}px Inter, sans-serif`; ctx.fillText(role.mark,x,y);
     if(n.llm_lane){const pill=n.llm_lane.includes('Gemini')?'GEMINI':n.llm_lane.includes('OpenAI')?'OPENAI':n.llm_lane.includes('Claude')?'CLAUDE':n.llm_lane.includes('Qwen')?'QWEN':'LLM';ctx.font='700 8px Inter, sans-serif';const pw=Math.max(28,ctx.measureText(pill).width+11);ctx.globalAlpha=dim?.18:.9;ctx.fillStyle='rgba(15,23,42,.86)';roundedRect(ctx,x-pw/2,y-r-18,pw,12,6);ctx.fill();ctx.strokeStyle='rgba(240,171,252,.54)';ctx.lineWidth=.8;ctx.stroke();ctx.fillStyle='#f5d0fe';ctx.fillText(pill,x,y-r-12);}
     if(state.showLabels&&(state.zoom>.65||n.major||selected||hovered||path)){ctx.globalAlpha=dim?.27:1;ctx.font=(n.major||selected?'600 ':'500 ')+(n.major?12:10)+'px Inter, sans-serif';ctx.textBaseline='top';ctx.fillStyle=selected?'#fff':'rgba(217,229,246,.96)';const label=n.label.replace(/^artifact - /,'').replace(/^module - /,'');const parts=wrap(label,n.major?18:15);parts.slice(0,2).forEach((part,i)=>ctx.fillText(part,x,y+r+7+i*12));}
+    if(pathStepIndex.has(n.id)){const step=String(pathStepIndex.get(n.id));ctx.globalAlpha=1;ctx.fillStyle='#07111f';ctx.strokeStyle=rgba(color,.95);ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(x+r*.82,y-r*.82,9,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.fillStyle='#e0f2fe';ctx.font='700 9px Inter, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(step,x+r*.82,y-r*.82+.5);}
     ctx.restore();
   });
   drawScenarioOverlay();
@@ -683,6 +692,7 @@ function positionScenarioNarration(node){
 function setMode(mode){if(state.scenario)stopScenario(true);state.mode=mode;renderUI();buildVisibility();fit(false);toast(modeDefs.find(item=>item.id===mode)?.label||mode);}
 function selectNode(n){if(state.scenario)stopScenario(true);state.selected=n;state.selectedEdge=null;document.getElementById('search').value=n?n.label:'';document.getElementById('inspector').classList.toggle('open',!!n);buildVisibility();renderDetails();updateLegend();if(studioAtlas&&state.mode==='overview')fit(false);}
 function selectEdge(edge){if(state.scenario)stopScenario(true);state.selected=edge.t;state.selectedEdge=edge;state.mode='evidence';document.getElementById('search').value=edge.t.label;document.getElementById('inspector').classList.add('open');renderUI();fit(false);toast('inspect: '+edge.relation);}
+function pathKind(p){return p.kind==='projection'?'Projection':p.kind==='task_route'?'Task Route':p.kind==='workflow'||String(p.id||'').startsWith('workflow_')?'Workflow':p.kind==='overview'||p.id==='overview'||p.id==='blueprint_core'?'Overview':'View';}
 const trustedTaskRoutes=(DATA.path_presets||[]).filter(path=>path.kind==='task_route');
 function selectPath(id,sticky=false){
   if(state.scenario)stopScenario(true);
@@ -726,6 +736,21 @@ function bindRelatedTaskRoutes(el){
   el.querySelectorAll('[data-highlight-route]').forEach(button=>button.onclick=()=>selectPath(button.dataset.highlightRoute,true));
   el.querySelectorAll('[data-copy-context]').forEach(button=>button.onclick=()=>copyCodingAgentContext(button.dataset.copyContext));
 }
+function semanticItems(value){return Array.isArray(value)?value.filter(item=>item!==null&&item!==undefined&&String(item).trim()).map(String):(value===null||value===undefined||!String(value).trim()?[]:[String(value)]);}
+function semanticCardHtml(title,value){
+  const items=semanticItems(value);if(!items.length)return '';
+  return `<div class="semantic-card"><h3>${escapeHtml(title)}</h3>${items.length===1?`<p>${escapeHtml(items[0])}</p>`:`<ul>${items.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul>`}</div>`;
+}
+function semanticOverviewHtml(node){
+  const cards=[
+    semanticCardHtml('What to know',node.inspector_summary),
+    semanticCardHtml('Why it matters',node.why_it_matters),
+    semanticCardHtml('Receives',node.inputs),
+    semanticCardHtml('Produces',node.outputs),
+    semanticCardHtml('Constraints',node.constraints)
+  ].filter(Boolean);
+  return cards.length?`<div class="semantic-grid">${cards.join('')}</div>`:'';
+}
 function evidenceHtml(evidence){const items=(evidence||[]).slice(0,4); return items.length?`<div class="evlist">${items.map(ev=>`<div>${escapeHtml(ev.kind||'evidence')}: ${escapeHtml(ev.path||'')}${ev.symbol?` · ${escapeHtml(ev.symbol)}`:''}</div>`).join('')}</div>`:'<div class="evlist">no recorded evidence</div>';}
 function confidenceLabel(value){return String(value||'not_recorded').replaceAll('_',' ');}
 function familyRelations(family){return [...new Set(edges.filter(e=>relationFamily(e)===family).map(e=>e.relation))].sort();}
@@ -745,7 +770,7 @@ function renderDetails(){
   const el=document.getElementById('details'); const n=state.selected;
   if(!n){el.innerHTML=`<div class="empty">${state.mode==='overview'?'Select a node for its role, then open Inspect Evidence for source references.':'Select a node or relationship to inspect recorded evidence.'}</div>`; return;}
   const family=nodeFamilyDefs[nodeFamily(n)]?.label||'Component';
-  const summary=`<div class="node-title">${escapeHtml(n.label)}</div><div><span class="badge">${escapeHtml(family)}</span><span class="badge">${escapeHtml(planeDisplayLabel(n.plane))}</span>${n.major?'<span class="badge">landmark</span>':''}</div><p class="desc">${escapeHtml(n.description||'')}</p>`;
+  const summary=`<div class="node-title">${escapeHtml(n.label)}</div><div><span class="badge">${escapeHtml(family)}</span><span class="badge">${escapeHtml(planeDisplayLabel(n.plane))}</span>${n.major?'<span class="badge">landmark</span>':''}${n.activation?`<span class="badge">${escapeHtml(String(n.activation).replaceAll('_',' '))}</span>`:''}</div><p class="desc">${escapeHtml(n.description||'')}</p>${semanticOverviewHtml(n)}`;
   if(state.mode==='overview'){
     const reveal=state.contextualNodeIds.size?`<div class="mode-note"><strong>Direct context revealed</strong><br>${state.contextualNodeIds.size} contextual neighbor${state.contextualNodeIds.size===1?'':'s'} linked to this selection are temporarily visible.</div>`:'';
     el.innerHTML=summary+reveal+relatedTaskRoutesHtml(n)+`<div class="mode-note">Evidence, exact relationship verbs, and confidence stay available on demand.<div style="margin-top:8px"><button id="inspectSelectedBtn">Inspect evidence</button></div></div>`;
@@ -780,15 +805,46 @@ function renderScenarioUI(){
   narration.classList.add('visible');
   narration.innerHTML=`<div class="scenario-step"><span class="scenario-basis">${escapeHtml(scenarioBasisLabels[scenario.basis]||scenario.basis)}</span><strong>${escapeHtml(scenario.playback_mode==='animated_token'?'Animated path':'Guided tour')}</strong>${state.scenarioPlaying?'':'<span class="scenario-status">Paused</span>'} · step ${state.scenarioStepIndex+1}/${count}</div><h3>${escapeHtml(step.title)}</h3><p>${escapeHtml(step.narration)}</p>`;
 }
+function renderOrientation(){
+  const summary=String(DATA.description||'Explore the repository responsibilities, workflows, and evidence.');
+  document.getElementById('repositorySummary').textContent=summary;
+  canvas.setAttribute('aria-label',`${summary} Use Repository outline for keyboard-accessible landmarks and workflows.`);
+  const firstWorkflow=(DATA.path_presets||[]).find(path=>pathKind(path)==='Workflow');
+  document.getElementById('startHereBtn').textContent=studioScenarios.length?'Start guided tour':firstWorkflow?'Start with workflow':primaryProjectionPreset?'Show primary view':'Browse outline';
+}
+function startHumanOrientation(){
+  if(studioScenarios.length){startScenario(studioScenarios[0].id);return;}
+  const firstWorkflow=(DATA.path_presets||[]).find(path=>pathKind(path)==='Workflow');
+  if(firstWorkflow){selectPath(firstWorkflow.id,true);return;}
+  if(primaryProjectionPreset){selectPath(primaryProjectionPreset.id,true);return;}
+  toggleFilters(true);
+}
+function renderRepositoryOutline(){
+  const el=document.getElementById('repositoryOutline');
+  const primaryIds=new Set(primaryProjectionPreset?.node_ids||[]);
+  const candidates=nodes.filter(node=>primaryIds.size?primaryIds.has(node.id):true);
+  const majorLandmarks=candidates.filter(node=>node.major);
+  const landmarks=(majorLandmarks.length?majorLandmarks:candidates).slice(0,10);
+  const workflows=(DATA.path_presets||[]).filter(path=>pathKind(path)==='Workflow').slice(0,10);
+  const projections=(DATA.path_presets||[]).filter(path=>pathKind(path)==='Projection').slice(0,6);
+  const nodeCards=landmarks.map(node=>`<button class="outline-card" data-outline-node="${escapeHtml(node.id)}"><strong>${escapeHtml(node.label)}</strong><span>${escapeHtml(node.inspector_summary||node.description||planeDisplayLabel(node.plane))}</span></button>`).join('');
+  const pathCards=items=>items.map(path=>`<button class="outline-card" data-outline-path="${escapeHtml(path.id)}"><strong>${escapeHtml(path.label)}</strong><span>${escapeHtml(path.question_answered||path.description||pathKind(path))}</span></button>`).join('');
+  el.innerHTML=`<div class="outline-intro">${escapeHtml(DATA.description||'Use these landmarks and reading paths to enter the map.')}</div>${landmarks.length?`<div class="outline-group"><h3>Key landmarks</h3>${nodeCards}</div>`:''}${workflows.length?`<div class="outline-group"><h3>Workflows</h3>${pathCards(workflows)}</div>`:''}${projections.length?`<div class="outline-group"><h3>Reading views</h3>${pathCards(projections)}</div>`:''}`;
+  el.querySelectorAll('[data-outline-node]').forEach(button=>button.onclick=()=>{const node=nodeById.get(button.dataset.outlineNode);if(node){toggleFilters(false);selectNode(node);}});
+  el.querySelectorAll('[data-outline-path]').forEach(button=>button.onclick=()=>{toggleFilters(false);selectPath(button.dataset.outlinePath,true);});
+}
 function renderUI(){
   renderTrust();
-  const activeProjection=state.path&&state.path.kind==='projection'?state.path:primaryProjectionPreset;
+  renderOrientation();
+  renderRepositoryOutline();
+  const activePath=state.path||primaryProjectionPreset;
   const projectionSummary=document.getElementById('projectionSummary');
-  if(studioAtlas&&activeProjection){
-    document.getElementById('hudTitle').textContent=activeProjection.label;
+  if(activePath){
+    document.getElementById('hudTitle').textContent=activePath.label;
     projectionSummary.classList.add('visible');
-    projectionSummary.innerHTML=`<strong>${activeProjection.is_primary?'Primary projection':'Projection'}</strong>${escapeHtml(activeProjection.question_answered||activeProjection.description||'')}`;
+    projectionSummary.innerHTML=`<strong>${activePath.is_primary?'Primary projection':pathKind(activePath)}</strong>${escapeHtml(activePath.question_answered||activePath.description||'')}`;
   } else {
+    document.getElementById('hudTitle').textContent=DATA.title||'Bunya-Jido';
     projectionSummary.classList.remove('visible');
     projectionSummary.innerHTML='';
   }
@@ -805,7 +861,6 @@ function renderUI(){
   document.querySelectorAll('[data-node-family]').forEach(x=>x.onchange=()=>{x.checked?state.allowedNodeFamilies.add(x.dataset.nodeFamily):state.allowedNodeFamilies.delete(x.dataset.nodeFamily);});
   document.querySelectorAll('[data-relation-family]').forEach(x=>x.onchange=()=>{x.checked?state.allowedRelationFamilies.add(x.dataset.relationFamily):state.allowedRelationFamilies.delete(x.dataset.relationFamily);});
   document.querySelectorAll('[data-confidence]').forEach(x=>x.onchange=()=>{x.checked?state.allowedConfidences.add(x.dataset.confidence):state.allowedConfidences.delete(x.dataset.confidence);});
-  const pathKind=p=>p.kind==='projection'?'Projection':p.kind==='task_route'?'Task Route':p.kind==='workflow'||String(p.id||'').startsWith('workflow_')?'Workflow':p.kind==='overview'||p.id==='overview'||p.id==='blueprint_core'?'Overview':'View';
   const projections=studioAtlas?DATA.path_presets.filter(p=>p.kind==='projection'):[];
   document.getElementById('presetBar').innerHTML=projections.map(p=>`<button class="preset-chip ${state.path&&state.path.id===p.id?'active':''}" data-preset="${p.id}" title="${escapeHtml(p.description)}"><small>${p.is_primary?'Primary':'View'}</small>${escapeHtml(p.label)}</button>`).join('');
   document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>selectPath(b.dataset.preset,true));
@@ -865,16 +920,20 @@ canvas.addEventListener('mousedown',e=>{const rect=canvas.getBoundingClientRect(
 window.addEventListener('mouseup',()=>{if(state.dragging){state.dragging.fixed=false;state.dragging=null;} panning=false; canvas.classList.remove('dragging');});
 canvas.addEventListener('click',e=>{const rect=canvas.getBoundingClientRect(); const x=e.clientX-rect.left,y=e.clientY-rect.top; const n=nearestNode(x,y); if(n){selectNode(n);return;} const ed=nearestEdge(x,y); if(ed)selectEdge(ed);});
 canvas.addEventListener('wheel',e=>{e.preventDefault(); const rect=canvas.getBoundingClientRect(); const mx=e.clientX-rect.left,my=e.clientY-rect.top; const [wx,wy]=screenToWorld(mx,my); const k=Math.exp(-e.deltaY*.001); state.zoom=Math.max(.15,Math.min(4,state.zoom*k)); state.panX=mx-wx*state.zoom; state.panY=my-wy*state.zoom;},{passive:false});
+canvas.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleFilters(true);document.querySelector('[data-outline-node],[data-outline-path]')?.focus();}});
 window.addEventListener('resize',resize);
 const filtersDrawer=document.getElementById('filters');
 const inspectorDrawer=document.getElementById('inspector');
 const filterBtn=document.getElementById('filterBtn');
-function toggleFilters(open){filtersDrawer.classList.toggle('open',open);filterBtn.classList.toggle('active',open);}
+function toggleFilters(open){filtersDrawer.classList.toggle('open',open);filterBtn.classList.toggle('active',open);filterBtn.setAttribute('aria-expanded',String(open));}
 filterBtn.onclick=()=>toggleFilters(!filtersDrawer.classList.contains('open'));
 document.getElementById('closeFilters').onclick=()=>toggleFilters(false);
 document.getElementById('closeInspector').onclick=()=>inspectorDrawer.classList.remove('open');
 document.getElementById('scenarioBtn').onclick=()=>{state.scenarioMenuOpen=!state.scenarioMenuOpen;renderScenarioUI();};
 document.getElementById('focusBtn').onclick=()=>{const q=document.getElementById('search').value.trim().toLowerCase(); const n=nodes.find(n=>n.label.toLowerCase()===q)||nodes.find(n=>n.label.toLowerCase().includes(q)); if(n){selectNode(n); state.depthMode=false; state.panX=W/2-n.x*state.zoom; state.panY=H/2-n.y*state.zoom; toast('selected '+n.label)}};
+document.getElementById('search').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('focusBtn').click();});
+document.getElementById('startHereBtn').onclick=()=>startHumanOrientation();
+document.getElementById('outlineBtn').onclick=()=>{toggleFilters(true);document.getElementById('outlineSection').scrollIntoView({block:'start'});document.querySelector('[data-outline-node],[data-outline-path]')?.focus();};
 document.getElementById('localBtn').onclick=()=>{if(!state.selected){document.getElementById('focusBtn').click()} state.depthMode=!!state.selected; if(state.depthMode){fit();toast('local graph')}};
 document.getElementById('clearFocusBtn').onclick=()=>{if(state.scenario)stopScenario(true);state.selected=null;state.selectedEdge=null;state.depthMode=false;document.getElementById('search').value='';inspectorDrawer.classList.remove('open');renderDetails();updateLegend();fit();};
 document.getElementById('depth').onchange=()=>{if(state.depthMode)fit();};

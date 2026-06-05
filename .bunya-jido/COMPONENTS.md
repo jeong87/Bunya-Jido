@@ -23,9 +23,9 @@ keeps the review rationale visible beside it.
 ### Renderer And Viewer
 
 - **Plane:** presentation
-- **Role:** Embeds the graph payload into an offline HTML viewer and presents trust, evidence, projection presets, policy-qualified narrated scenarios, and copyable validated agent-route context.
+- **Role:** Embeds the graph payload into an offline HTML viewer and presents human-first repository orientation, an accessible outline, semantic inspector context, trust, evidence, projection presets, policy-qualified narrated scenarios, and copyable validated agent-route context.
 - **Evidence:** `src/bunya_jido/render.py`, `src/bunya_jido/viewer/index.template.html`
-- **Boundary:** Presentation consumes the semantic contract; it is not evidence itself.
+- **Boundary:** Presentation consumes the semantic contract and may clarify direction or reading order, but it is not evidence itself and must not reinterpret authored meaning.
 
 ## Analysis And Trust
 

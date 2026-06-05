@@ -9,6 +9,9 @@ be documented.
 
 ### Added
 
+- Human-first map orientation with a repository summary, guided-tour entry,
+  keyboard-accessible repository outline, and semantic inspector cards for
+  authored purpose, inputs, outputs, and constraints.
 - Decision-aware context routing with `MATCH`, `IN_SCOPE_NO_ROUTE`,
   `OUT_OF_SCOPE`, and `UNCERTAIN`, optional reviewed repository/route
   boundaries, and machine-readable `bunya-jido context --json` output.
@@ -60,6 +63,9 @@ be documented.
 
 ### Changed
 
+- The existing constellation viewer now adds subtle relationship direction,
+  numbered workflow landmarks, current-path HUD context, and narrow-screen
+  overflow handling without replacing its visual design.
 - Natural-language task matching now uses conservative exact meaningful terms,
   explicit route-use phrases, route separation, and scope-sensitive rejection;
   non-`MATCH` decisions expose neither trusted routes nor safe-edit paths.
