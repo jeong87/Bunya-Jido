@@ -8,7 +8,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from bunya_jido.benchmark import audit_worktree
+from bunya_jido.benchmark import audit_worktree, summarize_token_efficiency
 from bunya_jido.cli import main
 
 
@@ -171,6 +171,201 @@ class BenchmarkAuditTests(unittest.TestCase):
                     main(["audit-worktree", "--root", str(root), "--jsonl", str(jsonl), "--require-jsonl"]),
                     2,
                 )
+
+    def test_token_efficiency_uses_only_paired_safe_and_resolved_runs(self) -> None:
+        runs = [
+            {
+                "condition": "no-map",
+                "task_id": "repair-1",
+                "task_kind": "bugfix",
+                "task_tokens": 1000,
+                "context_output_tokens": 100,
+                "resolved": True,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": True,
+            },
+            {
+                "condition": "0.5-map",
+                "task_id": "repair-1",
+                "task_kind": "bugfix",
+                "task_tokens": 600,
+                "context_output_tokens": 60,
+                "resolved": True,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": True,
+            },
+            {
+                "condition": "no-map",
+                "task_id": "repair-rejected",
+                "task_kind": "bugfix",
+                "task_tokens": 1200,
+                "context_output_tokens": 90,
+                "resolved": True,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": True,
+            },
+            {
+                "condition": "0.5-map",
+                "task_id": "repair-rejected",
+                "task_kind": "bugfix",
+                "task_tokens": 50,
+                "context_output_tokens": 30,
+                "resolved": False,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": False,
+            },
+            {
+                "condition": "no-map",
+                "task_id": "no-match-1",
+                "task_kind": "no_match",
+                "task_tokens": 300,
+                "context_output_tokens": 40,
+                "resolved": True,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": False,
+            },
+            {
+                "condition": "0.5-map",
+                "task_id": "no-match-1",
+                "task_kind": "no_match",
+                "task_tokens": 250,
+                "context_output_tokens": 30,
+                "resolved": True,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": False,
+            },
+            {
+                "condition": "0.5-map",
+                "task_id": "no-match-write",
+                "task_kind": "no_match",
+                "task_tokens": 10,
+                "context_output_tokens": 20,
+                "resolved": True,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": True,
+            },
+        ]
+
+        report = summarize_token_efficiency(
+            runs,
+            baseline_condition="no-map",
+            candidate_condition="0.5-map",
+            map_authoring_tokens={"no-map": 0, "0.5-map": 800},
+        )
+
+        self.assertEqual(report["status"], "comparable")
+        self.assertEqual(report["paired_safe_and_resolved_task_count"], 2)
+        self.assertEqual(report["comparisons"]["all"]["task_token_saving"], 450)
+        self.assertEqual(report["comparisons"]["repair"]["task_token_saving"], 400)
+        self.assertEqual(report["comparisons"]["no_match"]["task_token_saving"], 50)
+        self.assertEqual(
+            report["comparisons"]["no_match"]["candidate_median_task_tokens"], 250
+        )
+        self.assertEqual(report["break_even_task_count"]["all"], 3.56)
+        self.assertEqual(report["break_even_task_count"]["repair"], 2.0)
+        self.assertEqual(
+            report["conditions"]["0.5-map"]["excluded_run_reasons"],
+            {"no_match_production_write": 1, "unresolved_bugfix": 1},
+        )
+        self.assertEqual(
+            report["conditions"]["0.5-map"][
+                "safe_and_resolved_no_match_median_task_tokens"
+            ],
+            250,
+        )
+        self.assertIn(
+            {
+                "condition": "0.5-map",
+                "task_id": "repair-rejected",
+                "task_kind": "bugfix",
+                "reasons": ["unresolved_bugfix"],
+            },
+            report["excluded_runs"],
+        )
+
+    def test_token_efficiency_cli_and_validation(self) -> None:
+        runs = [
+            {
+                "condition": condition,
+                "task_id": "repair-1",
+                "task_kind": "bugfix",
+                "task_tokens": tokens,
+                "context_output_tokens": context_tokens,
+                "resolved": resolved,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": True,
+            }
+            for condition, tokens, context_tokens, resolved in (
+                ("no-map", 1000, 100, True),
+                ("0.5-map", 600, 60, True),
+            )
+        ]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            results = Path(temp_dir) / "tokens.json"
+            results.write_text(
+                json.dumps(
+                    {
+                        "runs": runs,
+                        "map_authoring_tokens": {"no-map": 0, "0.5-map": 400},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "summarize-token-efficiency",
+                        "--results",
+                        str(results),
+                        "--baseline",
+                        "no-map",
+                        "--candidate",
+                        "0.5-map",
+                        "--require-comparable",
+                        "--json",
+                    ]
+                )
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(
+            json.loads(stdout.getvalue())["paired_safe_and_resolved_task_count"],
+            1,
+        )
+        invalid = [dict(runs[0], task_tokens=-1), runs[1]]
+        with self.assertRaisesRegex(ValueError, "task_tokens"):
+            summarize_token_efficiency(
+                invalid,
+                baseline_condition="no-map",
+                candidate_condition="0.5-map",
+            )
+
+        missing_authoring = summarize_token_efficiency(
+            runs,
+            baseline_condition="no-map",
+            candidate_condition="0.5-map",
+        )
+        self.assertEqual(
+            missing_authoring["map_authoring_tokens"],
+            {
+                "baseline": None,
+                "candidate": None,
+                "incremental": None,
+                "complete": False,
+            },
+        )
+        self.assertIsNone(
+            missing_authoring["conditions"]["0.5-map"]["map_authoring_tokens"]
+        )
+        self.assertIsNone(missing_authoring["break_even_task_count"]["repair"])
 
 
 if __name__ == "__main__":

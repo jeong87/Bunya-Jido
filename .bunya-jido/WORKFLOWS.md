@@ -31,7 +31,7 @@ designed to be reviewable in the generated HTML map.
 4. Independent positive evidence, route-specific grounded nodes, negative boundaries, and route separation produce `MATCH`, `IN_SCOPE_NO_ROUTE`, `OUT_OF_SCOPE`, or `UNCERTAIN`.
 5. Only `MATCH` emits trusted route and safe-edit guidance. `IN_SCOPE_NO_ROUTE` may emit capped repository-relative read-only discovery; `OUT_OF_SCOPE` and `UNCERTAIN` remain route-free.
 6. Discovery candidates point back to blueprint nodes, workflows, or existing repository paths and require a new context decision before editing.
-7. The CLI can emit either the human-readable Markdown handoff or a machine-readable `context --json` decision report.
+7. The CLI emits compact Markdown or JSON by default while `--verbose` preserves route diagnostics and full discovery evidence.
 
 ## Continuous Contract Check
 
@@ -43,6 +43,12 @@ designed to be reviewable in the generated HTML map.
 1. The CLI validates a Studio v2 blueprint and gathers objective overview metrics.
 2. `src/bunya_jido/quality.py` reports density, label burden, and misleading scenario-narration signals separately from human editorial review.
 3. On request, the CLI writes `.bunya-jido/ATLAS_QUALITY_REPORT.md` as a local review summary without changing the publication gate.
+
+## Benchmark Evidence Reporting
+
+1. `bunya-jido audit-worktree` records tracked, staged, deleted, renamed, untracked, and JSONL-observed production activity.
+2. Compatible live-run results record task/context tokens, resolution, infrastructure validity, boundary violations, and no-match write attempts.
+3. `bunya-jido summarize-token-efficiency` compares only paired safe-and-resolved task IDs while reporting exclusions, medians, map-authoring cost, and break-even counts.
 
 ## Studio Benchmark Review
 

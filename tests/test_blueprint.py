@@ -424,6 +424,7 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         )
         self.assertEqual(cli_result, 0)
         self.assertEqual(cli_report["decision"], "OUT_OF_SCOPE")
+        self.assertEqual(cli_report["output_profile"], "compact")
         self.assertEqual(cli_report["execution_policy"], "read_only")
         self.assertEqual(cli_report["safe_edit_paths"], [])
 
@@ -493,6 +494,9 @@ class AgentMapCharacterizationTests(unittest.TestCase):
             semantic = generate_agent_context_report(
                 root, task="Fix command option dispatch."
             )
+            semantic_verbose = generate_agent_context_report(
+                root, task="Fix command option dispatch.", verbose=True
+            )
             repository_path = generate_agent_context_report(
                 root, task="Fix queue lease ownership."
             )
@@ -525,6 +529,12 @@ class AgentMapCharacterizationTests(unittest.TestCase):
             [candidate.get("id") for candidate in discovery["likely_areas"]],
         )
         self.assertIn("src/cli.py", [item["path"] for item in discovery["read_first"]])
+        self.assertNotIn("evidence_paths", discovery["likely_areas"][0])
+        self.assertIn("evidence_path", discovery["likely_areas"][0])
+        self.assertIn(
+            "evidence_paths",
+            semantic_verbose["discovery_context"]["likely_areas"][0],
+        )
         self.assertLessEqual(len(discovery["likely_areas"]), 3)
         self.assertLessEqual(len(discovery["likely_workflows"]), 2)
         self.assertLessEqual(len(discovery["read_first"]), 5)
@@ -604,6 +614,9 @@ class AgentMapCharacterizationTests(unittest.TestCase):
 
             errors, warnings, metrics = validate_agent_map_obj(agent_map, root=root, blueprint=blueprint)
             text = generate_agent_context(root, task="change builder behavior")
+            verbose_text = generate_agent_context(
+                root, task="change builder behavior", verbose=True
+            )
             node_text = generate_agent_context(root, node="component:builder")
             unmatched_text = generate_agent_context(root, task="rotate database credentials")
             catalog_text = generate_agent_context(root)
@@ -637,7 +650,10 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(metrics["trusted_route_count"], 1)
         self.assertIn("## Trust", text)
         self.assertIn("Grounding status: `grounded`", text)
-        self.assertIn("Agent-map routes: `validated` (1 trusted route(s))", text)
+        self.assertNotIn("Agent-map routes: `validated` (1 trusted route(s))", text)
+        self.assertIn(
+            "Agent-map routes: `validated` (1 trusted route(s))", verbose_text
+        )
         self.assertIn("Requested route match: `matched`", text)
         self.assertIn("## Recommended task routes", text)
         self.assertIn("### change builder behavior", text)
@@ -645,6 +661,13 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertIn("`component:builder`", text)
         self.assertIn("`main_flow`", text)
         self.assertIn("`README.md`", text)
+        self.assertLess(len(text), len(verbose_text))
+        self.assertNotIn("## Generated docs", text)
+        self.assertNotIn("- Route score:", text)
+        self.assertNotIn("**Start nodes:**", text)
+        self.assertIn("## Generated docs", verbose_text)
+        self.assertIn("- Route score:", verbose_text)
+        self.assertIn("**Start nodes:**", verbose_text)
         self.assertIn("Requested route match: `matched`", node_text)
         self.assertIn("focus node `component:builder` starts this route", node_text)
         self.assertIn("Requested route match: `not_found`", unmatched_text)
@@ -988,6 +1011,20 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(passed["recovery_metrics"]["actionable_guidance_coverage"], 1.0)
         self.assertEqual(
             passed["recovery_metrics"]["normal_bugfix_hard_rejection_rate"], 0.0
+        )
+        self.assertGreater(
+            passed["context_efficiency_metrics"]["estimated_token_saving_rate"],
+            0,
+        )
+        self.assertEqual(
+            passed["context_efficiency_metrics"]["passing_context_case_count"],
+            3,
+        )
+        self.assertGreater(
+            passed["cases"][0]["context_output"]["verbose_reference"][
+                "estimated_tokens"
+            ],
+            passed["cases"][0]["context_output"]["compact"]["estimated_tokens"],
         )
         self.assertEqual(strict_result, 2)
         self.assertEqual(failed["status"], "failed")

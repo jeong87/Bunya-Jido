@@ -397,6 +397,11 @@ JSON 보고서는 `execution_policy`, `agent_instruction`, 그리고 근거가 �
 계약은 [docs/CONTEXT_EXECUTION_POLICY.md](docs/CONTEXT_EXECUTION_POLICY.md)에
 있습니다.
 
+작업이 선택된 Markdown과 JSON context는 기본적으로 compact 출력입니다.
+선택된 route 또는 bounded discovery 계약은 유지하되 반복 진단과 무관한
+생성 문서 참조를 제거합니다. route 점수나 전체 discovery evidence를
+진단할 때는 `--verbose`를 사용합니다.
+
 특정 노드를 중심으로 만들 수도 있습니다.
 
 ```bash
@@ -464,6 +469,23 @@ actionable-guidance coverage, normal-bugfix hard-rejection rate도 보고합니�
 관찰 절차는
 [docs/AGENT_UTILITY_EVALUATION.md](docs/AGENT_UTILITY_EVALUATION.md)에
 정리되어 있습니다.
+보고서는 compact와 verbose context 출력 크기도 추정하지만, 이는 실제
+에이전트 작업 토큰 측정을 대신하지 않습니다.
+
+호환되는 live benchmark 결과를 모은 뒤에는 안전하고 해결된 동일 task만
+다음 명령으로 비교할 수 있습니다.
+
+```bash
+bunya-jido summarize-token-efficiency \
+  --results results/token-runs.json \
+  --baseline no-map \
+  --candidate 0.5-map \
+  --require-comparable \
+  --json
+```
+
+요약은 context 출력, repair, no-match, map authoring, safe-and-resolved
+task 토큰을 분리하고 median과 break-even task 수를 보고합니다.
 
 이 파일들은 코딩 에이전트에게 작업을 맡기기 전에 붙여넣거나 첨부하기 좋습니다.
 

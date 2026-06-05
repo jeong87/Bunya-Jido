@@ -2670,7 +2670,15 @@ def _resolve_agent_context_request(
     }
 
 
-def generate_agent_context(root: str | Path, *, node: str | None = None, workflow: str | None = None, task: str | None = None, changed_files: list[str] | None = None) -> str:
+def generate_agent_context(
+    root: str | Path,
+    *,
+    node: str | None = None,
+    workflow: str | None = None,
+    task: str | None = None,
+    changed_files: list[str] | None = None,
+    verbose: bool = False,
+) -> str:
     resolved = _resolve_agent_context_request(
         root,
         node=node,
@@ -2694,6 +2702,7 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     selection_requested = resolved["selection_requested"]
     selection = resolved["selection"]
     chosen = selection["chosen"]
+    compact = selection_requested and not verbose
     lines = []
     lines.append("# Bunya-Jido Agent Context\n")
     if task: lines.append(f"**Task:** {task}")
@@ -2702,28 +2711,34 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     if changed: lines.append(f"**Changed files:** {', '.join(changed)}")
     lines.append("")
     lines.append("## Trust")
-    lines.append("- Artifact mode: `semantic_blueprint`")
+    if not compact:
+        lines.append("- Artifact mode: `semantic_blueprint`")
     lines.append("- Grounding status: `grounded`")
-    lines.append(f"- Agent-map routes: `validated` ({agent_metrics.get('trusted_route_count', 0)} trusted route(s))")
+    if not compact:
+        lines.append(f"- Agent-map routes: `validated` ({agent_metrics.get('trusted_route_count', 0)} trusted route(s))")
     lines.append(f"- Requested route match: `{selection['route_status']}`")
     if changed:
         lines.append(f"- Changed-file route match: `{'matched' if chosen else 'not_found'}`")
     trust_warnings = list(bp_warnings) + list(agent_warnings)
-    lines.append(f"- Warnings: `{len(trust_warnings)}`")
+    if trust_warnings or not compact:
+        lines.append(f"- Warnings: `{len(trust_warnings)}`")
     for warning in trust_warnings[:10]:
         lines.append(f"  - {warning}")
     lines.append("")
     lines.append("## Decision")
     lines.append(f"- Decision: `{selection['decision']}`")
-    lines.append(f"- Edit policy: `{selection['edit_policy']}`")
+    if not compact:
+        lines.append(f"- Edit policy: `{selection['edit_policy']}`")
     lines.append(f"- Execution policy: `{selection['execution_policy']}`")
-    lines.append(f"- Reason: {selection['reason']}")
+    if not compact or selection["decision"] != "MATCH":
+        lines.append(f"- Reason: {selection['reason']}")
     lines.append(f"- Agent instruction: {selection['agent_instruction']}")
-    lines.append(f"- Route score: `{selection['top_score']}`")
-    lines.append(f"- Route margin: `{selection['margin']}`")
-    if selection["basis"]:
+    if not compact:
+        lines.append(f"- Route score: `{selection['top_score']}`")
+        lines.append(f"- Route margin: `{selection['margin']}`")
+    if selection["basis"] and (not compact or selection["decision"] != "MATCH"):
         lines.append("- Decision basis:")
-        for basis in selection["basis"][:10]:
+        for basis in selection["basis"][: 5 if compact else 10]:
             lines.append(f"  - {basis}")
     lines.append("")
     if node and node in node_by_id:
@@ -2732,10 +2747,10 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         lines.append(str(n.get("description", "")))
         lines.append("")
         lines.append("Evidence:")
-        for ev in (n.get("evidence") or [])[:10]:
+        for ev in (n.get("evidence") or [])[: 5 if compact else 10]:
             if isinstance(ev, dict): lines.append(f"- {ev.get('kind','evidence')}: `{ev.get('path','')}` {ev.get('symbol','')}")
         lines.append("")
-    if affected_nodes:
+    if affected_nodes and not compact:
         lines.append("## Affected nodes from changed files")
         for nid in affected_nodes[:20]:
             n = node_by_id.get(nid, {})
@@ -2745,21 +2760,20 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     if not chosen:
         if selection_requested:
             lines.append("No matching trusted route for this request.")
-            if selection["decision"] == "OUT_OF_SCOPE":
-                lines.append("The request conflicts with a reviewed repository boundary. Do not modify files for this request.")
-            elif selection["decision"] == "UNCERTAIN":
-                lines.append("The request cannot be routed safely. Prefer read-only inspection and request clarification before editing.")
-            else:
-                lines.append("The request appears repository-related, but the grounded map does not claim a prepared path. Continue cautiously without inferring a route.")
+            if not compact:
+                if selection["decision"] == "OUT_OF_SCOPE":
+                    lines.append("The request conflicts with a reviewed repository boundary. Do not modify files for this request.")
+                elif selection["decision"] == "UNCERTAIN":
+                    lines.append("The request cannot be routed safely. Prefer read-only inspection and request clarification before editing.")
+                else:
+                    lines.append("The request appears repository-related, but the grounded map does not claim a prepared path. Continue cautiously without inferring a route.")
         else:
             lines.append("No trusted task routes are available. Run the Bunya-Jido blueprint prompt to author routes.")
         lines.append("")
     discovery = selection.get("discovery_context") or {}
     if discovery:
         lines.append("## Bounded discovery (read-only)")
-        lines.append(
-            "These candidates are grounded starting points, not a trusted route or permission to edit."
-        )
+        lines.append("Grounded starting points only; rerun context before editing.")
         likely_areas = discovery.get("likely_areas") or []
         if likely_areas:
             lines.append("\n**Likely areas:**")
@@ -2782,9 +2796,12 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
             if values:
                 lines.append(f"\n**{title}:**")
                 for value in values:
-                    lines.append(
-                        f"- `{value.get('path')}` - {value.get('reason')} ({value.get('evidence')})"
-                    )
+                    if compact:
+                        lines.append(f"- `{value.get('path')}`")
+                    else:
+                        lines.append(
+                            f"- `{value.get('path')}` - {value.get('reason')} ({value.get('evidence')})"
+                        )
         for title, field in (
             ("Read-only search commands", "search_commands"),
             ("Recheck context after discovery", "recheck_commands"),
@@ -2800,10 +2817,10 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         if r.get("intent"): lines.append(str(r.get("intent")))
         if match["reasons"]:
             lines.append("\n**Matched because:**")
-            for reason in match["reasons"]:
+            for reason in list(dict.fromkeys(match["reasons"]))[: 5 if compact else 30]:
                 lines.append(f"- {reason}")
         def emit_list(title, vals):
-            vals = [v for v in (vals or []) if v]
+            vals = list(dict.fromkeys(v for v in (vals or []) if v))
             if vals:
                 lines.append(f"\n**{title}:**")
                 for v in vals[:30]: lines.append(f"- `{v}`")
@@ -2821,15 +2838,18 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
                     or ""
                 )
                 lines.append(
-                    f"- `{start_node.get('id')}` - {start_node.get('label', '')}: {description}"
+                    f"- `{start_node.get('id')}` - {start_node.get('label', '')}"
+                    + (f": {description}" if not compact else "")
                 )
         projection = projection_by_id.get(str(r.get("projection_context") or ""))
         if projection:
             lines.append("\n**Projection context:**")
-            lines.append(
-                f"- `{projection.get('id')}` - {projection.get('label', '')}: "
-                f"{projection.get('question_answered') or projection.get('description') or ''}"
-            )
+            projection_line = f"- `{projection.get('id')}` - {projection.get('label', '')}"
+            if not compact:
+                projection_line += (
+                    f": {projection.get('question_answered') or projection.get('description') or ''}"
+                )
+            lines.append(projection_line)
         scenarios = [
             scenario_by_id[scenario_id]
             for scenario_id in r.get("scenario_context", [])
@@ -2838,12 +2858,15 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         if scenarios:
             lines.append("\n**Scenario context:**")
             for scenario in scenarios[:30]:
-                lines.append(
-                    f"- `{scenario.get('id')}` - {scenario.get('label', '')} "
-                    f"({scenario.get('kind', 'unspecified')}, {scenario.get('basis', 'unspecified')}): "
-                    f"{scenario.get('description', '')}"
-                )
-        emit_list("Start nodes", r.get("start_nodes"))
+                scenario_line = f"- `{scenario.get('id')}` - {scenario.get('label', '')}"
+                if not compact:
+                    scenario_line += (
+                        f" ({scenario.get('kind', 'unspecified')}, {scenario.get('basis', 'unspecified')}): "
+                        f"{scenario.get('description', '')}"
+                    )
+                lines.append(scenario_line)
+        if not compact:
+            emit_list("Start nodes", r.get("start_nodes"))
         emit_list("Workflows", r.get("workflows"))
         emit_list("Must read", r.get("must_read"))
         emit_list("Contracts", r.get("contracts"))
@@ -2853,12 +2876,36 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         emit_list("Do not touch casually", r.get("do_not_touch_without_reason"))
         if r.get("notes"): lines.append(f"\n**Notes:** {r.get('notes')}")
         lines.append("")
-    lines.append("## Generated docs")
-    lines.append(f"- Components doc: `{comp_path.relative_to(root_path) if comp_path.exists() else comp_path}`")
-    lines.append(f"- Workflows doc: `{wf_path.relative_to(root_path) if wf_path.exists() else wf_path}`")
-    lines.append(f"- Blueprint: `{bp_path.relative_to(root_path) if bp_path.exists() else bp_path}`")
-    lines.append(f"- Agent map: `{am_path.relative_to(root_path) if am_path.exists() else am_path}`")
+    if not compact:
+        lines.append("## Generated docs")
+        lines.append(f"- Components doc: `{comp_path.relative_to(root_path) if comp_path.exists() else comp_path}`")
+        lines.append(f"- Workflows doc: `{wf_path.relative_to(root_path) if wf_path.exists() else wf_path}`")
+        lines.append(f"- Blueprint: `{bp_path.relative_to(root_path) if bp_path.exists() else bp_path}`")
+        lines.append(f"- Agent map: `{am_path.relative_to(root_path) if am_path.exists() else am_path}`")
     return "\n".join(lines).rstrip() + "\n"
+
+
+def _compact_discovery_context(discovery: dict[str, Any]) -> dict[str, Any]:
+    compact = {
+        key: value
+        for key, value in discovery.items()
+        if key not in {"likely_areas", "likely_workflows"}
+    }
+    for field in ("likely_areas", "likely_workflows"):
+        candidates = []
+        for candidate in discovery.get(field) or []:
+            public = {
+                key: value
+                for key, value in candidate.items()
+                if key != "evidence_paths"
+            }
+            evidence_paths = candidate.get("evidence_paths") or []
+            if evidence_paths:
+                public["evidence_path"] = evidence_paths[0].get("path")
+                public["evidence_kind"] = evidence_paths[0].get("kind")
+            candidates.append(public)
+        compact[field] = candidates
+    return compact
 
 
 def generate_agent_context_report(
@@ -2868,6 +2915,7 @@ def generate_agent_context_report(
     workflow: str | None = None,
     task: str | None = None,
     changed_files: list[str] | None = None,
+    verbose: bool = False,
 ) -> dict[str, Any]:
     resolved = _resolve_agent_context_request(
         root,
@@ -2881,6 +2929,7 @@ def generate_agent_context_report(
     warnings = [*resolved["bp_warnings"], *resolved["agent_warnings"]]
     report = {
         "schema_version": "bunya-jido-context-decision-v1",
+        "output_profile": "verbose" if verbose else "compact",
         "task": task,
         "focus_node": node,
         "focus_workflow": workflow,
@@ -2909,7 +2958,11 @@ def generate_agent_context_report(
         "warnings": warnings,
     }
     if selection.get("discovery_context"):
-        report["discovery_context"] = selection["discovery_context"]
+        report["discovery_context"] = (
+            selection["discovery_context"]
+            if verbose
+            else _compact_discovery_context(selection["discovery_context"])
+        )
     return report
 
 
@@ -3072,6 +3125,25 @@ def _context_list_values(context: str, title: str) -> list[str]:
     return values
 
 
+def _context_output_metrics(context: str) -> dict[str, int]:
+    utf8_bytes = len(context.encode("utf-8"))
+    return {
+        "characters": len(context),
+        "utf8_bytes": utf8_bytes,
+        "estimated_tokens": (utf8_bytes + 3) // 4,
+    }
+
+
+def _median_int(values: list[int]) -> int | float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    midpoint = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[midpoint]
+    return round((ordered[midpoint - 1] + ordered[midpoint]) / 2, 1)
+
+
 def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None = None) -> dict[str, Any]:
     root_path = Path(root).resolve()
     path = Path(evaluation_path).resolve() if evaluation_path else default_agent_evaluation_path(root_path)
@@ -3113,6 +3185,16 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
             workflow=query.get("workflow"),
             changed_files=query.get("changed_files"),
         )
+        verbose_context = generate_agent_context(
+            root_path,
+            task=query.get("task"),
+            node=query.get("node"),
+            workflow=query.get("workflow"),
+            changed_files=query.get("changed_files"),
+            verbose=True,
+        )
+        compact_metrics = _context_output_metrics(context)
+        verbose_metrics = _context_output_metrics(verbose_context)
         decision_report = generate_agent_context_report(
             root_path,
             task=query.get("task"),
@@ -3262,6 +3344,20 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
                 "bounded_discovery": bounded_discovery,
                 "actionable_guidance": actionable_guidance,
                 "hard_rejection": hard_rejection,
+                "context_output": {
+                    "compact": compact_metrics,
+                    "verbose_reference": verbose_metrics,
+                    "estimated_token_saving_rate": round(
+                        (
+                            verbose_metrics["estimated_tokens"]
+                            - compact_metrics["estimated_tokens"]
+                        )
+                        / verbose_metrics["estimated_tokens"],
+                        3,
+                    )
+                    if verbose_metrics["estimated_tokens"]
+                    else None,
+                },
                 "failures": failures,
             }
         )
@@ -3288,6 +3384,25 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
         }
         for expected in decision_labels
     }
+    compact_estimated_tokens = [
+        report["context_output"]["compact"]["estimated_tokens"]
+        for report in case_reports
+    ]
+    verbose_estimated_tokens = [
+        report["context_output"]["verbose_reference"]["estimated_tokens"]
+        for report in case_reports
+    ]
+    passing_reports = [
+        report for report in case_reports if report["status"] == "passed"
+    ]
+    compact_passing_tokens = sum(
+        report["context_output"]["compact"]["estimated_tokens"]
+        for report in passing_reports
+    )
+    verbose_passing_tokens = sum(
+        report["context_output"]["verbose_reference"]["estimated_tokens"]
+        for report in passing_reports
+    )
     return {
         "schema_version": "bunya-jido-agent-utility-report-v1",
         "suite_path": suite_path,
@@ -3328,6 +3443,31 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
             "hard_rejection_count": hard_rejection_count,
             "normal_bugfix_hard_rejection_rate": rate(
                 hard_rejection_count, normal_bugfix_case_count
+            ),
+        },
+        "context_efficiency_metrics": {
+            "measurement": "estimated_tokens_from_utf8_bytes",
+            "bytes_per_estimated_token": 4,
+            "context_case_count": len(case_reports),
+            "passing_context_case_count": len(passing_reports),
+            "compact_estimated_tokens": sum(compact_estimated_tokens),
+            "compact_median_estimated_tokens": _median_int(compact_estimated_tokens),
+            "verbose_reference_estimated_tokens": sum(verbose_estimated_tokens),
+            "verbose_reference_median_estimated_tokens": _median_int(
+                verbose_estimated_tokens
+            ),
+            "estimated_token_saving_rate": rate(
+                sum(verbose_estimated_tokens) - sum(compact_estimated_tokens),
+                sum(verbose_estimated_tokens),
+            ),
+            "passing_estimated_token_saving_rate": rate(
+                verbose_passing_tokens - compact_passing_tokens,
+                verbose_passing_tokens,
+            ),
+            "limitation": (
+                "This estimates context-output size only. Live task tokens, "
+                "safe-and-resolved savings, map-authoring cost, and break-even "
+                "require benchmark results."
             ),
         },
         "cases": case_reports,

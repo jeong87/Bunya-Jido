@@ -69,6 +69,13 @@ The report also includes deterministic P2 recovery metrics:
 Every `normal_bugfix_recovery` case fails unless it receives `MATCH` or an
 `IN_SCOPE_NO_ROUTE` result with grounded bounded discovery.
 
+The P3 `context_efficiency_metrics` compare compact default Markdown against
+the `--verbose` diagnostic reference. The estimate uses UTF-8 bytes divided by
+four so it is deterministic and reviewable; it is not a provider tokenizer or
+a live-agent task-token measurement. Compact output keeps required route,
+contract, test, boundary, and discovery guidance while verbose output retains
+diagnostic scores, repeated route context, and full discovery evidence.
+
 An ambiguous natural-language query should normally produce `UNCERTAIN`
 instead of several trusted routes. Changed-file refresh may still return
 multiple routes when each one is independently justified by file evidence.

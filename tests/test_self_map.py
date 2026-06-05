@@ -80,7 +80,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(blueprint["schema_version"], "bunya-jido-blueprint-v2")
         self.assertEqual(metrics["grounding_status"], "grounded")
         self.assertEqual(metrics["node_count"], 14)
-        self.assertEqual(metrics["edge_count"], 25)
+        self.assertEqual(metrics["edge_count"], 27)
         self.assertEqual(metrics["primary_projection"], "projection:trusted_publication")
         self.assertEqual(metrics["scenario_count"], 2)
         self.assertTrue(metrics["decision_record_present"])
@@ -97,7 +97,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertEqual(warnings, [])
         self.assertEqual(metrics["grounding_status"], "grounded")
-        self.assertEqual(metrics["trusted_route_count"], 6)
+        self.assertEqual(metrics["trusted_route_count"], 7)
 
     def test_gallery_build_projects_expected_semantic_paths(self) -> None:
         graph, _ = graph_with_optional_blueprint(ROOT, max_files=0)
@@ -107,7 +107,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(graph["grounding"]["status"], "grounded")
         self.assertTrue(graph["grounding"]["publishable"])
         self.assertEqual(graph["stats"]["nodes"], 14)
-        self.assertEqual(graph["stats"]["edges"], 25)
+        self.assertEqual(graph["stats"]["edges"], 27)
         self.assertEqual(graph["primary_projection"], "projection:trusted_publication")
         self.assertEqual(graph["scenario_count"], 2)
         self.assertEqual(
@@ -139,6 +139,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
                 "task_route_change-scanner-hint-provenance",
                 "task_route_change-grounding-policy",
                 "task_route_change-atlas-quality-evaluation",
+                "task_route_change-benchmark-evidence-reporting",
                 "task_route_change-multi-domain-rubric-coverage",
                 "task_route_change-task-route-projection",
                 "task_route_change-viewer-trust-presentation",
@@ -147,9 +148,15 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
     def test_trusted_context_uses_committed_route(self) -> None:
         context = generate_agent_context(ROOT, task="change task route projection")
+        verbose_context = generate_agent_context(
+            ROOT, task="change task route projection", verbose=True
+        )
 
         self.assertIn("- Grounding status: `grounded`", context)
-        self.assertIn("- Agent-map routes: `validated` (6 trusted route(s))", context)
+        self.assertNotIn("- Agent-map routes: `validated` (7 trusted route(s))", context)
+        self.assertIn(
+            "- Agent-map routes: `validated` (7 trusted route(s))", verbose_context
+        )
         self.assertIn("- Requested route match: `matched`", context)
         self.assertIn("- Execution policy: `workspace_write`", context)
         self.assertIn("### change task route projection", context)
@@ -168,6 +175,15 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             context,
         )
         self.assertIn("`projection:quality_contract` - Quality Contract", context)
+
+    def test_benchmark_reporting_has_a_safe_and_resolved_route(self) -> None:
+        context = generate_agent_context(ROOT, task="change benchmark token reporting")
+
+        self.assertIn("### change benchmark evidence reporting", context)
+        self.assertIn("- `src/bunya_jido/benchmark.py`", context)
+        self.assertIn("- `tests/test_benchmark_audit.py`", context)
+        self.assertIn("paired safe-and-resolved runs", context)
+        self.assertNotIn("### change multi-domain rubric coverage", context)
 
     def test_unmatched_context_does_not_invent_self_map_route(self) -> None:
         context = generate_agent_context(ROOT, task="publish package to package registry")
@@ -255,7 +271,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 16)
+        self.assertEqual(report["case_count"], 17)
         self.assertEqual(report["dimensions"]["honest_no_match"]["passed"], 7)
         self.assertEqual(report["dimensions"]["normal_bugfix_recovery"]["passed"], 2)
         self.assertEqual(report["safety_metrics"]["expected_decision_accuracy"], 1.0)
@@ -349,7 +365,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertTrue(report["semantic_publication_allowed"])
         self.assertEqual(report["atlas_quality_status"], "passed")
         self.assertTrue(report["atlas_quality"]["review_required"])
-        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 6, "total": 6})
+        self.assertEqual(report["agent_routes"], {"status": "validated", "trusted": 7, "total": 7})
 
 
 if __name__ == "__main__":

@@ -181,6 +181,37 @@
       }
     },
     {
+      "id": "benchmark-token-reporting-boundary",
+      "dimension": "boundary_discipline",
+      "query": {
+        "task": "change benchmark token reporting"
+      },
+      "expect": {
+        "route_status": "matched",
+        "decision": "MATCH",
+        "routes": [
+          "change benchmark evidence reporting"
+        ],
+        "forbid_routes": [
+          "change multi-domain rubric coverage",
+          "change task route projection"
+        ],
+        "must_read": [
+          "src/bunya_jido/benchmark.py",
+          "docs/BENCHMARK_RESULT_CONTRACT.md"
+        ],
+        "contracts": [
+          "Token-saving comparisons must include only paired safe-and-resolved runs from compatible conditions."
+        ],
+        "tests": [
+          "tests/test_benchmark_audit.py"
+        ],
+        "projection_context": [
+          "projection:quality_contract"
+        ]
+      }
+    },
+    {
       "id": "multi-domain-rubric-does-not-seed-domain-vocabulary",
       "dimension": "boundary_discipline",
       "query": {

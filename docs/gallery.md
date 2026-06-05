@@ -15,9 +15,9 @@ repository and is protected by semantic golden tests.
 | Grounding status | `grounded` |
 | Atlas quality status | `passed`, with projection choice and narration honesty still review-required |
 | Review status | Maintainer-authored and mechanically validated on June 1, 2026 |
-| Semantic coverage | 14 nodes, 25 relationships, 5 core nodes, 13 critical relationships |
+| Semantic coverage | 14 nodes, 27 relationships, 5 core nodes, 14 critical relationships |
 | Grounding metrics | 100% core-node evidence; 100% critical-relationship evidence |
-| Agent routes | 6 of 6 routes validated and projected as `Task Route` paths with optional Studio reading context |
+| Agent routes | 7 of 7 routes validated and projected as `Task Route` paths with optional Studio reading context |
 | Viewer surface | Studio constellation with authored projection tabs, scenario playback, semantic role glyphs, workflow launcher bar, and copyable trusted route context |
 | Viewer disclosure | `Overview` by default; map controls and selected-item inspector open on demand |
 | Screenshot capture | Clean `Overview` state at 1440 x 900 |

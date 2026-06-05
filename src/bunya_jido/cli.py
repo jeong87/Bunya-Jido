@@ -25,7 +25,7 @@ from .blueprint import (
     validate_agent_map_file,
     validate_blueprint_file,
 )
-from .benchmark import audit_worktree
+from .benchmark import audit_worktree, summarize_token_efficiency
 from .quality import ATLAS_QUALITY_REPORT_FILE, render_atlas_quality_markdown
 from .render import render_html, write_json
 from .scanner import build_graph
@@ -367,10 +367,23 @@ def cmd_context(args: argparse.Namespace) -> int:
             workflow=args.workflow,
             task=args.task,
             changed_files=changed,
+            verbose=args.verbose,
         )
-        text = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+        text = json.dumps(
+            report,
+            ensure_ascii=False,
+            indent=2 if args.verbose else None,
+            separators=None if args.verbose else (",", ":"),
+        ) + "\n"
     else:
-        text = generate_agent_context(args.root, node=args.node, workflow=args.workflow, task=args.task, changed_files=changed)
+        text = generate_agent_context(
+            args.root,
+            node=args.node,
+            workflow=args.workflow,
+            task=args.task,
+            changed_files=changed,
+            verbose=args.verbose,
+        )
     if args.out:
         out = Path(args.out).resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -394,7 +407,12 @@ def cmd_refresh_context(args: argparse.Namespace) -> int:
     if not changed:
         print("refresh-context requires at least one --changed-file or --changed-files-from entry.", file=sys.stderr)
         return 2
-    text = generate_agent_context(args.root, task=args.task, changed_files=changed)
+    text = generate_agent_context(
+        args.root,
+        task=args.task,
+        changed_files=changed,
+        verbose=args.verbose,
+    )
     if args.out:
         out = Path(args.out).resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -568,6 +586,54 @@ def cmd_audit_worktree(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_summarize_token_efficiency(args: argparse.Namespace) -> int:
+    try:
+        payload = json.loads(Path(args.results).read_text(encoding="utf-8"))
+        if isinstance(payload, list):
+            runs = payload
+            map_authoring_tokens = {}
+        elif isinstance(payload, dict):
+            runs = payload.get("runs")
+            map_authoring_tokens = payload.get("map_authoring_tokens") or {}
+        else:
+            raise ValueError("results file must contain a list or object")
+        if not isinstance(runs, list):
+            raise ValueError("results object must contain a runs list")
+        if not isinstance(map_authoring_tokens, dict):
+            raise ValueError("map_authoring_tokens must be an object")
+        report = summarize_token_efficiency(
+            runs,
+            baseline_condition=args.baseline,
+            candidate_condition=args.candidate,
+            map_authoring_tokens=map_authoring_tokens,
+        )
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"Token efficiency summary blocked: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        comparison = report["comparisons"]["all"]
+        print(f"Token efficiency summary: {report['status']}")
+        print(
+            "Paired safe-and-resolved tasks: "
+            f"{report['paired_safe_and_resolved_task_count']}"
+        )
+        print(
+            "Task token saving: "
+            f"{comparison['task_token_saving']} "
+            f"(rate={comparison['task_token_saving_rate']})"
+        )
+        print(
+            "Break-even tasks: "
+            f"all={report['break_even_task_count']['all']} "
+            f"repair={report['break_even_task_count']['repair']}"
+        )
+    if args.require_comparable and report["status"] != "comparable":
+        return 2
+    return 0
+
+
 def cmd_install_agent_guides(args: argparse.Namespace) -> int:
     if args.dry_run and not args.activate:
         print("--dry-run requires --activate.", file=sys.stderr)
@@ -651,6 +717,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_ctx.add_argument("--changed-file", action="append", default=[], help="Changed file path or comma-separated list. Repeatable.")
     p_ctx.add_argument("--out", default=None, help="Optional output path for Markdown or --json output.")
     p_ctx.add_argument("--json", action="store_true", help="Print or write a machine-readable context decision report.")
+    p_ctx.add_argument("--verbose", action="store_true", help="Include diagnostic scores, repeated route context, and full discovery evidence.")
     p_ctx.set_defaults(func=cmd_context)
 
     p_refresh = sub.add_parser("refresh-context", help="Recommend trusted routes justified by changed-file evidence after an edit or diff.")
@@ -659,6 +726,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_refresh.add_argument("--changed-files-from", default=None, help="File containing changed paths used as route evidence, one per line.")
     p_refresh.add_argument("--task", default=None, help="Optional task text to route context.")
     p_refresh.add_argument("--out", default=None, help="Optional output markdown path.")
+    p_refresh.add_argument("--verbose", action="store_true", help="Include diagnostic scores, repeated route context, and generated-doc references.")
     p_refresh.set_defaults(func=cmd_refresh_context)
 
     p_stale = sub.add_parser("check-stale", help="Check whether changed files require a reviewed semantic map update.")
@@ -695,6 +763,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_audit.add_argument("--json", action="store_true", help="Print the machine-readable audit report.")
     p_audit.set_defaults(func=cmd_audit_worktree)
 
+    p_tokens = sub.add_parser("summarize-token-efficiency", help="Compare paired safe-and-resolved benchmark token results.")
+    p_tokens.add_argument("--results", required=True, help="JSON file containing runs and optional map_authoring_tokens.")
+    p_tokens.add_argument("--baseline", required=True, help="Baseline condition name, such as no-map.")
+    p_tokens.add_argument("--candidate", required=True, help="Candidate condition name, such as 0.5-map.")
+    p_tokens.add_argument("--require-comparable", action="store_true", help="Exit with status 2 unless at least one safe-and-resolved task pair is comparable.")
+    p_tokens.add_argument("--json", action="store_true", help="Print the machine-readable token efficiency report.")
+    p_tokens.set_defaults(func=cmd_summarize_token_efficiency)
+
     p_guides = sub.add_parser("install-agent-guides", help="Write Bunya-Jido agent guidance snippets or activate managed project instructions.")
     p_guides.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_guides.add_argument("--agent", choices=["all", "codex", "claude", "cursor", "cline"], default="all", help="Which guide to write. Default: all.")
@@ -707,7 +783,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
-    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "audit-worktree", "install-agent-guides"}
+    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "audit-worktree", "summarize-token-efficiency", "install-agent-guides"}
     if not raw or (raw[0] not in subcommands and raw[0] not in {"-h", "--help", "--version"}):
         raw = ["build"] + raw
     parser = build_parser()

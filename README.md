@@ -394,6 +394,11 @@ launching an agent; Bunya-Jido reports the policy but does not control another
 process's sandbox. See
 [docs/CONTEXT_EXECUTION_POLICY.md](docs/CONTEXT_EXECUTION_POLICY.md).
 
+Task-selected Markdown and JSON context is compact by default: it keeps the
+selected route or bounded discovery contract while removing repeated
+diagnostics and unrelated generated-document references. Use `--verbose`
+when debugging route scores or inspecting full discovery evidence.
+
 You can also focus on a specific node:
 
 ```bash
@@ -457,6 +462,8 @@ deterministic check of the generated handoff, not proof that a live coding
 agent read or obeyed it. The evaluation format and an optional live-agent
 observation protocol are documented in
 [docs/AGENT_UTILITY_EVALUATION.md](docs/AGENT_UTILITY_EVALUATION.md).
+The report also estimates compact versus verbose context-output size; this is
+not a substitute for measured live-agent task tokens.
 
 ### Auditing Live-Agent Benchmark Changes
 
@@ -472,6 +479,21 @@ The audit keeps final workspace changes separate from write-then-revert
 attempts. See
 [docs/BENCHMARK_RESULT_CONTRACT.md](docs/BENCHMARK_RESULT_CONTRACT.md) for the
 runner integration and result contract.
+
+After collecting compatible live results, compare only paired
+safe-and-resolved tasks:
+
+```bash
+bunya-jido summarize-token-efficiency \
+  --results results/token-runs.json \
+  --baseline no-map \
+  --candidate 0.5-map \
+  --require-comparable \
+  --json
+```
+
+The summary separates context output, repair, no-match, map-authoring, and
+safe-and-resolved task tokens, and reports medians and break-even task counts.
 
 These files are meant to be pasted or attached before handing work to a coding agent.
 

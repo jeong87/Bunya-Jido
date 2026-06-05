@@ -129,7 +129,8 @@ recovery, repository-path fallback, candidate caps, and non-MATCH leakage.
 Deterministic replay against the current local benchmark maps produced:
 
 ```text
-Realistic Large: 8/8 bugfix MATCH, 1/1 no-match route-free
+Realistic Large: 7/8 bugfix MATCH, 1/8 bugfix bounded discovery,
+                 1/1 no-match route-free
 Enterprise XLarge: 10/10 core bugfix MATCH, 3/3 decoy bugfix bounded discovery,
                    2/2 no-match route-free
 ```
@@ -137,6 +138,38 @@ Enterprise XLarge: 10/10 core bugfix MATCH, 3/3 decoy bugfix bounded discovery,
 These are context-generation replay results, not live-agent resolution,
 boundary-violation, token, or timing evidence. The versioned-runner live gates
 remain required before claiming the full P2 release minimum.
+
+### 1.5 P3 implementation status - 2026-06-05
+
+Task-selected Markdown and JSON context is now compact by default, while
+`--verbose` preserves diagnostic scores, repeated route context, generated-doc
+references, and full discovery evidence. Compact output still carries the
+selected route's required reading, contracts, tests, safe-edit boundary, and
+Studio context, or the capped grounded discovery contract for
+`IN_SCOPE_NO_ROUTE`.
+
+The deterministic self-map acceptance suite reduced compact Markdown context
+characters by `36.3%` against the verbose compatibility reference while
+retaining `17/17` passing cases, zero non-MATCH route/safe-edit leaks, and
+`100%` normal-bugfix actionable guidance. This is context-output evidence, not
+a live repair-token claim.
+
+Fresh context-generation replay against the current local XHigh-authored
+benchmark maps reduced total Markdown context characters by `40.7%` on
+Realistic Large and `43.1%` on Enterprise XLarge versus `--verbose`. It
+retained the corrected P2 decisions above, including route-free no-match
+requests and bounded discovery for unmatched normal bugfixes. These numbers
+measure generated context size only, not live task-token savings.
+
+The reusable `summarize-token-efficiency` API and CLI now separates context,
+repair, no-match, safe-and-resolved, and map-authoring tokens; reports medians
+and break-even counts; and excludes unresolved bugfixes, boundary violations,
+no-match production writes, and infrastructure-invalid runs from savings
+comparisons.
+
+This completes the version-controlled P3 context and reporting implementation.
+The Realistic Large and Enterprise XLarge live token gates remain open until
+compatible runner results are collected and summarized.
 
 ---
 

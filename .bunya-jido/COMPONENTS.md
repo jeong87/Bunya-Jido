@@ -9,7 +9,7 @@ keeps the review rationale visible beside it.
 ### CLI
 
 - **Plane:** entry
-- **Role:** Parses user commands and chooses scanning, semantic rendering, validation, or context generation.
+- **Role:** Parses user commands and chooses scanning, semantic rendering, validation, context generation, benchmark audit, or token-efficiency reporting.
 - **Evidence:** `src/bunya_jido/cli.py`
 - **Boundary:** It coordinates publication, but does not define grounding policy.
 
@@ -46,7 +46,7 @@ keeps the review rationale visible beside it.
 ### Trusted Context Decision Router
 
 - **Plane:** semantic
-- **Role:** Classifies context requests as `MATCH`, `IN_SCOPE_NO_ROUTE`, `OUT_OF_SCOPE`, or `UNCERTAIN`, recovers routes only from independent positive evidence, and emits capped evidence-backed discovery for in-scope gaps.
+- **Role:** Classifies context requests as `MATCH`, `IN_SCOPE_NO_ROUTE`, `OUT_OF_SCOPE`, or `UNCERTAIN`, recovers routes only from independent positive evidence, and emits compact selected-route guidance or capped evidence-backed discovery.
 - **Evidence:** `src/bunya_jido/blueprint.py`, `src/bunya_jido/cli.py`, `tests/test_blueprint.py`, `.bunya-jido/bunya-jido.agent-evaluation.json`
 - **Boundary:** Non-`MATCH` decisions do not expose trusted routes or safe-edit paths; only `IN_SCOPE_NO_ROUTE` may expose bounded read-only discovery, while `OUT_OF_SCOPE` and `UNCERTAIN` remain route-free.
 
@@ -62,15 +62,15 @@ keeps the review rationale visible beside it.
 ### Contract Tests And CI
 
 - **Plane:** quality
-- **Role:** Characterize the trust contract, Studio benchmark variety, and offline viewer surface for supported Python versions.
-- **Evidence:** `tests/test_blueprint.py`, `tests/test_studio_benchmark.py`, `.github/workflows/ci.yml`
+- **Role:** Characterize the trust contract, benchmark evidence reporting, Studio benchmark variety, and offline viewer surface for supported Python versions.
+- **Evidence:** `tests/test_blueprint.py`, `tests/test_benchmark_audit.py`, `tests/test_studio_benchmark.py`, `.github/workflows/ci.yml`
 
-### Studio Benchmark
+### Benchmark Evidence Suite
 
 - **Plane:** quality
-- **Role:** Checks that different repository shapes yield distinct projections and honest scenario policy choices.
-- **Evidence:** `tests/fixtures/studio_benchmark_cases.json`, `tests/test_studio_benchmark.py`, `docs/STUDIO_BENCHMARK.md`
-- **Boundary:** It measures declared contract differences; it does not prove an editorial reading is uniquely best.
+- **Role:** Checks that different repository shapes yield distinct projections and that live benchmark token claims use auditable workspace truth and paired safe-and-resolved runs.
+- **Evidence:** `src/bunya_jido/benchmark.py`, `tests/test_benchmark_audit.py`, `tests/fixtures/studio_benchmark_cases.json`, `tests/test_studio_benchmark.py`, `docs/BENCHMARK_RESULT_CONTRACT.md`, `docs/STUDIO_BENCHMARK.md`
+- **Boundary:** It keeps unsafe, unresolved, and infrastructure-invalid runs visible but excludes them from savings claims; Studio fixtures still do not prove an editorial reading is uniquely best.
 
 ### Public Narrative And Roadmap
 

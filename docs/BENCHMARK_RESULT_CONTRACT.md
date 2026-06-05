@@ -106,3 +106,65 @@ write-then-revert attempts.
 External benchmark harnesses still need to call this API or CLI and rerun
 their benchmark sets. A historical result produced by a runner that only used
 `git diff --numstat` is not valid P0 evidence.
+
+## P3 Token Efficiency Summary
+
+`bunya-jido summarize-token-efficiency` accepts measured runner results and
+produces a `bunya-jido-token-efficiency-report-v1` report:
+
+```powershell
+bunya-jido summarize-token-efficiency `
+  --results results/token-runs.json `
+  --baseline no-map `
+  --candidate 0.5-map `
+  --require-comparable `
+  --json
+```
+
+The input object contains optional per-condition map-authoring tokens and a
+required run list:
+
+```json
+{
+  "map_authoring_tokens": {
+    "no-map": 0,
+    "0.5-map": 1972223
+  },
+  "runs": [
+    {
+      "condition": "0.5-map",
+      "task_id": "billing-step-units",
+      "task_kind": "bugfix",
+      "task_tokens": 42000,
+      "context_output_tokens": 900,
+      "resolved": true,
+      "infrastructure_valid": true,
+      "boundary_violation": false,
+      "production_write_attempt": true
+    }
+  ]
+}
+```
+
+`task_kind` is `bugfix` or `no_match`. A run is excluded from token-saving
+comparisons when it is unresolved, infrastructure-invalid, has a boundary
+violation, or is a no-match run with a production write attempt. Production
+writes are not themselves disqualifying for a resolved in-boundary bugfix.
+
+Savings use only shared task IDs that are safe and resolved in both the
+baseline and candidate conditions. The report keeps excluded runs visible and
+separately reports:
+
+- map-authoring tokens and incremental authoring cost;
+- context-output tokens and medians;
+- repair task tokens;
+- safe-and-resolved task tokens;
+- no-match tokens and safe-and-resolved no-match medians;
+- paired all-task, repair, and no-match savings;
+- all-task and repair break-even task counts.
+
+Missing optional map-authoring measurements are reported as `null`, never as
+measured zero. Break-even remains `null` when map-authoring measurements are
+incomplete or the paired tasks do not save tokens. The summary does not repair
+invalid runner evidence or prove live-agent resolution; callers must supply
+truthful, compatible measured results.

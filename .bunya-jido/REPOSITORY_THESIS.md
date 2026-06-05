@@ -18,10 +18,13 @@ validation into a human-readable map and a coding-agent route contract.
   artifacts and agent-map routes.
 - `src/bunya_jido/quality.py` evaluates measurable Studio readability and
   scenario-policy signals without claiming editorial proof.
+- `src/bunya_jido/benchmark.py` audits workspace truth and compares only
+  paired safe-and-resolved token results.
 - `src/bunya_jido/viewer/index.template.html` renders trust, projections, and
   validated scenario playback offline.
-- `tests/test_self_map.py` and `tests/test_studio_benchmark.py` protect the
-  published self-map and cross-domain contract.
+- `tests/test_self_map.py`, `tests/test_benchmark_audit.py`, and
+  `tests/test_studio_benchmark.py` protect the published self-map, token
+  evidence contract, and cross-domain contract.
 
 ## What this repository is not best explained as
 

@@ -316,3 +316,23 @@ An entry records review work; it does not prove architectural completeness.
   utility P1 fixtures, validate the blueprint and agent map, pass grounded,
   atlas-quality, utility, stale-map, and full unit-suite gates, then locally
   smoke-test sandbox policy integration in the external benchmark runners.
+
+## 2026-06-05 - P3 Compact Context And Token Evidence
+
+- Change: Made task-selected Markdown and JSON context compact by default,
+  retained full diagnostics behind `--verbose`, added deterministic
+  context-size estimates, and added safe-and-resolved benchmark token
+  reporting with medians and break-even counts.
+- Decision: Broadened the existing Benchmark Evidence Suite responsibility,
+  added the `benchmark_evidence_reporting` workflow and trusted maintenance
+  route, and kept the existing canvas-first viewer design and node layout.
+  Unsafe, unresolved, no-match-writing, and infrastructure-invalid runs remain
+  visible but cannot improve token-saving claims.
+- Validation: Validate the refreshed blueprint and agent map, pass compact
+  context, benchmark audit, self-map, utility, atlas-quality, stale-map, and
+  full unit tests, rebuild the committed demo, inspect the 1440 x 900 overview
+  capture, and replay the current local XHigh-authored benchmark maps. The
+  replay records compact-output reductions separately from live task tokens
+  and corrects the Realistic P2 route result to 7/8 MATCH plus 1/8 bounded
+  discovery. Compatible live benchmarks remain required before claiming P3
+  release thresholds.

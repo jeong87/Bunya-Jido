@@ -10,6 +10,8 @@
       "coding agent context generation",
       "context decision routing",
       "context decision calibration",
+      "benchmark worktree auditing",
+      "safe-and-resolved token efficiency reporting",
       "offline HTML atlas presentation",
       "static repository evidence scanning"
     ],
@@ -22,6 +24,7 @@
       "Python module",
       "unit test",
       "Markdown documentation",
+      "benchmark result JSON",
       "offline HTML atlas"
     ],
     "unsupported_surfaces": [
@@ -162,8 +165,63 @@
       ]
     },
     {
+      "task": "change benchmark evidence reporting",
+      "intent": "Adjust worktree audit or safe-and-resolved token reporting without hiding unsafe, unresolved, or infrastructure-invalid runs.",
+      "match_terms": [
+        "benchmark token reporting",
+        "worktree audit",
+        "safe-and-resolved token"
+      ],
+      "when_to_use": [
+        "benchmark result contract or token efficiency summary",
+        "production activity audit for live-agent benchmark runs"
+      ],
+      "when_not_to_use": [
+        "Studio cross-domain rubric fixture changes",
+        "audit event instrumentation"
+      ],
+      "common_failure_modes": [
+        "Counting unresolved bugfix rejection as token savings.",
+        "Ignoring no-match production write attempts.",
+        "Computing break-even without map-authoring tokens."
+      ],
+      "start_nodes": [
+        "quality:benchmark"
+      ],
+      "workflows": [
+        "benchmark_evidence_reporting"
+      ],
+      "projection_context": "projection:quality_contract",
+      "scenario_context": [],
+      "must_read": [
+        "src/bunya_jido/benchmark.py",
+        "src/bunya_jido/cli.py",
+        "docs/BENCHMARK_RESULT_CONTRACT.md"
+      ],
+      "contracts": [
+        "Token-saving comparisons must include only paired safe-and-resolved runs from compatible conditions.",
+        "Unresolved bugfixes, boundary violations, no-match production writes, and infrastructure-invalid runs must remain visible but excluded from savings claims.",
+        "Map-authoring tokens, context-output tokens, repair tokens, no-match tokens, medians, and break-even counts must remain separately reportable."
+      ],
+      "tests": [
+        "tests/test_benchmark_audit.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/benchmark.py",
+        "src/bunya_jido/cli.py",
+        "tests/test_benchmark_audit.py",
+        "docs/BENCHMARK_RESULT_CONTRACT.md"
+      ],
+      "watch_out": [
+        "A cheap rejected or unsafe run must never improve the reported token-saving rate."
+      ]
+    },
+    {
       "task": "change multi-domain rubric coverage",
       "intent": "Adjust cross-domain rubric fixtures while preserving domain-neutral authoring.",
+      "when_not_to_use": [
+        "audit event instrumentation"
+      ],
       "start_nodes": [
         "quality:benchmark"
       ],
@@ -197,11 +255,12 @@
     },
     {
       "task": "change task route projection",
-      "intent": "Adjust agent-map validation, conservative context decision routing, evidence-backed route recovery, bounded discovery, or task-route paths shown in rendered maps.",
+      "intent": "Adjust agent-map validation, conservative context decision routing, evidence-backed route recovery, bounded discovery, compact context output, or task-route paths shown in rendered maps.",
       "match_terms": [
         "context decision routing",
         "no-match rejection",
-        "route matching"
+        "route matching",
+        "compact context output"
       ],
       "when_to_use": [
         "context decision output or trusted route matching behavior",
@@ -213,7 +272,8 @@
       "common_failure_modes": [
         "Selecting a route from one broad shared-workflow term.",
         "Leaving an in-scope repair without a trusted route or bounded discovery.",
-        "Exposing safe-edit paths from a non-MATCH decision."
+        "Exposing safe-edit paths from a non-MATCH decision.",
+        "Removing required reading, contracts, tests, or boundaries while compacting context."
       ],
       "start_nodes": [
         "semantic:agent_map"
@@ -234,7 +294,8 @@
         "Only routes validated against repository-relative inputs may reach trusted context or HTML paths.",
         "Non-MATCH task-selection decisions must not expose trusted routes or safe-edit paths.",
         "IN_SCOPE_NO_ROUTE discovery candidates must be capped, repository-relative, evidence-backed, and read-only.",
-        "A common failure mode or shared-workflow term cannot confirm a route without independent positive evidence."
+        "A common failure mode or shared-workflow term cannot confirm a route without independent positive evidence.",
+        "Compact context must retain actionable route or discovery guidance while verbose output preserves diagnostics."
       ],
       "tests": [
         "tests/test_blueprint.py",
