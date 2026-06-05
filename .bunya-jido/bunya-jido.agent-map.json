@@ -12,6 +12,7 @@
       "context decision calibration",
       "benchmark worktree auditing",
       "safe-and-resolved token efficiency reporting",
+      "safe-and-resolved time efficiency reporting",
       "offline HTML atlas presentation",
       "static repository evidence scanning"
     ],
@@ -166,14 +167,17 @@
     },
     {
       "task": "change benchmark evidence reporting",
-      "intent": "Adjust worktree audit or safe-and-resolved token reporting without hiding unsafe, unresolved, or infrastructure-invalid runs.",
+      "intent": "Adjust worktree audit or safe-and-resolved token/time reporting without hiding unsafe, unresolved, or infrastructure-invalid runs.",
       "match_terms": [
         "benchmark token reporting",
+        "benchmark time reporting",
         "worktree audit",
-        "safe-and-resolved token"
+        "safe-and-resolved token",
+        "safe-and-resolved time"
       ],
       "when_to_use": [
         "benchmark result contract or token efficiency summary",
+        "time efficiency summary or resolution timing report",
         "production activity audit for live-agent benchmark runs"
       ],
       "when_not_to_use": [
@@ -183,7 +187,9 @@
       "common_failure_modes": [
         "Counting unresolved bugfix rejection as token savings.",
         "Ignoring no-match production write attempts.",
-        "Computing break-even without map-authoring tokens."
+        "Computing break-even without map-authoring cost.",
+        "Pairing different repetitions or efforts as the same timing run.",
+        "Tuning route vocabulary to a synthetic benchmark timing result."
       ],
       "start_nodes": [
         "quality:benchmark"
@@ -200,8 +206,11 @@
       ],
       "contracts": [
         "Token-saving comparisons must include only paired safe-and-resolved runs from compatible conditions.",
+        "Time-saving comparisons must include only explicitly paired safe-and-resolved runs from compatible conditions.",
         "Unresolved bugfixes, boundary violations, no-match production writes, and infrastructure-invalid runs must remain visible but excluded from savings claims.",
-        "Map-authoring tokens, context-output tokens, repair tokens, no-match tokens, medians, and break-even counts must remain separately reportable."
+        "Map-authoring tokens, context-output tokens, repair tokens, no-match tokens, medians, and break-even counts must remain separately reportable.",
+        "Timing reports must keep total resolution, context generation, discovery-to-first-edit, median, p90, and optional authoring time separately reportable.",
+        "Benchmark timing evidence must not tune route vocabulary without diverse-repository and holdout validation."
       ],
       "tests": [
         "tests/test_benchmark_audit.py"
@@ -213,7 +222,8 @@
         "docs/BENCHMARK_RESULT_CONTRACT.md"
       ],
       "watch_out": [
-        "A cheap rejected or unsafe run must never improve the reported token-saving rate."
+        "A cheap rejected or unsafe run must never improve the reported efficiency rate.",
+        "A synthetic timing win is not evidence of a general routing optimization."
       ]
     },
     {

@@ -487,6 +487,23 @@ bunya-jido summarize-token-efficiency \
 요약은 context 출력, repair, no-match, map authoring, safe-and-resolved
 task 토큰을 분리하고 median과 break-even task 수를 보고합니다.
 
+동일한 안전 필터와 명시적인 반복 실행 pairing으로 해결 시간도 측정할
+수 있습니다.
+
+```bash
+bunya-jido summarize-time-efficiency \
+  --results results/time-runs.json \
+  --baseline no-map \
+  --candidate 0.5-map \
+  --require-comparable \
+  --json
+```
+
+시간 요약은 누적 시간, median, nearest-rank p90, context 생성,
+discovery-to-first-edit, 전체 해결 시간, task별 결과, 선택적 authoring 시간
+break-even을 보고합니다. 이는 측정 전용 기능이며 benchmark 시나리오에
+맞춰 routing 동작을 튜닝하지 않습니다.
+
 이 파일들은 코딩 에이전트에게 작업을 맡기기 전에 붙여넣거나 첨부하기 좋습니다.
 
 ## 현재 지원 범위

@@ -212,6 +212,38 @@
       }
     },
     {
+      "id": "benchmark-time-reporting-boundary",
+      "dimension": "boundary_discipline",
+      "query": {
+        "task": "change benchmark time reporting"
+      },
+      "expect": {
+        "route_status": "matched",
+        "decision": "MATCH",
+        "routes": [
+          "change benchmark evidence reporting"
+        ],
+        "forbid_routes": [
+          "change multi-domain rubric coverage",
+          "change task route projection"
+        ],
+        "must_read": [
+          "src/bunya_jido/benchmark.py",
+          "docs/BENCHMARK_RESULT_CONTRACT.md"
+        ],
+        "contracts": [
+          "Time-saving comparisons must include only explicitly paired safe-and-resolved runs from compatible conditions.",
+          "Benchmark timing evidence must not tune route vocabulary without diverse-repository and holdout validation."
+        ],
+        "tests": [
+          "tests/test_benchmark_audit.py"
+        ],
+        "projection_context": [
+          "projection:quality_contract"
+        ]
+      }
+    },
+    {
       "id": "multi-domain-rubric-does-not-seed-domain-vocabulary",
       "dimension": "boundary_discipline",
       "query": {

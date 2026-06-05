@@ -168,3 +168,73 @@ measured zero. Break-even remains `null` when map-authoring measurements are
 incomplete or the paired tasks do not save tokens. The summary does not repair
 invalid runner evidence or prove live-agent resolution; callers must supply
 truthful, compatible measured results.
+
+## P4 Time Efficiency Summary
+
+`bunya-jido summarize-time-efficiency` reports measured timing without changing
+route selection, matcher thresholds, or discovery behavior:
+
+```powershell
+bunya-jido summarize-time-efficiency `
+  --results results/time-runs.json `
+  --baseline no-map `
+  --candidate 0.5-map `
+  --require-comparable `
+  --json
+```
+
+The input object contains optional per-condition map-authoring seconds and a
+required run list:
+
+```json
+{
+  "map_authoring_seconds": {
+    "no-map": 0,
+    "0.5-map": 1800
+  },
+  "runs": [
+    {
+      "condition": "0.5-map",
+      "pair_id": "billing-step-units/medium/r1",
+      "task_id": "billing-step-units",
+      "task_kind": "bugfix",
+      "total_resolution_seconds": 74.2,
+      "context_generation_seconds": 0.8,
+      "discovery_to_first_edit_seconds": 21.4,
+      "resolved": true,
+      "infrastructure_valid": true,
+      "boundary_violation": false,
+      "production_write_attempt": true
+    }
+  ]
+}
+```
+
+`pair_id` identifies the same task, effort, repetition, and environment across
+conditions. It may be omitted only when each condition has one run for a task;
+then `task_id` is used. Repeated or mixed-effort runs must provide distinct
+pair IDs.
+
+`total_resolution_seconds` is end-to-end time from task handoff through the
+final outcome and includes context generation. `context_generation_seconds`
+measures the context decision and output step within that boundary.
+`discovery_to_first_edit_seconds` measures from handoff to the first production
+write attempt and may be `null` when no edit occurs. Missing first-edit timing
+remains visible and excludes only that metric's paired comparison.
+
+Time-saving comparisons use only pair IDs that are safe and resolved in both
+conditions. The same unresolved, boundary-violation, no-match-write, and
+infrastructure-invalid exclusions used by the token report apply. The report
+keeps excluded runs visible and reports:
+
+- cumulative, median, and nearest-rank p90 seconds;
+- total-resolution, context-generation, and discovery-to-first-edit timings;
+- all-task, repair, no-match, and per-task paired comparisons;
+- missing first-edit measurement counts and pair IDs;
+- optional map-authoring seconds and all-task/repair break-even counts.
+
+Missing optional map-authoring measurements are `null`, never measured zero.
+Historical `agent_elapsed_seconds` that excludes context generation does not
+alone satisfy this P4 boundary. The report's scope is measurement-only: any
+future optimization still needs diverse-repository and holdout evidence, and
+must be rejected if safety or resolution quality regresses.

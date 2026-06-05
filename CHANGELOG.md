@@ -32,6 +32,10 @@ be documented.
   no-match, safe-and-resolved, map-authoring, median, and break-even token
   measures while excluding unsafe, unresolved, and infrastructure-invalid
   runs from savings claims.
+- A measurement-only `summarize-time-efficiency` API and CLI with explicit
+  repeated-run pairing, cumulative/median/nearest-rank-p90 timing,
+  context-generation and discovery-to-first-edit visibility, per-task
+  comparisons, and optional authoring-time break-even reporting.
 
 ### Fixed
 

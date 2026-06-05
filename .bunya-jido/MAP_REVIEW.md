@@ -336,3 +336,20 @@ An entry records review work; it does not prove architectural completeness.
   and corrects the Realistic P2 route result to 7/8 MATCH plus 1/8 bounded
   discovery. Compatible live benchmarks remain required before claiming P3
   release thresholds.
+
+## 2026-06-06 - P4 Measurement-Only Time Evidence
+
+- Change: Added safe-and-resolved repeated-run time reporting with explicit
+  pair IDs, cumulative/median/nearest-rank-p90 metrics, context-generation and
+  discovery-to-first-edit visibility, per-task comparisons, and optional
+  authoring-time break-even.
+- Decision: Broadened the existing Benchmark Evidence Suite and maintenance
+  route to cover time evidence while explicitly forbidding synthetic benchmark
+  timing from becoming route-vocabulary or matcher tuning. No context decision,
+  route threshold, viewer layout, node count, or edge count changed.
+- Validation: Run benchmark audit/time fixtures, the committed agent-utility
+  suite, blueprint and agent-map validation, grounded/atlas/stale gates, full
+  unit tests, rebuild the committed demo and clean overview capture, replay the
+  current local XHigh-authored maps to verify unchanged routing decisions, and
+  keep live P4 speed claims open until compatible diverse-repository and
+  holdout results exist.

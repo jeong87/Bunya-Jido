@@ -177,13 +177,21 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("`projection:quality_contract` - Quality Contract", context)
 
     def test_benchmark_reporting_has_a_safe_and_resolved_route(self) -> None:
-        context = generate_agent_context(ROOT, task="change benchmark token reporting")
+        token_context = generate_agent_context(
+            ROOT, task="change benchmark token reporting"
+        )
+        time_context = generate_agent_context(
+            ROOT, task="change benchmark time reporting"
+        )
 
-        self.assertIn("### change benchmark evidence reporting", context)
-        self.assertIn("- `src/bunya_jido/benchmark.py`", context)
-        self.assertIn("- `tests/test_benchmark_audit.py`", context)
-        self.assertIn("paired safe-and-resolved runs", context)
-        self.assertNotIn("### change multi-domain rubric coverage", context)
+        for context in (token_context, time_context):
+            self.assertIn("### change benchmark evidence reporting", context)
+            self.assertIn("- `src/bunya_jido/benchmark.py`", context)
+            self.assertIn("- `tests/test_benchmark_audit.py`", context)
+            self.assertNotIn("### change multi-domain rubric coverage", context)
+        self.assertIn("paired safe-and-resolved runs", token_context)
+        self.assertIn("explicitly paired safe-and-resolved runs", time_context)
+        self.assertIn("must not tune route vocabulary", time_context)
 
     def test_unmatched_context_does_not_invent_self_map_route(self) -> None:
         context = generate_agent_context(ROOT, task="publish package to package registry")
@@ -271,7 +279,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 17)
+        self.assertEqual(report["case_count"], 18)
         self.assertEqual(report["dimensions"]["honest_no_match"]["passed"], 7)
         self.assertEqual(report["dimensions"]["normal_bugfix_recovery"]["passed"], 2)
         self.assertEqual(report["safety_metrics"]["expected_decision_accuracy"], 1.0)

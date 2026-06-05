@@ -495,6 +495,23 @@ bunya-jido summarize-token-efficiency \
 The summary separates context output, repair, no-match, map-authoring, and
 safe-and-resolved task tokens, and reports medians and break-even task counts.
 
+Measure resolution time with the same safety filter and explicit repeated-run
+pairing:
+
+```bash
+bunya-jido summarize-time-efficiency \
+  --results results/time-runs.json \
+  --baseline no-map \
+  --candidate 0.5-map \
+  --require-comparable \
+  --json
+```
+
+The time summary reports cumulative, median, nearest-rank p90,
+context-generation, discovery-to-first-edit, total-resolution, per-task, and
+optional authoring-time break-even measures. It is reporting-only and does not
+tune routing behavior from benchmark scenarios.
+
 These files are meant to be pasted or attached before handing work to a coding agent.
 
 ## Supported Scope

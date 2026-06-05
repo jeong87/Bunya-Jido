@@ -14,7 +14,7 @@ repository and is protected by semantic golden tests.
 | Atlas contract | Studio v2, primary projection `Trusted Publication`, machine-readable decision record, two behavioral scenarios |
 | Grounding status | `grounded` |
 | Atlas quality status | `passed`, with projection choice and narration honesty still review-required |
-| Review status | Maintainer-authored and mechanically validated on June 1, 2026 |
+| Review status | Maintainer-authored and mechanically validated on June 6, 2026 |
 | Semantic coverage | 14 nodes, 27 relationships, 5 core nodes, 14 critical relationships |
 | Grounding metrics | 100% core-node evidence; 100% critical-relationship evidence |
 | Agent routes | 7 of 7 routes validated and projected as `Task Route` paths with optional Studio reading context |
@@ -42,6 +42,7 @@ python -m bunya_jido build --root . --max-files 0 --out docs/demo.html
 - Studio projection and scenario labels are authored from this repository's thesis; playback carries a documented-workflow basis badge rather than claiming observed runtime traces.
 - The blueprint retains the compared projections, scenario choices, and centrality risks in `atlas.decision_record`, while quality checks still leave editorial judgment review-required.
 - Atlas-quality reporting keeps review-only narration signals separate from blockers and can write an optional local Markdown review summary.
+- Benchmark evidence reporting keeps unsafe or unresolved runs out of token/time savings and treats synthetic timing results as measurement rather than routing-tuning instructions.
 - Validated routes may connect a coding task to a relevant projection question and qualified scenario, and the viewer copies only this projected trusted context.
 - Provider hint observations now carry origin/type metadata, and generated prompt/schema example text cannot become a contextual overlay node.
 - The benchmark suite exercises six different repository shapes so this promoted self-map is not the only quality target. See [`STUDIO_BENCHMARK.md`](STUDIO_BENCHMARK.md).

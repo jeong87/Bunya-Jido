@@ -9,7 +9,7 @@ keeps the review rationale visible beside it.
 ### CLI
 
 - **Plane:** entry
-- **Role:** Parses user commands and chooses scanning, semantic rendering, validation, context generation, benchmark audit, or token-efficiency reporting.
+- **Role:** Parses user commands and chooses scanning, semantic rendering, validation, context generation, benchmark audit, or token/time-efficiency reporting.
 - **Evidence:** `src/bunya_jido/cli.py`
 - **Boundary:** It coordinates publication, but does not define grounding policy.
 
@@ -68,9 +68,9 @@ keeps the review rationale visible beside it.
 ### Benchmark Evidence Suite
 
 - **Plane:** quality
-- **Role:** Checks that different repository shapes yield distinct projections and that live benchmark token claims use auditable workspace truth and paired safe-and-resolved runs.
+- **Role:** Checks that different repository shapes yield distinct projections and that live benchmark token/time claims use auditable workspace truth and explicitly paired safe-and-resolved runs.
 - **Evidence:** `src/bunya_jido/benchmark.py`, `tests/test_benchmark_audit.py`, `tests/fixtures/studio_benchmark_cases.json`, `tests/test_studio_benchmark.py`, `docs/BENCHMARK_RESULT_CONTRACT.md`, `docs/STUDIO_BENCHMARK.md`
-- **Boundary:** It keeps unsafe, unresolved, and infrastructure-invalid runs visible but excludes them from savings claims; Studio fixtures still do not prove an editorial reading is uniquely best.
+- **Boundary:** It keeps unsafe, unresolved, and infrastructure-invalid runs visible but excludes them from savings claims; timing reports measure supplied evidence without tuning routing from synthetic scenarios, and Studio fixtures still do not prove an editorial reading is uniquely best.
 
 ### Public Narrative And Roadmap
 

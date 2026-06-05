@@ -8,7 +8,11 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
-from bunya_jido.benchmark import audit_worktree, summarize_token_efficiency
+from bunya_jido.benchmark import (
+    audit_worktree,
+    summarize_time_efficiency,
+    summarize_token_efficiency,
+)
 from bunya_jido.cli import main
 
 
@@ -366,6 +370,187 @@ class BenchmarkAuditTests(unittest.TestCase):
             missing_authoring["conditions"]["0.5-map"]["map_authoring_tokens"]
         )
         self.assertIsNone(missing_authoring["break_even_task_count"]["repair"])
+
+    def test_time_efficiency_uses_repeated_safe_and_resolved_pairs(self) -> None:
+        def run(
+            condition: str,
+            pair_id: str,
+            task_id: str,
+            task_kind: str,
+            total: float,
+            context: float,
+            first_edit: float | None,
+            *,
+            resolved: bool = True,
+            boundary_violation: bool = False,
+            production_write_attempt: bool = True,
+        ) -> dict[str, object]:
+            return {
+                "condition": condition,
+                "pair_id": pair_id,
+                "task_id": task_id,
+                "task_kind": task_kind,
+                "total_resolution_seconds": total,
+                "context_generation_seconds": context,
+                "discovery_to_first_edit_seconds": first_edit,
+                "resolved": resolved,
+                "infrastructure_valid": True,
+                "boundary_violation": boundary_violation,
+                "production_write_attempt": production_write_attempt,
+            }
+
+        runs = [
+            run("no-map", "repair-a/r1", "repair-a", "bugfix", 100, 5, 20),
+            run("0.5-map", "repair-a/r1", "repair-a", "bugfix", 80, 4, 15),
+            run("no-map", "repair-a/r2", "repair-a", "bugfix", 120, 6, 30),
+            run("0.5-map", "repair-a/r2", "repair-a", "bugfix", 90, 4, 18),
+            run("no-map", "repair-a/r3", "repair-a", "bugfix", 140, 7, 40),
+            run("0.5-map", "repair-a/r3", "repair-a", "bugfix", 100, 5, None),
+            run(
+                "no-map",
+                "no-match/r1",
+                "no-match",
+                "no_match",
+                20,
+                0,
+                None,
+                production_write_attempt=False,
+            ),
+            run(
+                "0.5-map",
+                "no-match/r1",
+                "no-match",
+                "no_match",
+                25,
+                2,
+                None,
+                production_write_attempt=False,
+            ),
+            run("no-map", "unsafe/r1", "unsafe", "bugfix", 200, 5, 50),
+            run(
+                "0.5-map",
+                "unsafe/r1",
+                "unsafe",
+                "bugfix",
+                10,
+                1,
+                2,
+                boundary_violation=True,
+            ),
+            run("no-map", "unresolved/r1", "unresolved", "bugfix", 160, 5, 40),
+            run(
+                "0.5-map",
+                "unresolved/r1",
+                "unresolved",
+                "bugfix",
+                20,
+                1,
+                None,
+                resolved=False,
+                production_write_attempt=False,
+            ),
+        ]
+
+        report = summarize_time_efficiency(
+            runs,
+            baseline_condition="no-map",
+            candidate_condition="0.5-map",
+            map_authoring_seconds={"no-map": 0, "0.5-map": 300},
+        )
+
+        self.assertEqual(report["status"], "comparable")
+        self.assertEqual(report["measurement_scope"], "reporting_only_no_routing_optimization")
+        self.assertEqual(report["paired_safe_and_resolved_run_count"], 4)
+        all_time = report["comparisons"]["all"]["total_resolution"]
+        self.assertEqual(all_time["saving_seconds"], 85)
+        self.assertEqual(all_time["saving_rate"], 0.2237)
+        self.assertEqual(all_time["baseline"]["median_seconds"], 110)
+        self.assertEqual(all_time["baseline"]["p90_seconds"], 140.0)
+        self.assertEqual(all_time["candidate"]["p90_seconds"], 100.0)
+        first_edit = report["comparisons"]["all"]["discovery_to_first_edit"]
+        self.assertEqual(first_edit["paired_run_count"], 2)
+        self.assertEqual(first_edit["saving_seconds"], 17)
+        self.assertEqual(report["break_even_task_count"]["repair"], 10.0)
+        repair_task = next(
+            task for task in report["per_task"] if task["task_id"] == "repair-a"
+        )
+        self.assertEqual(repair_task["paired_run_count"], 3)
+        self.assertEqual(
+            repair_task["total_resolution"]["baseline"]["median_seconds"], 120.0
+        )
+        self.assertEqual(
+            report["conditions"]["0.5-map"]["excluded_run_reasons"],
+            {"boundary_violation": 1, "unresolved_bugfix": 1},
+        )
+
+    def test_time_efficiency_cli_and_validation(self) -> None:
+        runs = [
+            {
+                "condition": condition,
+                "task_id": "repair-1",
+                "task_kind": "bugfix",
+                "total_resolution_seconds": total,
+                "context_generation_seconds": context,
+                "discovery_to_first_edit_seconds": first_edit,
+                "resolved": True,
+                "infrastructure_valid": True,
+                "boundary_violation": False,
+                "production_write_attempt": True,
+            }
+            for condition, total, context, first_edit in (
+                ("no-map", 100, 0, 25),
+                ("0.5-map", 70, 3, 15),
+            )
+        ]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            results = Path(temp_dir) / "time.json"
+            results.write_text(json.dumps({"runs": runs}), encoding="utf-8")
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "summarize-time-efficiency",
+                        "--results",
+                        str(results),
+                        "--baseline",
+                        "no-map",
+                        "--candidate",
+                        "0.5-map",
+                        "--require-comparable",
+                        "--json",
+                    ]
+                )
+
+        report = json.loads(stdout.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(report["paired_safe_and_resolved_run_count"], 1)
+        self.assertEqual(
+            report["map_authoring_seconds"],
+            {
+                "baseline": None,
+                "candidate": None,
+                "incremental": None,
+                "complete": False,
+            },
+        )
+        self.assertIsNone(report["break_even_task_count"]["repair"])
+        invalid = [
+            dict(runs[0], context_generation_seconds=101),
+            runs[1],
+        ]
+        with self.assertRaisesRegex(ValueError, "cannot exceed"):
+            summarize_time_efficiency(
+                invalid,
+                baseline_condition="no-map",
+                candidate_condition="0.5-map",
+            )
+        duplicate = [runs[0], dict(runs[0]), runs[1]]
+        with self.assertRaisesRegex(ValueError, "duplicate time run"):
+            summarize_time_efficiency(
+                duplicate,
+                baseline_condition="no-map",
+                candidate_condition="0.5-map",
+            )
 
 
 if __name__ == "__main__":

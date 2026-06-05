@@ -28,12 +28,13 @@
 
 ## Candidate C: Quality And Benchmark Contract
 
-- **Question answered:** How are readability, benchmark truth, safe token comparisons, and cross-domain honesty checked?
+- **Question answered:** How are readability, benchmark truth, safe token/time comparisons, and cross-domain honesty checked?
 - **Landmark nodes:** Atlas Quality Evaluator, Benchmark Evidence Suite, Semantic
   Contract Tests, Continuous Integration.
 - **Grounding strength:** Strong but supporting rather than the product entry.
 - **Review value:** Flags misleading scenario narration, keeps unsafe or
-  unresolved runs out of token savings, and leaves editorial judgment human-owned.
+  unresolved runs out of efficiency savings, prevents synthetic timing evidence
+  from becoming route tuning, and leaves editorial judgment human-owned.
 - **Scenario potential:** Better as a secondary projection than a primary story.
 
 ## Editorial selection

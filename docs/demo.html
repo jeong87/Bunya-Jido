@@ -110,7 +110,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
-  "generated_at": "2026-06-05T15:09:13+00:00",
+  "generated_at": "2026-06-05T15:33:46+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
   "artifact_mode": "semantic_blueprint",
@@ -302,7 +302,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Command Line Interface",
       "type": "component",
       "plane": "entry",
-      "description": "Dispatches build, validation, preparation, trusted context, benchmark audit, and safe-and-resolved token reporting commands.",
+      "description": "Dispatches build, validation, preparation, trusted context, benchmark audit, and safe-and-resolved token/time reporting commands.",
       "source_path": "src/bunya_jido/cli.py",
       "tags": [
         "blueprint",
@@ -331,6 +331,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "source",
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_summarize_token_efficiency"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_summarize_time_efficiency"
         }
       ],
       "family": "command",
@@ -504,7 +509,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Benchmark Evidence Suite",
       "type": "test",
       "plane": "quality",
-      "description": "Exercises Studio generality and provides auditable worktree and safe-and-resolved token evidence for live benchmark runners.",
+      "description": "Exercises Studio generality and provides auditable worktree plus safe-and-resolved token/time evidence for live benchmark runners.",
       "source_path": "src/bunya_jido/benchmark.py",
       "tags": [
         "blueprint",
@@ -523,6 +528,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "source",
           "path": "src/bunya_jido/benchmark.py",
           "symbol": "summarize_token_efficiency"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/benchmark.py",
+          "symbol": "summarize_time_efficiency"
         },
         {
           "kind": "test",
@@ -548,7 +558,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "family": "evidence",
       "overview_visibility": "visible",
       "activation": "conditional",
-      "inspector_summary": "Benchmark evidence keeps workspace truth, unsafe or unresolved exclusions, map-authoring cost, and task-token comparisons explicit."
+      "inspector_summary": "Benchmark evidence keeps workspace truth, unsafe or unresolved exclusions, explicit repeated-run pairing, map-authoring cost, and task-efficiency comparisons visible."
     },
     {
       "id": "quality:tests",
@@ -863,6 +873,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "source",
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_summarize_token_efficiency"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_summarize_time_efficiency"
         }
       ],
       "relation_family": "invocation",
@@ -1475,7 +1490,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "id": "projection_projection:quality_contract",
       "projection_id": "projection:quality_contract",
       "label": "Quality Contract",
-      "description": "How readability, benchmark truth, token comparisons, and publication trust are mechanically checked.",
+      "description": "How readability, benchmark truth, safe token/time comparisons, and publication trust are mechanically checked.",
       "question_answered": "Which checks keep the Studio output honest?",
       "kind": "projection",
       "source": "atlas",
@@ -1700,7 +1715,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "id": "workflow_benchmark_evidence_reporting",
       "label": "Benchmark Evidence Reporting",
-      "description": "Audit live-run workspace truth and compare only paired safe-and-resolved token results.",
+      "description": "Audit live-run workspace truth and compare only explicitly paired safe-and-resolved token/time results.",
       "kind": "workflow",
       "source": "blueprint",
       "node_ids": [
@@ -1778,7 +1793,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "projection_context": {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
-        "description": "How readability, benchmark truth, token comparisons, and publication trust are mechanically checked.",
+        "description": "How readability, benchmark truth, safe token/time comparisons, and publication trust are mechanically checked.",
         "question_answered": "Which checks keep the Studio output honest?"
       },
       "scenario_context": []
@@ -1830,7 +1845,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "projection_context": {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
-        "description": "How readability, benchmark truth, token comparisons, and publication trust are mechanically checked.",
+        "description": "How readability, benchmark truth, safe token/time comparisons, and publication trust are mechanically checked.",
         "question_answered": "Which checks keep the Studio output honest?"
       },
       "scenario_context": [
@@ -1890,7 +1905,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "projection_context": {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
-        "description": "How readability, benchmark truth, token comparisons, and publication trust are mechanically checked.",
+        "description": "How readability, benchmark truth, safe token/time comparisons, and publication trust are mechanically checked.",
         "question_answered": "Which checks keep the Studio output honest?"
       },
       "scenario_context": [
@@ -1907,7 +1922,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "id": "task_route_change-benchmark-evidence-reporting",
       "label": "change benchmark evidence reporting",
-      "description": "Adjust worktree audit or safe-and-resolved token reporting without hiding unsafe, unresolved, or infrastructure-invalid runs.",
+      "description": "Adjust worktree audit or safe-and-resolved token/time reporting without hiding unsafe, unresolved, or infrastructure-invalid runs.",
       "kind": "task_route",
       "source": "agent_map",
       "node_ids": [
@@ -1933,8 +1948,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "contracts": [
         "Token-saving comparisons must include only paired safe-and-resolved runs from compatible conditions.",
+        "Time-saving comparisons must include only explicitly paired safe-and-resolved runs from compatible conditions.",
         "Unresolved bugfixes, boundary violations, no-match production writes, and infrastructure-invalid runs must remain visible but excluded from savings claims.",
-        "Map-authoring tokens, context-output tokens, repair tokens, no-match tokens, medians, and break-even counts must remain separately reportable."
+        "Map-authoring tokens, context-output tokens, repair tokens, no-match tokens, medians, and break-even counts must remain separately reportable.",
+        "Timing reports must keep total resolution, context generation, discovery-to-first-edit, median, p90, and optional authoring time separately reportable.",
+        "Benchmark timing evidence must not tune route vocabulary without diverse-repository and holdout validation."
       ],
       "tests": [
         "tests/test_benchmark_audit.py"
@@ -1948,7 +1966,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "projection_context": {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
-        "description": "How readability, benchmark truth, token comparisons, and publication trust are mechanically checked.",
+        "description": "How readability, benchmark truth, safe token/time comparisons, and publication trust are mechanically checked.",
         "question_answered": "Which checks keep the Studio output honest?"
       },
       "scenario_context": []
@@ -1997,7 +2015,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "projection_context": {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
-        "description": "How readability, benchmark truth, token comparisons, and publication trust are mechanically checked.",
+        "description": "How readability, benchmark truth, safe token/time comparisons, and publication trust are mechanically checked.",
         "question_answered": "Which checks keep the Studio output honest?"
       },
       "scenario_context": []
@@ -2255,10 +2273,6 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "kind": "test",
       "path": "tests/test_studio_benchmark.py"
-    },
-    {
-      "kind": "fixture",
-      "path": "tests/fixtures/studio_benchmark_cases.json"
     },
     {
       "kind": "source",
@@ -2556,7 +2570,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
-        "description": "How readability, benchmark truth, token comparisons, and publication trust are mechanically checked.",
+        "description": "How readability, benchmark truth, safe token/time comparisons, and publication trust are mechanically checked.",
         "question_answered": "Which checks keep the Studio output honest?",
         "is_primary": false,
         "node_ids": [

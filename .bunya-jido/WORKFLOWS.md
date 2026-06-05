@@ -47,8 +47,10 @@ designed to be reviewable in the generated HTML map.
 ## Benchmark Evidence Reporting
 
 1. `bunya-jido audit-worktree` records tracked, staged, deleted, renamed, untracked, and JSONL-observed production activity.
-2. Compatible live-run results record task/context tokens, resolution, infrastructure validity, boundary violations, and no-match write attempts.
+2. Compatible live-run results record task/context tokens, end-to-end and staged timings, explicit repeated-run pair IDs, resolution, infrastructure validity, boundary violations, and no-match write attempts.
 3. `bunya-jido summarize-token-efficiency` compares only paired safe-and-resolved task IDs while reporting exclusions, medians, map-authoring cost, and break-even counts.
+4. `bunya-jido summarize-time-efficiency` compares only explicitly paired safe-and-resolved runs while reporting cumulative/median/p90 time, context generation, first-edit coverage, per-task results, and optional authoring-time break-even.
+5. Timing evidence remains measurement-only until diverse-repository and holdout evaluation identifies a general optimization that preserves safety and resolution quality.
 
 ## Studio Benchmark Review
 

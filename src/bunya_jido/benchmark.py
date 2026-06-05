@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import fnmatch
 import json
+import math
 import subprocess
 from pathlib import Path
 from typing import Any, Iterable
@@ -9,6 +10,7 @@ from typing import Any, Iterable
 
 AUDIT_SCHEMA_VERSION = "bunya-jido-worktree-audit-v1"
 TOKEN_EFFICIENCY_SCHEMA_VERSION = "bunya-jido-token-efficiency-report-v1"
+TIME_EFFICIENCY_SCHEMA_VERSION = "bunya-jido-time-efficiency-report-v1"
 TOKEN_RUN_KINDS = {"bugfix", "no_match"}
 
 
@@ -244,7 +246,18 @@ def _require_bool(value: Any, field: str) -> bool:
     return value
 
 
-def _token_exclusion_reasons(run: dict[str, Any]) -> list[str]:
+def _require_nonnegative_number(value: Any, field: str) -> float:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        or value < 0
+    ):
+        raise ValueError(f"{field} must be a finite non-negative number")
+    return round(float(value), 6)
+
+
+def _efficiency_exclusion_reasons(run: dict[str, Any]) -> list[str]:
     reasons: list[str] = []
     if not run["infrastructure_valid"]:
         reasons.append("infrastructure_invalid")
@@ -292,13 +305,13 @@ def _normalize_token_runs(runs: Iterable[dict[str, Any]]) -> list[dict[str, Any]
                 f"duplicate token run for condition/task_id: {key[0]}/{key[1]}"
             )
         seen.add(key)
-        run["exclusion_reasons"] = _token_exclusion_reasons(run)
+        run["exclusion_reasons"] = _efficiency_exclusion_reasons(run)
         run["safe_and_resolved"] = not run["exclusion_reasons"]
         normalized.append(run)
     return normalized
 
 
-def _median(values: list[int]) -> int | float | None:
+def _median(values: list[int | float]) -> int | float | None:
     if not values:
         return None
     ordered = sorted(values)
@@ -306,6 +319,13 @@ def _median(values: list[int]) -> int | float | None:
     if len(ordered) % 2:
         return ordered[midpoint]
     return round((ordered[midpoint - 1] + ordered[midpoint]) / 2, 2)
+
+
+def _p90(values: list[int | float]) -> int | float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    return ordered[max(0, math.ceil(len(ordered) * 0.9) - 1)]
 
 
 def _token_condition_summary(
@@ -537,5 +557,349 @@ def summarize_token_efficiency(
             "Token-saving comparisons include only task IDs that are safe and "
             "resolved in both conditions. The caller must supply actual measured "
             "tokens and truthful run outcomes."
+        ),
+    }
+
+
+def _normalize_time_runs(runs: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    normalized: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for index, raw_run in enumerate(runs):
+        if not isinstance(raw_run, dict):
+            raise ValueError(f"runs[{index}] must be an object")
+        run = dict(raw_run)
+        for field in ("condition", "task_id", "task_kind"):
+            value = run.get(field)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"runs[{index}].{field} must be a non-empty string")
+            run[field] = value.strip()
+        if run["task_kind"] not in TOKEN_RUN_KINDS:
+            raise ValueError(
+                f"runs[{index}].task_kind must be bugfix or no_match"
+            )
+        pair_id = run.get("pair_id", run["task_id"])
+        if not isinstance(pair_id, str) or not pair_id.strip():
+            raise ValueError(f"runs[{index}].pair_id must be a non-empty string")
+        run["pair_id"] = pair_id.strip()
+        for field in ("total_resolution_seconds", "context_generation_seconds"):
+            run[field] = _require_nonnegative_number(
+                run.get(field), f"runs[{index}].{field}"
+            )
+        first_edit = run.get("discovery_to_first_edit_seconds")
+        run["discovery_to_first_edit_seconds"] = (
+            None
+            if first_edit is None
+            else _require_nonnegative_number(
+                first_edit, f"runs[{index}].discovery_to_first_edit_seconds"
+            )
+        )
+        if run["context_generation_seconds"] > run["total_resolution_seconds"]:
+            raise ValueError(
+                f"runs[{index}].context_generation_seconds cannot exceed "
+                "total_resolution_seconds"
+            )
+        if (
+            run["discovery_to_first_edit_seconds"] is not None
+            and run["discovery_to_first_edit_seconds"]
+            > run["total_resolution_seconds"]
+        ):
+            raise ValueError(
+                f"runs[{index}].discovery_to_first_edit_seconds cannot exceed "
+                "total_resolution_seconds"
+            )
+        for field in (
+            "resolved",
+            "infrastructure_valid",
+            "boundary_violation",
+            "production_write_attempt",
+        ):
+            run[field] = _require_bool(run.get(field), f"runs[{index}].{field}")
+        key = (run["condition"], run["pair_id"])
+        if key in seen:
+            raise ValueError(
+                f"duplicate time run for condition/pair_id: {key[0]}/{key[1]}"
+            )
+        seen.add(key)
+        run["exclusion_reasons"] = _efficiency_exclusion_reasons(run)
+        run["safe_and_resolved"] = not run["exclusion_reasons"]
+        normalized.append(run)
+    return normalized
+
+
+def _seconds_distribution(values: list[float]) -> dict[str, Any]:
+    return {
+        "sample_count": len(values),
+        "cumulative_seconds": round(sum(values), 6),
+        "median_seconds": _median(values),
+        "p90_seconds": _p90(values),
+    }
+
+
+def _time_bundle(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    first_edit_values = [
+        run["discovery_to_first_edit_seconds"]
+        for run in runs
+        if run["discovery_to_first_edit_seconds"] is not None
+    ]
+    return {
+        "total_resolution": _seconds_distribution(
+            [run["total_resolution_seconds"] for run in runs]
+        ),
+        "context_generation": _seconds_distribution(
+            [run["context_generation_seconds"] for run in runs]
+        ),
+        "discovery_to_first_edit": _seconds_distribution(first_edit_values),
+        "missing_discovery_to_first_edit_count": len(runs) - len(first_edit_values),
+    }
+
+
+def _time_condition_summary(
+    runs: list[dict[str, Any]],
+    map_authoring_seconds: float | None,
+) -> dict[str, Any]:
+    safe_runs = [run for run in runs if run["safe_and_resolved"]]
+    repair_runs = [run for run in runs if run["task_kind"] == "bugfix"]
+    safe_repair_runs = [
+        run for run in safe_runs if run["task_kind"] == "bugfix"
+    ]
+    no_match_runs = [run for run in runs if run["task_kind"] == "no_match"]
+    safe_no_match_runs = [
+        run for run in safe_runs if run["task_kind"] == "no_match"
+    ]
+    excluded: dict[str, int] = {}
+    for run in runs:
+        for reason in run["exclusion_reasons"]:
+            excluded[reason] = excluded.get(reason, 0) + 1
+    return {
+        "map_authoring_seconds": map_authoring_seconds,
+        "run_count": len(runs),
+        "safe_and_resolved_run_count": len(safe_runs),
+        "excluded_run_count": len(runs) - len(safe_runs),
+        "excluded_run_reasons": dict(sorted(excluded.items())),
+        "timings": {
+            "all": _time_bundle(runs),
+            "safe_and_resolved": _time_bundle(safe_runs),
+            "repair": _time_bundle(repair_runs),
+            "safe_and_resolved_repair": _time_bundle(safe_repair_runs),
+            "no_match": _time_bundle(no_match_runs),
+            "safe_and_resolved_no_match": _time_bundle(safe_no_match_runs),
+        },
+    }
+
+
+def _paired_time_metric(
+    baseline_runs: dict[str, dict[str, Any]],
+    candidate_runs: dict[str, dict[str, Any]],
+    pair_ids: list[str],
+    field: str,
+) -> dict[str, Any]:
+    available_ids = [
+        pair_id
+        for pair_id in pair_ids
+        if baseline_runs[pair_id].get(field) is not None
+        and candidate_runs[pair_id].get(field) is not None
+    ]
+    missing_ids = sorted(set(pair_ids) - set(available_ids))
+    baseline_values = [baseline_runs[pair_id][field] for pair_id in available_ids]
+    candidate_values = [
+        candidate_runs[pair_id][field] for pair_id in available_ids
+    ]
+    baseline_total = round(sum(baseline_values), 6)
+    candidate_total = round(sum(candidate_values), 6)
+    saving = round(baseline_total - candidate_total, 6)
+    return {
+        "paired_run_count": len(available_ids),
+        "missing_pair_ids": missing_ids,
+        "baseline": _seconds_distribution(baseline_values),
+        "candidate": _seconds_distribution(candidate_values),
+        "saving_seconds": saving,
+        "saving_rate": round(saving / baseline_total, 4)
+        if baseline_total
+        else None,
+        "average_saving_seconds": round(saving / len(available_ids), 6)
+        if available_ids
+        else None,
+    }
+
+
+def _paired_time_scope(
+    baseline_runs: dict[str, dict[str, Any]],
+    candidate_runs: dict[str, dict[str, Any]],
+    pair_ids: list[str],
+) -> dict[str, Any]:
+    return {
+        "paired_run_count": len(pair_ids),
+        "pair_ids": pair_ids,
+        "total_resolution": _paired_time_metric(
+            baseline_runs, candidate_runs, pair_ids, "total_resolution_seconds"
+        ),
+        "context_generation": _paired_time_metric(
+            baseline_runs, candidate_runs, pair_ids, "context_generation_seconds"
+        ),
+        "discovery_to_first_edit": _paired_time_metric(
+            baseline_runs,
+            candidate_runs,
+            pair_ids,
+            "discovery_to_first_edit_seconds",
+        ),
+    }
+
+
+def summarize_time_efficiency(
+    runs: Iterable[dict[str, Any]],
+    *,
+    baseline_condition: str,
+    candidate_condition: str,
+    map_authoring_seconds: dict[str, int | float] | None = None,
+) -> dict[str, Any]:
+    """Summarize measured time without changing routing or discovery behavior."""
+
+    baseline_condition = baseline_condition.strip()
+    candidate_condition = candidate_condition.strip()
+    if not baseline_condition or not candidate_condition:
+        raise ValueError("baseline_condition and candidate_condition are required")
+    if baseline_condition == candidate_condition:
+        raise ValueError("baseline_condition and candidate_condition must differ")
+    normalized = _normalize_time_runs(runs)
+    authoring = dict(map_authoring_seconds or {})
+    for condition, value in authoring.items():
+        authoring[condition] = _require_nonnegative_number(
+            value, f"map_authoring_seconds.{condition}"
+        )
+    by_condition: dict[str, list[dict[str, Any]]] = {}
+    for run in normalized:
+        by_condition.setdefault(run["condition"], []).append(run)
+    for required in (baseline_condition, candidate_condition):
+        if required not in by_condition:
+            raise ValueError(f"time runs do not include condition: {required}")
+    baseline_by_id = {
+        run["pair_id"]: run for run in by_condition[baseline_condition]
+    }
+    candidate_by_id = {
+        run["pair_id"]: run for run in by_condition[candidate_condition]
+    }
+    shared_ids = sorted(set(baseline_by_id) & set(candidate_by_id))
+    baseline_only_ids = sorted(set(baseline_by_id) - set(candidate_by_id))
+    candidate_only_ids = sorted(set(candidate_by_id) - set(baseline_by_id))
+    for pair_id in shared_ids:
+        baseline_run = baseline_by_id[pair_id]
+        candidate_run = candidate_by_id[pair_id]
+        if baseline_run["task_id"] != candidate_run["task_id"]:
+            raise ValueError(f"paired task_id mismatch for pair_id: {pair_id}")
+        if baseline_run["task_kind"] != candidate_run["task_kind"]:
+            raise ValueError(f"paired task_kind mismatch for pair_id: {pair_id}")
+    paired_ids = [
+        pair_id
+        for pair_id in shared_ids
+        if baseline_by_id[pair_id]["safe_and_resolved"]
+        and candidate_by_id[pair_id]["safe_and_resolved"]
+    ]
+    repair_ids = [
+        pair_id
+        for pair_id in paired_ids
+        if baseline_by_id[pair_id]["task_kind"] == "bugfix"
+    ]
+    no_match_ids = [
+        pair_id
+        for pair_id in paired_ids
+        if baseline_by_id[pair_id]["task_kind"] == "no_match"
+    ]
+    comparisons = {
+        "all": _paired_time_scope(baseline_by_id, candidate_by_id, paired_ids),
+        "repair": _paired_time_scope(
+            baseline_by_id, candidate_by_id, repair_ids
+        ),
+        "no_match": _paired_time_scope(
+            baseline_by_id, candidate_by_id, no_match_ids
+        ),
+    }
+    per_task = []
+    for task_id in sorted({baseline_by_id[pair_id]["task_id"] for pair_id in paired_ids}):
+        task_pair_ids = [
+            pair_id
+            for pair_id in paired_ids
+            if baseline_by_id[pair_id]["task_id"] == task_id
+        ]
+        task_scope = _paired_time_scope(
+            baseline_by_id, candidate_by_id, task_pair_ids
+        )
+        task_scope.update(
+            {
+                "task_id": task_id,
+                "task_kind": baseline_by_id[task_pair_ids[0]]["task_kind"],
+            }
+        )
+        per_task.append(task_scope)
+    authoring_complete = (
+        baseline_condition in authoring and candidate_condition in authoring
+    )
+    baseline_authoring = authoring.get(baseline_condition)
+    candidate_authoring = authoring.get(candidate_condition)
+    incremental_authoring = (
+        round(candidate_authoring - baseline_authoring, 6)
+        if authoring_complete
+        and baseline_authoring is not None
+        and candidate_authoring is not None
+        else None
+    )
+    break_even: dict[str, float | None] = {}
+    for name in ("all", "repair"):
+        average_saving = comparisons[name]["total_resolution"][
+            "average_saving_seconds"
+        ]
+        break_even[name] = (
+            round(incremental_authoring / average_saving, 2)
+            if average_saving is not None
+            and average_saving > 0
+            and incremental_authoring is not None
+            and incremental_authoring >= 0
+            and authoring_complete
+            else None
+        )
+    excluded_runs = [
+        {
+            "condition": run["condition"],
+            "pair_id": run["pair_id"],
+            "task_id": run["task_id"],
+            "task_kind": run["task_kind"],
+            "reasons": run["exclusion_reasons"],
+        }
+        for run in normalized
+        if run["exclusion_reasons"]
+    ]
+    conditions = {
+        condition: _time_condition_summary(
+            condition_runs, authoring.get(condition)
+        )
+        for condition, condition_runs in sorted(by_condition.items())
+    }
+    return {
+        "schema_version": TIME_EFFICIENCY_SCHEMA_VERSION,
+        "status": "comparable" if paired_ids else "insufficient_data",
+        "measurement_scope": "reporting_only_no_routing_optimization",
+        "baseline_condition": baseline_condition,
+        "candidate_condition": candidate_condition,
+        "conditions": conditions,
+        "paired_safe_and_resolved_run_count": len(paired_ids),
+        "shared_pair_count": len(shared_ids),
+        "unpaired_or_excluded_shared_pair_count": len(shared_ids) - len(paired_ids),
+        "baseline_only_pair_ids": baseline_only_ids,
+        "candidate_only_pair_ids": candidate_only_ids,
+        "comparisons": comparisons,
+        "per_task": per_task,
+        "map_authoring_seconds": {
+            "baseline": baseline_authoring,
+            "candidate": candidate_authoring,
+            "incremental": incremental_authoring,
+            "complete": authoring_complete,
+        },
+        "break_even_task_count": break_even,
+        "excluded_runs": excluded_runs,
+        "percentile_method": "nearest_rank",
+        "limitation": (
+            "Time-saving comparisons include only pair IDs that are safe and "
+            "resolved in both conditions. This report measures supplied timings "
+            "and does not tune routing, prove general speedups, or replace "
+            "diverse-repository and holdout evaluation."
         ),
     }

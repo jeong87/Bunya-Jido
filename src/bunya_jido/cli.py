@@ -25,7 +25,11 @@ from .blueprint import (
     validate_agent_map_file,
     validate_blueprint_file,
 )
-from .benchmark import audit_worktree, summarize_token_efficiency
+from .benchmark import (
+    audit_worktree,
+    summarize_time_efficiency,
+    summarize_token_efficiency,
+)
 from .quality import ATLAS_QUALITY_REPORT_FILE, render_atlas_quality_markdown
 from .render import render_html, write_json
 from .scanner import build_graph
@@ -634,6 +638,54 @@ def cmd_summarize_token_efficiency(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_summarize_time_efficiency(args: argparse.Namespace) -> int:
+    try:
+        payload = json.loads(Path(args.results).read_text(encoding="utf-8"))
+        if isinstance(payload, list):
+            runs = payload
+            map_authoring_seconds = {}
+        elif isinstance(payload, dict):
+            runs = payload.get("runs")
+            map_authoring_seconds = payload.get("map_authoring_seconds") or {}
+        else:
+            raise ValueError("results file must contain a list or object")
+        if not isinstance(runs, list):
+            raise ValueError("results object must contain a runs list")
+        if not isinstance(map_authoring_seconds, dict):
+            raise ValueError("map_authoring_seconds must be an object")
+        report = summarize_time_efficiency(
+            runs,
+            baseline_condition=args.baseline,
+            candidate_condition=args.candidate,
+            map_authoring_seconds=map_authoring_seconds,
+        )
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"Time efficiency summary blocked: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        comparison = report["comparisons"]["all"]["total_resolution"]
+        print(f"Time efficiency summary: {report['status']}")
+        print(
+            "Paired safe-and-resolved runs: "
+            f"{report['paired_safe_and_resolved_run_count']}"
+        )
+        print(
+            "Total resolution saving: "
+            f"{comparison['saving_seconds']} seconds "
+            f"(rate={comparison['saving_rate']})"
+        )
+        print(
+            "Break-even tasks: "
+            f"all={report['break_even_task_count']['all']} "
+            f"repair={report['break_even_task_count']['repair']}"
+        )
+    if args.require_comparable and report["status"] != "comparable":
+        return 2
+    return 0
+
+
 def cmd_install_agent_guides(args: argparse.Namespace) -> int:
     if args.dry_run and not args.activate:
         print("--dry-run requires --activate.", file=sys.stderr)
@@ -771,6 +823,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_tokens.add_argument("--json", action="store_true", help="Print the machine-readable token efficiency report.")
     p_tokens.set_defaults(func=cmd_summarize_token_efficiency)
 
+    p_time = sub.add_parser("summarize-time-efficiency", help="Compare paired safe-and-resolved benchmark timing results without tuning routing behavior.")
+    p_time.add_argument("--results", required=True, help="JSON file containing runs and optional map_authoring_seconds.")
+    p_time.add_argument("--baseline", required=True, help="Baseline condition name, such as no-map.")
+    p_time.add_argument("--candidate", required=True, help="Candidate condition name, such as 0.5-map.")
+    p_time.add_argument("--require-comparable", action="store_true", help="Exit with status 2 unless at least one safe-and-resolved run pair is comparable.")
+    p_time.add_argument("--json", action="store_true", help="Print the machine-readable time efficiency report.")
+    p_time.set_defaults(func=cmd_summarize_time_efficiency)
+
     p_guides = sub.add_parser("install-agent-guides", help="Write Bunya-Jido agent guidance snippets or activate managed project instructions.")
     p_guides.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_guides.add_argument("--agent", choices=["all", "codex", "claude", "cursor", "cline"], default="all", help="Which guide to write. Default: all.")
@@ -783,7 +843,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
-    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "audit-worktree", "summarize-token-efficiency", "install-agent-guides"}
+    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "audit-worktree", "summarize-token-efficiency", "summarize-time-efficiency", "install-agent-guides"}
     if not raw or (raw[0] not in subcommands and raw[0] not in {"-h", "--help", "--version"}):
         raw = ["build"] + raw
     parser = build_parser()

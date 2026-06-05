@@ -30,14 +30,15 @@
       "importance": "core",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Dispatches build, validation, preparation, trusted context, benchmark audit, and safe-and-resolved token reporting commands.",
+      "description": "Dispatches build, validation, preparation, trusted context, benchmark audit, and safe-and-resolved token/time reporting commands.",
       "why_it_matters": "Every published artifact or agent-context request begins at an explicit command boundary.",
       "inspector_summary": "Command entrypoints coordinate publication and diagnostics without defining the trust policy.",
       "source_path": "src/bunya_jido/cli.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_build"},
         {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_evaluate_atlas_quality"},
-        {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_summarize_token_efficiency"}
+        {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_summarize_token_efficiency"},
+        {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_summarize_time_efficiency"}
       ]
     },
     {
@@ -117,11 +118,12 @@
       "importance": "major",
       "overview_visibility": "visible",
       "activation": "conditional",
-      "description": "Exercises Studio generality and provides auditable worktree and safe-and-resolved token evidence for live benchmark runners.",
-      "inspector_summary": "Benchmark evidence keeps workspace truth, unsafe or unresolved exclusions, map-authoring cost, and task-token comparisons explicit.",
+      "description": "Exercises Studio generality and provides auditable worktree plus safe-and-resolved token/time evidence for live benchmark runners.",
+      "inspector_summary": "Benchmark evidence keeps workspace truth, unsafe or unresolved exclusions, explicit repeated-run pairing, map-authoring cost, and task-efficiency comparisons visible.",
       "source_path": "src/bunya_jido/benchmark.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/benchmark.py", "symbol": "summarize_token_efficiency"},
+        {"kind": "source", "path": "src/bunya_jido/benchmark.py", "symbol": "summarize_time_efficiency"},
         {"kind": "test", "path": "tests/test_benchmark_audit.py"},
         {"kind": "test", "path": "tests/test_studio_benchmark.py"},
         {"kind": "fixture", "path": "tests/fixtures/studio_benchmark_cases.json"},
@@ -287,7 +289,7 @@
     {"id": "edge:scanner_blueprint", "source": "analysis:scanner", "target": "semantic:blueprint", "relation": "feeds", "relation_family": "observation", "workflow_role": "supporting", "overview_visibility": "contextual", "activation": "optional", "confidence": "llm_grounded", "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "graph_from_blueprint"}]},
     {"id": "edge:blueprint_validation", "source": "semantic:blueprint", "target": "semantic:validation", "relation": "validates", "relation_family": "assurance", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "validate_blueprint_obj"}]},
     {"id": "edge:cli_atlas_quality", "source": "entry:cli", "target": "quality:atlas", "relation": "calls", "relation_family": "invocation", "workflow_role": "supporting", "overview_visibility": "visible", "activation": "conditional", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_evaluate_atlas_quality"}]},
-    {"id": "edge:cli_benchmark_evidence", "source": "entry:cli", "target": "quality:benchmark", "relation": "calls", "relation_family": "invocation", "workflow_role": "supporting", "overview_visibility": "contextual", "activation": "conditional", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_summarize_token_efficiency"}]},
+    {"id": "edge:cli_benchmark_evidence", "source": "entry:cli", "target": "quality:benchmark", "relation": "calls", "relation_family": "invocation", "workflow_role": "supporting", "overview_visibility": "contextual", "activation": "conditional", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_summarize_token_efficiency"}, {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_summarize_time_efficiency"}]},
     {"id": "edge:validation_atlas_quality", "source": "semantic:validation", "target": "quality:atlas", "relation": "precedes", "relation_family": "assurance", "workflow_role": "supporting", "overview_visibility": "visible", "activation": "conditional", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/quality.py", "symbol": "evaluate_atlas_quality_obj"}]},
     {"id": "edge:blueprint_agent_map", "source": "semantic:blueprint", "target": "semantic:agent_map", "relation": "validates", "relation_family": "assurance", "workflow_role": "boundary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "validate_agent_map_obj"}]},
     {"id": "edge:validation_renderer", "source": "semantic:validation", "target": "presentation:renderer", "relation": "gates", "relation_family": "assurance", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "llm_grounded", "evidence": [{"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_build"}]},
@@ -386,11 +388,11 @@
     {
       "id": "benchmark_evidence_reporting",
       "label": "Benchmark Evidence Reporting",
-      "description": "Audit live-run workspace truth and compare only paired safe-and-resolved token results.",
+      "description": "Audit live-run workspace truth and compare only explicitly paired safe-and-resolved token/time results.",
       "kind": "behavioral",
       "ordered": true,
-      "trigger": "bunya-jido audit-worktree or summarize-token-efficiency",
-      "outcome": "Auditable production activity, token exclusions, medians, savings, and break-even counts.",
+      "trigger": "bunya-jido audit-worktree, summarize-token-efficiency, or summarize-time-efficiency",
+      "outcome": "Auditable production activity, exclusions, medians, p90s, savings, and break-even counts without benchmark-specific routing tuning.",
       "confidence": "deterministic",
       "node_ids": ["entry:cli", "quality:benchmark", "quality:tests"],
       "evidence": [{"kind": "source", "path": "src/bunya_jido/benchmark.py"}, {"kind": "test", "path": "tests/test_benchmark_audit.py"}, {"kind": "documentation", "path": "docs/BENCHMARK_RESULT_CONTRACT.md"}]
@@ -540,7 +542,7 @@
       {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
-        "description": "How readability, benchmark truth, token comparisons, and publication trust are mechanically checked.",
+        "description": "How readability, benchmark truth, safe token/time comparisons, and publication trust are mechanically checked.",
         "question_answered": "Which checks keep the Studio output honest?",
         "is_primary": false,
         "node_ids": ["quality:atlas", "quality:benchmark", "quality:tests", "quality:ci", "semantic:validation", "presentation:viewer"],

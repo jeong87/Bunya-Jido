@@ -149,8 +149,8 @@ Studio context, or the capped grounded discovery contract for
 `IN_SCOPE_NO_ROUTE`.
 
 The deterministic self-map acceptance suite reduced compact Markdown context
-characters by `36.3%` against the verbose compatibility reference while
-retaining `17/17` passing cases, zero non-MATCH route/safe-edit leaks, and
+characters by `36.0%` against the verbose compatibility reference while
+retaining `18/18` passing cases, zero non-MATCH route/safe-edit leaks, and
 `100%` normal-bugfix actionable guidance. This is context-output evidence, not
 a live repair-token claim.
 
@@ -170,6 +170,32 @@ comparisons.
 This completes the version-controlled P3 context and reporting implementation.
 The Realistic Large and Enterprise XLarge live token gates remain open until
 compatible runner results are collected and summarized.
+
+### 1.6 P4 implementation status - 2026-06-06
+
+The measurement-only `summarize-time-efficiency` API and CLI now compares
+explicit repeated-run pair IDs only when both conditions are safe and resolved.
+It reports cumulative, median, nearest-rank p90, context-generation,
+discovery-to-first-edit, total-resolution, per-task, optional map-authoring,
+and break-even time measures. Missing first-edit measurements and excluded
+runs remain visible.
+
+P4 implementation deliberately does not change matcher thresholds, route
+vocabulary, decision behavior, or discovery ordering from synthetic benchmark
+results. Historical runner `agent_elapsed_seconds` that excludes context
+generation is not sufficient P4 evidence; compatible runners must measure the
+full handoff-to-outcome boundary and supply truthful pair IDs.
+
+This completes the version-controlled P4 measurement and reporting
+implementation. P4 speed improvements and release minimums remain open until
+diverse-repository and holdout evidence identifies a general bottleneck without
+regressing P0-P3 safety or resolution quality.
+
+Deterministic replay against the current local XHigh-authored benchmark maps
+kept the P2 decisions unchanged: Realistic Large produced `7/8` bugfix MATCH
+plus `1/8` bounded discovery and one route-free no-match; Enterprise XLarge
+produced `10/10` core MATCH, `3/3` decoy bounded discovery, and two route-free
+no-match decisions. This is routing-regression evidence, not a P4 timing claim.
 
 ---
 
@@ -720,13 +746,19 @@ Scope:
 
 - context decision latency 측정
 - discovery-to-first-edit 시간 측정
-- 불필요한 반복 탐색 제거
-- no-match 즉시 종료 시간 개선
+- explicit task/effort/repetition pair 기준의 안전한 시간 비교
+- unsafe/unresolved/infrastructure-invalid 실행 제외와 별도 보고
 - task별 median/p90 보고
+- diverse-repository와 holdout에서 공통 병목이 확인된 경우에만 최적화
+
+합성 benchmark 문구, fixture 경로, 특정 route vocabulary에 맞춘 튜닝은
+이 work package의 범위가 아니다. 최적화 후보는 route 결정과 context 의미를
+보존하며, 어떤 데이터셋에서든 안전성이나 해결률이 하락하면 거절한다.
 
 Exit criteria:
 
-- P4 release minimum 달성
+- P4 측정·보고 계약 구현
+- diverse-repository와 holdout evidence로 P4 release minimum 달성
 - P0-P3 gate 유지
 
 ### Work Package 6: 0.5 Release Evidence
@@ -919,6 +951,9 @@ Schema version을 바꿀 필요가 있는지는 실제 JSON contract 변경 범�
 
 ### P4 Resolution time
 
+- [x] safe-and-resolved repeated-run time summary 구현
+- [x] cumulative/median/p90/context/first-edit/total/per-task 보고 구현
+- [x] benchmark-specific routing optimization 금지 계약 명시
 - [ ] Realistic bugfix가 no-map보다 느리지 않음
 - [ ] Enterprise bugfix time saving `>= 10%`
 - [ ] no-match가 no-map보다 느리지 않음
