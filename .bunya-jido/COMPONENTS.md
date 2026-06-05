@@ -43,6 +43,13 @@ keeps the review rationale visible beside it.
 - **Evidence:** `src/bunya_jido/blueprint.py`, `tests/test_blueprint.py`
 - **Boundary:** A route is trusted only after its nodes, workflow, required reading, tests, and any published Studio context references resolve.
 
+### Trusted Context Decision Router
+
+- **Plane:** semantic
+- **Role:** Classifies context requests as `MATCH`, `IN_SCOPE_NO_ROUTE`, `OUT_OF_SCOPE`, or `UNCERTAIN` before emitting route guidance, using conservative exact-term matching plus reviewed repository and route boundaries.
+- **Evidence:** `src/bunya_jido/blueprint.py`, `src/bunya_jido/cli.py`, `tests/test_blueprint.py`, `.bunya-jido/bunya-jido.agent-evaluation.json`
+- **Boundary:** Non-`MATCH` decisions do not expose trusted routes or safe-edit paths; `OUT_OF_SCOPE` and `UNCERTAIN` remain read-only guidance.
+
 ### Atlas Quality Evaluator
 
 - **Plane:** quality

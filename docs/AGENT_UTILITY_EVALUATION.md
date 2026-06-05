@@ -32,7 +32,7 @@ The Bunya-Jido self-map currently covers:
 | `first_read_accuracy` | A focused task selects its intended route and required reading. |
 | `test_recall` | A focused task exposes the tests needed for the route. |
 | `boundary_discipline` | A sensitive change exposes its contract and safe-edit boundary without unrelated guidance. |
-| `honest_no_match` | An unsupported task emits no prepared route. |
+| `honest_no_match` | Unsupported, weak-overlap, and in-scope-unmapped tasks emit no false trusted route and the expected decision. |
 | `change_aware_refresh` | A changed source file selects only routes justified by mapped evidence. |
 
 The report deliberately includes a limitation: it evaluates generated context,
@@ -45,14 +45,17 @@ Keep cases small and reviewable:
 1. Choose task wording that identifies one authored route, unless multiple
    routes are intentionally expected.
 2. Record only expectations that the agent handoff must expose, such as
-   `routes`, `must_read`, `tests`, `contracts`, and `safe_edit`.
-3. Include at least one `not_found` task outside the authored map.
-4. Include a changed-file case when `refresh-context` is part of the
+   `decision`, `routes`, `must_read`, `tests`, `contracts`, and `safe_edit`.
+3. Include multiple `not_found` tasks: reviewed `OUT_OF_SCOPE`, ambiguous
+   `UNCERTAIN`, and `IN_SCOPE_NO_ROUTE` when the repository scope supports it.
+4. Include adversarial wording that shares generic or broad terms with routes.
+5. Include a changed-file case when `refresh-context` is part of the
    repository workflow.
-5. Update the suite alongside agent-map changes and run the strict command.
+6. Update the suite alongside agent-map changes and run the strict command.
 
-An ambiguous query may legitimately select more than one route. In that case,
-either make the case precise or explicitly expect each justified route.
+An ambiguous natural-language query should normally produce `UNCERTAIN`
+instead of several trusted routes. Changed-file refresh may still return
+multiple routes when each one is independently justified by file evidence.
 
 ## Live-Agent Observation
 

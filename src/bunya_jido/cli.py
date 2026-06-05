@@ -17,6 +17,7 @@ from .blueprint import (
     evaluate_agent_utility,
     evaluate_map_freshness,
     generate_agent_context,
+    generate_agent_context_report,
     graph_with_optional_blueprint,
     install_agent_guides,
     load_blueprint,
@@ -358,7 +359,17 @@ def cmd_context(args: argparse.Namespace) -> int:
     changed = []
     for v in args.changed_file or []:
         changed.extend([x.strip() for x in v.split(",") if x.strip()])
-    text = generate_agent_context(args.root, node=args.node, workflow=args.workflow, task=args.task, changed_files=changed)
+    if args.json:
+        report = generate_agent_context_report(
+            args.root,
+            node=args.node,
+            workflow=args.workflow,
+            task=args.task,
+            changed_files=changed,
+        )
+        text = json.dumps(report, ensure_ascii=False, indent=2) + "\n"
+    else:
+        text = generate_agent_context(args.root, node=args.node, workflow=args.workflow, task=args.task, changed_files=changed)
     if args.out:
         out = Path(args.out).resolve()
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -588,7 +599,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_ctx.add_argument("--workflow", default=None, help="Optional workflow id to focus.")
     p_ctx.add_argument("--task", default=None, help="Natural language task to match against agent-map routes.")
     p_ctx.add_argument("--changed-file", action="append", default=[], help="Changed file path or comma-separated list. Repeatable.")
-    p_ctx.add_argument("--out", default=None, help="Optional output markdown path.")
+    p_ctx.add_argument("--out", default=None, help="Optional output path for Markdown or --json output.")
+    p_ctx.add_argument("--json", action="store_true", help="Print or write a machine-readable context decision report.")
     p_ctx.set_defaults(func=cmd_context)
 
     p_refresh = sub.add_parser("refresh-context", help="Recommend trusted routes justified by changed-file evidence after an edit or diff.")

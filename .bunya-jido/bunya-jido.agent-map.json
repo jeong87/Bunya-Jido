@@ -4,6 +4,54 @@
     "name": "Bunya-Jido",
     "summary": "Validated task routes for changes to grounded semantic publication."
   },
+  "repository_scope": {
+    "supported_surfaces": [
+      "semantic repository map publication",
+      "coding agent context generation",
+      "context decision routing",
+      "context decision calibration",
+      "offline HTML atlas presentation",
+      "static repository evidence scanning"
+    ],
+    "supported_technologies": [
+      "Python",
+      "offline HTML",
+      "JSON semantic artifacts"
+    ],
+    "supported_artifact_types": [
+      "Python module",
+      "unit test",
+      "Markdown documentation",
+      "offline HTML atlas"
+    ],
+    "unsupported_surfaces": [
+      "native iOS application",
+      "Android Gradle application",
+      "Electron desktop application",
+      "React Native mobile client"
+    ],
+    "unsupported_technologies": [
+      "Terraform",
+      "Kubernetes",
+      "Swift",
+      "Kotlin",
+      "Gradle",
+      "Electron",
+      "React Native"
+    ],
+    "unsupported_artifact_types": [
+      "iOS project",
+      "Android Gradle project",
+      "Terraform module",
+      "Helm chart",
+      "Electron application"
+    ],
+    "repository_non_goals": [
+      "native mobile application development",
+      "infrastructure provisioning",
+      "desktop application implementation"
+    ]
+  },
   "task_routes": [
     {
       "task": "change scanner hint provenance",
@@ -149,7 +197,19 @@
     },
     {
       "task": "change task route projection",
-      "intent": "Adjust agent-map validation or the task-route paths shown in rendered maps.",
+      "intent": "Adjust agent-map validation, conservative context decision routing, or task-route paths shown in rendered maps.",
+      "match_terms": [
+        "context decision routing",
+        "no-match rejection",
+        "route matching"
+      ],
+      "when_to_use": [
+        "context decision output or trusted route matching behavior",
+        "agent-map route validation or projection"
+      ],
+      "when_not_to_use": [
+        "unrelated application feature implementation"
+      ],
       "start_nodes": [
         "semantic:agent_map"
       ],
@@ -162,10 +222,12 @@
       ],
       "must_read": [
         "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/cli.py",
         "src/bunya_jido/viewer/index.template.html"
       ],
       "contracts": [
-        "Only routes validated against repository-relative inputs may reach trusted context or HTML paths."
+        "Only routes validated against repository-relative inputs may reach trusted context or HTML paths.",
+        "Non-MATCH task-selection decisions must not expose trusted routes or safe-edit paths."
       ],
       "tests": [
         "tests/test_blueprint.py",
@@ -173,6 +235,7 @@
       ],
       "safe_edit": [
         "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/cli.py",
         "src/bunya_jido/viewer/index.template.html",
         "tests/test_blueprint.py"
       ],

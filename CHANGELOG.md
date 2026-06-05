@@ -9,6 +9,9 @@ be documented.
 
 ### Added
 
+- Decision-aware context routing with `MATCH`, `IN_SCOPE_NO_ROUTE`,
+  `OUT_OF_SCOPE`, and `UNCERTAIN`, optional reviewed repository/route
+  boundaries, and machine-readable `bunya-jido context --json` output.
 - Public-alpha release preparation with PyPI Trusted Publishing and GitHub
   Pages deployment workflows.
 - A `bunya-jido diagnose` command that reports actual artifact mode,
@@ -57,6 +60,9 @@ be documented.
 
 ### Changed
 
+- Natural-language task matching now uses conservative exact meaningful terms,
+  explicit route-use phrases, route separation, and scope-sensitive rejection;
+  non-`MATCH` decisions expose neither trusted routes nor safe-edit paths.
 - A canvas-first constellation viewer design with semantic role glyphs,
   streamlined workflow access, and a refreshed grounded self-map preview.
 - Agent context selects only routes that match the requested task or explicit

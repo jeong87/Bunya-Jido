@@ -294,6 +294,11 @@ def agent_map_schema() -> dict[str, Any]:
                         "tests": {"type": "array", "items": {"type": "string"}},
                         "workflows": {"type": "array", "items": {"type": "string"}},
                         "safe_edit": {"type": "array", "items": {"type": "string"}},
+                        "match_terms": {"type": "array", "items": {"type": "string"}},
+                        "when_to_use": {"type": "array", "items": {"type": "string"}},
+                        "when_not_to_use": {"type": "array", "items": {"type": "string"}},
+                        "forbidden_technologies": {"type": "array", "items": {"type": "string"}},
+                        "unsupported_artifacts": {"type": "array", "items": {"type": "string"}},
                         "projection_context": {"type": "string"},
                         "scenario_context": {"type": "array", "items": {"type": "string"}},
                         "do_not_touch_without_reason": {"type": "array", "items": {"type": "string"}},
@@ -301,6 +306,18 @@ def agent_map_schema() -> dict[str, Any]:
                         "notes": {"type": "string"}
                     }
                 }
+            },
+            "repository_scope": {
+                "type": "object",
+                "properties": {
+                    "supported_surfaces": {"type": "array", "items": {"type": "string"}},
+                    "unsupported_surfaces": {"type": "array", "items": {"type": "string"}},
+                    "supported_technologies": {"type": "array", "items": {"type": "string"}},
+                    "unsupported_technologies": {"type": "array", "items": {"type": "string"}},
+                    "supported_artifact_types": {"type": "array", "items": {"type": "string"}},
+                    "unsupported_artifact_types": {"type": "array", "items": {"type": "string"}},
+                    "repository_non_goals": {"type": "array", "items": {"type": "string"}},
+                },
             },
             "workflow_routes": {"type": "array", "items": {"type": "object"}},
             "stale_map_policy": {
@@ -511,6 +528,8 @@ def make_blueprint_prompt(project_name: str, atlas_mode: str = "classic") -> str
     - Which files/docs/tests/contracts must it read?
     - What is safe to edit?
     - What should not be touched without a strong reason?
+    - Which reviewed product surfaces, technologies, or artifacts are outside this repository?
+    - When should a route explicitly not be used?
     - Which workflow or component context should be loaded?
 
     Every task route must reference node IDs and workflow IDs that exist in the semantic blueprint.
@@ -709,10 +728,20 @@ def make_blueprint_prompt(project_name: str, atlas_mode: str = "classic") -> str
     {{
       "schema_version": "bunya-jido-agent-map-v1",
       "project": {{"name": "{project_name}", "summary": "same project summary"}},
+      "repository_scope": {{
+        "supported_surfaces": ["existing in-repository product surfaces"],
+        "unsupported_surfaces": ["reviewed product surfaces owned elsewhere"],
+        "supported_technologies": ["technologies grounded in this repository"],
+        "unsupported_technologies": ["reviewed technologies outside this repository"],
+        "repository_non_goals": ["reviewed responsibilities this repository does not own"]
+      }},
       "task_routes": [
         {{
           "task": "modify provider behavior",
           "intent": "Change how model/API calls are routed or sanitized.",
+          "match_terms": ["provider routing", "provider adapter"],
+          "when_to_use": ["existing model or API provider behavior"],
+          "when_not_to_use": ["unrelated frontend or infrastructure work"],
           "start_nodes": ["component:llm_router"],
           "must_read": ["src/example/llm.py", ".bunya-jido/COMPONENTS.md#llm-router"],
           "contracts": ["ProviderRequest", "ProviderResponse"],
@@ -742,6 +771,7 @@ def make_blueprint_prompt(project_name: str, atlas_mode: str = "classic") -> str
     - LLM/API/provider routes are visible if the repo uses them.
     - Edges say what actually happens.
     - The agent map contains useful task routes for future coding agents.
+    - Repository scope and route negative boundaries are recorded when they can be reviewed and grounded.
     - Every task route references existing blueprint nodes/workflows and resolving required files/tests.
     - Evidence supports every important node and edge.
 
@@ -1134,6 +1164,26 @@ def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = 
     project = agent_map.get("project")
     if not isinstance(project, dict) or not project.get("name") or not project.get("summary"):
         errors.append("project.name and project.summary are required")
+    repository_scope = agent_map.get("repository_scope")
+    scope_list_fields = (
+        "supported_surfaces",
+        "unsupported_surfaces",
+        "supported_technologies",
+        "unsupported_technologies",
+        "supported_artifact_types",
+        "unsupported_artifact_types",
+        "repository_non_goals",
+    )
+    if repository_scope is not None:
+        if not isinstance(repository_scope, dict):
+            errors.append("repository_scope must be an object")
+        else:
+            for key in scope_list_fields:
+                value = repository_scope.get(key, [])
+                if not isinstance(value, list) or not all(
+                    isinstance(item, str) and item.strip() for item in value
+                ):
+                    errors.append(f"repository_scope.{key} must be a list of non-empty strings")
     routes = agent_map.get("task_routes")
     if not isinstance(routes, list):
         errors.append("task_routes must be a list")
@@ -1178,6 +1228,20 @@ def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = 
                 errors.append(f"task_routes[{i}].{key} must be a list")
                 value = []
             route_lists[key] = value
+        for key in (
+            "match_terms",
+            "when_to_use",
+            "when_not_to_use",
+            "forbidden_technologies",
+            "unsupported_artifacts",
+        ):
+            if key not in route:
+                continue
+            value = route.get(key)
+            if not isinstance(value, list) or not all(
+                isinstance(item, str) and item.strip() for item in value
+            ):
+                errors.append(f"task_routes[{i}].{key} must be a list of non-empty strings")
         start_nodes = route_lists["start_nodes"]
         if not start_nodes:
             route_blockers.append(f"task route {task} has no start_nodes")
@@ -1321,22 +1385,193 @@ def _load_optional_text(path: Path) -> str:
 
 
 GENERIC_ROUTE_TERMS = {
-    "add", "change", "changed", "debug", "edit", "fix", "implement", "improve",
-    "modify", "review", "update", "behavior", "context", "feature", "issue", "map",
-    "repository", "route", "task", "work", "working",
+    "add", "added", "adding", "behavior", "bug", "change", "changed", "changing",
+    "context", "debug", "edit", "feature", "fix", "fixed", "implement", "improve",
+    "issue", "map", "modify", "new", "repository", "review", "route", "state",
+    "support", "task", "update", "updated", "workflow", "work", "working",
 }
+ROUTE_STOPWORDS = GENERIC_ROUTE_TERMS | {
+    "about", "after", "again", "against", "all", "also", "and", "another", "any",
+    "are", "because", "been", "before", "being", "between", "both", "but", "can",
+    "could", "does", "each", "existing", "for", "from", "have", "into", "its",
+    "more", "not", "now", "only", "other", "our", "out", "over", "same", "should",
+    "some", "such", "than", "that", "the", "their", "then", "there", "these",
+    "this", "those", "through", "under", "use", "using", "very", "want", "when",
+    "where", "which", "while", "with", "without", "would", "your",
+}
+ROUTE_TERM_ALIASES = {
+    "app": "application",
+    "apps": "application",
+    "applications": "application",
+    "frontends": "frontend",
+    "ios": "ios",
+    "k8s": "kubernetes",
+    "mobileapps": "mobile",
+}
+SHORT_ROUTE_TERMS = {"ai", "api", "cd", "ci", "db", "io", "js", "ui"}
+SCOPE_SENSITIVE_TERMS = {
+    "android", "electron", "frontend", "gradle", "helm", "ios", "kotlin",
+    "kubernetes", "mobile", "swift", "terraform",
+}
+SCOPE_SENSITIVE_PHRASES = {
+    "app store",
+    "play store",
+    "react native",
+}
+REPOSITORY_SUPPORTED_SCOPE_FIELDS = (
+    "supported_surfaces",
+    "supported_technologies",
+    "supported_artifact_types",
+)
+REPOSITORY_UNSUPPORTED_SCOPE_FIELDS = (
+    "unsupported_surfaces",
+    "unsupported_technologies",
+    "unsupported_artifact_types",
+    "repository_non_goals",
+)
+
+
+def _canonical_route_term(word: str) -> str:
+    lowered = word.lower()
+    return ROUTE_TERM_ALIASES.get(lowered, lowered)
+
+
+def _context_terms(text: str | None, *, drop_generic: bool) -> list[str]:
+    if not text:
+        return []
+    terms: list[str] = []
+    for raw_word in re.findall(r"[^\W_]+", text.lower(), flags=re.UNICODE):
+        word = _canonical_route_term(raw_word)
+        if len(word) < 3 and word not in SHORT_ROUTE_TERMS:
+            continue
+        if drop_generic and word in ROUTE_STOPWORDS:
+            continue
+        terms.append(word)
+    return list(dict.fromkeys(terms))
 
 
 def _task_match_terms(task: str | None) -> list[str]:
+    return _context_terms(task, drop_generic=True)
+
+
+def _boundary_entry_matches(task: str, entry: str) -> bool:
+    task_terms = set(_context_terms(task, drop_generic=True))
+    entry_terms = set(_context_terms(entry, drop_generic=True))
+    if not task_terms or not entry_terms:
+        return False
+    overlap = task_terms & entry_terms
+    if len(entry_terms) == 1:
+        return bool(overlap)
+    required_overlap = max(2, (len(entry_terms) * 2 + 2) // 3)
+    return len(overlap) >= required_overlap
+
+
+def _matching_boundary_entries(task: str, entries: list[Any]) -> list[str]:
+    return [
+        str(entry)
+        for entry in entries
+        if isinstance(entry, str) and entry.strip() and _boundary_entry_matches(task, entry)
+    ]
+
+
+def _scope_sensitive_matches(task: str) -> list[str]:
+    all_terms = set(_context_terms(task, drop_generic=False))
+    normalized = " ".join(re.findall(r"[^\W_]+", task.lower(), flags=re.UNICODE))
+    matches = sorted(all_terms & SCOPE_SENSITIVE_TERMS)
+    matches.extend(sorted(phrase for phrase in SCOPE_SENSITIVE_PHRASES if phrase in normalized))
+    return list(dict.fromkeys(matches))
+
+
+def _route_positive_text(route: dict[str, Any]) -> str:
+    values: list[str] = [
+        str(route.get("task") or ""),
+        str(route.get("intent") or ""),
+        str(route.get("notes") or ""),
+    ]
+    for key in ("match_terms", "when_to_use"):
+        values.extend(str(item) for item in route.get(key) or [] if item)
+    return " ".join(values)
+
+
+def _classify_task_scope(
+    task: str | None,
+    *,
+    agent_map: dict[str, Any],
+    routes: list[dict[str, Any]],
+) -> dict[str, Any]:
     if not task:
-        return []
-    return list(
-        dict.fromkeys(
-            word
-            for word in re.findall(r"\w+", task.lower())
-            if len(word) >= 3 and word not in GENERIC_ROUTE_TERMS
-        )
-    )
+        return {
+            "decision": None,
+            "reason": "",
+            "basis": [],
+            "supported_matches": [],
+            "unsupported_matches": [],
+            "ungrounded_sensitive_terms": [],
+        }
+    scope = agent_map.get("repository_scope")
+    scope = scope if isinstance(scope, dict) else {}
+    supported_entries = [
+        str(item)
+        for key in REPOSITORY_SUPPORTED_SCOPE_FIELDS
+        for item in scope.get(key, [])
+        if isinstance(item, str) and item.strip()
+    ]
+    unsupported_entries = [
+        str(item)
+        for key in REPOSITORY_UNSUPPORTED_SCOPE_FIELDS
+        for item in scope.get(key, [])
+        if isinstance(item, str) and item.strip()
+    ]
+    supported_matches = _matching_boundary_entries(task, supported_entries)
+    unsupported_matches = _matching_boundary_entries(task, unsupported_entries)
+    if unsupported_matches and not supported_matches:
+        return {
+            "decision": "OUT_OF_SCOPE",
+            "reason": "The request conflicts with an explicitly reviewed repository scope boundary.",
+            "basis": [f"unsupported repository boundary: `{entry}`" for entry in unsupported_matches],
+            "supported_matches": [],
+            "unsupported_matches": unsupported_matches,
+            "ungrounded_sensitive_terms": [],
+        }
+    if unsupported_matches and supported_matches:
+        return {
+            "decision": "UNCERTAIN",
+            "reason": "The request overlaps both supported and unsupported repository scope declarations.",
+            "basis": [
+                *[f"supported repository scope: `{entry}`" for entry in supported_matches],
+                *[f"unsupported repository boundary: `{entry}`" for entry in unsupported_matches],
+            ],
+            "supported_matches": supported_matches,
+            "unsupported_matches": unsupported_matches,
+            "ungrounded_sensitive_terms": [],
+        }
+
+    supported_text = " ".join([*supported_entries, *[_route_positive_text(route) for route in routes]])
+    supported_terms = set(_context_terms(supported_text, drop_generic=False))
+    normalized_supported = " ".join(re.findall(r"[^\W_]+", supported_text.lower(), flags=re.UNICODE))
+    sensitive_matches = _scope_sensitive_matches(task)
+    ungrounded_sensitive = [
+        item
+        for item in sensitive_matches
+        if (item not in supported_terms if " " not in item else item not in normalized_supported)
+    ]
+    if ungrounded_sensitive:
+        return {
+            "decision": "UNCERTAIN",
+            "reason": "The request introduces scope-sensitive technology or product-surface terms not grounded in any trusted route.",
+            "basis": [f"ungrounded scope-sensitive term: `{item}`" for item in ungrounded_sensitive],
+            "supported_matches": supported_matches,
+            "unsupported_matches": [],
+            "ungrounded_sensitive_terms": ungrounded_sensitive,
+        }
+    return {
+        "decision": None,
+        "reason": "",
+        "basis": [f"supported repository scope: `{entry}`" for entry in supported_matches],
+        "supported_matches": supported_matches,
+        "unsupported_matches": [],
+        "ungrounded_sensitive_terms": [],
+    }
 
 
 def _normalize_context_path(path: str) -> str:
@@ -1511,13 +1746,57 @@ def _match_route(
             reasons.append(f"focus workflow `{workflow}` belongs to this route")
         score = 100 + (10 * len(reasons))
     elif task:
-        hay = " ".join(str(route.get(k, "")) for k in ("task", "intent", "notes")).lower()
-        matched_terms = [word for word in _task_match_terms(task) if word in hay]
+        negative_entries = [
+            *(route.get("when_not_to_use") or []),
+            *(route.get("forbidden_technologies") or []),
+            *(route.get("unsupported_artifacts") or []),
+        ]
+        negative_matches = _matching_boundary_entries(task, negative_entries)
+        if negative_matches:
+            return {
+                "status": "excluded",
+                "score": 0,
+                "reasons": [
+                    f"task conflicts with route boundary `{entry}`" for entry in negative_matches
+                ],
+                "matched_terms": [],
+            }
+        task_terms = _task_match_terms(task)
+        title_terms = set(_task_match_terms(str(route.get("task") or "")))
+        intent_terms = set(
+            _task_match_terms(
+                " ".join(
+                    [
+                        str(route.get("intent") or ""),
+                        str(route.get("notes") or ""),
+                    ]
+                )
+            )
+        )
+        matched_title_terms = [term for term in task_terms if term in title_terms]
+        matched_intent_terms = [
+            term for term in task_terms if term in intent_terms and term not in matched_title_terms
+        ]
+        explicit_matches = _matching_boundary_entries(
+            task,
+            [*(route.get("match_terms") or []), *(route.get("when_to_use") or [])],
+        )
+        strong_explicit_matches = [
+            entry
+            for entry in explicit_matches
+            if len(_task_match_terms(entry)) >= 2 or len(task_terms) == 1
+        ]
+        matched_terms = list(dict.fromkeys([*matched_title_terms, *matched_intent_terms]))
         if matched_terms:
             reasons.append("task terms match: " + ", ".join(f"`{word}`" for word in matched_terms))
-            score += len(matched_terms) * 2
-        elif not changed_files:
-            return {"status": "unmatched", "score": 0, "reasons": []}
+        if explicit_matches:
+            reasons.extend(f"task matches explicit route use `{entry}`" for entry in explicit_matches)
+        score += (len(matched_title_terms) * 4) + (len(matched_intent_terms) * 2) + (len(strong_explicit_matches) * 6)
+        strong_match = bool(strong_explicit_matches) or len(matched_terms) >= 2 or (
+            bool(matched_title_terms) and len(task_terms) == 1
+        )
+        if not matched_terms and not explicit_matches and not changed_files:
+            return {"status": "unmatched", "score": 0, "reasons": [], "matched_terms": []}
 
     if changed_files:
         changed_match = _match_changed_files(
@@ -1531,11 +1810,128 @@ def _match_route(
         return {"status": "matched", "score": score + changed_match["score"], "reasons": reasons}
 
     if reasons:
-        return {"status": "matched", "score": score, "reasons": reasons}
+        return {
+            "status": "matched" if not task or strong_match else "weak",
+            "score": score,
+            "reasons": reasons,
+        }
     return {"status": "available", "score": 0, "reasons": []}
 
 
-def generate_agent_context(root: str | Path, *, node: str | None = None, workflow: str | None = None, task: str | None = None, changed_files: list[str] | None = None) -> str:
+def _select_context_routes(
+    *,
+    agent_map: dict[str, Any],
+    routes: list[dict[str, Any]],
+    task: str | None,
+    node: str | None,
+    workflow: str | None,
+    changed_files: list[str],
+    affected_node_files: dict[str, list[str]],
+) -> dict[str, Any]:
+    selection_requested = bool(task or node or workflow or changed_files)
+    scope = _classify_task_scope(task, agent_map=agent_map, routes=routes)
+    scored = sorted(
+        [
+            (
+                _match_route(
+                    route,
+                    task=task,
+                    node=node,
+                    workflow=workflow,
+                    changed_files=changed_files,
+                    affected_node_files=affected_node_files,
+                ),
+                route,
+            )
+            for route in routes
+        ],
+        key=lambda item: item[0]["score"],
+        reverse=True,
+    )
+    matched = [(match, route) for match, route in scored if match["status"] == "matched"]
+    weak = [(match, route) for match, route in scored if match["status"] == "weak"]
+    excluded = [(match, route) for match, route in scored if match["status"] == "excluded"]
+    chosen: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    top_score = matched[0][0]["score"] if matched else 0
+    second_score = matched[1][0]["score"] if len(matched) > 1 else 0
+    margin = top_score - second_score if matched else 0
+    decision = "NOT_REQUESTED"
+    reason = "No route selection was requested."
+
+    if not selection_requested:
+        chosen = [({"status": "available", "score": 0, "reasons": []}, route) for route in routes[:3]]
+    elif scope["decision"] in {"OUT_OF_SCOPE", "UNCERTAIN"}:
+        decision = str(scope["decision"])
+        reason = str(scope["reason"])
+    elif task and not changed_files:
+        if matched and (len(matched) == 1 or margin >= 2):
+            chosen = [matched[0]]
+            decision = "MATCH"
+            reason = "A trusted route has sufficient task-term evidence and separation from alternatives."
+        elif matched:
+            decision = "UNCERTAIN"
+            reason = "Multiple trusted routes are too close to select safely."
+        elif weak or scope["supported_matches"]:
+            decision = "IN_SCOPE_NO_ROUTE"
+            reason = "The request appears related to repository responsibilities, but no trusted route has sufficient evidence."
+        else:
+            decision = "UNCERTAIN"
+            reason = "No trusted route has sufficient evidence, and repository scope is not explicit enough to reject the request."
+    else:
+        chosen = matched[:5]
+        if chosen:
+            decision = "MATCH"
+            reason = "Trusted routes are justified by explicit focus or changed-file evidence."
+        else:
+            decision = "IN_SCOPE_NO_ROUTE"
+            reason = "The requested repository focus or changed files have no prepared trusted route."
+
+    route_status = "not_requested" if not selection_requested else ("matched" if chosen else "not_found")
+    edit_policy = {
+        "MATCH": "workspace_write",
+        "IN_SCOPE_NO_ROUTE": "cautious",
+        "OUT_OF_SCOPE": "read_only",
+        "UNCERTAIN": "read_only",
+        "NOT_REQUESTED": "read_only",
+    }[decision]
+    safe_edit_paths = list(
+        dict.fromkeys(
+            str(path)
+            for _, route in chosen
+            for path in route.get("safe_edit") or []
+            if path
+        )
+    ) if decision == "MATCH" else []
+    basis = list(scope["basis"])
+    if decision == "MATCH":
+        basis.extend(reason for match, _ in chosen for reason in match.get("reasons", []))
+    elif weak:
+        basis.extend(reason for match, _ in weak[:3] for reason in match.get("reasons", []))
+    if excluded:
+        basis.extend(reason for match, _ in excluded[:3] for reason in match.get("reasons", []))
+    return {
+        "decision": decision,
+        "route_status": route_status,
+        "edit_policy": edit_policy,
+        "reason": reason,
+        "basis": list(dict.fromkeys(basis)),
+        "chosen": chosen,
+        "scored": scored,
+        "top_score": top_score,
+        "margin": margin,
+        "safe_edit_paths": safe_edit_paths,
+        "scope": scope,
+    }
+
+
+def _resolve_agent_context_request(
+    root: str | Path,
+    *,
+    node: str | None = None,
+    workflow: str | None = None,
+    task: str | None = None,
+    changed_files: list[str] | None = None,
+) -> dict[str, Any]:
     root_path = Path(root).resolve()
     bp_path = default_blueprint_path(root_path)
     am_path = default_agent_map_path(root_path)
@@ -1577,28 +1973,61 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     affected_node_files = _affected_nodes_for_changes(changed, node_by_id)
     affected_nodes = list(affected_node_files)
     selection_requested = bool(task or node or workflow or changed)
-    scored = sorted(
-        [
-            (
-                _match_route(
-                    route,
-                    task=task,
-                    node=node,
-                    workflow=workflow,
-                    changed_files=changed,
-                    affected_node_files=affected_node_files,
-                ),
-                route,
-            )
-            for route in routes
-        ],
-        key=lambda item: item[0]["score"],
-        reverse=True,
+    selection = _select_context_routes(
+        agent_map=agent_map,
+        routes=routes,
+        task=task,
+        node=node,
+        workflow=workflow,
+        changed_files=changed,
+        affected_node_files=affected_node_files,
     )
-    if selection_requested:
-        chosen = [(match, route) for match, route in scored if match["status"] == "matched"][:5]
-    else:
-        chosen = [({"status": "available", "score": 0, "reasons": []}, route) for route in routes[:3]]
+    return {
+        "root_path": root_path,
+        "bp_path": bp_path,
+        "am_path": am_path,
+        "comp_path": comp_path,
+        "wf_path": wf_path,
+        "bp": bp,
+        "agent_map": agent_map,
+        "bp_warnings": bp_warnings,
+        "agent_warnings": agent_warnings,
+        "agent_metrics": agent_metrics,
+        "node_by_id": node_by_id,
+        "projection_by_id": projection_by_id,
+        "scenario_by_id": scenario_by_id,
+        "routes": routes,
+        "changed": changed,
+        "affected_nodes": affected_nodes,
+        "selection_requested": selection_requested,
+        "selection": selection,
+    }
+
+
+def generate_agent_context(root: str | Path, *, node: str | None = None, workflow: str | None = None, task: str | None = None, changed_files: list[str] | None = None) -> str:
+    resolved = _resolve_agent_context_request(
+        root,
+        node=node,
+        workflow=workflow,
+        task=task,
+        changed_files=changed_files,
+    )
+    root_path = resolved["root_path"]
+    bp_path = resolved["bp_path"]
+    am_path = resolved["am_path"]
+    comp_path = resolved["comp_path"]
+    wf_path = resolved["wf_path"]
+    bp_warnings = resolved["bp_warnings"]
+    agent_warnings = resolved["agent_warnings"]
+    agent_metrics = resolved["agent_metrics"]
+    node_by_id = resolved["node_by_id"]
+    projection_by_id = resolved["projection_by_id"]
+    scenario_by_id = resolved["scenario_by_id"]
+    changed = resolved["changed"]
+    affected_nodes = resolved["affected_nodes"]
+    selection_requested = resolved["selection_requested"]
+    selection = resolved["selection"]
+    chosen = selection["chosen"]
     lines = []
     lines.append("# Bunya-Jido Agent Context\n")
     if task: lines.append(f"**Task:** {task}")
@@ -1610,16 +2039,24 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     lines.append("- Artifact mode: `semantic_blueprint`")
     lines.append("- Grounding status: `grounded`")
     lines.append(f"- Agent-map routes: `validated` ({agent_metrics.get('trusted_route_count', 0)} trusted route(s))")
-    if selection_requested:
-        lines.append(f"- Requested route match: `{'matched' if chosen else 'not_found'}`")
-    else:
-        lines.append("- Requested route match: `not_requested`")
+    lines.append(f"- Requested route match: `{selection['route_status']}`")
     if changed:
         lines.append(f"- Changed-file route match: `{'matched' if chosen else 'not_found'}`")
     trust_warnings = list(bp_warnings) + list(agent_warnings)
     lines.append(f"- Warnings: `{len(trust_warnings)}`")
     for warning in trust_warnings[:10]:
         lines.append(f"  - {warning}")
+    lines.append("")
+    lines.append("## Decision")
+    lines.append(f"- Decision: `{selection['decision']}`")
+    lines.append(f"- Edit policy: `{selection['edit_policy']}`")
+    lines.append(f"- Reason: {selection['reason']}")
+    lines.append(f"- Route score: `{selection['top_score']}`")
+    lines.append(f"- Route margin: `{selection['margin']}`")
+    if selection["basis"]:
+        lines.append("- Decision basis:")
+        for basis in selection["basis"][:10]:
+            lines.append(f"  - {basis}")
     lines.append("")
     if node and node in node_by_id:
         n = node_by_id[node]
@@ -1639,7 +2076,13 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     lines.append("## Recommended task routes" if selection_requested else "## Available trusted task routes")
     if not chosen:
         if selection_requested:
-            lines.append("No matching trusted route for this request. The grounded map does not claim a prepared path for this task.")
+            lines.append("No matching trusted route for this request.")
+            if selection["decision"] == "OUT_OF_SCOPE":
+                lines.append("The request conflicts with a reviewed repository boundary. Do not modify files for this request.")
+            elif selection["decision"] == "UNCERTAIN":
+                lines.append("The request cannot be routed safely. Prefer read-only inspection and request clarification before editing.")
+            else:
+                lines.append("The request appears repository-related, but the grounded map does not claim a prepared path. Continue cautiously without inferring a route.")
         else:
             lines.append("No trusted task routes are available. Run the Bunya-Jido blueprint prompt to author routes.")
         lines.append("")
@@ -1706,6 +2149,51 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     lines.append(f"- Blueprint: `{bp_path.relative_to(root_path) if bp_path.exists() else bp_path}`")
     lines.append(f"- Agent map: `{am_path.relative_to(root_path) if am_path.exists() else am_path}`")
     return "\n".join(lines).rstrip() + "\n"
+
+
+def generate_agent_context_report(
+    root: str | Path,
+    *,
+    node: str | None = None,
+    workflow: str | None = None,
+    task: str | None = None,
+    changed_files: list[str] | None = None,
+) -> dict[str, Any]:
+    resolved = _resolve_agent_context_request(
+        root,
+        node=node,
+        workflow=workflow,
+        task=task,
+        changed_files=changed_files,
+    )
+    selection = resolved["selection"]
+    chosen = selection["chosen"]
+    warnings = [*resolved["bp_warnings"], *resolved["agent_warnings"]]
+    return {
+        "schema_version": "bunya-jido-context-decision-v1",
+        "task": task,
+        "focus_node": node,
+        "focus_workflow": workflow,
+        "changed_files": resolved["changed"],
+        "artifact_mode": "semantic_blueprint",
+        "grounding_status": "grounded",
+        "trusted_route_count": resolved["agent_metrics"].get("trusted_route_count", 0),
+        "decision": selection["decision"],
+        "route_status": selection["route_status"],
+        "edit_policy": selection["edit_policy"],
+        "reason": selection["reason"],
+        "route_score": selection["top_score"],
+        "route_margin": selection["margin"],
+        "matched_routes": [str(route.get("task") or "Unnamed route") for _, route in chosen],
+        "safe_edit_paths": selection["safe_edit_paths"],
+        "decision_basis": selection["basis"],
+        "scope_evidence": {
+            "supported_matches": selection["scope"]["supported_matches"],
+            "unsupported_matches": selection["scope"]["unsupported_matches"],
+            "ungrounded_sensitive_terms": selection["scope"]["ungrounded_sensitive_terms"],
+        },
+        "warnings": warnings,
+    }
 
 
 AGENT_UTILITY_DIMENSIONS = {
@@ -1786,6 +2274,15 @@ def validate_agent_evaluation_obj(evaluation: Any) -> list[str]:
             continue
         if expect.get("route_status") not in {"matched", "not_found"}:
             errors.append(f"cases[{i}].expect.route_status must be matched or not_found")
+        if "decision" in expect and expect.get("decision") not in {
+            "MATCH",
+            "IN_SCOPE_NO_ROUTE",
+            "OUT_OF_SCOPE",
+            "UNCERTAIN",
+        }:
+            errors.append(
+                f"cases[{i}].expect.decision must be MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, or UNCERTAIN"
+            )
         for field in expected_list_fields:
             value = expect.get(field, [])
             if not isinstance(value, list) or not all(
@@ -1855,12 +2352,23 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
             workflow=query.get("workflow"),
             changed_files=query.get("changed_files"),
         )
+        decision_report = generate_agent_context_report(
+            root_path,
+            task=query.get("task"),
+            node=query.get("node"),
+            workflow=query.get("workflow"),
+            changed_files=query.get("changed_files"),
+        )
         actual_status = _context_route_status(context)
         actual_routes = _context_route_titles(context)
         failures: list[str] = []
         if actual_status != expected["route_status"]:
             failures.append(
                 f"route status expected {expected['route_status']}, got {actual_status}"
+            )
+        if expected.get("decision") and decision_report["decision"] != expected["decision"]:
+            failures.append(
+                f"decision expected {expected['decision']}, got {decision_report['decision']}"
             )
         expected_routes = expected.get("routes", [])
         if actual_routes != expected_routes:
@@ -1890,6 +2398,8 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
                 "status": "passed" if passed else "failed",
                 "expected_route_status": expected["route_status"],
                 "actual_route_status": actual_status,
+                "expected_decision": expected.get("decision"),
+                "actual_decision": decision_report["decision"],
                 "expected_routes": expected_routes,
                 "actual_routes": actual_routes,
                 "failures": failures,
@@ -1930,12 +2440,14 @@ def _agent_activation_instructions() -> str:
     For implementation, debugging, or code-review work in this repository:
 
     1. Before editing, run `bunya-jido context --root . --task "<user request>"`.
-    2. If a route is matched, read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
-    3. If the output says `No matching trusted route`, state that the map has no prepared route for the task and continue with ordinary repository inspection. Do not infer a route.
-    4. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
-    5. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
-    6. If the repository defines `stale_map_policy`, run `bunya-jido check-stale --root . --git-diff --require-reviewed`; when it reports `stale`, refresh and validate the map or record a reviewed no-structure-change decision in `.bunya-jido/MAP_REVIEW.md`.
-    7. Run the tests named by a matched route after the change, together with any checks required by the repository.
+    2. If the decision is `MATCH`, read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
+    3. If the decision is `OUT_OF_SCOPE`, do not edit files; explain the reviewed repository boundary.
+    4. If the decision is `UNCERTAIN`, prefer read-only inspection and request clarification before editing.
+    5. If the decision is `IN_SCOPE_NO_ROUTE` and the output says `No matching trusted route`, state that the map has no prepared route and continue cautiously with ordinary repository inspection. Do not infer a route.
+    6. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
+    7. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
+    8. If the repository defines `stale_map_policy`, run `bunya-jido check-stale --root . --git-diff --require-reviewed`; when it reports `stale`, refresh and validate the map or record a reviewed no-structure-change decision in `.bunya-jido/MAP_REVIEW.md`.
+    9. Run the tests named by a matched route after the change, together with any checks required by the repository.
 
     When asked to update the Bunya-Jido map itself, run `bunya-jido prepare --root . --quiet`,
     execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`, then validate the blueprint and agent map.

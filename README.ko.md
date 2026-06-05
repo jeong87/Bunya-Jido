@@ -360,6 +360,26 @@ bunya-jido context --root . --task "modify provider behavior" --out .bunya-jido/
 시작 노드의 책임도 함께 제공합니다. 일치하는 route가 없으면
 무관한 준비 경로를 안내하는 대신 `No matching trusted route`라고 명시합니다.
 
+Context 선택은 다음 결정을 구분합니다.
+
+| Decision | 의미 | 편집 정책 |
+|---|---|---|
+| `MATCH` | 하나의 trusted route가 충분한 근거와 구분도를 가짐 | `workspace_write` |
+| `IN_SCOPE_NO_ROUTE` | 저장소 책임 범위 안이지만 충분한 route가 없음 | `cautious` |
+| `OUT_OF_SCOPE` | 검토된 저장소 경계와 요청이 충돌함 | `read_only` |
+| `UNCERTAIN` | 범위 또는 route 충분성을 안전하게 판단할 수 없음 | `read_only` |
+
+Agent map은 선택적으로 repository scope와 route별 negative boundary를
+선언할 수 있습니다. Matching은 의미 있는 정확한 단어, 명시적 route 사용
+문구, 보수적인 route 간 점수 차이를 사용합니다. `MATCH`가 아닌 결정은
+trusted route나 safe-edit 경로를 노출하지 않습니다.
+
+통합 도구는 machine-readable 결정을 받을 수 있습니다.
+
+```bash
+bunya-jido context --root . --task "modify provider behavior" --json
+```
+
 특정 노드를 중심으로 만들 수도 있습니다.
 
 ```bash
@@ -462,9 +482,10 @@ Cline       .clinerules/bunya-jido.md
 활성화는 기존 프로젝트 지침을 덮어쓰지 않고, 표시된 Bunya-Jido 관리
 블록만 추가하거나 갱신합니다. 이 블록은 에이전트에게 `bunya-jido
 context --root . --task "<user request>"`를 먼저 실행하고, 일치한 route의
-읽기 파일, 계약, 테스트를 따르며, 일치 경로가 없을 때는 무관한 안내를
-추측하지 말고, 수정 후에는 실제 변경 파일로 `refresh-context`를 실행하라고
-지시합니다. 저장소에 stale-map policy가 정의되어 있으면
+읽기 파일, 계약, 테스트를 따르며, `OUT_OF_SCOPE`와 `UNCERTAIN`은
+read-only로 유지하고, `IN_SCOPE_NO_ROUTE`에서는 route를 추측하지 않은 채
+신중하게 일반 탐색을 진행하며, 수정 후에는 실제 변경 파일로
+`refresh-context`를 실행하라고 지시합니다. 저장소에 stale-map policy가 정의되어 있으면
 `check-stale`도 실행하고, 지도 갱신 또는 구조 변경 없음 검토 기록 중
 맞는 조치를 남기도록 안내합니다.
 

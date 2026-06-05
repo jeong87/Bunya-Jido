@@ -4,6 +4,20 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-06-05 - Decision-Aware No-Match Rejection
+
+- Change: Replaced permissive task substring matching with conservative
+  decision-aware routing, optional reviewed repository/route boundaries,
+  route-free non-MATCH output, `context --json`, and adversarial no-match
+  utility cases.
+- Decision: Updated the existing Trusted Context Generator, Agent Route
+  Parity, bounded-navigation workflow, and scenario rather than adding a new
+  top-level product subsystem. Context decisions remain part of the semantic
+  agent-handoff boundary.
+- Validation: Blueprint and agent-map validation, strict grounded diagnostics,
+  strict agent-utility and atlas-quality evaluation, the full unit suite,
+  refresh-context, and stale-map review are required.
+
 ## 2026-05-28 - PR 11.1 Portability And Stale-Map Gate
 
 - Change: Added `check-stale`, cross-platform CI coverage, and OS-specific

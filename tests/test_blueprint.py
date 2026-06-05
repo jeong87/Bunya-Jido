@@ -14,6 +14,7 @@ from bunya_jido.blueprint import (
     evaluate_agent_utility,
     evaluate_map_freshness,
     generate_agent_context,
+    generate_agent_context_report,
     graph_from_blueprint,
     graph_with_optional_blueprint,
     install_agent_guides,
@@ -94,6 +95,17 @@ def example_agent_map() -> dict:
     return {
         "schema_version": "bunya-jido-agent-map-v1",
         "project": {"name": "fixture", "summary": "Agent routes."},
+        "repository_scope": {
+            "supported_surfaces": ["semantic map builder"],
+            "supported_technologies": ["Python"],
+            "unsupported_surfaces": [
+                "native iOS application",
+                "Android Gradle application",
+                "Electron desktop application",
+            ],
+            "unsupported_technologies": ["Terraform", "Kubernetes"],
+            "repository_non_goals": ["native mobile application development"],
+        },
         "task_routes": [
             {
                 "task": "change builder behavior",
@@ -314,10 +326,95 @@ class AgentMapCharacterizationTests(unittest.TestCase):
     def test_malformed_route_link_fields_are_validation_errors(self) -> None:
         agent_map = example_agent_map()
         agent_map["task_routes"][0]["must_read"] = "README.md"
+        agent_map["task_routes"][0]["when_not_to_use"] = "mobile work"
+        agent_map["repository_scope"]["unsupported_surfaces"] = "native iOS application"
 
         errors, _, _ = validate_agent_map_obj(agent_map, blueprint=example_blueprint())
 
         self.assertIn("task_routes[0].must_read must be a list", errors)
+        self.assertIn("task_routes[0].when_not_to_use must be a list of non-empty strings", errors)
+        self.assertIn(
+            "repository_scope.unsupported_surfaces must be a list of non-empty strings",
+            errors,
+        )
+
+    def test_context_decision_rejects_out_of_scope_and_weak_lexical_matches(self) -> None:
+        blueprint = example_blueprint()
+        agent_map = example_agent_map()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            (root / "tests").mkdir()
+            (root / "src" / "bunya_jido").mkdir(parents=True)
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (root / "src" / "bunya_jido" / "blueprint.py").write_text("# fixture\n", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(json.dumps(blueprint), encoding="utf-8")
+            (outdir / "bunya-jido.agent-map.json").write_text(json.dumps(agent_map), encoding="utf-8")
+
+            ios = generate_agent_context_report(
+                root, task="Add a native iOS app with App Store signing."
+            )
+            weak = generate_agent_context_report(
+                root, task="Add an audit event for a workflow state not yet represented in the map."
+            )
+            matched = generate_agent_context_report(root, task="change builder behavior")
+            broad_match_map = example_agent_map()
+            broad_match_map["task_routes"][0]["match_terms"] = ["builder"]
+            (outdir / "bunya-jido.agent-map.json").write_text(
+                json.dumps(broad_match_map), encoding="utf-8"
+            )
+            broad_match = generate_agent_context_report(
+                root, task="Add external builder deployment support."
+            )
+            route_boundary_map = example_agent_map()
+            route_boundary_map["repository_scope"]["supported_technologies"].append("iOS")
+            route_boundary_map["repository_scope"]["unsupported_surfaces"] = [
+                "Android Gradle application",
+                "Electron desktop application",
+            ]
+            route_boundary_map["repository_scope"]["repository_non_goals"] = []
+            route_boundary_map["task_routes"][0]["when_not_to_use"] = [
+                "native iOS application"
+            ]
+            (outdir / "bunya-jido.agent-map.json").write_text(
+                json.dumps(route_boundary_map), encoding="utf-8"
+            )
+            route_boundary = generate_agent_context_report(
+                root, task="change builder behavior for a native iOS application"
+            )
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                cli_result = main(
+                    [
+                        "context",
+                        "--root",
+                        str(root),
+                        "--task",
+                        "Add Terraform Kubernetes deployment manifests.",
+                        "--json",
+                    ]
+                )
+            cli_report = json.loads(stdout.getvalue())
+
+        self.assertEqual(ios["decision"], "OUT_OF_SCOPE")
+        self.assertEqual(ios["route_status"], "not_found")
+        self.assertEqual(ios["edit_policy"], "read_only")
+        self.assertEqual(ios["safe_edit_paths"], [])
+        self.assertEqual(weak["decision"], "UNCERTAIN")
+        self.assertEqual(weak["matched_routes"], [])
+        self.assertEqual(matched["decision"], "MATCH")
+        self.assertEqual(matched["matched_routes"], ["change builder behavior"])
+        self.assertNotEqual(broad_match["decision"], "MATCH")
+        self.assertEqual(broad_match["matched_routes"], [])
+        self.assertEqual(route_boundary["decision"], "IN_SCOPE_NO_ROUTE")
+        self.assertTrue(
+            any("task conflicts with route boundary" in basis for basis in route_boundary["decision_basis"])
+        )
+        self.assertEqual(cli_result, 0)
+        self.assertEqual(cli_report["decision"], "OUT_OF_SCOPE")
+        self.assertEqual(cli_report["safe_edit_paths"], [])
 
     def test_malformed_stale_map_policy_is_a_validation_error(self) -> None:
         agent_map = example_agent_map()
@@ -678,6 +775,7 @@ class AgentMapCharacterizationTests(unittest.TestCase):
                     "query": {"task": "change builder behavior"},
                     "expect": {
                         "route_status": "matched",
+                        "decision": "MATCH",
                         "routes": ["change builder behavior"],
                         "must_read": ["README.md"],
                         "tests": ["tests/test_smoke.py"],
@@ -689,6 +787,7 @@ class AgentMapCharacterizationTests(unittest.TestCase):
                     "query": {"task": "rotate database credentials"},
                     "expect": {
                         "route_status": "not_found",
+                        "decision": "UNCERTAIN",
                         "routes": [],
                         "forbid_routes": ["change builder behavior"],
                     },
@@ -731,6 +830,8 @@ class AgentMapCharacterizationTests(unittest.TestCase):
 
         self.assertEqual(passed["status"], "passed")
         self.assertEqual(passed["passed_case_count"], 2)
+        self.assertEqual(passed["cases"][0]["actual_decision"], "MATCH")
+        self.assertEqual(passed["cases"][1]["actual_decision"], "UNCERTAIN")
         self.assertEqual(strict_result, 2)
         self.assertEqual(failed["status"], "failed")
         self.assertIn("must_read missing from context", failed["cases"][0]["failures"][0])
@@ -752,6 +853,26 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         )
 
         self.assertIn("cases[0].dimension is not supported: agent_magic", errors)
+        invalid_decision = {
+            "schema_version": "bunya-jido-agent-evaluation-v1",
+            "project": {"name": "fixture", "summary": "Agent utility cases."},
+            "cases": [
+                {
+                    "id": "invalid-decision",
+                    "dimension": "honest_no_match",
+                    "query": {"task": "rotate database credentials"},
+                    "expect": {
+                        "route_status": "not_found",
+                        "decision": "MAYBE",
+                        "routes": [],
+                    },
+                }
+            ],
+        }
+        self.assertIn(
+            "cases[0].expect.decision must be MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, or UNCERTAIN",
+            validate_agent_evaluation_obj(invalid_decision),
+        )
         self.assertEqual(
             validate_agent_evaluation_obj([]),
             ["evaluation suite must be an object"],

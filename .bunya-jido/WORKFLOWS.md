@@ -26,8 +26,11 @@ designed to be reviewable in the generated HTML map.
 ## Trusted Context Generation
 
 1. The CLI accepts a context request.
-2. The context generator validates the grounded blueprint.
-3. It validates task routes before emitting bounded navigation guidance with route-linked projection questions, qualified scenarios, and start-node responsibility.
+2. The context generator validates the grounded blueprint and agent-map routes.
+3. It checks reviewed repository scope and route negative boundaries before candidate retrieval.
+4. Conservative exact-term matching and route separation produce `MATCH`, `IN_SCOPE_NO_ROUTE`, `OUT_OF_SCOPE`, or `UNCERTAIN`.
+5. Only `MATCH` emits bounded navigation guidance and safe-edit paths; other decisions remain route-free, with `OUT_OF_SCOPE` and `UNCERTAIN` marked read-only.
+6. The CLI can emit either the human-readable Markdown handoff or a machine-readable `context --json` decision report.
 
 ## Continuous Contract Check
 

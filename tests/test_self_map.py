@@ -11,6 +11,7 @@ from bunya_jido.blueprint import (
     evaluate_agent_utility,
     evaluate_map_freshness,
     generate_agent_context,
+    generate_agent_context_report,
     graph_with_optional_blueprint,
     validate_agent_map_obj,
     validate_blueprint_obj,
@@ -170,6 +171,18 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertNotIn("### change task route projection", context)
         self.assertNotIn("### change viewer trust presentation", context)
 
+    def test_reviewed_out_of_scope_context_is_read_only_and_route_free(self) -> None:
+        report = generate_agent_context_report(
+            ROOT, task="Add a native iOS app with App Store signing."
+        )
+
+        self.assertEqual(report["decision"], "OUT_OF_SCOPE")
+        self.assertEqual(report["route_status"], "not_found")
+        self.assertEqual(report["edit_policy"], "read_only")
+        self.assertEqual(report["matched_routes"], [])
+        self.assertEqual(report["safe_edit_paths"], [])
+        self.assertIn("native iOS application", report["scope_evidence"]["unsupported_matches"])
+
     def test_refresh_context_routes_only_from_changed_self_map_evidence(self) -> None:
         context = generate_agent_context(
             ROOT, changed_files=["src/bunya_jido/blueprint.py"]
@@ -214,7 +227,8 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 8)
+        self.assertEqual(report["case_count"], 13)
+        self.assertEqual(report["dimensions"]["honest_no_match"]["passed"], 6)
         self.assertEqual(
             set(report["dimensions"]),
             {

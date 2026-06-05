@@ -24,11 +24,12 @@
 - **Kind:** behavioral
 - **Basis:** documented workflow
 - **Derived from workflow/projection:** `trusted_context_generation`, Bounded Agent Navigation
-- **Why playback helps:** It explains how route guidance is conditioned on
-  validated blueprint and agent-map references.
-- **Steps:** CLI context request -> Trusted Context Generator -> Grounding
-  Gate -> Agent Route Parity.
-- **What must not be implied:** Every arbitrary coding task already has a route.
+- **Why playback helps:** It explains how repository scope, route sufficiency,
+  and validated blueprint/agent-map references condition route guidance.
+- **Steps:** CLI context request -> Trusted Context Decision Router -> Grounding
+  Gate -> Agent Route Parity -> trusted route or explicit rejection.
+- **What must not be implied:** Every arbitrary coding task already has a route,
+  or that a non-MATCH decision permits editing.
 
 ## Rejected scenario ideas
 
