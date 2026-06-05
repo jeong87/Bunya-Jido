@@ -7,6 +7,21 @@ be documented.
 
 ## Unreleased
 
+### Added
+
+- A reusable `audit-worktree` API and CLI for live-agent benchmark runners
+  that reports tracked, staged, deleted, renamed, untracked, and explicitly
+  allowed artifact changes, plus Codex JSONL file-change attempts and
+  incomplete-log evidence.
+- P0 runner-correctness fixtures and a benchmark result contract covering
+  clean-baseline enforcement and write-then-revert detection.
+
+### Fixed
+
+- Benchmark workspace auditing no longer relies on tracked `git diff`
+  output alone, preventing untracked production files from being silently
+  counted as edit-free runs.
+
 ## 0.4.0 - 2026-06-05
 
 ### Added

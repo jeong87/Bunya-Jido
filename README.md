@@ -444,6 +444,21 @@ agent read or obeyed it. The evaluation format and an optional live-agent
 observation protocol are documented in
 [docs/AGENT_UTILITY_EVALUATION.md](docs/AGENT_UTILITY_EVALUATION.md).
 
+### Auditing Live-Agent Benchmark Changes
+
+Live-agent benchmark runners can reject dirty baselines and observe tracked,
+staged, deleted, renamed, untracked, and Codex JSONL-reported write activity:
+
+```bash
+bunya-jido audit-worktree --root workspace --require-clean --json
+bunya-jido audit-worktree --root workspace --jsonl task.codex.jsonl --allow-artifact "results/**" --require-jsonl --json
+```
+
+The audit keeps final workspace changes separate from write-then-revert
+attempts. See
+[docs/BENCHMARK_RESULT_CONTRACT.md](docs/BENCHMARK_RESULT_CONTRACT.md) for the
+runner integration and result contract.
+
 These files are meant to be pasted or attached before handing work to a coding agent.
 
 ## Supported Scope

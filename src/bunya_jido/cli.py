@@ -25,6 +25,7 @@ from .blueprint import (
     validate_agent_map_file,
     validate_blueprint_file,
 )
+from .benchmark import audit_worktree
 from .quality import ATLAS_QUALITY_REPORT_FILE, render_atlas_quality_markdown
 from .render import render_html, write_json
 from .scanner import build_graph
@@ -518,6 +519,39 @@ def cmd_evaluate_atlas_quality(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_audit_worktree(args: argparse.Namespace) -> int:
+    try:
+        report = audit_worktree(
+            args.root,
+            jsonl_paths=args.jsonl,
+            allowed_artifacts=args.allow_artifact,
+        )
+    except (OSError, ValueError, subprocess.CalledProcessError) as exc:
+        print(f"Worktree audit blocked: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(f"Worktree audit: {'clean' if report['worktree_clean'] else 'changed'}")
+        print(f"Tracked changes: {len(report['changed_files_tracked'])}")
+        print(f"Untracked changes: {len(report['untracked_files'])}")
+        print(f"Production changes: {len(report['production_file_changes'])}")
+        print(f"JSONL production write attempts: {len(report['jsonl_production_write_attempts'])}")
+        if report["malformed_jsonl_lines"]:
+            print(f"Malformed JSONL lines: {report['malformed_jsonl_lines']}")
+        if report["invalid_jsonl_lines"]:
+            print(f"Invalid JSONL event lines: {report['invalid_jsonl_lines']}")
+    if args.require_clean and not report["worktree_clean"]:
+        return 2
+    if args.require_jsonl and not report["jsonl_complete"]:
+        return 2
+    if args.require_no_production_activity and (
+        report["has_production_changes"] or report["has_production_write_attempts"]
+    ):
+        return 2
+    return 0
+
+
 def cmd_install_agent_guides(args: argparse.Namespace) -> int:
     if args.dry_run and not args.activate:
         print("--dry-run requires --activate.", file=sys.stderr)
@@ -635,6 +669,16 @@ def build_parser() -> argparse.ArgumentParser:
     p_atlas_quality.add_argument("--write-report", action="store_true", help="Write an optional Markdown report to .bunya-jido/ATLAS_QUALITY_REPORT.md.")
     p_atlas_quality.set_defaults(func=cmd_evaluate_atlas_quality)
 
+    p_audit = sub.add_parser("audit-worktree", help="Audit tracked, staged, deleted, renamed, untracked, and JSONL-observed benchmark changes.")
+    p_audit.add_argument("--root", default=".", help="Git worktree root. Default: current directory.")
+    p_audit.add_argument("--jsonl", action="append", default=[], help="Codex JSONL event log to inspect. Repeatable.")
+    p_audit.add_argument("--allow-artifact", action="append", default=[], help="Allowed harness-artifact glob, relative to the worktree. Repeatable.")
+    p_audit.add_argument("--require-clean", action="store_true", help="Exit with status 2 unless the worktree is clean.")
+    p_audit.add_argument("--require-jsonl", action="store_true", help="Exit with status 2 unless at least one JSONL log is present and every non-empty line parses.")
+    p_audit.add_argument("--require-no-production-activity", action="store_true", help="Exit with status 2 when production changes or JSONL write attempts are observed.")
+    p_audit.add_argument("--json", action="store_true", help="Print the machine-readable audit report.")
+    p_audit.set_defaults(func=cmd_audit_worktree)
+
     p_guides = sub.add_parser("install-agent-guides", help="Write Bunya-Jido agent guidance snippets or activate managed project instructions.")
     p_guides.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_guides.add_argument("--agent", choices=["all", "codex", "claude", "cursor", "cline"], default="all", help="Which guide to write. Default: all.")
@@ -647,7 +691,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
-    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "install-agent-guides"}
+    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "audit-worktree", "install-agent-guides"}
     if not raw or (raw[0] not in subcommands and raw[0] not in {"-h", "--help", "--version"}):
         raw = ["build"] + raw
     parser = build_parser()

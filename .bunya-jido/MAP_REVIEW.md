@@ -263,3 +263,29 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: Version alignment and Pages trigger regression tests, rebuilt
   committed demo, stale-map review, release gates, and the full unit suite are
   required before merge to `main`.
+
+## 2026-06-05 - 0.5 Trust-Preserving Recall Recovery Plan
+
+- Change: Added the proposed `0.5` update plan with ordered runner-correctness,
+  no-match safety, normal-bugfix recovery, token-efficiency, and resolution-time
+  gates.
+- Decision: This is a planning and acceptance-contract document only. It does
+  not change the current semantic map, context decision behavior, trusted
+  routes, or viewer output.
+- Validation: Review the plan against the current context-decision
+  implementation and updated-map revalidation report, then run stale-map
+  review to record that no current structure changed.
+
+## 2026-06-05 - P0 Benchmark Worktree Truth
+
+- Change: Added a reusable benchmark worktree audit API and CLI, fixture tests,
+  and a runner integration contract that detect tracked, staged, deleted,
+  renamed, untracked, and JSONL-observed write activity.
+- Decision: This extends quality evaluation support around live-agent
+  benchmarks. It does not change the semantic blueprint, trusted task routes,
+  context decisions, or human-facing map, so no self-map structure update is
+  required.
+- Validation: Run the benchmark-audit fixtures, CLI smoke checks, full unit
+  suite, blueprint and agent-map validation, strict utility and atlas-quality
+  evaluation, stale-map review, and local Realistic Large/Enterprise XLarge
+  runner mock smoke runs before commit.
