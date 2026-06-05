@@ -364,12 +364,12 @@ presenting an unrelated prepared path as guidance.
 
 Context selection is decision-aware:
 
-| Decision | Meaning | Edit policy |
-|---|---|---|
-| `MATCH` | One trusted route has sufficient evidence and separation | `workspace_write` |
-| `IN_SCOPE_NO_ROUTE` | The request is repository-related, but the map has no sufficient route | `cautious` |
-| `OUT_OF_SCOPE` | The request conflicts with a reviewed repository boundary | `read_only` |
-| `UNCERTAIN` | Scope or route sufficiency cannot be established safely | `read_only` |
+| Decision | Meaning | Edit policy | Execution policy |
+|---|---|---|---|
+| `MATCH` | One trusted route has sufficient evidence and separation | `workspace_write` | `workspace_write` |
+| `IN_SCOPE_NO_ROUTE` | The request is repository-related, but the map has no sufficient route | `cautious` | `read_only_discovery` |
+| `OUT_OF_SCOPE` | The request conflicts with a reviewed repository boundary | `read_only` | `read_only` |
+| `UNCERTAIN` | Scope or route sufficiency cannot be established safely | `read_only` | `read_only` |
 
 Agent maps may declare optional repository scope and route-level negative
 boundaries. Matching uses exact meaningful terms, explicit route-use phrases,
@@ -381,6 +381,12 @@ Machine-readable decisions are available for integrations:
 ```bash
 bunya-jido context --root . --task "modify provider behavior" --json
 ```
+
+The JSON report includes `execution_policy` and `agent_instruction`.
+Integrations should enforce `read_only` or `read_only_discovery` before
+launching an agent; Bunya-Jido reports the policy but does not control another
+process's sandbox. See
+[docs/CONTEXT_EXECUTION_POLICY.md](docs/CONTEXT_EXECUTION_POLICY.md).
 
 You can also focus on a specific node:
 
@@ -496,8 +502,8 @@ Cline       .clinerules/bunya-jido.md
 Activation inserts or updates only a marked Bunya-Jido block, preserving any
 existing project instructions. The block tells the agent to run `bunya-jido
 context --root . --task "<user request>"`, use matched reading/contracts/tests,
-keep `OUT_OF_SCOPE` and `UNCERTAIN` decisions read-only, proceed cautiously
-without invented guidance for `IN_SCOPE_NO_ROUTE`, and run `refresh-context`
+keep `OUT_OF_SCOPE` and `UNCERTAIN` decisions read-only, keep initial
+`IN_SCOPE_NO_ROUTE` discovery read-only without invented guidance, and run `refresh-context`
 from actual changed files after editing. If a repository
 defines a stale-map policy, it also tells the agent to run `check-stale` and
 either update the map or record an explicit no-structure-change review.

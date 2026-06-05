@@ -174,6 +174,7 @@
       "expect": {
         "route_status": "not_found",
         "decision": "UNCERTAIN",
+        "execution_policy": "read_only",
         "routes": [],
         "forbid_routes": [
           "change grounding policy",
@@ -192,6 +193,7 @@
       "expect": {
         "route_status": "not_found",
         "decision": "OUT_OF_SCOPE",
+        "execution_policy": "read_only",
         "routes": [],
         "forbid_routes": [
           "change scanner hint provenance",
@@ -209,6 +211,7 @@
       "expect": {
         "route_status": "not_found",
         "decision": "OUT_OF_SCOPE",
+        "execution_policy": "read_only",
         "routes": []
       }
     },
@@ -221,6 +224,7 @@
       "expect": {
         "route_status": "not_found",
         "decision": "OUT_OF_SCOPE",
+        "execution_policy": "read_only",
         "routes": []
       }
     },
@@ -233,6 +237,7 @@
       "expect": {
         "route_status": "not_found",
         "decision": "UNCERTAIN",
+        "execution_policy": "read_only",
         "routes": [],
         "forbid_routes": [
           "change grounding policy",
@@ -249,6 +254,20 @@
       "expect": {
         "route_status": "not_found",
         "decision": "IN_SCOPE_NO_ROUTE",
+        "execution_policy": "read_only_discovery",
+        "routes": []
+      }
+    },
+    {
+      "id": "mixed-supported-and-unsupported-scope-is-uncertain",
+      "dimension": "honest_no_match",
+      "query": {
+        "task": "Add Python semantic repository map support for a native iOS application."
+      },
+      "expect": {
+        "route_status": "not_found",
+        "decision": "UNCERTAIN",
+        "execution_policy": "read_only",
         "routes": []
       }
     },

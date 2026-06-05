@@ -45,13 +45,21 @@ Keep cases small and reviewable:
 1. Choose task wording that identifies one authored route, unless multiple
    routes are intentionally expected.
 2. Record only expectations that the agent handoff must expose, such as
-   `decision`, `routes`, `must_read`, `tests`, `contracts`, and `safe_edit`.
+   `decision`, `execution_policy`, `routes`, `must_read`, `tests`, `contracts`,
+   and `safe_edit`.
 3. Include multiple `not_found` tasks: reviewed `OUT_OF_SCOPE`, ambiguous
    `UNCERTAIN`, and `IN_SCOPE_NO_ROUTE` when the repository scope supports it.
 4. Include adversarial wording that shares generic or broad terms with routes.
 5. Include a changed-file case when `refresh-context` is part of the
    repository workflow.
 6. Update the suite alongside agent-map changes and run the strict command.
+
+The report includes a decision confusion matrix and deterministic P1 safety
+metrics. Any expected non-`MATCH` case automatically fails if generated
+context exposes a trusted route or safe-edit path. Expected execution policy
+defaults from the decision when a case does not state it explicitly:
+`MATCH=workspace_write`, `IN_SCOPE_NO_ROUTE=read_only_discovery`, and
+`OUT_OF_SCOPE/UNCERTAIN=read_only`.
 
 An ambiguous natural-language query should normally produce `UNCERTAIN`
 instead of several trusted routes. Changed-file refresh may still return
@@ -71,6 +79,8 @@ Use this layer only when making a behavioral claim about real coding agents:
    its edits.
 5. Store the observation date, agent/version, repository commit, task text,
    and deviations in the pull request or release evidence.
+6. Record whether the integration enforced the reported execution policy and
+   audit final production changes separately from JSONL write attempts.
 
 Optionally repeat the same tasks without activated instructions as a baseline.
 Do not combine results from different agent versions or prompts without

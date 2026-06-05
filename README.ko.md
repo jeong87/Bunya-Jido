@@ -366,12 +366,12 @@ bunya-jido context --root . --task "modify provider behavior" --out .bunya-jido/
 
 Context 선택은 다음 결정을 구분합니다.
 
-| Decision | 의미 | 편집 정책 |
-|---|---|---|
-| `MATCH` | 하나의 trusted route가 충분한 근거와 구분도를 가짐 | `workspace_write` |
-| `IN_SCOPE_NO_ROUTE` | 저장소 책임 범위 안이지만 충분한 route가 없음 | `cautious` |
-| `OUT_OF_SCOPE` | 검토된 저장소 경계와 요청이 충돌함 | `read_only` |
-| `UNCERTAIN` | 범위 또는 route 충분성을 안전하게 판단할 수 없음 | `read_only` |
+| Decision | 의미 | 편집 정책 | 실행 정책 |
+|---|---|---|---|
+| `MATCH` | 하나의 trusted route가 충분한 근거와 구분도를 가짐 | `workspace_write` | `workspace_write` |
+| `IN_SCOPE_NO_ROUTE` | 저장소 책임 범위 안이지만 충분한 route가 없음 | `cautious` | `read_only_discovery` |
+| `OUT_OF_SCOPE` | 검토된 저장소 경계와 요청이 충돌함 | `read_only` | `read_only` |
+| `UNCERTAIN` | 범위 또는 route 충분성을 안전하게 판단할 수 없음 | `read_only` | `read_only` |
 
 Agent map은 선택적으로 repository scope와 route별 negative boundary를
 선언할 수 있습니다. Matching은 의미 있는 정확한 단어, 명시적 route 사용
@@ -383,6 +383,13 @@ trusted route나 safe-edit 경로를 노출하지 않습니다.
 ```bash
 bunya-jido context --root . --task "modify provider behavior" --json
 ```
+
+JSON 보고서는 `execution_policy`와 `agent_instruction`도 제공합니다.
+통합 도구는 에이전트를 실행하기 전에 `read_only` 또는
+`read_only_discovery` sandbox를 강제해야 합니다. Bunya-Jido는 정책을
+보고하지만 다른 프로세스의 sandbox를 직접 제어하지는 않습니다. 자세한
+계약은 [docs/CONTEXT_EXECUTION_POLICY.md](docs/CONTEXT_EXECUTION_POLICY.md)에
+있습니다.
 
 특정 노드를 중심으로 만들 수도 있습니다.
 
@@ -488,7 +495,7 @@ Cline       .clinerules/bunya-jido.md
 context --root . --task "<user request>"`를 먼저 실행하고, 일치한 route의
 읽기 파일, 계약, 테스트를 따르며, `OUT_OF_SCOPE`와 `UNCERTAIN`은
 read-only로 유지하고, `IN_SCOPE_NO_ROUTE`에서는 route를 추측하지 않은 채
-신중하게 일반 탐색을 진행하며, 수정 후에는 실제 변경 파일로
+초기 탐색도 read-only로 진행하며, 수정 후에는 실제 변경 파일로
 `refresh-context`를 실행하라고 지시합니다. 저장소에 stale-map policy가 정의되어 있으면
 `check-stale`도 실행하고, 지도 갱신 또는 구조 변경 없음 검토 기록 중
 맞는 조치를 남기도록 안내합니다.

@@ -289,3 +289,16 @@ An entry records review work; it does not prove architectural completeness.
   suite, blueprint and agent-map validation, strict utility and atlas-quality
   evaluation, stale-map review, and local Realistic Large/Enterprise XLarge
   runner mock smoke runs before commit.
+
+## 2026-06-05 - P1 No-Match Safety Lock
+
+- Change: Added machine-readable context execution policies, decision-specific
+  agent instructions, non-MATCH safe-edit suppression, deterministic decision
+  confusion and safety metrics, and a mixed-boundary acceptance case.
+- Decision: This strengthens the existing Agent Route Parity and bounded
+  context safety contract without changing matcher thresholds, trusted route
+  definitions, semantic blueprint structure, or human-facing HTML output.
+- Validation: Regenerate the managed Codex activation block, run context and
+  utility P1 fixtures, validate the blueprint and agent map, pass grounded,
+  atlas-quality, utility, stale-map, and full unit-suite gates, then locally
+  smoke-test sandbox policy integration in the external benchmark runners.

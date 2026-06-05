@@ -47,6 +47,21 @@ MAP_REVIEW_ARTIFACTS = {
     f"{BLUEPRINT_DIR}/{AGENT_MAP_FILE}",
     f"{BLUEPRINT_DIR}/{MAP_REVIEW_FILE}",
 }
+CONTEXT_EXECUTION_POLICIES = {
+    "MATCH": "workspace_write",
+    "IN_SCOPE_NO_ROUTE": "read_only_discovery",
+    "OUT_OF_SCOPE": "read_only",
+    "UNCERTAIN": "read_only",
+    "NOT_REQUESTED": "read_only",
+}
+CONTEXT_AGENT_INSTRUCTIONS = {
+    "MATCH": "Use only the validated route guidance and stay within its declared change boundaries.",
+    "IN_SCOPE_NO_ROUTE": "Do not modify files during initial discovery. Inspect repository evidence, then request a new context decision or user approval before editing.",
+    "OUT_OF_SCOPE": "Do not modify files or create placeholder implementations. Explain the reviewed repository boundary.",
+    "UNCERTAIN": "Do not modify files. Inspect read-only evidence only when useful, then request clarification before editing.",
+    "NOT_REQUESTED": "No task decision was requested. Treat listed routes as a read-only catalog, not permission to edit.",
+}
+NON_MATCH_CONTEXT_DECISIONS = {"IN_SCOPE_NO_ROUTE", "OUT_OF_SCOPE", "UNCERTAIN"}
 
 SECRET_PATTERNS = [
     re.compile(r"sk-[A-Za-z0-9_\-]{20,}"),
@@ -1894,6 +1909,8 @@ def _select_context_routes(
         "UNCERTAIN": "read_only",
         "NOT_REQUESTED": "read_only",
     }[decision]
+    execution_policy = CONTEXT_EXECUTION_POLICIES[decision]
+    agent_instruction = CONTEXT_AGENT_INSTRUCTIONS[decision]
     safe_edit_paths = list(
         dict.fromkeys(
             str(path)
@@ -1913,6 +1930,8 @@ def _select_context_routes(
         "decision": decision,
         "route_status": route_status,
         "edit_policy": edit_policy,
+        "execution_policy": execution_policy,
+        "agent_instruction": agent_instruction,
         "reason": reason,
         "basis": list(dict.fromkeys(basis)),
         "chosen": chosen,
@@ -2050,7 +2069,9 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
     lines.append("## Decision")
     lines.append(f"- Decision: `{selection['decision']}`")
     lines.append(f"- Edit policy: `{selection['edit_policy']}`")
+    lines.append(f"- Execution policy: `{selection['execution_policy']}`")
     lines.append(f"- Reason: {selection['reason']}")
+    lines.append(f"- Agent instruction: {selection['agent_instruction']}")
     lines.append(f"- Route score: `{selection['top_score']}`")
     lines.append(f"- Route margin: `{selection['margin']}`")
     if selection["basis"]:
@@ -2139,7 +2160,8 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         emit_list("Must read", r.get("must_read"))
         emit_list("Contracts", r.get("contracts"))
         emit_list("Tests", r.get("tests"))
-        emit_list("Safe edit", r.get("safe_edit"))
+        if selection["decision"] == "MATCH":
+            emit_list("Safe edit", r.get("safe_edit"))
         emit_list("Do not touch casually", r.get("do_not_touch_without_reason"))
         if r.get("notes"): lines.append(f"\n**Notes:** {r.get('notes')}")
         lines.append("")
@@ -2181,10 +2203,14 @@ def generate_agent_context_report(
         "decision": selection["decision"],
         "route_status": selection["route_status"],
         "edit_policy": selection["edit_policy"],
+        "execution_policy": selection["execution_policy"],
+        "agent_instruction": selection["agent_instruction"],
         "reason": selection["reason"],
         "route_score": selection["top_score"],
         "route_margin": selection["margin"],
-        "matched_routes": [str(route.get("task") or "Unnamed route") for _, route in chosen],
+        "matched_routes": [
+            str(route.get("task") or "Unnamed route") for _, route in chosen
+        ] if selection["decision"] == "MATCH" else [],
         "safe_edit_paths": selection["safe_edit_paths"],
         "decision_basis": selection["basis"],
         "scope_evidence": {
@@ -2283,6 +2309,14 @@ def validate_agent_evaluation_obj(evaluation: Any) -> list[str]:
             errors.append(
                 f"cases[{i}].expect.decision must be MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, or UNCERTAIN"
             )
+        if "execution_policy" in expect and expect.get("execution_policy") not in {
+            "workspace_write",
+            "read_only_discovery",
+            "read_only",
+        }:
+            errors.append(
+                f"cases[{i}].expect.execution_policy must be workspace_write, read_only_discovery, or read_only"
+            )
         for field in expected_list_fields:
             value = expect.get(field, [])
             if not isinstance(value, list) or not all(
@@ -2291,6 +2325,18 @@ def validate_agent_evaluation_obj(evaluation: Any) -> list[str]:
                 errors.append(f"cases[{i}].expect.{field} must be a list of non-empty strings")
         if expect.get("route_status") == "not_found" and expect.get("routes"):
             errors.append(f"cases[{i}].expect.routes must be empty for not_found")
+        decision = expect.get("decision")
+        if decision in NON_MATCH_CONTEXT_DECISIONS:
+            if expect.get("routes"):
+                errors.append(f"cases[{i}].expect.routes must be empty for non-MATCH decision")
+            if expect.get("safe_edit"):
+                errors.append(f"cases[{i}].expect.safe_edit must be empty for non-MATCH decision")
+        if decision in CONTEXT_EXECUTION_POLICIES and expect.get("execution_policy"):
+            required_policy = CONTEXT_EXECUTION_POLICIES[decision]
+            if expect["execution_policy"] != required_policy:
+                errors.append(
+                    f"cases[{i}].expect.execution_policy must be {required_policy} for {decision}"
+                )
     if any(_string_has_secret(value) for value in _walk_strings(evaluation)):
         errors.append("evaluation suite appears to contain secret-like text; remove raw tokens/API keys/passwords")
     return errors
@@ -2334,6 +2380,13 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
         raise ValueError("Invalid agent utility evaluation suite: " + "; ".join(errors[:12]))
     case_reports: list[dict[str, Any]] = []
     dimension_counts: dict[str, dict[str, int]] = defaultdict(lambda: {"passed": 0, "total": 0})
+    decision_confusion: dict[str, Counter[str]] = defaultdict(Counter)
+    decision_case_count = 0
+    correct_decision_count = 0
+    non_match_case_count = 0
+    false_route_count = 0
+    safe_edit_leak_count = 0
+    execution_policy_mismatch_count = 0
     list_titles = {
         "must_read": "Must read",
         "contracts": "Contracts",
@@ -2370,6 +2423,16 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
             failures.append(
                 f"decision expected {expected['decision']}, got {decision_report['decision']}"
             )
+        expected_execution_policy = expected.get("execution_policy")
+        if not expected_execution_policy and expected.get("decision") in CONTEXT_EXECUTION_POLICIES:
+            expected_execution_policy = CONTEXT_EXECUTION_POLICIES[expected["decision"]]
+        if (
+            expected_execution_policy
+            and decision_report["execution_policy"] != expected_execution_policy
+        ):
+            failures.append(
+                f"execution policy expected {expected_execution_policy}, got {decision_report['execution_policy']}"
+            )
         expected_routes = expected.get("routes", [])
         if actual_routes != expected_routes:
             failures.append(f"routes expected {expected_routes}, got {actual_routes}")
@@ -2386,6 +2449,32 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
             ]
             if missing:
                 failures.append(f"{field} missing from context: {missing}")
+        expected_decision = expected.get("decision")
+        false_route = False
+        safe_edit_leak = False
+        if expected_decision:
+            decision_case_count += 1
+            decision_confusion[str(expected_decision)][str(decision_report["decision"])] += 1
+            if decision_report["decision"] == expected_decision:
+                correct_decision_count += 1
+            if decision_report["execution_policy"] != expected_execution_policy:
+                execution_policy_mismatch_count += 1
+            if expected_decision in NON_MATCH_CONTEXT_DECISIONS:
+                non_match_case_count += 1
+                false_route = bool(
+                    actual_status == "matched"
+                    or actual_routes
+                    or decision_report["matched_routes"]
+                )
+                safe_edit_leak = bool(
+                    actual_lists["safe_edit"] or decision_report["safe_edit_paths"]
+                )
+                if false_route:
+                    false_route_count += 1
+                    failures.append("non-MATCH decision leaked a trusted route")
+                if safe_edit_leak:
+                    safe_edit_leak_count += 1
+                    failures.append("non-MATCH decision leaked safe-edit paths")
         passed = not failures
         dimension = str(case["dimension"])
         dimension_counts[dimension]["total"] += 1
@@ -2400,8 +2489,12 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
                 "actual_route_status": actual_status,
                 "expected_decision": expected.get("decision"),
                 "actual_decision": decision_report["decision"],
+                "expected_execution_policy": expected_execution_policy,
+                "actual_execution_policy": decision_report["execution_policy"],
                 "expected_routes": expected_routes,
                 "actual_routes": actual_routes,
+                "false_route": false_route,
+                "safe_edit_leak": safe_edit_leak,
                 "failures": failures,
             }
         )
@@ -2417,6 +2510,17 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
         }
         for dimension, counts in dimension_counts.items()
     }
+    def rate(numerator: int, denominator: int) -> float | None:
+        return round(numerator / denominator, 3) if denominator else None
+
+    decision_labels = ["MATCH", "IN_SCOPE_NO_ROUTE", "OUT_OF_SCOPE", "UNCERTAIN"]
+    confusion_matrix = {
+        expected: {
+            actual: decision_confusion[expected][actual]
+            for actual in decision_labels
+        }
+        for expected in decision_labels
+    }
     return {
         "schema_version": "bunya-jido-agent-utility-report-v1",
         "suite_path": suite_path,
@@ -2425,6 +2529,21 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
         "case_count": len(case_reports),
         "passed_case_count": passed_count,
         "dimensions": dimensions,
+        "decision_confusion_matrix": confusion_matrix,
+        "safety_metrics": {
+            "decision_case_count": decision_case_count,
+            "expected_decision_accuracy": rate(correct_decision_count, decision_case_count),
+            "non_match_case_count": non_match_case_count,
+            "false_route_count": false_route_count,
+            "false_route_rate": rate(false_route_count, non_match_case_count),
+            "safe_edit_leak_count": safe_edit_leak_count,
+            "safe_edit_leak_rate": rate(safe_edit_leak_count, non_match_case_count),
+            "execution_policy_mismatch_count": execution_policy_mismatch_count,
+            "execution_policy_accuracy": rate(
+                decision_case_count - execution_policy_mismatch_count,
+                decision_case_count,
+            ),
+        },
         "cases": case_reports,
     }
 
@@ -2440,14 +2559,15 @@ def _agent_activation_instructions() -> str:
     For implementation, debugging, or code-review work in this repository:
 
     1. Before editing, run `bunya-jido context --root . --task "<user request>"`.
-    2. If the decision is `MATCH`, read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
-    3. If the decision is `OUT_OF_SCOPE`, do not edit files; explain the reviewed repository boundary.
-    4. If the decision is `UNCERTAIN`, prefer read-only inspection and request clarification before editing.
-    5. If the decision is `IN_SCOPE_NO_ROUTE` and the output says `No matching trusted route`, state that the map has no prepared route and continue cautiously with ordinary repository inspection. Do not infer a route.
-    6. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
-    7. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
-    8. If the repository defines `stale_map_policy`, run `bunya-jido check-stale --root . --git-diff --require-reviewed`; when it reports `stale`, refresh and validate the map or record a reviewed no-structure-change decision in `.bunya-jido/MAP_REVIEW.md`.
-    9. Run the tests named by a matched route after the change, together with any checks required by the repository.
+    2. Obey the returned `Execution policy`; integrations should enforce the matching sandbox when available.
+    3. If the decision is `MATCH`, use `workspace_write` and read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
+    4. If the decision is `IN_SCOPE_NO_ROUTE`, use `read_only_discovery`; state that the map has `No matching trusted route`, inspect ordinary repository evidence without editing, and request a new context decision or user approval before changing files. Do not infer a route.
+    5. If the decision is `OUT_OF_SCOPE`, use `read_only`; do not edit files or create placeholder implementations, and explain the reviewed repository boundary.
+    6. If the decision is `UNCERTAIN`, use `read_only`; inspect only when useful and request clarification before editing.
+    7. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
+    8. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
+    9. If the repository defines `stale_map_policy`, run `bunya-jido check-stale --root . --git-diff --require-reviewed`; when it reports `stale`, refresh and validate the map or record a reviewed no-structure-change decision in `.bunya-jido/MAP_REVIEW.md`.
+    10. Run the tests named by a matched route after the change, together with any checks required by the repository.
 
     When asked to update the Bunya-Jido map itself, run `bunya-jido prepare --root . --quiet`,
     execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`, then validate the blueprint and agent map.

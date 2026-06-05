@@ -151,6 +151,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("- Grounding status: `grounded`", context)
         self.assertIn("- Agent-map routes: `validated` (6 trusted route(s))", context)
         self.assertIn("- Requested route match: `matched`", context)
+        self.assertIn("- Execution policy: `workspace_write`", context)
         self.assertIn("### change task route projection", context)
         self.assertIn("- `task_route_publication`", context)
         self.assertIn("**Start-node responsibility:**", context)
@@ -188,9 +189,22 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(report["decision"], "OUT_OF_SCOPE")
         self.assertEqual(report["route_status"], "not_found")
         self.assertEqual(report["edit_policy"], "read_only")
+        self.assertEqual(report["execution_policy"], "read_only")
         self.assertEqual(report["matched_routes"], [])
         self.assertEqual(report["safe_edit_paths"], [])
         self.assertIn("native iOS application", report["scope_evidence"]["unsupported_matches"])
+
+    def test_in_scope_no_route_is_read_only_discovery_and_route_free(self) -> None:
+        report = generate_agent_context_report(
+            ROOT, task="Change context decision calibration."
+        )
+
+        self.assertEqual(report["decision"], "IN_SCOPE_NO_ROUTE")
+        self.assertEqual(report["route_status"], "not_found")
+        self.assertEqual(report["execution_policy"], "read_only_discovery")
+        self.assertEqual(report["matched_routes"], [])
+        self.assertEqual(report["safe_edit_paths"], [])
+        self.assertIn("Do not modify files during initial discovery", report["agent_instruction"])
 
     def test_refresh_context_routes_only_from_changed_self_map_evidence(self) -> None:
         context = generate_agent_context(
@@ -236,8 +250,12 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 13)
-        self.assertEqual(report["dimensions"]["honest_no_match"]["passed"], 6)
+        self.assertEqual(report["case_count"], 14)
+        self.assertEqual(report["dimensions"]["honest_no_match"]["passed"], 7)
+        self.assertEqual(report["safety_metrics"]["expected_decision_accuracy"], 1.0)
+        self.assertEqual(report["safety_metrics"]["false_route_rate"], 0.0)
+        self.assertEqual(report["safety_metrics"]["safe_edit_leak_rate"], 0.0)
+        self.assertEqual(report["safety_metrics"]["execution_policy_accuracy"], 1.0)
         self.assertEqual(
             set(report["dimensions"]),
             {

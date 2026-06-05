@@ -467,6 +467,14 @@ def cmd_evaluate_agent_utility(args: argparse.Namespace) -> int:
     else:
         print(f"Agent utility evaluation: {report['status']}")
         print(f"Cases: {report['passed_case_count']}/{report['case_count']} passed")
+        safety = report["safety_metrics"]
+        print(
+            "No-match safety: "
+            f"decision_accuracy={safety['expected_decision_accuracy']} "
+            f"false_route_rate={safety['false_route_rate']} "
+            f"safe_edit_leak_rate={safety['safe_edit_leak_rate']} "
+            f"execution_policy_accuracy={safety['execution_policy_accuracy']}"
+        )
         for dimension, result in report["dimensions"].items():
             print(f"- {dimension}: {result['passed']}/{result['total']} passed")
         for case in report["cases"]:

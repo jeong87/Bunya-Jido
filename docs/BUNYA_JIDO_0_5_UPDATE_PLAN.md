@@ -91,6 +91,24 @@ integrated with this API and passed mock bugfix/no-match smoke runs on
 not a durable patch identifier and does not satisfy the release-evidence gate
 until the runner source is versioned.
 
+### 1.3 P1 implementation status - 2026-06-05
+
+Context decisions now expose an additive `execution_policy` and
+decision-specific `agent_instruction`. Only `MATCH` permits
+`workspace_write`; `IN_SCOPE_NO_ROUTE` uses `read_only_discovery`, while
+`OUT_OF_SCOPE` and `UNCERTAIN` use `read_only`.
+
+The deterministic agent-utility gate now reports a decision confusion matrix,
+expected decision accuracy, false-route rate, safe-edit leak rate, and
+execution-policy accuracy. The committed P1 fixture covers all four decisions,
+including a mixed supported/unsupported request, and automatically fails any
+expected non-`MATCH` case that leaks a trusted route or safe-edit path.
+
+This completes the version-controlled P1 safety-lock implementation. Realistic
+Large and Enterprise XLarge no-match sets must still be rerun with a versioned
+runner that enforces the reported sandbox and records P0 worktree audit data
+before the live-agent P1 release minimum can be claimed.
+
 ---
 
 ## 2. 0.5 Product Contract
@@ -809,6 +827,10 @@ Schema version을 바꿀 필요가 있는지는 실제 JSON contract 변경 범�
 
 ### P1 No-match safety
 
+- [x] context execution-policy contract and agent activation guidance
+- [x] deterministic decision confusion matrix
+- [x] committed non-`MATCH` false-route and safe-edit leak `0`
+- [x] committed expected decision and execution-policy accuracy `100%`
 - [ ] Realistic no-match route match `0/3`
 - [ ] Enterprise no-match route match `0/6`
 - [ ] no-match production write attempt `0`

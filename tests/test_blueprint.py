@@ -401,19 +401,25 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(ios["decision"], "OUT_OF_SCOPE")
         self.assertEqual(ios["route_status"], "not_found")
         self.assertEqual(ios["edit_policy"], "read_only")
+        self.assertEqual(ios["execution_policy"], "read_only")
         self.assertEqual(ios["safe_edit_paths"], [])
+        self.assertIn("Do not modify files", ios["agent_instruction"])
         self.assertEqual(weak["decision"], "UNCERTAIN")
+        self.assertEqual(weak["execution_policy"], "read_only")
         self.assertEqual(weak["matched_routes"], [])
         self.assertEqual(matched["decision"], "MATCH")
+        self.assertEqual(matched["execution_policy"], "workspace_write")
         self.assertEqual(matched["matched_routes"], ["change builder behavior"])
         self.assertNotEqual(broad_match["decision"], "MATCH")
         self.assertEqual(broad_match["matched_routes"], [])
         self.assertEqual(route_boundary["decision"], "IN_SCOPE_NO_ROUTE")
+        self.assertEqual(route_boundary["execution_policy"], "read_only_discovery")
         self.assertTrue(
             any("task conflicts with route boundary" in basis for basis in route_boundary["decision_basis"])
         )
         self.assertEqual(cli_result, 0)
         self.assertEqual(cli_report["decision"], "OUT_OF_SCOPE")
+        self.assertEqual(cli_report["execution_policy"], "read_only")
         self.assertEqual(cli_report["safe_edit_paths"], [])
 
     def test_malformed_stale_map_policy_is_a_validation_error(self) -> None:
@@ -528,6 +534,8 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertIn("Requested route match: `not_requested`", catalog_text)
         self.assertIn("## Available trusted task routes", catalog_text)
         self.assertIn("### change builder behavior", catalog_text)
+        self.assertNotIn("**Safe edit:**", catalog_text)
+        self.assertNotIn("`src/bunya_jido/blueprint.py`", catalog_text)
         self.assertIn("Requested route match: `matched`", changed_text)
         self.assertIn("Changed-file route match: `matched`", changed_text)
         self.assertIn("changed file `src/bunya_jido/blueprint.py` matches route safe-edit path", changed_text)
@@ -776,6 +784,7 @@ class AgentMapCharacterizationTests(unittest.TestCase):
                     "expect": {
                         "route_status": "matched",
                         "decision": "MATCH",
+                        "execution_policy": "workspace_write",
                         "routes": ["change builder behavior"],
                         "must_read": ["README.md"],
                         "tests": ["tests/test_smoke.py"],
@@ -788,6 +797,7 @@ class AgentMapCharacterizationTests(unittest.TestCase):
                     "expect": {
                         "route_status": "not_found",
                         "decision": "UNCERTAIN",
+                        "execution_policy": "read_only",
                         "routes": [],
                         "forbid_routes": ["change builder behavior"],
                     },
@@ -831,7 +841,15 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(passed["status"], "passed")
         self.assertEqual(passed["passed_case_count"], 2)
         self.assertEqual(passed["cases"][0]["actual_decision"], "MATCH")
+        self.assertEqual(passed["cases"][0]["actual_execution_policy"], "workspace_write")
         self.assertEqual(passed["cases"][1]["actual_decision"], "UNCERTAIN")
+        self.assertEqual(passed["cases"][1]["actual_execution_policy"], "read_only")
+        self.assertEqual(passed["safety_metrics"]["expected_decision_accuracy"], 1.0)
+        self.assertEqual(passed["safety_metrics"]["false_route_rate"], 0.0)
+        self.assertEqual(passed["safety_metrics"]["safe_edit_leak_rate"], 0.0)
+        self.assertEqual(passed["safety_metrics"]["execution_policy_accuracy"], 1.0)
+        self.assertEqual(passed["decision_confusion_matrix"]["MATCH"]["MATCH"], 1)
+        self.assertEqual(passed["decision_confusion_matrix"]["UNCERTAIN"]["UNCERTAIN"], 1)
         self.assertEqual(strict_result, 2)
         self.assertEqual(failed["status"], "failed")
         self.assertIn("must_read missing from context", failed["cases"][0]["failures"][0])
@@ -872,6 +890,37 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertIn(
             "cases[0].expect.decision must be MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, or UNCERTAIN",
             validate_agent_evaluation_obj(invalid_decision),
+        )
+        invalid_non_match_contract = {
+            "schema_version": "bunya-jido-agent-evaluation-v1",
+            "project": {"name": "fixture", "summary": "Agent utility cases."},
+            "cases": [
+                {
+                    "id": "invalid-non-match-contract",
+                    "dimension": "honest_no_match",
+                    "query": {"task": "rotate database credentials"},
+                    "expect": {
+                        "route_status": "not_found",
+                        "decision": "OUT_OF_SCOPE",
+                        "execution_policy": "workspace_write",
+                        "routes": ["change builder behavior"],
+                        "safe_edit": ["src/bunya_jido/blueprint.py"],
+                    },
+                }
+            ],
+        }
+        invalid_non_match_errors = validate_agent_evaluation_obj(invalid_non_match_contract)
+        self.assertIn(
+            "cases[0].expect.routes must be empty for non-MATCH decision",
+            invalid_non_match_errors,
+        )
+        self.assertIn(
+            "cases[0].expect.safe_edit must be empty for non-MATCH decision",
+            invalid_non_match_errors,
+        )
+        self.assertIn(
+            "cases[0].expect.execution_policy must be read_only for OUT_OF_SCOPE",
+            invalid_non_match_errors,
         )
         self.assertEqual(
             validate_agent_evaluation_obj([]),
@@ -917,6 +966,8 @@ class AgentGuideActivationTests(unittest.TestCase):
 
         self.assertIn('bunya-jido context --root . --task "<user request>"', text)
         self.assertIn("No matching trusted route", text)
+        self.assertIn("read_only_discovery", text)
+        self.assertIn("workspace_write", text)
         self.assertIn("no semantic blueprint or agent map", text)
         self.assertIn("Must read", text)
         self.assertIn("Tests", text)
