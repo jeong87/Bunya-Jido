@@ -251,3 +251,15 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: The viewer regression test asserts `drawer < scenario <
   toolbar`, and the committed self-map demo and hero capture are regenerated
   before the full repository checks.
+
+## 2026-06-05 - Published Demo Delivery And Version Alignment
+
+- Change: Advanced the compatible viewer release to `0.4.0`, added a regression
+  check that package version declarations stay aligned, and made reviewed
+  `docs/` changes deploy to GitHub Pages automatically when they reach `main`.
+- Decision: This changes delivery of the existing reviewed Semantic Map
+  Publication artifact, not its structure or evidence. Pages still publishes
+  only the committed `docs/` artifact after the existing trust gates pass.
+- Validation: Version alignment and Pages trigger regression tests, rebuilt
+  committed demo, stale-map review, release gates, and the full unit suite are
+  required before merge to `main`.

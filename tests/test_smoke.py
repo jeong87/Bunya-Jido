@@ -8,6 +8,11 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
+    import tomli as tomllib
+
 from bunya_jido import __version__
 from bunya_jido.cli import main
 from bunya_jido.render import render_html
@@ -21,6 +26,9 @@ MINIMAL_EXAMPLE = ROOT / "examples" / "minimal"
 class SmokeTests(unittest.TestCase):
     def test_version_is_set(self) -> None:
         self.assertRegex(__version__, r"^\d+\.\d+\.\d+$")
+        with (ROOT / "pyproject.toml").open("rb") as handle:
+            package_version = tomllib.load(handle)["project"]["version"]
+        self.assertEqual(__version__, package_version)
 
     def test_static_scan_minimal_example(self) -> None:
         graph = build_graph(MINIMAL_EXAMPLE)

@@ -90,10 +90,10 @@ Maintainers must complete one-time repository and PyPI setup:
 ## Demo And Gallery Publishing
 
 The published demo is committed under `docs/`. The
-`.github/workflows/pages.yml` workflow deploys that directory when dispatched
-by a maintainer after reviewed changes merge. It runs the semantic self-map
-tests, the strict grounded diagnostic, and the Studio atlas-quality gate before
-uploading the Pages artifact.
+`.github/workflows/pages.yml` workflow deploys that directory automatically
+when reviewed `docs/` changes reach `main`; maintainers can also dispatch it
+manually. It runs the semantic self-map tests, the strict grounded diagnostic,
+and the Studio atlas-quality gate before uploading the Pages artifact.
 
 This design deliberately publishes the reviewed committed demo, rather than
 generating an unreviewed semantic map during deployment.

@@ -191,8 +191,9 @@ python -m bunya_jido evaluate-atlas-quality --root . --require-pass --json
 python -m unittest tests.test_gallery
 ```
 
-After reviewed `docs/` changes merge, a maintainer can dispatch
-`.github/workflows/pages.yml`. It deploys only after the committed semantic
-self-map test, strict grounded diagnostic, and Studio atlas-quality gate pass. The Pages deployment
-publishes the reviewed artifact already in the repository; it does not
-generate a new semantic interpretation during deployment.
+After reviewed `docs/` changes merge to `main`,
+`.github/workflows/pages.yml` deploys them automatically and remains available
+for manual dispatch. It deploys only after the committed semantic self-map
+test, strict grounded diagnostic, and Studio atlas-quality gate pass. The
+Pages deployment publishes the reviewed artifact already in the repository;
+it does not generate a new semantic interpretation during deployment.

@@ -7,6 +7,8 @@ be documented.
 
 ## Unreleased
 
+## 0.4.0 - 2026-06-05
+
 ### Added
 
 - Human-first map orientation with a repository summary, guided-tour entry,
@@ -88,6 +90,8 @@ be documented.
   agent-utility suite to pass without claiming live-agent behavioral proof.
 - Maintained workflows use current official Node.js 24-backed checkout,
   Python setup, and release artifact actions where supported.
+- GitHub Pages now deploys validated committed `docs/` changes automatically
+  when they reach `main`, while retaining manual workflow dispatch.
 - The committed Bunya-Jido self-map now publishes a grounded Studio v2 atlas
   with authored projections and evidence-badged scenarios; Studio layout
   derives its planes from authored data rather than domain-specific defaults.

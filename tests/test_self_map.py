@@ -25,6 +25,7 @@ AGENT_MAP_PATH = ROOT / ".bunya-jido" / "bunya-jido.agent-map.json"
 AGENT_EVALUATION_PATH = ROOT / ".bunya-jido" / "bunya-jido.agent-evaluation.json"
 DEMO_PATH = ROOT / "docs" / "demo.html"
 HERO_PATH = ROOT / "docs" / "assets" / "self-map-grounded.png"
+PAGES_WORKFLOW_PATH = ROOT / ".github" / "workflows" / "pages.yml"
 
 
 def load_json(path: Path) -> dict:
@@ -61,6 +62,14 @@ def stable_semantic_contract(graph: dict) -> dict:
 
 
 class SemanticSelfMapGoldenTests(unittest.TestCase):
+    def test_pages_deploys_reviewed_docs_changes_from_main(self) -> None:
+        workflow = PAGES_WORKFLOW_PATH.read_text(encoding="utf-8")
+
+        self.assertIn("push:", workflow)
+        self.assertIn("- main", workflow)
+        self.assertIn('- "docs/**"', workflow)
+        self.assertIn("workflow_dispatch:", workflow)
+
     def test_committed_self_map_and_routes_are_grounded(self) -> None:
         blueprint = load_json(BLUEPRINT_PATH)
         agent_map = load_json(AGENT_MAP_PATH)
