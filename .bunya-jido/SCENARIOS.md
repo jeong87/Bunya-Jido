@@ -26,9 +26,10 @@
 - **Basis:** documented workflow
 - **Derived from workflow/projection:** `trusted_context_generation`, Bounded Agent Navigation
 - **Why playback helps:** It explains how repository scope, route sufficiency,
-  and validated blueprint/agent-map references condition route guidance.
+  and validated blueprint/agent-map references condition trusted routes or
+  bounded read-only discovery.
 - **Steps:** CLI context request -> Trusted Context Decision Router -> Grounding
-  Gate -> Agent Route Parity -> trusted route or explicit rejection.
+  Gate -> Agent Route Parity -> trusted route, bounded discovery, or explicit rejection.
 - **What must not be implied:** Every arbitrary coding task already has a route,
   or that a non-MATCH decision permits editing.
 

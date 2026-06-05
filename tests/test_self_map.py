@@ -204,6 +204,11 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(report["execution_policy"], "read_only_discovery")
         self.assertEqual(report["matched_routes"], [])
         self.assertEqual(report["safe_edit_paths"], [])
+        self.assertEqual(report["discovery_context"]["mode"], "bounded_read_only")
+        self.assertIn(
+            "src/bunya_jido/blueprint.py",
+            [item["path"] for item in report["discovery_context"]["read_first"]],
+        )
         self.assertIn("Do not modify files during initial discovery", report["agent_instruction"])
 
     def test_refresh_context_routes_only_from_changed_self_map_evidence(self) -> None:
@@ -250,12 +255,20 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 14)
+        self.assertEqual(report["case_count"], 16)
         self.assertEqual(report["dimensions"]["honest_no_match"]["passed"], 7)
+        self.assertEqual(report["dimensions"]["normal_bugfix_recovery"]["passed"], 2)
         self.assertEqual(report["safety_metrics"]["expected_decision_accuracy"], 1.0)
         self.assertEqual(report["safety_metrics"]["false_route_rate"], 0.0)
         self.assertEqual(report["safety_metrics"]["safe_edit_leak_rate"], 0.0)
         self.assertEqual(report["safety_metrics"]["execution_policy_accuracy"], 1.0)
+        self.assertEqual(report["recovery_metrics"]["normal_bugfix_case_count"], 2)
+        self.assertEqual(report["recovery_metrics"]["trusted_route_recall"], 0.5)
+        self.assertEqual(report["recovery_metrics"]["bounded_discovery_coverage"], 0.5)
+        self.assertEqual(report["recovery_metrics"]["actionable_guidance_coverage"], 1.0)
+        self.assertEqual(
+            report["recovery_metrics"]["normal_bugfix_hard_rejection_rate"], 0.0
+        )
         self.assertEqual(
             set(report["dimensions"]),
             {
@@ -264,6 +277,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
                 "boundary_discipline",
                 "honest_no_match",
                 "change_aware_refresh",
+                "normal_bugfix_recovery",
             },
         )
         self.assertEqual(cli_report["status"], "passed")

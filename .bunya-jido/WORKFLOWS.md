@@ -28,9 +28,10 @@ designed to be reviewable in the generated HTML map.
 1. The CLI accepts a context request.
 2. The context generator validates the grounded blueprint and agent-map routes.
 3. It checks reviewed repository scope and route negative boundaries before candidate retrieval.
-4. Conservative exact-term matching and route separation produce `MATCH`, `IN_SCOPE_NO_ROUTE`, `OUT_OF_SCOPE`, or `UNCERTAIN`.
-5. Only `MATCH` emits bounded navigation guidance and safe-edit paths; other decisions remain route-free, with `OUT_OF_SCOPE` and `UNCERTAIN` marked read-only.
-6. The CLI can emit either the human-readable Markdown handoff or a machine-readable `context --json` decision report.
+4. Independent positive evidence, route-specific grounded nodes, negative boundaries, and route separation produce `MATCH`, `IN_SCOPE_NO_ROUTE`, `OUT_OF_SCOPE`, or `UNCERTAIN`.
+5. Only `MATCH` emits trusted route and safe-edit guidance. `IN_SCOPE_NO_ROUTE` may emit capped repository-relative read-only discovery; `OUT_OF_SCOPE` and `UNCERTAIN` remain route-free.
+6. Discovery candidates point back to blueprint nodes, workflows, or existing repository paths and require a new context decision before editing.
+7. The CLI can emit either the human-readable Markdown handoff or a machine-readable `context --json` decision report.
 
 ## Continuous Contract Check
 

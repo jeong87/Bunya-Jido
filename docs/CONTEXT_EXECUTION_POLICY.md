@@ -13,13 +13,20 @@ an integration should use.
 | Decision | Execution policy | Integration behavior |
 |---|---|---|
 | `MATCH` | `workspace_write` | Allow writes while following the validated route and its boundaries. |
-| `IN_SCOPE_NO_ROUTE` | `read_only_discovery` | Inspect repository evidence without editing, then request a new decision or user approval. |
+| `IN_SCOPE_NO_ROUTE` | `read_only_discovery` | Inspect supplied bounded discovery or ordinary repository evidence without editing, then request a new decision or user approval. |
 | `OUT_OF_SCOPE` | `read_only` | Block writes and explain the reviewed repository boundary. |
 | `UNCERTAIN` | `read_only` | Block writes and request clarification after bounded inspection when useful. |
 
 Only `MATCH` may expose matched trusted routes or safe-edit paths. A route
 catalog requested without a task is also read-only and does not expose
 safe-edit paths.
+
+`IN_SCOPE_NO_ROUTE` may expose optional `discovery_context`. Its likely areas,
+first reads, tests, and search commands are capped and grounded in blueprint
+nodes, workflows, or existing repository-relative paths. They are not a
+trusted route or edit permission. After discovery, integrations should request
+a new decision with a justified `context --node` or `context --workflow`
+focus before enabling writes.
 
 ## Integration Pattern
 
@@ -56,6 +63,10 @@ process's sandbox. Enforcement belongs to the runner, IDE, or agent host.
 - `false_route_rate`
 - `safe_edit_leak_rate`
 - `execution_policy_accuracy`
+- `trusted_route_recall`
+- `bounded_discovery_coverage`
+- `actionable_guidance_coverage`
+- `normal_bugfix_hard_rejection_rate`
 
 The committed suite automatically fails any expected non-`MATCH` case that
 emits a trusted route or safe-edit path. Production write attempts, final

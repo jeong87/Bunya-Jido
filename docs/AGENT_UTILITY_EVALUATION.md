@@ -34,6 +34,7 @@ The Bunya-Jido self-map currently covers:
 | `boundary_discipline` | A sensitive change exposes its contract and safe-edit boundary without unrelated guidance. |
 | `honest_no_match` | Unsupported, weak-overlap, and in-scope-unmapped tasks emit no false trusted route and the expected decision. |
 | `change_aware_refresh` | A changed source file selects only routes justified by mapped evidence. |
+| `normal_bugfix_recovery` | A normal repair receives either a trusted route or capped evidence-backed bounded discovery. |
 
 The report deliberately includes a limitation: it evaluates generated context,
 not autonomous agent behavior.
@@ -46,7 +47,8 @@ Keep cases small and reviewable:
    routes are intentionally expected.
 2. Record only expectations that the agent handoff must expose, such as
    `decision`, `execution_policy`, `routes`, `must_read`, `tests`, `contracts`,
-   and `safe_edit`.
+   `safe_edit`, `discovery_nodes`, `discovery_workflows`, `read_first`, and
+   `likely_tests`.
 3. Include multiple `not_found` tasks: reviewed `OUT_OF_SCOPE`, ambiguous
    `UNCERTAIN`, and `IN_SCOPE_NO_ROUTE` when the repository scope supports it.
 4. Include adversarial wording that shares generic or broad terms with routes.
@@ -60,6 +62,12 @@ context exposes a trusted route or safe-edit path. Expected execution policy
 defaults from the decision when a case does not state it explicitly:
 `MATCH=workspace_write`, `IN_SCOPE_NO_ROUTE=read_only_discovery`, and
 `OUT_OF_SCOPE/UNCERTAIN=read_only`.
+
+The report also includes deterministic P2 recovery metrics:
+`trusted_route_recall`, `bounded_discovery_coverage`,
+`actionable_guidance_coverage`, and `normal_bugfix_hard_rejection_rate`.
+Every `normal_bugfix_recovery` case fails unless it receives `MATCH` or an
+`IN_SCOPE_NO_ROUTE` result with grounded bounded discovery.
 
 An ambiguous natural-language query should normally produce `UNCERTAIN`
 instead of several trusted routes. Changed-file refresh may still return

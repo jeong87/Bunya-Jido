@@ -363,6 +363,9 @@ bunya-jido context --root . --task "modify provider behavior" --out .bunya-jido/
 읽기 문맥을 선언한 경우 관련 projection 질문, 성격이 표시된 scenario,
 시작 노드의 책임도 함께 제공합니다. 일치하는 route가 없으면
 무관한 준비 경로를 안내하는 대신 `No matching trusted route`라고 명시합니다.
+`IN_SCOPE_NO_ROUTE`인 정상 수정 작업에는 likely area, 먼저 읽을 경로,
+테스트, 읽기 전용 검색 명령, node/workflow 재평가 명령을 상한 내에서
+근거와 함께 제공할 수 있습니다.
 
 Context 선택은 다음 결정을 구분합니다.
 
@@ -375,8 +378,10 @@ Context 선택은 다음 결정을 구분합니다.
 
 Agent map은 선택적으로 repository scope와 route별 negative boundary를
 선언할 수 있습니다. Matching은 의미 있는 정확한 단어, 명시적 route 사용
-문구, 보수적인 route 간 점수 차이를 사용합니다. `MATCH`가 아닌 결정은
-trusted route나 safe-edit 경로를 노출하지 않습니다.
+문구, common failure mode, route 고유의 grounded node/workflow 근거,
+보수적인 route 간 점수 차이를 사용합니다. failure mode나 공유 workflow
+단어 하나만으로 route를 확정하지 않으며, `MATCH`가 아닌 결정은 trusted
+route나 safe-edit 경로를 노출하지 않습니다.
 
 통합 도구는 machine-readable 결정을 받을 수 있습니다.
 
@@ -384,7 +389,8 @@ trusted route나 safe-edit 경로를 노출하지 않습니다.
 bunya-jido context --root . --task "modify provider behavior" --json
 ```
 
-JSON 보고서는 `execution_policy`와 `agent_instruction`도 제공합니다.
+JSON 보고서는 `execution_policy`, `agent_instruction`, 그리고 근거가 있는
+`IN_SCOPE_NO_ROUTE`에만 선택적으로 `discovery_context`를 제공합니다.
 통합 도구는 에이전트를 실행하기 전에 `read_only` 또는
 `read_only_discovery` sandbox를 강제해야 합니다. Bunya-Jido는 정책을
 보고하지만 다른 프로세스의 sandbox를 직접 제어하지는 않습니다. 자세한
@@ -450,7 +456,9 @@ bunya-jido evaluate-agent-utility --root . --require-pass --json
 ```
 
 이 suite는 예상 첫 읽기 파일, 관련 테스트 회상, 계약/편집 경계,
-정직한 no-match 처리, 변경 근거 기반 refresh 출력을 검사합니다. 이는
+정직한 no-match 처리, 정상 bugfix의 route/discovery 회수, 변경 근거 기반
+refresh 출력을 검사합니다. trusted-route recall, bounded-discovery coverage,
+actionable-guidance coverage, normal-bugfix hard-rejection rate도 보고합니다. 이는
 생성된 handoff의 결정적 계약 검사이지, 실제 코딩 에이전트가 내용을
 읽고 따랐다는 증명은 아닙니다. 평가 형식과 선택적인 실제 에이전트
 관찰 절차는
@@ -495,7 +503,8 @@ Cline       .clinerules/bunya-jido.md
 context --root . --task "<user request>"`를 먼저 실행하고, 일치한 route의
 읽기 파일, 계약, 테스트를 따르며, `OUT_OF_SCOPE`와 `UNCERTAIN`은
 read-only로 유지하고, `IN_SCOPE_NO_ROUTE`에서는 route를 추측하지 않은 채
-초기 탐색도 read-only로 진행하며, 수정 후에는 실제 변경 파일로
+초기 탐색도 read-only로 진행한 뒤 정당화된 node/workflow focus로 context를
+다시 평가하며, 수정 후에는 실제 변경 파일로
 `refresh-context`를 실행하라고 지시합니다. 저장소에 stale-map policy가 정의되어 있으면
 `check-stale`도 실행하고, 지도 갱신 또는 구조 변경 없음 검토 기록 중
 맞는 조치를 남기도록 안내합니다.

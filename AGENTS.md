@@ -6,7 +6,7 @@ For implementation, debugging, or code-review work in this repository:
 1. Before editing, run `bunya-jido context --root . --task "<user request>"`.
 2. Obey the returned `Execution policy`; integrations should enforce the matching sandbox when available.
 3. If the decision is `MATCH`, use `workspace_write` and read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
-4. If the decision is `IN_SCOPE_NO_ROUTE`, use `read_only_discovery`; state that the map has `No matching trusted route`, inspect ordinary repository evidence without editing, and request a new context decision or user approval before changing files. Do not infer a route.
+4. If the decision is `IN_SCOPE_NO_ROUTE`, use `read_only_discovery`; state that the map has `No matching trusted route`, inspect only the supplied bounded discovery or ordinary repository evidence without editing, then rerun context with a justified `--node` or `--workflow` focus or request user approval before changing files. Do not infer a route.
 5. If the decision is `OUT_OF_SCOPE`, use `read_only`; do not edit files or create placeholder implementations, and explain the reviewed repository boundary.
 6. If the decision is `UNCERTAIN`, use `read_only`; inspect only when useful and request clarification before editing.
 7. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.

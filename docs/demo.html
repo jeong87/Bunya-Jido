@@ -110,7 +110,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
-  "generated_at": "2026-06-05T05:36:25+00:00",
+  "generated_at": "2026-06-05T14:39:52+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
   "artifact_mode": "semantic_blueprint",
@@ -646,7 +646,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Trusted Context Generator",
       "type": "component",
       "plane": "semantic",
-      "description": "Classifies task scope conservatively before emitting bounded navigation guidance from a grounded blueprint and validated task routes.",
+      "description": "Classifies task scope conservatively, recovers sufficiently grounded route matches, and emits bounded read-only discovery when an in-scope repair has no trusted route.",
       "source_path": "src/bunya_jido/blueprint.py",
       "tags": [
         "blueprint",
@@ -675,7 +675,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "family": "projection",
       "overview_visibility": "contextual",
       "activation": "conditional",
-      "inspector_summary": "Context generation distinguishes MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, and UNCERTAIN; only MATCH exposes trusted routes and safe-edit guidance."
+      "inspector_summary": "Context generation distinguishes MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, and UNCERTAIN; only MATCH exposes trusted routes and safe-edit guidance, while IN_SCOPE_NO_ROUTE may expose capped evidence-backed discovery."
     },
     {
       "id": "semantic:agent_map",
@@ -1366,8 +1366,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "id": "projection_projection:agent_navigation",
       "projection_id": "projection:agent_navigation",
       "label": "Bounded Agent Navigation",
-      "description": "How a coding task receives route guidance only after scope, sufficiency, and trust checks.",
-      "question_answered": "How can a coding agent receive trusted guidance or an honest route-free rejection?",
+      "description": "How a coding task receives a trusted route or capped read-only discovery only after scope, sufficiency, and trust checks.",
+      "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
       "kind": "projection",
       "source": "atlas",
       "is_primary": false,
@@ -1576,7 +1576,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "id": "workflow_trusted_context_generation",
       "label": "Trusted Context Generation",
-      "description": "Validate blueprint and route trust, classify request scope and route sufficiency, then emit guidance only for a safe decision.",
+      "description": "Validate blueprint and route trust, classify request scope and route sufficiency, then emit either a trusted route or capped evidence-backed read-only discovery for an in-scope gap.",
       "kind": "workflow",
       "source": "blueprint",
       "node_ids": [
@@ -1868,7 +1868,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     {
       "id": "task_route_change-task-route-projection",
       "label": "change task route projection",
-      "description": "Adjust agent-map validation, conservative context decision routing, or task-route paths shown in rendered maps.",
+      "description": "Adjust agent-map validation, conservative context decision routing, evidence-backed route recovery, bounded discovery, or task-route paths shown in rendered maps.",
       "kind": "task_route",
       "source": "agent_map",
       "node_ids": [
@@ -1898,7 +1898,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "contracts": [
         "Only routes validated against repository-relative inputs may reach trusted context or HTML paths.",
-        "Non-MATCH task-selection decisions must not expose trusted routes or safe-edit paths."
+        "Non-MATCH task-selection decisions must not expose trusted routes or safe-edit paths.",
+        "IN_SCOPE_NO_ROUTE discovery candidates must be capped, repository-relative, evidence-backed, and read-only.",
+        "A common failure mode or shared-workflow term cannot confirm a route without independent positive evidence."
       ],
       "tests": [
         "tests/test_blueprint.py",
@@ -1913,14 +1915,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "projection_context": {
         "id": "projection:agent_navigation",
         "label": "Bounded Agent Navigation",
-        "description": "How a coding task receives route guidance only after scope, sufficiency, and trust checks.",
-        "question_answered": "How can a coding agent receive trusted guidance or an honest route-free rejection?"
+        "description": "How a coding task receives a trusted route or capped read-only discovery only after scope, sufficiency, and trust checks.",
+        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?"
       },
       "scenario_context": [
         {
           "id": "scenario:agent_context",
           "label": "Request Bounded Agent Context",
-          "description": "Follow a task request to trusted guidance or an explicit route-free decision.",
+          "description": "Follow a task request to a trusted route, bounded read-only discovery, or an explicit rejection.",
           "kind": "behavioral",
           "basis": "documented_workflow",
           "playback_mode": "animated_token"
@@ -2001,7 +2003,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "id": "scenario:agent_context",
           "label": "Request Bounded Agent Context",
-          "description": "Follow a task request to trusted guidance or an explicit route-free decision.",
+          "description": "Follow a task request to a trusted route, bounded read-only discovery, or an explicit rejection.",
           "kind": "behavioral",
           "basis": "documented_workflow",
           "playback_mode": "animated_token"
@@ -2196,7 +2198,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "id": "projection:agent_navigation",
           "label": "Bounded Agent Navigation",
-          "question_answered": "How can a coding agent receive trusted guidance or an honest route-free rejection?",
+          "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
           "selected": false,
           "grounding_strength": "strong",
           "first_screen_value": "medium",
@@ -2378,8 +2380,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       {
         "id": "projection:agent_navigation",
         "label": "Bounded Agent Navigation",
-        "description": "How a coding task receives route guidance only after scope, sufficiency, and trust checks.",
-        "question_answered": "How can a coding agent receive trusted guidance or an honest route-free rejection?",
+        "description": "How a coding task receives a trusted route or capped read-only discovery only after scope, sufficiency, and trust checks.",
+        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
         "is_primary": false,
         "node_ids": [
           "entry:cli",
@@ -2531,7 +2533,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       {
         "id": "scenario:agent_context",
         "label": "Request Bounded Agent Context",
-        "description": "Follow a task request to trusted guidance or an explicit route-free decision.",
+        "description": "Follow a task request to a trusted route, bounded read-only discovery, or an explicit rejection.",
         "kind": "behavioral",
         "basis": "documented_workflow",
         "derived_from_workflow_ids": [
@@ -2588,8 +2590,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           {
             "id": "context:route",
             "node_id": "semantic:agent_map",
-            "title": "Emit Or Reject Route",
-            "narration": "Only MATCH exposes validated reading, contract, test, and safe-edit guidance; other decisions remain route-free.",
+            "title": "Emit Route Or Discovery",
+            "narration": "MATCH exposes validated route and safe-edit guidance; IN_SCOPE_NO_ROUTE may expose capped read-only discovery without inventing a route.",
             "pause_ms": 4100,
             "evidence": [
               {

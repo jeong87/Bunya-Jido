@@ -360,7 +360,10 @@ why it matched and supplies that route's reading, contract, and test guidance.
 If the route declares validated Studio reading context, it also identifies the
 relevant projection question, qualified scenarios, and starting responsibility.
 If no route matches, it states `No matching trusted route` instead of
-presenting an unrelated prepared path as guidance.
+presenting an unrelated prepared path as guidance. An `IN_SCOPE_NO_ROUTE`
+repair may additionally receive capped, evidence-backed read-only discovery
+with likely areas, first reads, tests, search commands, and node/workflow
+commands for requesting a new decision.
 
 Context selection is decision-aware:
 
@@ -373,8 +376,10 @@ Context selection is decision-aware:
 
 Agent maps may declare optional repository scope and route-level negative
 boundaries. Matching uses exact meaningful terms, explicit route-use phrases,
-and conservative route separation; non-`MATCH` decisions never expose trusted
-routes or safe-edit paths.
+common failure modes, route-specific grounded node/workflow evidence, and
+conservative route separation. A failure mode or shared-workflow term cannot
+confirm a route alone; non-`MATCH` decisions never expose trusted routes or
+safe-edit paths.
 
 Machine-readable decisions are available for integrations:
 
@@ -382,7 +387,8 @@ Machine-readable decisions are available for integrations:
 bunya-jido context --root . --task "modify provider behavior" --json
 ```
 
-The JSON report includes `execution_policy` and `agent_instruction`.
+The JSON report includes `execution_policy`, `agent_instruction`, and an
+optional `discovery_context` only for grounded `IN_SCOPE_NO_ROUTE` discovery.
 Integrations should enforce `read_only` or `read_only_discovery` before
 launching an agent; Bunya-Jido reports the policy but does not control another
 process's sandbox. See
@@ -444,7 +450,9 @@ bunya-jido evaluate-agent-utility --root . --require-pass --json
 ```
 
 The suite checks expected first reads, test recall, contract/edit boundaries,
-honest no-match handling, and change-aware refresh output. It is a
+honest no-match handling, normal-bugfix route/discovery recovery, and
+change-aware refresh output. It reports trusted-route recall, bounded-discovery
+coverage, actionable-guidance coverage, and normal-bugfix hard-rejection rate. It is a
 deterministic check of the generated handoff, not proof that a live coding
 agent read or obeyed it. The evaluation format and an optional live-agent
 observation protocol are documented in
@@ -503,7 +511,8 @@ Activation inserts or updates only a marked Bunya-Jido block, preserving any
 existing project instructions. The block tells the agent to run `bunya-jido
 context --root . --task "<user request>"`, use matched reading/contracts/tests,
 keep `OUT_OF_SCOPE` and `UNCERTAIN` decisions read-only, keep initial
-`IN_SCOPE_NO_ROUTE` discovery read-only without invented guidance, and run `refresh-context`
+`IN_SCOPE_NO_ROUTE` discovery read-only without invented guidance, rerun
+context with a justified node/workflow focus before editing, and run `refresh-context`
 from actual changed files after editing. If a repository
 defines a stale-map policy, it also tells the agent to run `check-stale` and
 either update the map or record an explicit no-structure-change review.

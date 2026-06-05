@@ -4,6 +4,20 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-06-05 - P2 Normal Bugfix Recovery And Bounded Discovery
+
+- Change: Added independent-evidence route recovery, capped evidence-backed
+  `IN_SCOPE_NO_ROUTE` discovery, and deterministic normal-bugfix recovery
+  metrics while preserving P1 non-MATCH route and safe-edit isolation.
+- Decision: Updated the existing Trusted Context Generator, bounded-agent
+  projection, workflow, scenario, and task-route contract. The change extends
+  an existing context boundary and does not add a new top-level subsystem or
+  alter the human-facing viewer design.
+- Validation: Focused recovery/safety fixtures, external Realistic Large and
+  Enterprise XLarge deterministic context replay, strict map/utility/quality
+  gates, stale-map review, regenerated demo, and the full unit suite are
+  required before commit.
+
 ## 2026-06-05 - Decision-Aware No-Match Rejection
 
 - Change: Replaced permissive task substring matching with conservative

@@ -475,6 +475,14 @@ def cmd_evaluate_agent_utility(args: argparse.Namespace) -> int:
             f"safe_edit_leak_rate={safety['safe_edit_leak_rate']} "
             f"execution_policy_accuracy={safety['execution_policy_accuracy']}"
         )
+        recovery = report["recovery_metrics"]
+        print(
+            "Normal bugfix recovery: "
+            f"trusted_route_recall={recovery['trusted_route_recall']} "
+            f"bounded_discovery_coverage={recovery['bounded_discovery_coverage']} "
+            f"actionable_guidance_coverage={recovery['actionable_guidance_coverage']} "
+            f"hard_rejection_rate={recovery['normal_bugfix_hard_rejection_rate']}"
+        )
         for dimension, result in report["dimensions"].items():
             print(f"- {dimension}: {result['passed']}/{result['total']} passed")
         for case in report["cases"]:

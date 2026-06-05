@@ -20,6 +20,11 @@ be documented.
   in-scope route-free inspection.
 - P1 decision confusion, false-route, safe-edit leak, and execution-policy
   metrics in deterministic agent-utility evaluation.
+- Evidence-backed, capped `IN_SCOPE_NO_ROUTE` discovery with likely areas,
+  first reads, likely tests, read-only search commands, and context recheck
+  commands.
+- P2 trusted-route recall, bounded-discovery coverage, actionable-guidance
+  coverage, and normal-bugfix hard-rejection metrics.
 
 ### Fixed
 
@@ -29,6 +34,9 @@ be documented.
 - Non-`MATCH` context and read-only route catalogs no longer expose safe-edit
   paths, and committed no-match acceptance cases fail on any trusted-route or
   safe-edit leak.
+- Normal bugfix routing now recovers from independent explicit, failure-mode,
+  route-specific node, and workflow evidence without allowing a failure mode
+  or shared-workflow term to select a route alone.
 
 ## 0.4.0 - 2026-06-05
 

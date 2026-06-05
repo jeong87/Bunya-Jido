@@ -150,8 +150,8 @@
       "importance": "major",
       "overview_visibility": "contextual",
       "activation": "conditional",
-      "description": "Classifies task scope conservatively before emitting bounded navigation guidance from a grounded blueprint and validated task routes.",
-      "inspector_summary": "Context generation distinguishes MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, and UNCERTAIN; only MATCH exposes trusted routes and safe-edit guidance.",
+      "description": "Classifies task scope conservatively, recovers sufficiently grounded route matches, and emits bounded read-only discovery when an in-scope repair has no trusted route.",
+      "inspector_summary": "Context generation distinguishes MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, and UNCERTAIN; only MATCH exposes trusted routes and safe-edit guidance, while IN_SCOPE_NO_ROUTE may expose capped evidence-backed discovery.",
       "source_path": "src/bunya_jido/blueprint.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "generate_agent_context"},
@@ -343,11 +343,11 @@
     {
       "id": "trusted_context_generation",
       "label": "Trusted Context Generation",
-      "description": "Validate blueprint and route trust, classify request scope and route sufficiency, then emit guidance only for a safe decision.",
+      "description": "Validate blueprint and route trust, classify request scope and route sufficiency, then emit either a trusted route or capped evidence-backed read-only discovery for an in-scope gap.",
       "kind": "behavioral",
       "ordered": true,
       "trigger": "bunya-jido context",
-      "outcome": "A decision-aware handoff where only MATCH exposes bounded route guidance and non-MATCH decisions remain route-free.",
+      "outcome": "A decision-aware handoff where only MATCH exposes route and safe-edit guidance, while IN_SCOPE_NO_ROUTE may expose bounded read-only discovery without inventing a route.",
       "confidence": "deterministic",
       "node_ids": ["entry:cli", "semantic:context", "semantic:validation", "semantic:agent_map"],
       "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "generate_agent_context"}]
@@ -428,7 +428,7 @@
         {
           "id": "projection:agent_navigation",
           "label": "Bounded Agent Navigation",
-          "question_answered": "How can a coding agent receive trusted guidance or an honest route-free rejection?",
+          "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
           "selected": false,
           "grounding_strength": "strong",
           "first_screen_value": "medium",
@@ -510,8 +510,8 @@
       {
         "id": "projection:agent_navigation",
         "label": "Bounded Agent Navigation",
-        "description": "How a coding task receives route guidance only after scope, sufficiency, and trust checks.",
-        "question_answered": "How can a coding agent receive trusted guidance or an honest route-free rejection?",
+        "description": "How a coding task receives a trusted route or capped read-only discovery only after scope, sufficiency, and trust checks.",
+        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
         "is_primary": false,
         "node_ids": ["entry:cli", "semantic:context", "semantic:validation", "semantic:agent_map", "quality:tests", "presentation:viewer"],
         "plane_ids": ["entry", "semantic", "quality", "presentation"],
@@ -551,7 +551,7 @@
       {
         "id": "scenario:agent_context",
         "label": "Request Bounded Agent Context",
-        "description": "Follow a task request to trusted guidance or an explicit route-free decision.",
+        "description": "Follow a task request to a trusted route, bounded read-only discovery, or an explicit rejection.",
         "kind": "behavioral",
         "basis": "documented_workflow",
         "derived_from_workflow_ids": ["trusted_context_generation"],
@@ -561,7 +561,7 @@
           {"id": "context:request", "node_id": "entry:cli", "edge_id": "edge:cli_context", "title": "Ask For Context", "narration": "A task asks for bounded repository guidance.", "pause_ms": 3300, "evidence": [{"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_context"}]},
           {"id": "context:generate", "node_id": "semantic:context", "edge_id": "edge:context_validation", "title": "Classify Request", "narration": "Context generation checks repository scope and route sufficiency before trusting a candidate.", "pause_ms": 3500, "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "_select_context_routes"}]},
           {"id": "context:ground", "node_id": "semantic:validation", "edge_id": "edge:validation_agent_map", "title": "Confirm Grounding", "narration": "The underlying semantic claims must remain grounded.", "pause_ms": 3600, "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "validate_blueprint_obj"}]},
-          {"id": "context:route", "node_id": "semantic:agent_map", "title": "Emit Or Reject Route", "narration": "Only MATCH exposes validated reading, contract, test, and safe-edit guidance; other decisions remain route-free.", "pause_ms": 4100, "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "validate_agent_map_obj"}]}
+          {"id": "context:route", "node_id": "semantic:agent_map", "title": "Emit Route Or Discovery", "narration": "MATCH exposes validated route and safe-edit guidance; IN_SCOPE_NO_ROUTE may expose capped read-only discovery without inventing a route.", "pause_ms": 4100, "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "validate_agent_map_obj"}]}
         ]
       }
     ],

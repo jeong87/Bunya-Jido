@@ -109,6 +109,35 @@ Large and Enterprise XLarge no-match sets must still be rerun with a versioned
 runner that enforces the reported sandbox and records P0 worktree audit data
 before the live-agent P1 release minimum can be claimed.
 
+### 1.4 P2 implementation status - 2026-06-05
+
+Context routing now uses conservative term normalization, validated
+`common_failure_modes`, route-specific grounded node/workflow evidence, and
+independent-evidence separation. A failure mode or shared workflow term cannot
+confirm a route alone.
+
+`IN_SCOPE_NO_ROUTE` may now expose optional capped `discovery_context` grounded
+in blueprint nodes, workflows, or existing repository-relative paths. It never
+exposes a trusted route or safe-edit path, and it supplies read-only search and
+`context --node`/`--workflow` recheck commands when justified.
+
+The deterministic utility gate now reports trusted-route recall, bounded
+discovery coverage, actionable-guidance coverage, and normal-bugfix hard
+rejection rate. Focused fixtures cover failure-mode isolation, grounded
+recovery, repository-path fallback, candidate caps, and non-MATCH leakage.
+
+Deterministic replay against the current local benchmark maps produced:
+
+```text
+Realistic Large: 8/8 bugfix MATCH, 1/1 no-match route-free
+Enterprise XLarge: 10/10 core bugfix MATCH, 3/3 decoy bugfix bounded discovery,
+                   2/2 no-match route-free
+```
+
+These are context-generation replay results, not live-agent resolution,
+boundary-violation, token, or timing evidence. The versioned-runner live gates
+remain required before claiming the full P2 release minimum.
+
 ---
 
 ## 2. 0.5 Product Contract

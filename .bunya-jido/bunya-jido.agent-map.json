@@ -197,7 +197,7 @@
     },
     {
       "task": "change task route projection",
-      "intent": "Adjust agent-map validation, conservative context decision routing, or task-route paths shown in rendered maps.",
+      "intent": "Adjust agent-map validation, conservative context decision routing, evidence-backed route recovery, bounded discovery, or task-route paths shown in rendered maps.",
       "match_terms": [
         "context decision routing",
         "no-match rejection",
@@ -209,6 +209,11 @@
       ],
       "when_not_to_use": [
         "unrelated application feature implementation"
+      ],
+      "common_failure_modes": [
+        "Selecting a route from one broad shared-workflow term.",
+        "Leaving an in-scope repair without a trusted route or bounded discovery.",
+        "Exposing safe-edit paths from a non-MATCH decision."
       ],
       "start_nodes": [
         "semantic:agent_map"
@@ -227,7 +232,9 @@
       ],
       "contracts": [
         "Only routes validated against repository-relative inputs may reach trusted context or HTML paths.",
-        "Non-MATCH task-selection decisions must not expose trusted routes or safe-edit paths."
+        "Non-MATCH task-selection decisions must not expose trusted routes or safe-edit paths.",
+        "IN_SCOPE_NO_ROUTE discovery candidates must be capped, repository-relative, evidence-backed, and read-only.",
+        "A common failure mode or shared-workflow term cannot confirm a route without independent positive evidence."
       ],
       "tests": [
         "tests/test_blueprint.py",

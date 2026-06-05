@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import textwrap
 from collections import Counter, defaultdict
@@ -62,6 +63,39 @@ CONTEXT_AGENT_INSTRUCTIONS = {
     "NOT_REQUESTED": "No task decision was requested. Treat listed routes as a read-only catalog, not permission to edit.",
 }
 NON_MATCH_CONTEXT_DECISIONS = {"IN_SCOPE_NO_ROUTE", "OUT_OF_SCOPE", "UNCERTAIN"}
+DISCOVERY_REPAIR_TERMS = {
+    "correct",
+    "ensure",
+    "fix",
+    "keep",
+    "preserve",
+    "prevent",
+    "repair",
+    "resolve",
+    "restore",
+}
+DISCOVERY_SKIP_DIRECTORIES = {
+    ".bunya-jido",
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".tox",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+}
+DISCOVERY_LIMITS = {
+    "likely_areas": 3,
+    "likely_workflows": 2,
+    "read_first": 5,
+    "likely_tests": 3,
+    "search_commands": 3,
+    "recheck_commands": 5,
+}
 
 SECRET_PATTERNS = [
     re.compile(r"sk-[A-Za-z0-9_\-]{20,}"),
@@ -1247,6 +1281,7 @@ def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = 
             "match_terms",
             "when_to_use",
             "when_not_to_use",
+            "common_failure_modes",
             "forbidden_technologies",
             "unsupported_artifacts",
         ):
@@ -1401,9 +1436,12 @@ def _load_optional_text(path: Path) -> str:
 
 GENERIC_ROUTE_TERMS = {
     "add", "added", "adding", "behavior", "bug", "change", "changed", "changing",
-    "context", "debug", "edit", "feature", "fix", "fixed", "implement", "improve",
-    "issue", "map", "modify", "new", "repository", "review", "route", "state",
-    "support", "task", "update", "updated", "workflow", "work", "working",
+    "context", "current", "debug", "different", "edit", "entry", "execution",
+    "every", "feature", "first", "fix", "fixed", "implement", "improve", "issue", "keep",
+    "later", "map", "modify", "new", "preferred", "remains", "repository",
+    "request", "return", "returned", "returns", "review", "route", "state",
+    "supplied", "support", "target", "task", "they", "update", "updated", "workflow",
+    "work", "working",
 }
 ROUTE_STOPWORDS = GENERIC_ROUTE_TERMS | {
     "about", "after", "again", "against", "all", "also", "and", "another", "any",
@@ -1418,10 +1456,31 @@ ROUTE_TERM_ALIASES = {
     "app": "application",
     "apps": "application",
     "applications": "application",
+    "completed": "complete",
+    "completion": "complete",
+    "deployments": "deployment",
+    "entries": "entry",
+    "events": "event",
     "frontends": "frontend",
     "ios": "ios",
     "k8s": "kubernetes",
+    "lists": "list",
     "mobileapps": "mobile",
+    "names": "name",
+    "providers": "provider",
+    "projections": "projection",
+    "queueing": "queue",
+    "records": "record",
+    "reporting": "report",
+    "reports": "report",
+    "restarted": "restart",
+    "running": "run",
+    "runs": "run",
+    "snapshots": "snapshot",
+    "statuses": "status",
+    "steps": "step",
+    "transitions": "transition",
+    "units": "unit",
 }
 SHORT_ROUTE_TERMS = {"ai", "api", "cd", "ci", "db", "io", "js", "ui"}
 SCOPE_SENSITIVE_TERMS = {
@@ -1503,7 +1562,7 @@ def _route_positive_text(route: dict[str, Any]) -> str:
         str(route.get("intent") or ""),
         str(route.get("notes") or ""),
     ]
-    for key in ("match_terms", "when_to_use"):
+    for key in ("match_terms", "when_to_use", "common_failure_modes"):
         values.extend(str(item) for item in route.get(key) or [] if item)
     return " ".join(values)
 
@@ -1739,6 +1798,104 @@ def _match_changed_files(
     }
 
 
+def _semantic_record_text(record: dict[str, Any], fields: tuple[str, ...]) -> str:
+    values: list[str] = []
+    for field in fields:
+        value = record.get(field)
+        if isinstance(value, str) and value:
+            values.append(value)
+    for evidence in record.get("evidence") or []:
+        if isinstance(evidence, dict) and evidence.get("path"):
+            values.append(str(evidence["path"]))
+    return " ".join(values)
+
+
+def _matched_semantic_terms(task_terms: list[str], text: str) -> list[str]:
+    semantic_terms = set(_context_terms(text, drop_generic=True))
+    return [term for term in task_terms if term in semantic_terms]
+
+
+def _route_grounded_matches(
+    route: dict[str, Any],
+    *,
+    task_terms: list[str],
+    node_by_id: dict[str, dict[str, Any]],
+    workflow_by_id: dict[str, dict[str, Any]],
+    node_use_counts: Counter[str],
+    workflow_use_counts: Counter[str],
+) -> dict[str, Any]:
+    unique_node_terms: list[str] = []
+    shared_node_terms: list[str] = []
+    node_reasons: list[str] = []
+    best_unique_node_match_count = 0
+    for node_id in route.get("start_nodes") or []:
+        node = node_by_id.get(str(node_id))
+        if not node:
+            continue
+        matched = _matched_semantic_terms(
+            task_terms,
+            _semantic_record_text(
+                node,
+                (
+                    "id",
+                    "label",
+                    "description",
+                    "why_it_matters",
+                    "inspector_summary",
+                    "source_path",
+                ),
+            ),
+        )
+        if matched:
+            if node_use_counts[str(node_id)] == 1:
+                unique_node_terms.extend(matched)
+                best_unique_node_match_count = max(
+                    best_unique_node_match_count, len(matched)
+                )
+                grounding_label = "route-specific grounded start node"
+            else:
+                shared_node_terms.extend(matched)
+                grounding_label = "shared grounded start node"
+            node_reasons.append(
+                f"task terms match {grounding_label} `{node_id}`: "
+                + ", ".join(f"`{term}`" for term in matched)
+            )
+
+    unique_workflow_terms: list[str] = []
+    shared_workflow_terms: list[str] = []
+    workflow_reasons: list[str] = []
+    for workflow_id in route.get("workflows") or []:
+        workflow = workflow_by_id.get(str(workflow_id))
+        if not workflow:
+            continue
+        matched = _matched_semantic_terms(
+            task_terms,
+            _semantic_record_text(
+                workflow,
+                ("id", "label", "description", "trigger", "outcome"),
+            ),
+        )
+        if matched:
+            if workflow_use_counts[str(workflow_id)] == 1:
+                unique_workflow_terms.extend(matched)
+                grounding_label = "route-specific grounded workflow"
+            else:
+                shared_workflow_terms.extend(matched)
+                grounding_label = "shared grounded workflow"
+            workflow_reasons.append(
+                f"task terms match {grounding_label} `{workflow_id}`: "
+                + ", ".join(f"`{term}`" for term in matched)
+            )
+    return {
+        "unique_node_terms": list(dict.fromkeys(unique_node_terms)),
+        "shared_node_terms": list(dict.fromkeys(shared_node_terms)),
+        "unique_workflow_terms": list(dict.fromkeys(unique_workflow_terms)),
+        "shared_workflow_terms": list(dict.fromkeys(shared_workflow_terms)),
+        "best_unique_node_match_count": best_unique_node_match_count,
+        "reasons": [*node_reasons, *workflow_reasons],
+    }
+
+
 def _match_route(
     route: dict[str, Any],
     *,
@@ -1747,6 +1904,10 @@ def _match_route(
     workflow: str | None = None,
     changed_files: list[str] | None = None,
     affected_node_files: dict[str, list[str]] | None = None,
+    node_by_id: dict[str, dict[str, Any]] | None = None,
+    workflow_by_id: dict[str, dict[str, Any]] | None = None,
+    node_use_counts: Counter[str] | None = None,
+    workflow_use_counts: Counter[str] | None = None,
 ) -> dict[str, Any]:
     reasons: list[str] = []
     score = 0
@@ -1796,21 +1957,97 @@ def _match_route(
             task,
             [*(route.get("match_terms") or []), *(route.get("when_to_use") or [])],
         )
+        symptom_matches = _matching_boundary_entries(
+            task,
+            list(route.get("common_failure_modes") or []),
+        )
         strong_explicit_matches = [
             entry
             for entry in explicit_matches
             if len(_task_match_terms(entry)) >= 2 or len(task_terms) == 1
         ]
+        explicit_terms = list(
+            dict.fromkeys(
+                term
+                for entry in explicit_matches
+                for term in _task_match_terms(entry)
+                if term in task_terms
+            )
+        )
+        symptom_terms = list(
+            dict.fromkeys(
+                term
+                for entry in symptom_matches
+                for term in _task_match_terms(entry)
+                if term in task_terms
+            )
+        )
+        grounded_matches = _route_grounded_matches(
+            route,
+            task_terms=task_terms,
+            node_by_id=node_by_id or {},
+            workflow_by_id=workflow_by_id or {},
+            node_use_counts=node_use_counts or Counter(),
+            workflow_use_counts=workflow_use_counts or Counter(),
+        )
         matched_terms = list(dict.fromkeys([*matched_title_terms, *matched_intent_terms]))
         if matched_terms:
             reasons.append("task terms match: " + ", ".join(f"`{word}`" for word in matched_terms))
         if explicit_matches:
             reasons.extend(f"task matches explicit route use `{entry}`" for entry in explicit_matches)
-        score += (len(matched_title_terms) * 4) + (len(matched_intent_terms) * 2) + (len(strong_explicit_matches) * 6)
-        strong_match = bool(strong_explicit_matches) or len(matched_terms) >= 2 or (
-            bool(matched_title_terms) and len(task_terms) == 1
+        if symptom_matches:
+            reasons.extend(f"task matches route failure mode `{entry}`" for entry in symptom_matches)
+        reasons.extend(grounded_matches["reasons"])
+        evidence_terms = {
+            "route_text": matched_terms,
+            "explicit_use": explicit_terms,
+            "failure_mode": symptom_terms,
+            "route_specific_start_node": grounded_matches["unique_node_terms"],
+            "route_specific_workflow": grounded_matches["unique_workflow_terms"],
+        }
+        positive_categories = {
+            category for category, terms in evidence_terms.items() if terms
+        }
+        distinct_positive_terms = list(
+            dict.fromkeys(term for terms in evidence_terms.values() for term in terms)
         )
-        if not matched_terms and not explicit_matches and not changed_files:
+        # Early route-title terms help rank intent; shared workflow vocabulary never confirms a route.
+        title_position_bonus = max(
+            (
+                max(0, 8 - task_terms.index(term)) * 3
+                for term in matched_title_terms
+            ),
+            default=0,
+        )
+        score += (
+            (len(matched_title_terms) * 4)
+            + (len(matched_intent_terms) * 2)
+            + (len(strong_explicit_matches) * 6)
+            + (len(explicit_terms) * 2)
+            + len(symptom_terms)
+            + (len(grounded_matches["unique_node_terms"]) * 3)
+            + (len(grounded_matches["unique_workflow_terms"]) * 3)
+            + len(grounded_matches["shared_node_terms"])
+            + len(grounded_matches["shared_workflow_terms"])
+            + (min(grounded_matches["best_unique_node_match_count"], 5) ** 2 * 2)
+            + title_position_bonus
+        )
+        independently_grounded = (
+            len(positive_categories) >= 2
+            and len(distinct_positive_terms) >= 2
+            and positive_categories != {"failure_mode"}
+        )
+        multiple_explicit_terms = len(explicit_matches) >= 2 and len(explicit_terms) >= 2
+        strong_match = (
+            bool(strong_explicit_matches)
+            or multiple_explicit_terms
+            or independently_grounded
+            or len(matched_terms) >= 2
+            or (
+                bool(matched_title_terms) and len(task_terms) == 1
+            )
+        )
+        if not any(evidence_terms.values()) and not changed_files:
             return {"status": "unmatched", "score": 0, "reasons": [], "matched_terms": []}
 
     if changed_files:
@@ -1829,8 +2066,374 @@ def _match_route(
             "status": "matched" if not task or strong_match else "weak",
             "score": score,
             "reasons": reasons,
+            "matched_terms": distinct_positive_terms if task else [],
+            "evidence_categories": sorted(positive_categories) if task else [],
+            "best_route_specific_overlap": (
+                grounded_matches["best_unique_node_match_count"] if task else 0
+            ),
         }
     return {"status": "available", "score": 0, "reasons": []}
+
+
+def _resolved_repository_path(path: Any, root_path: Path) -> str | None:
+    if not _route_path_resolves(path, root_path):
+        return None
+    value = str(path).split("#", 1)[0]
+    value = re.sub(r":\d+(?::\d+)?$", "", value)
+    return _normalize_context_path(value)
+
+
+def _record_grounded_paths(record: dict[str, Any], root_path: Path) -> list[dict[str, str]]:
+    paths: list[dict[str, str]] = []
+    if record.get("source_path"):
+        resolved = _resolved_repository_path(record["source_path"], root_path)
+        if resolved:
+            paths.append({"path": resolved, "kind": "source"})
+    for evidence in record.get("evidence") or []:
+        if not isinstance(evidence, dict):
+            continue
+        resolved = _resolved_repository_path(evidence.get("path"), root_path)
+        if resolved:
+            paths.append(
+                {
+                    "path": resolved,
+                    "kind": str(evidence.get("kind") or "evidence"),
+                }
+            )
+    return list({item["path"]: item for item in paths}.values())
+
+
+def _excluded_only_route_values(
+    scored: list[tuple[dict[str, Any], dict[str, Any]]],
+    field: str,
+) -> set[str]:
+    excluded: set[str] = set()
+    allowed: set[str] = set()
+    for match, route in scored:
+        values = {str(value) for value in route.get(field) or [] if value}
+        if match.get("status") == "excluded":
+            excluded.update(values)
+        else:
+            allowed.update(values)
+    return excluded - allowed
+
+
+def _repository_discovery_candidates(
+    root_path: Path,
+    task_terms: list[str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    task_term_set = set(task_terms)
+    areas: list[dict[str, Any]] = []
+    files: list[dict[str, Any]] = []
+    visited = 0
+    # Repository fallback uses bounded path-name evidence only, never file contents or edit paths.
+    for current, directories, filenames in os.walk(root_path):
+        directories[:] = sorted(
+            directory
+            for directory in directories
+            if directory not in DISCOVERY_SKIP_DIRECTORIES and not directory.startswith(".")
+        )
+        current_path = Path(current)
+        try:
+            relative_current = current_path.relative_to(root_path)
+        except ValueError:
+            continue
+        if len(relative_current.parts) > 7:
+            directories[:] = []
+            continue
+        for directory in directories:
+            visited += 1
+            relative = (relative_current / directory).as_posix()
+            matched = sorted(task_term_set & set(_context_terms(relative, drop_generic=True)))
+            if matched:
+                areas.append(
+                    {
+                        "kind": "repository_path",
+                        "path": relative,
+                        "matched_terms": matched,
+                        "score": (len(matched) * 10) - len(Path(relative).parts),
+                        "evidence": "existing repository directory",
+                    }
+                )
+        for filename in sorted(filenames):
+            visited += 1
+            relative = (relative_current / filename).as_posix()
+            filename_terms = set(_context_terms(filename, drop_generic=True))
+            matched = sorted(task_term_set & filename_terms)
+            if matched:
+                files.append(
+                    {
+                        "path": relative,
+                        "matched_terms": matched,
+                        "score": (len(matched) * 10) - len(Path(relative).parts),
+                        "evidence": "existing repository file name",
+                    }
+                )
+        if visited >= 20000:
+            break
+    areas.sort(key=lambda item: (-item["score"], item["path"]))
+    files.sort(key=lambda item: (-item["score"], item["path"]))
+    return areas, files
+
+
+def _is_test_path(path: str, kind: str = "") -> bool:
+    normalized = _normalize_context_path(path).lower()
+    return (
+        kind.lower() == "test"
+        or normalized.startswith("tests/")
+        or normalized.startswith("test/")
+        or "/tests/" in normalized
+        or "/test/" in normalized
+        or Path(normalized).name.startswith("test_")
+    )
+
+
+def _append_discovery_path(
+    target: list[dict[str, str]],
+    *,
+    path: str,
+    reason: str,
+    evidence: str,
+    limit: int,
+) -> None:
+    if not path or any(item["path"] == path for item in target):
+        return
+    if len(target) < limit:
+        target.append({"path": path, "reason": reason, "evidence": evidence})
+
+
+def _repair_intent_requested(task: str | None) -> bool:
+    if not task:
+        return False
+    return bool(set(_context_terms(task, drop_generic=False)) & DISCOVERY_REPAIR_TERMS)
+
+
+def _build_bounded_discovery(
+    root_path: Path,
+    *,
+    blueprint: dict[str, Any],
+    task: str,
+    selection: dict[str, Any],
+) -> dict[str, Any]:
+    task_terms = _task_match_terms(task)
+    if not task_terms:
+        return {}
+    excluded_nodes = _excluded_only_route_values(selection["scored"], "start_nodes")
+    excluded_workflows = _excluded_only_route_values(selection["scored"], "workflows")
+    node_candidates: list[dict[str, Any]] = []
+    node_by_id = {
+        str(node.get("id")): node
+        for node in blueprint.get("nodes") or []
+        if isinstance(node, dict) and node.get("id")
+    }
+    for node_id, node in node_by_id.items():
+        if node_id in excluded_nodes:
+            continue
+        if node_id.startswith("repo:") or str(node.get("type") or "").lower() == "repo":
+            continue
+        grounded_paths = _record_grounded_paths(node, root_path)
+        if not grounded_paths:
+            continue
+        matched = _matched_semantic_terms(
+            task_terms,
+            _semantic_record_text(
+                node,
+                (
+                    "id",
+                    "label",
+                    "description",
+                    "why_it_matters",
+                    "inspector_summary",
+                    "source_path",
+                ),
+            ),
+        )
+        if not matched:
+            continue
+        node_candidates.append(
+            {
+                "kind": "blueprint_node",
+                "id": node_id,
+                "label": str(node.get("label") or node_id),
+                "matched_terms": matched,
+                "evidence_paths": grounded_paths,
+                "score": (len(matched) * 10)
+                + (3 if str(node.get("importance") or "") == "core" else 0),
+            }
+        )
+    node_candidates.sort(key=lambda item: (-item["score"], item["id"]))
+
+    workflow_candidates: list[dict[str, Any]] = []
+    for workflow in blueprint.get("workflows") or []:
+        if not isinstance(workflow, dict) or not workflow.get("id"):
+            continue
+        workflow_id = str(workflow["id"])
+        if workflow_id in excluded_workflows:
+            continue
+        grounded_paths = _record_grounded_paths(workflow, root_path)
+        grounded_node_paths = [
+            path
+            for node_id in workflow.get("node_ids") or []
+            for path in _record_grounded_paths(node_by_id.get(str(node_id), {}), root_path)
+        ]
+        grounded_paths = list(
+            {item["path"]: item for item in [*grounded_paths, *grounded_node_paths]}.values()
+        )
+        if not grounded_paths:
+            continue
+        matched = _matched_semantic_terms(
+            task_terms,
+            _semantic_record_text(
+                workflow,
+                ("id", "label", "description", "trigger", "outcome"),
+            ),
+        )
+        if not matched:
+            continue
+        workflow_candidates.append(
+            {
+                "kind": "blueprint_workflow",
+                "id": workflow_id,
+                "label": str(workflow.get("label") or workflow_id),
+                "matched_terms": matched,
+                "evidence_paths": grounded_paths,
+                "score": len(matched) * 10,
+            }
+        )
+    workflow_candidates.sort(key=lambda item: (-item["score"], item["id"]))
+
+    repository_areas, repository_files = _repository_discovery_candidates(
+        root_path, task_terms
+    )
+    area_candidates = sorted(
+        [*node_candidates, *repository_areas],
+        key=lambda item: (
+            -int(item.get("score") or 0),
+            str(item.get("id") or item.get("path") or ""),
+        ),
+    )[: DISCOVERY_LIMITS["likely_areas"]]
+    selected_workflows = workflow_candidates[: DISCOVERY_LIMITS["likely_workflows"]]
+
+    read_first: list[dict[str, str]] = []
+    likely_tests: list[dict[str, str]] = []
+    for candidate in [*area_candidates, *selected_workflows]:
+        candidate_id = str(candidate.get("id") or candidate.get("path") or "")
+        for evidence_path in candidate.get("evidence_paths") or []:
+            path = str(evidence_path["path"])
+            kind = str(evidence_path.get("kind") or "evidence")
+            target = likely_tests if _is_test_path(path, kind) else read_first
+            limit = (
+                DISCOVERY_LIMITS["likely_tests"]
+                if target is likely_tests
+                else DISCOVERY_LIMITS["read_first"]
+            )
+            _append_discovery_path(
+                target,
+                path=path,
+                reason=f"grounded evidence for `{candidate_id}`",
+                evidence=f"blueprint {kind}",
+                limit=limit,
+            )
+    for candidate in repository_files:
+        target = likely_tests if _is_test_path(candidate["path"]) else read_first
+        limit = (
+            DISCOVERY_LIMITS["likely_tests"]
+            if target is likely_tests
+            else DISCOVERY_LIMITS["read_first"]
+        )
+        _append_discovery_path(
+            target,
+            path=str(candidate["path"]),
+            reason="file name overlaps the task vocabulary",
+            evidence=str(candidate["evidence"]),
+            limit=limit,
+        )
+
+    search_terms = [term for term in task_terms if term not in ROUTE_STOPWORDS][:6]
+    search_pattern = "|".join(re.escape(term) for term in search_terms)
+    search_commands = [
+        f'rg -n "{search_pattern}" "{candidate["path"]}"'
+        for candidate in area_candidates
+        if candidate.get("kind") == "repository_path" and search_pattern
+    ][: DISCOVERY_LIMITS["search_commands"]]
+    recheck_commands = [
+        *[
+            f'bunya-jido context --root . --node "{candidate["id"]}"'
+            for candidate in area_candidates
+            if candidate.get("kind") == "blueprint_node"
+        ],
+        *[
+            f'bunya-jido context --root . --workflow "{candidate["id"]}"'
+            for candidate in selected_workflows
+        ],
+    ][: DISCOVERY_LIMITS["recheck_commands"]]
+    if not area_candidates and not selected_workflows and not read_first and not likely_tests:
+        return {}
+    return {
+        "mode": "bounded_read_only",
+        "limits": dict(DISCOVERY_LIMITS),
+        "likely_areas": [
+            {key: value for key, value in candidate.items() if key != "score"}
+            for candidate in area_candidates
+        ],
+        "likely_workflows": [
+            {key: value for key, value in candidate.items() if key != "score"}
+            for candidate in selected_workflows
+        ],
+        "read_first": read_first,
+        "likely_tests": likely_tests,
+        "search_commands": search_commands,
+        "recheck_commands": recheck_commands,
+    }
+
+
+def _attach_bounded_discovery(
+    root_path: Path,
+    *,
+    blueprint: dict[str, Any],
+    task: str | None,
+    selection: dict[str, Any],
+) -> None:
+    if not task or selection["scope"]["decision"] in {"OUT_OF_SCOPE", "UNCERTAIN"}:
+        selection["discovery_context"] = {}
+        return
+    matched_count = sum(
+        1 for match, _ in selection["scored"] if match.get("status") == "matched"
+    )
+    eligible = selection["decision"] == "IN_SCOPE_NO_ROUTE" or (
+        selection["decision"] == "UNCERTAIN"
+        and matched_count == 0
+        and _repair_intent_requested(task)
+    )
+    if not eligible:
+        selection["discovery_context"] = {}
+        return
+    discovery = _build_bounded_discovery(
+        root_path,
+        blueprint=blueprint,
+        task=task,
+        selection=selection,
+    )
+    if selection["decision"] == "UNCERTAIN" and discovery:
+        selection["decision"] = "IN_SCOPE_NO_ROUTE"
+        selection["edit_policy"] = "cautious"
+        selection["execution_policy"] = CONTEXT_EXECUTION_POLICIES["IN_SCOPE_NO_ROUTE"]
+        selection["agent_instruction"] = CONTEXT_AGENT_INSTRUCTIONS["IN_SCOPE_NO_ROUTE"]
+        selection["reason"] = (
+            "The repair request has no sufficiently precise trusted route, but bounded "
+            "repository evidence supports read-only discovery."
+        )
+        selection["basis"] = list(
+            dict.fromkeys(
+                [
+                    *selection["basis"],
+                    "repair intent plus bounded repository-relative discovery evidence",
+                ]
+            )
+        )
+    selection["discovery_context"] = (
+        discovery if selection["decision"] == "IN_SCOPE_NO_ROUTE" else {}
+    )
 
 
 def _select_context_routes(
@@ -1842,9 +2445,23 @@ def _select_context_routes(
     workflow: str | None,
     changed_files: list[str],
     affected_node_files: dict[str, list[str]],
+    node_by_id: dict[str, dict[str, Any]],
+    workflow_by_id: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
     selection_requested = bool(task or node or workflow or changed_files)
     scope = _classify_task_scope(task, agent_map=agent_map, routes=routes)
+    node_use_counts: Counter[str] = Counter(
+        str(node_id)
+        for route in routes
+        for node_id in route.get("start_nodes") or []
+        if node_id
+    )
+    workflow_use_counts: Counter[str] = Counter(
+        str(workflow_id)
+        for route in routes
+        for workflow_id in route.get("workflows") or []
+        if workflow_id
+    )
     scored = sorted(
         [
             (
@@ -1855,12 +2472,19 @@ def _select_context_routes(
                     workflow=workflow,
                     changed_files=changed_files,
                     affected_node_files=affected_node_files,
+                    node_by_id=node_by_id,
+                    workflow_by_id=workflow_by_id,
+                    node_use_counts=node_use_counts,
+                    workflow_use_counts=workflow_use_counts,
                 ),
                 route,
             )
             for route in routes
         ],
-        key=lambda item: item[0]["score"],
+        key=lambda item: (
+            item[0]["score"],
+            item[0].get("best_route_specific_overlap", 0),
+        ),
         reverse=True,
     )
     matched = [(match, route) for match, route in scored if match["status"] == "matched"]
@@ -1870,6 +2494,12 @@ def _select_context_routes(
     top_score = matched[0][0]["score"] if matched else 0
     second_score = matched[1][0]["score"] if len(matched) > 1 else 0
     margin = top_score - second_score if matched else 0
+    specific_separation = bool(
+        len(matched) > 1
+        and matched[0][0].get("best_route_specific_overlap", 0) >= 3
+        and matched[0][0].get("best_route_specific_overlap", 0)
+        > matched[1][0].get("best_route_specific_overlap", 0)
+    )
     decision = "NOT_REQUESTED"
     reason = "No route selection was requested."
 
@@ -1879,10 +2509,13 @@ def _select_context_routes(
         decision = str(scope["decision"])
         reason = str(scope["reason"])
     elif task and not changed_files:
-        if matched and (len(matched) == 1 or margin >= 2):
+        if matched and (len(matched) == 1 or margin >= 2 or specific_separation):
             chosen = [matched[0]]
             decision = "MATCH"
-            reason = "A trusted route has sufficient task-term evidence and separation from alternatives."
+            reason = (
+                "A trusted route has sufficient independent task evidence and "
+                "separation from alternatives."
+            )
         elif matched:
             decision = "UNCERTAIN"
             reason = "Multiple trusted routes are too close to select safely."
@@ -1975,6 +2608,11 @@ def _resolve_agent_context_request(
     if agent_blockers:
         raise ValueError("Trusted context blocked by agent-map routes: " + "; ".join(agent_blockers[:8]))
     node_by_id = {str(n.get("id")): n for n in bp.get("nodes", []) if isinstance(n, dict) and n.get("id")}
+    workflow_by_id = {
+        str(item.get("id")): item
+        for item in bp.get("workflows", [])
+        if isinstance(item, dict) and item.get("id")
+    }
     atlas = bp.get("atlas") if isinstance(bp.get("atlas"), dict) else {}
     projection_by_id = {
         str(projection.get("id")): projection
@@ -2000,6 +2638,14 @@ def _resolve_agent_context_request(
         workflow=workflow,
         changed_files=changed,
         affected_node_files=affected_node_files,
+        node_by_id=node_by_id,
+        workflow_by_id=workflow_by_id,
+    )
+    _attach_bounded_discovery(
+        root_path,
+        blueprint=bp,
+        task=task,
+        selection=selection,
     )
     return {
         "root_path": root_path,
@@ -2013,6 +2659,7 @@ def _resolve_agent_context_request(
         "agent_warnings": agent_warnings,
         "agent_metrics": agent_metrics,
         "node_by_id": node_by_id,
+        "workflow_by_id": workflow_by_id,
         "projection_by_id": projection_by_id,
         "scenario_by_id": scenario_by_id,
         "routes": routes,
@@ -2107,6 +2754,47 @@ def generate_agent_context(root: str | Path, *, node: str | None = None, workflo
         else:
             lines.append("No trusted task routes are available. Run the Bunya-Jido blueprint prompt to author routes.")
         lines.append("")
+    discovery = selection.get("discovery_context") or {}
+    if discovery:
+        lines.append("## Bounded discovery (read-only)")
+        lines.append(
+            "These candidates are grounded starting points, not a trusted route or permission to edit."
+        )
+        likely_areas = discovery.get("likely_areas") or []
+        if likely_areas:
+            lines.append("\n**Likely areas:**")
+            for candidate in likely_areas:
+                candidate_id = candidate.get("id") or candidate.get("path")
+                label = candidate.get("label") or candidate.get("evidence") or ""
+                terms = ", ".join(f"`{term}`" for term in candidate.get("matched_terms") or [])
+                lines.append(f"- `{candidate_id}` - {label} | matched: {terms}")
+        likely_workflows = discovery.get("likely_workflows") or []
+        if likely_workflows:
+            lines.append("\n**Likely workflows:**")
+            for candidate in likely_workflows:
+                terms = ", ".join(f"`{term}`" for term in candidate.get("matched_terms") or [])
+                lines.append(f"- `{candidate.get('id')}` - {candidate.get('label', '')} | matched: {terms}")
+        for title, field in (
+            ("Read first", "read_first"),
+            ("Likely tests", "likely_tests"),
+        ):
+            values = discovery.get(field) or []
+            if values:
+                lines.append(f"\n**{title}:**")
+                for value in values:
+                    lines.append(
+                        f"- `{value.get('path')}` - {value.get('reason')} ({value.get('evidence')})"
+                    )
+        for title, field in (
+            ("Read-only search commands", "search_commands"),
+            ("Recheck context after discovery", "recheck_commands"),
+        ):
+            values = discovery.get(field) or []
+            if values:
+                lines.append(f"\n**{title}:**")
+                for value in values:
+                    lines.append(f"- `{value}`")
+        lines.append("")
     for match, r in chosen:
         lines.append(f"### {r.get('task','Unnamed route')}")
         if r.get("intent"): lines.append(str(r.get("intent")))
@@ -2191,7 +2879,7 @@ def generate_agent_context_report(
     selection = resolved["selection"]
     chosen = selection["chosen"]
     warnings = [*resolved["bp_warnings"], *resolved["agent_warnings"]]
-    return {
+    report = {
         "schema_version": "bunya-jido-context-decision-v1",
         "task": task,
         "focus_node": node,
@@ -2220,6 +2908,9 @@ def generate_agent_context_report(
         },
         "warnings": warnings,
     }
+    if selection.get("discovery_context"):
+        report["discovery_context"] = selection["discovery_context"]
+    return report
 
 
 AGENT_UTILITY_DIMENSIONS = {
@@ -2228,6 +2919,7 @@ AGENT_UTILITY_DIMENSIONS = {
     "boundary_discipline",
     "honest_no_match",
     "change_aware_refresh",
+    "normal_bugfix_recovery",
 }
 AGENT_UTILITY_LIMITATION = (
     "This deterministic suite verifies generated bounded context against authored "
@@ -2258,6 +2950,10 @@ def validate_agent_evaluation_obj(evaluation: Any) -> list[str]:
         "safe_edit",
         "projection_context",
         "scenario_context",
+        "discovery_nodes",
+        "discovery_workflows",
+        "read_first",
+        "likely_tests",
     )
     for i, case in enumerate(cases):
         if not isinstance(case, dict):
@@ -2331,6 +3027,13 @@ def validate_agent_evaluation_obj(evaluation: Any) -> list[str]:
                 errors.append(f"cases[{i}].expect.routes must be empty for non-MATCH decision")
             if expect.get("safe_edit"):
                 errors.append(f"cases[{i}].expect.safe_edit must be empty for non-MATCH decision")
+        if decision != "IN_SCOPE_NO_ROUTE" and any(
+            expect.get(field)
+            for field in ("discovery_nodes", "discovery_workflows", "read_first", "likely_tests")
+        ):
+            errors.append(
+                f"cases[{i}] discovery expectations require decision IN_SCOPE_NO_ROUTE"
+            )
         if decision in CONTEXT_EXECUTION_POLICIES and expect.get("execution_policy"):
             required_policy = CONTEXT_EXECUTION_POLICIES[decision]
             if expect["execution_policy"] != required_policy:
@@ -2387,6 +3090,11 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
     false_route_count = 0
     safe_edit_leak_count = 0
     execution_policy_mismatch_count = 0
+    normal_bugfix_case_count = 0
+    trusted_route_match_count = 0
+    bounded_discovery_count = 0
+    actionable_guidance_count = 0
+    hard_rejection_count = 0
     list_titles = {
         "must_read": "Must read",
         "contracts": "Contracts",
@@ -2414,6 +3122,7 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
         )
         actual_status = _context_route_status(context)
         actual_routes = _context_route_titles(context)
+        discovery = decision_report.get("discovery_context") or {}
         failures: list[str] = []
         if actual_status != expected["route_status"]:
             failures.append(
@@ -2449,6 +3158,33 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
             ]
             if missing:
                 failures.append(f"{field} missing from context: {missing}")
+        discovery_lists = {
+            "discovery_nodes": [
+                str(candidate.get("id"))
+                for candidate in discovery.get("likely_areas") or []
+                if candidate.get("kind") == "blueprint_node" and candidate.get("id")
+            ],
+            "discovery_workflows": [
+                str(candidate.get("id"))
+                for candidate in discovery.get("likely_workflows") or []
+                if candidate.get("id")
+            ],
+            "read_first": [
+                str(candidate.get("path"))
+                for candidate in discovery.get("read_first") or []
+                if candidate.get("path")
+            ],
+            "likely_tests": [
+                str(candidate.get("path"))
+                for candidate in discovery.get("likely_tests") or []
+                if candidate.get("path")
+            ],
+        }
+        actual_lists.update(discovery_lists)
+        for field, actual in discovery_lists.items():
+            missing = [value for value in expected.get(field, []) if value not in actual]
+            if missing:
+                failures.append(f"{field} missing from discovery context: {missing}")
         expected_decision = expected.get("decision")
         false_route = False
         safe_edit_leak = False
@@ -2475,6 +3211,34 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
                 if safe_edit_leak:
                     safe_edit_leak_count += 1
                     failures.append("non-MATCH decision leaked safe-edit paths")
+        bounded_discovery = bool(
+            decision_report["decision"] == "IN_SCOPE_NO_ROUTE"
+            and discovery
+            and (
+                discovery.get("likely_areas")
+                or discovery.get("likely_workflows")
+                or discovery.get("read_first")
+                or discovery.get("search_commands")
+            )
+        )
+        actionable_guidance = bool(
+            decision_report["decision"] == "MATCH" or bounded_discovery
+        )
+        hard_rejection = False
+        if case["dimension"] == "normal_bugfix_recovery":
+            normal_bugfix_case_count += 1
+            if decision_report["decision"] == "MATCH":
+                trusted_route_match_count += 1
+            if bounded_discovery:
+                bounded_discovery_count += 1
+            if actionable_guidance:
+                actionable_guidance_count += 1
+            else:
+                hard_rejection_count += 1
+                hard_rejection = True
+                failures.append(
+                    "normal bugfix did not receive a trusted route or bounded discovery"
+                )
         passed = not failures
         dimension = str(case["dimension"])
         dimension_counts[dimension]["total"] += 1
@@ -2495,6 +3259,9 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
                 "actual_routes": actual_routes,
                 "false_route": false_route,
                 "safe_edit_leak": safe_edit_leak,
+                "bounded_discovery": bounded_discovery,
+                "actionable_guidance": actionable_guidance,
+                "hard_rejection": hard_rejection,
                 "failures": failures,
             }
         )
@@ -2544,6 +3311,25 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
                 decision_case_count,
             ),
         },
+        "recovery_metrics": {
+            "normal_bugfix_case_count": normal_bugfix_case_count,
+            "trusted_route_match_count": trusted_route_match_count,
+            "trusted_route_recall": rate(
+                trusted_route_match_count, normal_bugfix_case_count
+            ),
+            "bounded_discovery_count": bounded_discovery_count,
+            "bounded_discovery_coverage": rate(
+                bounded_discovery_count, normal_bugfix_case_count
+            ),
+            "actionable_guidance_count": actionable_guidance_count,
+            "actionable_guidance_coverage": rate(
+                actionable_guidance_count, normal_bugfix_case_count
+            ),
+            "hard_rejection_count": hard_rejection_count,
+            "normal_bugfix_hard_rejection_rate": rate(
+                hard_rejection_count, normal_bugfix_case_count
+            ),
+        },
         "cases": case_reports,
     }
 
@@ -2561,7 +3347,7 @@ def _agent_activation_instructions() -> str:
     1. Before editing, run `bunya-jido context --root . --task "<user request>"`.
     2. Obey the returned `Execution policy`; integrations should enforce the matching sandbox when available.
     3. If the decision is `MATCH`, use `workspace_write` and read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
-    4. If the decision is `IN_SCOPE_NO_ROUTE`, use `read_only_discovery`; state that the map has `No matching trusted route`, inspect ordinary repository evidence without editing, and request a new context decision or user approval before changing files. Do not infer a route.
+    4. If the decision is `IN_SCOPE_NO_ROUTE`, use `read_only_discovery`; state that the map has `No matching trusted route`, inspect only the supplied bounded discovery or ordinary repository evidence without editing, then rerun context with a justified `--node` or `--workflow` focus or request user approval before changing files. Do not infer a route.
     5. If the decision is `OUT_OF_SCOPE`, use `read_only`; do not edit files or create placeholder implementations, and explain the reviewed repository boundary.
     6. If the decision is `UNCERTAIN`, use `read_only`; inspect only when useful and request clarification before editing.
     7. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.

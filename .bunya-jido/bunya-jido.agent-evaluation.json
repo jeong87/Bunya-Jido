@@ -65,6 +65,46 @@
       }
     },
     {
+      "id": "normal-bugfix-route-recovery",
+      "dimension": "normal_bugfix_recovery",
+      "query": {
+        "task": "Fix conservative context decision routing behavior."
+      },
+      "expect": {
+        "route_status": "matched",
+        "decision": "MATCH",
+        "execution_policy": "workspace_write",
+        "routes": [
+          "change task route projection"
+        ],
+        "must_read": [
+          "src/bunya_jido/blueprint.py"
+        ],
+        "tests": [
+          "tests/test_blueprint.py"
+        ]
+      }
+    },
+    {
+      "id": "normal-bugfix-bounded-discovery",
+      "dimension": "normal_bugfix_recovery",
+      "query": {
+        "task": "Fix CLI command dispatch for an unmapped option."
+      },
+      "expect": {
+        "route_status": "not_found",
+        "decision": "IN_SCOPE_NO_ROUTE",
+        "execution_policy": "read_only_discovery",
+        "routes": [],
+        "discovery_nodes": [
+          "entry:cli"
+        ],
+        "read_first": [
+          "src/bunya_jido/cli.py"
+        ]
+      }
+    },
+    {
       "id": "viewer-test-recall",
       "dimension": "test_recall",
       "query": {

@@ -17,10 +17,10 @@
 
 ## Candidate B: Bounded Agent Navigation
 
-- **Question answered:** How does a coding task obtain trusted guidance, or an honest route-free rejection?
+- **Question answered:** How does a coding task obtain a trusted route, bounded read-only discovery, or an honest rejection?
 - **Landmark nodes:** Command Line Interface, Trusted Context Generator, Agent
   Route Parity, Grounding Gate, Semantic Contract Tests.
-- **Grounding strength:** Strong for context decisions, route validation, and machine-readable output.
+- **Grounding strength:** Strong for context decisions, route validation, evidence-backed discovery, and machine-readable output.
 - **First-screen value:** Useful for agent adopters, less complete for humans
   first discovering the map product.
 - **Distortion risks:** Making the viewer appear secondary to agent routing.

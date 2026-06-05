@@ -327,12 +327,17 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         agent_map = example_agent_map()
         agent_map["task_routes"][0]["must_read"] = "README.md"
         agent_map["task_routes"][0]["when_not_to_use"] = "mobile work"
+        agent_map["task_routes"][0]["common_failure_modes"] = "cursor drift"
         agent_map["repository_scope"]["unsupported_surfaces"] = "native iOS application"
 
         errors, _, _ = validate_agent_map_obj(agent_map, blueprint=example_blueprint())
 
         self.assertIn("task_routes[0].must_read must be a list", errors)
         self.assertIn("task_routes[0].when_not_to_use must be a list of non-empty strings", errors)
+        self.assertIn(
+            "task_routes[0].common_failure_modes must be a list of non-empty strings",
+            errors,
+        )
         self.assertIn(
             "repository_scope.unsupported_surfaces must be a list of non-empty strings",
             errors,
@@ -421,6 +426,120 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(cli_report["decision"], "OUT_OF_SCOPE")
         self.assertEqual(cli_report["execution_policy"], "read_only")
         self.assertEqual(cli_report["safe_edit_paths"], [])
+
+    def test_failure_mode_needs_independent_grounded_evidence_to_match(self) -> None:
+        blueprint = example_blueprint()
+        agent_map = example_agent_map()
+        agent_map["task_routes"][0]["common_failure_modes"] = [
+            "report cursor drift"
+        ]
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            (root / "tests").mkdir()
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (outdir / "bunya-jido.agent-map.json").write_text(
+                json.dumps(agent_map), encoding="utf-8"
+            )
+            (outdir / "bunya-jido.blueprint.json").write_text(
+                json.dumps(blueprint), encoding="utf-8"
+            )
+
+            symptom_only = generate_agent_context_report(
+                root, task="Fix report cursor drift."
+            )
+            blueprint["nodes"][1]["description"] = (
+                "Builder owns report cursor behavior and drift correction."
+            )
+            (outdir / "bunya-jido.blueprint.json").write_text(
+                json.dumps(blueprint), encoding="utf-8"
+            )
+            corroborated = generate_agent_context_report(
+                root, task="Fix report cursor drift."
+            )
+
+        self.assertNotEqual(symptom_only["decision"], "MATCH")
+        self.assertEqual(symptom_only["matched_routes"], [])
+        self.assertEqual(corroborated["decision"], "MATCH")
+        self.assertEqual(corroborated["matched_routes"], ["change builder behavior"])
+
+    def test_bounded_discovery_is_grounded_capped_and_non_match_only(self) -> None:
+        blueprint = example_blueprint()
+        blueprint["nodes"][0]["description"] = "Dispatches command options."
+        blueprint["nodes"][0]["source_path"] = "src/cli.py"
+        blueprint["nodes"][0]["evidence"] = [{"kind": "source", "path": "src/cli.py"}]
+        agent_map = example_agent_map()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            outdir = root / ".bunya-jido"
+            (root / "src" / "fixture" / "queueing").mkdir(parents=True)
+            (root / "tests").mkdir()
+            outdir.mkdir()
+            (root / "README.md").write_text("fixture", encoding="utf-8")
+            (root / "src" / "cli.py").write_text("# command option dispatch\n", encoding="utf-8")
+            (root / "src" / "fixture" / "queueing" / "component_001.py").write_text(
+                "# lease holder\n", encoding="utf-8"
+            )
+            (root / "tests" / "test_smoke.py").write_text("pass\n", encoding="utf-8")
+            (outdir / "bunya-jido.blueprint.json").write_text(
+                json.dumps(blueprint), encoding="utf-8"
+            )
+            (outdir / "bunya-jido.agent-map.json").write_text(
+                json.dumps(agent_map), encoding="utf-8"
+            )
+
+            semantic = generate_agent_context_report(
+                root, task="Fix command option dispatch."
+            )
+            repository_path = generate_agent_context_report(
+                root, task="Fix queue lease ownership."
+            )
+            unsupported = generate_agent_context_report(
+                root, task="Add a native iOS application."
+            )
+            unknown = generate_agent_context_report(
+                root, task="publish package to package registry"
+            )
+            ambiguous_map = example_agent_map()
+            ambiguous_map["task_routes"][0]["match_terms"] = ["cursor repair"]
+            ambiguous_route = json.loads(json.dumps(ambiguous_map["task_routes"][0]))
+            ambiguous_route["task"] = "change validator behavior"
+            ambiguous_route["intent"] = "Update validator logic."
+            ambiguous_route["start_nodes"] = ["component:validator"]
+            ambiguous_route["match_terms"] = ["cursor repair"]
+            ambiguous_map["task_routes"].append(ambiguous_route)
+            (outdir / "bunya-jido.agent-map.json").write_text(
+                json.dumps(ambiguous_map), encoding="utf-8"
+            )
+            ambiguous = generate_agent_context_report(
+                root, task="Fix cursor repair."
+            )
+
+        discovery = semantic["discovery_context"]
+        self.assertEqual(semantic["decision"], "IN_SCOPE_NO_ROUTE")
+        self.assertEqual(semantic["safe_edit_paths"], [])
+        self.assertIn(
+            "component:cli",
+            [candidate.get("id") for candidate in discovery["likely_areas"]],
+        )
+        self.assertIn("src/cli.py", [item["path"] for item in discovery["read_first"]])
+        self.assertLessEqual(len(discovery["likely_areas"]), 3)
+        self.assertLessEqual(len(discovery["likely_workflows"]), 2)
+        self.assertLessEqual(len(discovery["read_first"]), 5)
+        self.assertLessEqual(len(discovery["likely_tests"]), 3)
+        self.assertEqual(repository_path["decision"], "IN_SCOPE_NO_ROUTE")
+        self.assertIn(
+            "src/fixture/queueing",
+            [candidate.get("path") for candidate in repository_path["discovery_context"]["likely_areas"]],
+        )
+        self.assertTrue(repository_path["discovery_context"]["search_commands"])
+        self.assertNotIn("discovery_context", unsupported)
+        self.assertNotIn("discovery_context", unknown)
+        self.assertEqual(ambiguous["decision"], "UNCERTAIN")
+        self.assertEqual(ambiguous["matched_routes"], [])
+        self.assertNotIn("discovery_context", ambiguous)
 
     def test_malformed_stale_map_policy_is_a_validation_error(self) -> None:
         agent_map = example_agent_map()
@@ -802,6 +921,19 @@ class AgentMapCharacterizationTests(unittest.TestCase):
                         "forbid_routes": ["change builder behavior"],
                     },
                 },
+                {
+                    "id": "bounded-recovery",
+                    "dimension": "normal_bugfix_recovery",
+                    "query": {"task": "Fix CLI command behavior."},
+                    "expect": {
+                        "route_status": "not_found",
+                        "decision": "IN_SCOPE_NO_ROUTE",
+                        "execution_policy": "read_only_discovery",
+                        "routes": [],
+                        "discovery_nodes": ["component:cli"],
+                        "read_first": ["README.md"],
+                    },
+                },
             ],
         }
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -839,7 +971,7 @@ class AgentMapCharacterizationTests(unittest.TestCase):
             failed = json.loads(stdout.getvalue())
 
         self.assertEqual(passed["status"], "passed")
-        self.assertEqual(passed["passed_case_count"], 2)
+        self.assertEqual(passed["passed_case_count"], 3)
         self.assertEqual(passed["cases"][0]["actual_decision"], "MATCH")
         self.assertEqual(passed["cases"][0]["actual_execution_policy"], "workspace_write")
         self.assertEqual(passed["cases"][1]["actual_decision"], "UNCERTAIN")
@@ -850,6 +982,13 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(passed["safety_metrics"]["execution_policy_accuracy"], 1.0)
         self.assertEqual(passed["decision_confusion_matrix"]["MATCH"]["MATCH"], 1)
         self.assertEqual(passed["decision_confusion_matrix"]["UNCERTAIN"]["UNCERTAIN"], 1)
+        self.assertEqual(passed["recovery_metrics"]["normal_bugfix_case_count"], 1)
+        self.assertEqual(passed["recovery_metrics"]["trusted_route_recall"], 0.0)
+        self.assertEqual(passed["recovery_metrics"]["bounded_discovery_coverage"], 1.0)
+        self.assertEqual(passed["recovery_metrics"]["actionable_guidance_coverage"], 1.0)
+        self.assertEqual(
+            passed["recovery_metrics"]["normal_bugfix_hard_rejection_rate"], 0.0
+        )
         self.assertEqual(strict_result, 2)
         self.assertEqual(failed["status"], "failed")
         self.assertIn("must_read missing from context", failed["cases"][0]["failures"][0])
