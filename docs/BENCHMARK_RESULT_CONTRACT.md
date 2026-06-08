@@ -14,7 +14,8 @@ bunya-jido audit-worktree --root workspace --require-clean --json
 ```
 
 After the task, include the Codex JSONL event log and explicitly classify
-runner-owned artifacts:
+runner-owned artifacts. Common generated/cache noise is filtered by default,
+while runner artifacts must still be explicitly allowed:
 
 ```powershell
 bunya-jido audit-worktree `
@@ -46,6 +47,14 @@ observed_production_activity = sorted(
 )
 ```
 
+The built-in generated-noise filter covers Python bytecode/cache output,
+common test/cache directories, coverage HTML/data output, and OS/editor temp
+files such as `__pycache__/`, `*.pyc`, `.pytest_cache/`, `.mypy_cache/`,
+`.ruff_cache/`, `.hypothesis/`, `.coverage*`, `htmlcov/`, `.DS_Store`,
+`Thumbs.db`, swap files, and backup suffixes. Runners may add reviewed
+repo-specific generated noise with repeated `--ignore-noise` globs. Use
+`--no-default-noise` only to debug classifier behavior.
+
 Backward-compatible runners may keep their existing `changed_files` field for
 final production changes while adding the complete `baseline_audit`,
 `worktree_audit`, and `observed_production_activity` fields. Boundary,
@@ -54,19 +63,26 @@ activity so a write-then-revert attempt cannot evade them.
 
 ## Result Fields
 
-The `bunya-jido-worktree-audit-v1` report records:
+The `bunya-jido-worktree-audit-v2` report records:
 
 - `worktree_clean`
+- `production_clean`
 - `changed_files_tracked`
 - `staged_files`
 - `deleted_files`
 - `renamed_files`
 - `untracked_files`
 - `changed_lines_tracked`
+- `allowed_artifact_patterns`
+- `generated_noise_patterns`
+- `file_change_classification`
 - `allowed_artifact_changes`
+- `generated_noise_changes`
 - `production_file_changes`
 - `jsonl_file_change_events`
+- `jsonl_file_change_classification`
 - `jsonl_allowed_artifact_attempts`
+- `jsonl_generated_noise_attempts`
 - `jsonl_production_write_attempts`
 - `jsonl_outside_workspace_changes`
 - `jsonl_log_count`
@@ -79,6 +95,10 @@ Final workspace truth and JSONL write attempts are intentionally separate.
 A file that an agent writes and then reverts produces no final production
 change, but it remains a production write attempt.
 
+`worktree_clean` remains strict git cleanliness. Generated noise and allowed
+artifacts still make the worktree non-clean, but they do not make
+`production_clean` false and do not count as no-match production activity.
+
 ## Required Runner Behavior
 
 1. Run the clean-baseline audit after fixture setup and before agent execution.
@@ -86,22 +106,24 @@ change, but it remains a production write attempt.
    runner result's `baseline_clean` field, and mark the run invalid when
    `--require-clean` fails.
 3. Store the complete post-run audit report with the benchmark result.
-4. Treat all changed paths as production unless they match an explicit,
-   reviewed `--allow-artifact` glob.
-5. Treat production JSONL file-change events as policy failures even when the
+4. Treat all changed paths as production unless they classify as an explicit,
+   reviewed `--allow-artifact` glob or generated/cache noise.
+5. Do not use `.gitignore` as a blanket production exemption; add only reviewed
+   generated-noise globs when the default classifier is insufficient.
+6. Treat production JSONL file-change events as policy failures even when the
    final worktree is clean.
-6. Use `--require-jsonl` for claims about write-attempt-free execution; a
+7. Use `--require-jsonl` for claims about write-attempt-free execution; a
    missing, empty, malformed, or structurally invalid JSONL log makes that
    evidence incomplete.
-7. Keep context-decision and execution-policy fields in the enclosing runner
+8. Keep context-decision and execution-policy fields in the enclosing runner
    result; this audit reports filesystem truth rather than router policy.
 
 ## Fixture Coverage
 
 `tests/test_benchmark_audit.py` locks the P0 behavior for clean baselines,
 untracked production files, tracked modifications, staged files, deletions,
-renames, allowed artifacts, malformed JSONL, outside-workspace events, and
-write-then-revert attempts.
+renames, allowed artifacts, generated/cache noise, malformed JSONL,
+outside-workspace events, and write-then-revert attempts.
 
 External benchmark harnesses still need to call this API or CLI and rerun
 their benchmark sets. A historical result produced by a runner that only used

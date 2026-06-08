@@ -476,7 +476,10 @@ bunya-jido audit-worktree --root workspace --jsonl task.codex.jsonl --allow-arti
 ```
 
 The audit keeps final workspace changes separate from write-then-revert
-attempts. See
+attempts. It also classifies common generated/cache noise such as Python
+bytecode caches, test caches, coverage output, and OS/editor temp files so
+no-match production-edit checks are not polluted by environment artifacts.
+Runner-owned outputs still need explicit `--allow-artifact` globs. See
 [docs/BENCHMARK_RESULT_CONTRACT.md](docs/BENCHMARK_RESULT_CONTRACT.md) for the
 runner integration and result contract.
 

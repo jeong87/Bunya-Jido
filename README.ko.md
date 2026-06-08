@@ -472,6 +472,23 @@ actionable-guidance coverage, normal-bugfix hard-rejection rate도 보고합니�
 보고서는 compact와 verbose context 출력 크기도 추정하지만, 이는 실제
 에이전트 작업 토큰 측정을 대신하지 않습니다.
 
+### Live-agent benchmark 변경 감사하기
+
+Live-agent benchmark runner는 dirty baseline을 거절하고 tracked, staged,
+deleted, renamed, untracked, Codex JSONL write activity를 관찰할 수
+있습니다.
+
+```bash
+bunya-jido audit-worktree --root workspace --require-clean --json
+bunya-jido audit-worktree --root workspace --jsonl task.codex.jsonl --allow-artifact "results/**" --require-jsonl --json
+```
+
+Audit은 최종 workspace 변경과 write-then-revert 시도를 분리합니다. 또한
+Python bytecode cache, test cache, coverage output, OS/editor temp file 같은
+일반 generated/cache noise를 분류해 no-match production edit 검사가 환경
+artifact에 오염되지 않게 합니다. Runner가 소유한 결과물은 여전히 명시적인
+`--allow-artifact` glob으로 허용해야 합니다.
+
 호환되는 live benchmark 결과를 모은 뒤에는 안전하고 해결된 동일 task만
 다음 명령으로 비교할 수 있습니다.
 

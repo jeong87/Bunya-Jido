@@ -8,10 +8,37 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-AUDIT_SCHEMA_VERSION = "bunya-jido-worktree-audit-v1"
+AUDIT_SCHEMA_VERSION = "bunya-jido-worktree-audit-v2"
 TOKEN_EFFICIENCY_SCHEMA_VERSION = "bunya-jido-token-efficiency-report-v1"
 TIME_EFFICIENCY_SCHEMA_VERSION = "bunya-jido-time-efficiency-report-v1"
 TOKEN_RUN_KINDS = {"bugfix", "no_match"}
+DEFAULT_GENERATED_NOISE_PATTERNS = (
+    "__pycache__/**",
+    "**/__pycache__/**",
+    "*.pyc",
+    "*.pyo",
+    ".pytest_cache/**",
+    "**/.pytest_cache/**",
+    ".mypy_cache/**",
+    "**/.mypy_cache/**",
+    ".ruff_cache/**",
+    "**/.ruff_cache/**",
+    ".hypothesis/**",
+    "**/.hypothesis/**",
+    ".coverage",
+    "**/.coverage",
+    ".coverage.*",
+    "**/.coverage.*",
+    "htmlcov/**",
+    "**/htmlcov/**",
+    ".DS_Store",
+    "**/.DS_Store",
+    "Thumbs.db",
+    "**/Thumbs.db",
+    "*.swp",
+    "*.swo",
+    "*~",
+)
 
 
 def _git_output(root: Path, *args: str) -> bytes:
@@ -30,6 +57,51 @@ def _normalize_pattern(pattern: str) -> str:
 
 def _matches_any(path: str, patterns: Iterable[str]) -> bool:
     return any(fnmatch.fnmatchcase(path, pattern) for pattern in patterns)
+
+
+def _compile_noise_patterns(
+    ignored_noise: Iterable[str],
+    *,
+    include_default_noise: bool,
+) -> list[str]:
+    patterns = set()
+    if include_default_noise:
+        patterns.update(DEFAULT_GENERATED_NOISE_PATTERNS)
+    patterns.update(pattern for pattern in ignored_noise if pattern.strip())
+    return sorted(_normalize_pattern(pattern) for pattern in patterns)
+
+
+def _classify_change_path(
+    path: str,
+    *,
+    allowed_artifacts: Iterable[str],
+    generated_noise: Iterable[str],
+) -> str:
+    normalized = _normalize_pattern(path)
+    if _matches_any(normalized, allowed_artifacts):
+        return "allowed_artifact"
+    if _matches_any(normalized, generated_noise):
+        return "generated_noise"
+    return "production"
+
+
+def _classify_paths(
+    paths: Iterable[str],
+    *,
+    allowed_artifacts: Iterable[str],
+    generated_noise: Iterable[str],
+) -> list[dict[str, str]]:
+    return [
+        {
+            "path": path,
+            "classification": _classify_change_path(
+                path,
+                allowed_artifacts=allowed_artifacts,
+                generated_noise=generated_noise,
+            ),
+        }
+        for path in sorted(set(paths))
+    ]
 
 
 def _decode_path(value: bytes) -> str:
@@ -152,12 +224,18 @@ def audit_worktree(
     *,
     jsonl_paths: Iterable[str | Path] = (),
     allowed_artifacts: Iterable[str] = (),
+    ignored_noise: Iterable[str] = (),
+    include_default_noise: bool = True,
 ) -> dict[str, Any]:
     """Return machine-readable workspace truth for a benchmark run."""
 
     resolved_root = Path(root).resolve()
     jsonl_paths = tuple(jsonl_paths)
-    patterns = sorted({_normalize_pattern(pattern) for pattern in allowed_artifacts if pattern.strip()})
+    artifact_patterns = sorted({_normalize_pattern(pattern) for pattern in allowed_artifacts if pattern.strip()})
+    noise_patterns = _compile_noise_patterns(
+        ignored_noise,
+        include_default_noise=include_default_noise,
+    )
     status_entries = _parse_porcelain_status(
         _git_output(
             resolved_root,
@@ -194,23 +272,48 @@ def audit_worktree(
             renamed_files.append({"from": original_path, "to": path})
 
     changed_files = changed_files_tracked | untracked_files
-    allowed_artifact_changes = sorted(path for path in changed_files if _matches_any(path, patterns))
-    production_file_changes = sorted(path for path in changed_files if not _matches_any(path, patterns))
+    classified_changes = _classify_paths(
+        changed_files,
+        allowed_artifacts=artifact_patterns,
+        generated_noise=noise_patterns,
+    )
+    allowed_artifact_changes = [
+        item["path"] for item in classified_changes if item["classification"] == "allowed_artifact"
+    ]
+    generated_noise_changes = [
+        item["path"] for item in classified_changes if item["classification"] == "generated_noise"
+    ]
+    production_file_changes = [
+        item["path"] for item in classified_changes if item["classification"] == "production"
+    ]
     jsonl_events, outside_events, malformed_lines, invalid_lines, event_count = _jsonl_file_change_events(
         resolved_root,
         jsonl_paths,
     )
-    jsonl_production_write_attempts = sorted(
-        {event["path"] for event in jsonl_events if not _matches_any(event["path"], patterns)}
+    jsonl_classified_paths = _classify_paths(
+        (event["path"] for event in jsonl_events),
+        allowed_artifacts=artifact_patterns,
+        generated_noise=noise_patterns,
     )
-    jsonl_allowed_artifact_attempts = sorted(
-        {event["path"] for event in jsonl_events if _matches_any(event["path"], patterns)}
+    jsonl_allowed_artifact_attempts = [
+        item["path"] for item in jsonl_classified_paths if item["classification"] == "allowed_artifact"
+    ]
+    jsonl_generated_noise_attempts = [
+        item["path"] for item in jsonl_classified_paths if item["classification"] == "generated_noise"
+    ]
+    jsonl_production_write_attempts = [
+        item["path"] for item in jsonl_classified_paths if item["classification"] == "production"
+    ]
+    production_clean = (
+        not production_file_changes
+        and not jsonl_production_write_attempts
     )
 
     return {
         "schema_version": AUDIT_SCHEMA_VERSION,
         "root": str(resolved_root),
         "worktree_clean": not status_entries,
+        "production_clean": production_clean,
         "status_entries": status_entries,
         "changed_files_tracked": sorted(changed_files_tracked),
         "staged_files": sorted(staged_files),
@@ -218,10 +321,16 @@ def audit_worktree(
         "renamed_files": sorted(renamed_files, key=lambda item: (item["from"], item["to"])),
         "untracked_files": sorted(untracked_files),
         "changed_lines_tracked": _tracked_changed_lines(resolved_root),
+        "allowed_artifact_patterns": artifact_patterns,
+        "generated_noise_patterns": noise_patterns,
+        "file_change_classification": classified_changes,
         "allowed_artifact_changes": allowed_artifact_changes,
+        "generated_noise_changes": generated_noise_changes,
         "production_file_changes": production_file_changes,
         "jsonl_file_change_events": jsonl_events,
+        "jsonl_file_change_classification": jsonl_classified_paths,
         "jsonl_allowed_artifact_attempts": jsonl_allowed_artifact_attempts,
+        "jsonl_generated_noise_attempts": jsonl_generated_noise_attempts,
         "jsonl_production_write_attempts": jsonl_production_write_attempts,
         "jsonl_outside_workspace_changes": outside_events,
         "jsonl_log_count": len(jsonl_paths),

@@ -42,6 +42,10 @@ be documented.
 - Benchmark workspace auditing no longer relies on tracked `git diff`
   output alone, preventing untracked production files from being silently
   counted as edit-free runs.
+- Benchmark workspace auditing now classifies common generated/cache noise
+  separately from production changes, so files such as Python bytecode caches,
+  test caches, coverage output, and OS/editor temp files do not create false
+  no-match production-edit failures.
 - Non-`MATCH` context and read-only route catalogs no longer expose safe-edit
   paths, and committed no-match acceptance cases fail on any trusted-route or
   safe-edit leak.

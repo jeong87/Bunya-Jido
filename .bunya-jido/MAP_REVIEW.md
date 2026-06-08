@@ -317,6 +317,20 @@ An entry records review work; it does not prove architectural completeness.
   atlas-quality, utility, stale-map, and full unit-suite gates, then locally
   smoke-test sandbox policy integration in the external benchmark runners.
 
+## 2026-06-08 - P0 Generated Noise Classifier
+
+- Change: Hardened benchmark worktree auditing so common generated/cache noise
+  is classified separately from production changes and JSONL production write
+  attempts.
+- Decision: This is a Benchmark Evidence Suite contract refinement. It keeps
+  the existing benchmark route, semantic blueprint structure, context decision
+  behavior, and viewer output unchanged. Runner artifacts still require
+  explicit allowlist globs, and `.gitignore` is not used as a blanket
+  exemption.
+- Validation: Run benchmark-audit fixtures, refresh-context, stale-map review,
+  blueprint and agent-map validation, utility and atlas-quality gates, and the
+  full unit suite before commit.
+
 ## 2026-06-05 - P3 Compact Context And Token Evidence
 
 - Change: Made task-selected Markdown and JSON context compact by default,

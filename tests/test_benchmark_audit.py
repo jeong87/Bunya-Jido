@@ -112,6 +112,98 @@ class BenchmarkAuditTests(unittest.TestCase):
                 ["infra/terraform/main.tf", "src/orders/infrastructure/adapter.py"],
             )
 
+    def test_generated_noise_does_not_count_as_production_activity(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _committed_repo(root, {"src/app.py": "value = 1\n"})
+            _write(root / "__pycache__/app.cpython-312.pyc", "cache\n")
+            _write(root / "src/__pycache__/worker.cpython-312.pyc", "cache\n")
+            _write(root / ".pytest_cache/v/cache/nodeids", "[]\n")
+            _write(root / "htmlcov/index.html", "<html></html>\n")
+            _write(root / ".coverage", "coverage\n")
+            _write(root / "results/run.json", "{}\n")
+            events = [
+                {
+                    "type": "item.completed",
+                    "item": {
+                        "type": "file_change",
+                        "status": "completed",
+                        "changes": [
+                            {"path": str(root / "src/__pycache__/worker.cpython-312.pyc"), "kind": "add"},
+                            {"path": str(root / ".pytest_cache/v/cache/nodeids"), "kind": "add"},
+                            {"path": str(root / "results/run.json"), "kind": "add"},
+                        ],
+                    },
+                },
+            ]
+            jsonl = root / "results" / "codex.jsonl"
+            jsonl.write_text(
+                "\n".join(json.dumps(event) for event in events) + "\n",
+                encoding="utf-8",
+            )
+
+            report = audit_worktree(
+                root,
+                jsonl_paths=[jsonl],
+                allowed_artifacts=["results/**"],
+            )
+
+            self.assertFalse(report["worktree_clean"])
+            self.assertTrue(report["production_clean"])
+            self.assertEqual(report["production_file_changes"], [])
+            self.assertEqual(report["jsonl_production_write_attempts"], [])
+            self.assertEqual(report["allowed_artifact_changes"], ["results/codex.jsonl", "results/run.json"])
+            self.assertEqual(report["jsonl_allowed_artifact_attempts"], ["results/run.json"])
+            self.assertEqual(
+                report["generated_noise_changes"],
+                [
+                    ".coverage",
+                    ".pytest_cache/v/cache/nodeids",
+                    "__pycache__/app.cpython-312.pyc",
+                    "htmlcov/index.html",
+                    "src/__pycache__/worker.cpython-312.pyc",
+                ],
+            )
+            self.assertEqual(
+                report["jsonl_generated_noise_attempts"],
+                [
+                    ".pytest_cache/v/cache/nodeids",
+                    "src/__pycache__/worker.cpython-312.pyc",
+                ],
+            )
+            classifications = {
+                item["path"]: item["classification"]
+                for item in report["file_change_classification"]
+            }
+            self.assertEqual(classifications["src/__pycache__/worker.cpython-312.pyc"], "generated_noise")
+            self.assertEqual(classifications["results/run.json"], "allowed_artifact")
+
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = main(
+                    [
+                        "audit-worktree",
+                        "--root",
+                        str(root),
+                        "--jsonl",
+                        str(jsonl),
+                        "--allow-artifact",
+                        "results/**",
+                        "--require-no-production-activity",
+                        "--json",
+                    ]
+                )
+            self.assertEqual(exit_code, 0)
+            cli_report = json.loads(stdout.getvalue())
+            self.assertEqual(cli_report["generated_noise_changes"], report["generated_noise_changes"])
+
+            strict = audit_worktree(
+                root,
+                allowed_artifacts=["results/**"],
+                include_default_noise=False,
+            )
+            self.assertIn("src/__pycache__/worker.cpython-312.pyc", strict["production_file_changes"])
+
     def test_jsonl_detects_write_then_revert_and_deduplicates_events(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             fixture_root = Path(temp_dir)

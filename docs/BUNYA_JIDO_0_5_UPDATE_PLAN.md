@@ -77,9 +77,9 @@ efficiency:
 The repository now provides the reusable P0 observation primitive through
 `bunya-jido audit-worktree` and `bunya_jido.benchmark.audit_worktree`.
 `tests/test_benchmark_audit.py` covers clean-baseline rejection, tracked,
-staged, deleted, renamed, untracked, allowed-artifact, and JSONL
-write-then-revert cases. `docs/BENCHMARK_RESULT_CONTRACT.md` defines how an
-external live-agent runner must integrate the audit.
+staged, deleted, renamed, untracked, allowed-artifact, generated/cache noise,
+and JSONL write-then-revert cases. `docs/BENCHMARK_RESULT_CONTRACT.md` defines
+how an external live-agent runner must integrate the audit.
 
 This completes the version-controlled P0 implementation in Bunya-Jido. The
 external benchmark runner copies must still call the API or CLI and rerun the
@@ -90,6 +90,21 @@ integrated with this API and passed mock bugfix/no-match smoke runs on
 2026-06-05. Those directories are not Git repositories, so the local patch is
 not a durable patch identifier and does not satisfy the release-evidence gate
 until the runner source is versioned.
+
+### 1.2.1 P0 classifier hardening - 2026-06-08
+
+The worktree audit schema is now `bunya-jido-worktree-audit-v2`. It keeps
+strict `worktree_clean` reporting, but separately reports `production_clean`,
+`file_change_classification`, `generated_noise_changes`, and
+`jsonl_generated_noise_attempts`. Common generated/cache noise such as
+`__pycache__/`, `*.pyc`, `.pytest_cache/`, `.mypy_cache/`, `.ruff_cache/`,
+`.hypothesis/`, `.coverage*`, `htmlcov/`, `.DS_Store`, `Thumbs.db`, swap
+files, and backup suffixes no longer counts as no-match production activity.
+
+Runner-owned outputs still require explicit `--allow-artifact` globs. The
+classifier deliberately does not use `.gitignore` as a blanket exemption,
+because ignored generated source or local configuration can still affect
+product behavior.
 
 ### 1.3 P1 implementation status - 2026-06-05
 

@@ -563,6 +563,8 @@ def cmd_audit_worktree(args: argparse.Namespace) -> int:
             args.root,
             jsonl_paths=args.jsonl,
             allowed_artifacts=args.allow_artifact,
+            ignored_noise=args.ignore_noise,
+            include_default_noise=not args.no_default_noise,
         )
     except (OSError, ValueError, subprocess.CalledProcessError) as exc:
         print(f"Worktree audit blocked: {exc}", file=sys.stderr)
@@ -573,7 +575,9 @@ def cmd_audit_worktree(args: argparse.Namespace) -> int:
         print(f"Worktree audit: {'clean' if report['worktree_clean'] else 'changed'}")
         print(f"Tracked changes: {len(report['changed_files_tracked'])}")
         print(f"Untracked changes: {len(report['untracked_files'])}")
+        print(f"Generated noise changes: {len(report['generated_noise_changes'])}")
         print(f"Production changes: {len(report['production_file_changes'])}")
+        print(f"JSONL generated noise attempts: {len(report['jsonl_generated_noise_attempts'])}")
         print(f"JSONL production write attempts: {len(report['jsonl_production_write_attempts'])}")
         if report["malformed_jsonl_lines"]:
             print(f"Malformed JSONL lines: {report['malformed_jsonl_lines']}")
@@ -809,6 +813,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_audit.add_argument("--root", default=".", help="Git worktree root. Default: current directory.")
     p_audit.add_argument("--jsonl", action="append", default=[], help="Codex JSONL event log to inspect. Repeatable.")
     p_audit.add_argument("--allow-artifact", action="append", default=[], help="Allowed harness-artifact glob, relative to the worktree. Repeatable.")
+    p_audit.add_argument("--ignore-noise", action="append", default=[], help="Additional generated/cache noise glob to exclude from production activity. Repeatable.")
+    p_audit.add_argument("--no-default-noise", action="store_true", help="Disable built-in generated/cache noise filters.")
     p_audit.add_argument("--require-clean", action="store_true", help="Exit with status 2 unless the worktree is clean.")
     p_audit.add_argument("--require-jsonl", action="store_true", help="Exit with status 2 unless at least one JSONL log is present and every non-empty line parses.")
     p_audit.add_argument("--require-no-production-activity", action="store_true", help="Exit with status 2 when production changes or JSONL write attempts are observed.")
