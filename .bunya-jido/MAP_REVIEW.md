@@ -331,6 +331,18 @@ An entry records review work; it does not prove architectural completeness.
   blueprint and agent-map validation, utility and atlas-quality gates, and the
   full unit suite before commit.
 
+## 2026-06-08 - Runner Sandbox Policy Field
+
+- Change: Added a machine-readable `codex_sandbox_mode` to context selection,
+  JSON context reports, and Markdown context output.
+- Decision: This hardens runner integration against Markdown backtick parsing
+  errors without changing trusted route definitions, route matching,
+  publication structure, or viewer output. `MATCH` maps to `workspace-write`;
+  every non-MATCH decision maps to `read-only`.
+- Validation: Run context/report focused tests, refresh-context, stale-map
+  review, blueprint and agent-map validation, utility and atlas-quality gates,
+  and the full unit suite before commit.
+
 ## 2026-06-05 - P3 Compact Context And Token Evidence
 
 - Change: Made task-selected Markdown and JSON context compact by default,

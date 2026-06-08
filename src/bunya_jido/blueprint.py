@@ -55,6 +55,11 @@ CONTEXT_EXECUTION_POLICIES = {
     "UNCERTAIN": "read_only",
     "NOT_REQUESTED": "read_only",
 }
+CONTEXT_CODEX_SANDBOX_MODES = {
+    "workspace_write": "workspace-write",
+    "read_only_discovery": "read-only",
+    "read_only": "read-only",
+}
 CONTEXT_AGENT_INSTRUCTIONS = {
     "MATCH": "Use only the validated route guidance and stay within its declared change boundaries.",
     "IN_SCOPE_NO_ROUTE": "Do not modify files during initial discovery. Inspect repository evidence, then request a new context decision or user approval before editing.",
@@ -2543,6 +2548,7 @@ def _select_context_routes(
         "NOT_REQUESTED": "read_only",
     }[decision]
     execution_policy = CONTEXT_EXECUTION_POLICIES[decision]
+    codex_sandbox_mode = CONTEXT_CODEX_SANDBOX_MODES[execution_policy]
     agent_instruction = CONTEXT_AGENT_INSTRUCTIONS[decision]
     safe_edit_paths = list(
         dict.fromkeys(
@@ -2564,6 +2570,7 @@ def _select_context_routes(
         "route_status": route_status,
         "edit_policy": edit_policy,
         "execution_policy": execution_policy,
+        "codex_sandbox_mode": codex_sandbox_mode,
         "agent_instruction": agent_instruction,
         "reason": reason,
         "basis": list(dict.fromkeys(basis)),
@@ -2730,6 +2737,7 @@ def generate_agent_context(
     if not compact:
         lines.append(f"- Edit policy: `{selection['edit_policy']}`")
     lines.append(f"- Execution policy: `{selection['execution_policy']}`")
+    lines.append(f"- Codex sandbox mode: `{selection['codex_sandbox_mode']}`")
     if not compact or selection["decision"] != "MATCH":
         lines.append(f"- Reason: {selection['reason']}")
     lines.append(f"- Agent instruction: {selection['agent_instruction']}")
@@ -2941,6 +2949,7 @@ def generate_agent_context_report(
         "route_status": selection["route_status"],
         "edit_policy": selection["edit_policy"],
         "execution_policy": selection["execution_policy"],
+        "codex_sandbox_mode": selection["codex_sandbox_mode"],
         "agent_instruction": selection["agent_instruction"],
         "reason": selection["reason"],
         "route_score": selection["top_score"],

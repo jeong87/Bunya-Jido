@@ -106,6 +106,15 @@ classifier deliberately does not use `.gitignore` as a blanket exemption,
 because ignored generated source or local configuration can still affect
 product behavior.
 
+### 1.2.2 Runner sandbox policy hardening - 2026-06-08
+
+`bunya-jido context --json` now exposes `codex_sandbox_mode` directly. Runners
+should use this machine-readable field instead of scraping Markdown decision
+lines. `MATCH` maps to `workspace-write`; `IN_SCOPE_NO_ROUTE`, `OUT_OF_SCOPE`,
+and `UNCERTAIN` map to `read-only`. Legacy runners that still parse Markdown
+must strip surrounding code ticks, but JSON context is the supported
+integration surface.
+
 ### 1.3 P1 implementation status - 2026-06-05
 
 Context decisions now expose an additive `execution_policy` and

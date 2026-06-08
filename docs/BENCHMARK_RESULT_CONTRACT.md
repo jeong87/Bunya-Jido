@@ -118,6 +118,30 @@ artifacts still make the worktree non-clean, but they do not make
 8. Keep context-decision and execution-policy fields in the enclosing runner
    result; this audit reports filesystem truth rather than router policy.
 
+## Context Policy For Runners
+
+Benchmark runners should request machine-readable context instead of parsing
+Markdown:
+
+```powershell
+bunya-jido context --root workspace --task "<task>" --json
+```
+
+The context report includes `decision`, `edit_policy`, `execution_policy`, and
+`codex_sandbox_mode`. Use `codex_sandbox_mode` directly when launching Codex:
+
+| `decision` | `execution_policy` | `codex_sandbox_mode` |
+| --- | --- | --- |
+| `MATCH` | `workspace_write` | `workspace-write` |
+| `IN_SCOPE_NO_ROUTE` | `read_only_discovery` | `read-only` |
+| `OUT_OF_SCOPE` | `read_only` | `read-only` |
+| `UNCERTAIN` | `read_only` | `read-only` |
+
+Do not scrape backtick-wrapped Markdown fields for sandbox selection. If a
+legacy runner must consume older Markdown output, it must normalize surrounding
+Markdown code ticks before comparison, but JSON context is the supported
+integration surface.
+
 ## Fixture Coverage
 
 `tests/test_benchmark_audit.py` locks the P0 behavior for clean baselines,
