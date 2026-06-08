@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import tempfile
@@ -8,6 +9,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 from pathlib import Path
 
+from bunya_jido import __version__
 from bunya_jido.benchmark import (
     audit_worktree,
     summarize_time_efficiency,
@@ -67,6 +69,46 @@ class BenchmarkAuditTests(unittest.TestCase):
 
             with redirect_stdout(StringIO()):
                 self.assertEqual(main(["audit-worktree", "--root", str(root), "--require-clean"]), 2)
+
+    def test_audit_records_benchmark_provenance(self) -> None:
+        agent_map = '{"schema_version":"bunya-jido-agent-map-v1","task_routes":[]}\n'
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            _committed_repo(
+                root,
+                {
+                    "src/app.py": "value = 1\n",
+                    ".bunya-jido/bunya-jido.agent-map.json": agent_map,
+                },
+            )
+            expected_commit = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=root,
+                check=True,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            ).stdout.strip()
+            expected_agent_map_sha = hashlib.sha256(
+                (root / ".bunya-jido" / "bunya-jido.agent-map.json").read_bytes()
+            ).hexdigest()
+
+            provenance = audit_worktree(root)["benchmark_provenance"]
+
+            self.assertEqual(provenance["bunya_jido_version"], __version__)
+            self.assertEqual(
+                provenance["bunya_jido_version_output"],
+                f"bunya-jido {__version__}",
+            )
+            self.assertEqual(provenance["git_commit_sha"], expected_commit)
+            self.assertEqual(
+                provenance["agent_map_path"],
+                ".bunya-jido/bunya-jido.agent-map.json",
+            )
+            self.assertEqual(
+                provenance["agent_map_sha256"],
+                expected_agent_map_sha,
+            )
 
     def test_tracks_modified_staged_deleted_and_renamed_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:

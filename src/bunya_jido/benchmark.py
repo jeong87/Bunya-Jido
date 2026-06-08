@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import fnmatch
+import hashlib
 import json
 import math
 import subprocess
 from pathlib import Path
 from typing import Any, Iterable
+
+from . import __version__
 
 
 AUDIT_SCHEMA_VERSION = "bunya-jido-worktree-audit-v2"
@@ -146,6 +149,30 @@ def _tracked_changed_lines(root: Path) -> int:
             if value.isdigit():
                 total += int(value)
     return total
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _benchmark_provenance(root: Path) -> dict[str, Any]:
+    agent_map_path = root / ".bunya-jido" / "bunya-jido.agent-map.json"
+    agent_map_relative = ".bunya-jido/bunya-jido.agent-map.json"
+    return {
+        "bunya_jido_version": __version__,
+        "bunya_jido_version_output": f"bunya-jido {__version__}",
+        "git_commit_sha": _git_output(root, "rev-parse", "HEAD")
+        .decode("utf-8", errors="replace")
+        .strip(),
+        "agent_map_path": agent_map_relative if agent_map_path.exists() else None,
+        "agent_map_sha256": _sha256_file(agent_map_path)
+        if agent_map_path.exists()
+        else None,
+    }
 
 
 def _workspace_relative_path(raw_path: str, root: Path) -> str | None:
@@ -312,6 +339,7 @@ def audit_worktree(
     return {
         "schema_version": AUDIT_SCHEMA_VERSION,
         "root": str(resolved_root),
+        "benchmark_provenance": _benchmark_provenance(resolved_root),
         "worktree_clean": not status_entries,
         "production_clean": production_clean,
         "status_entries": status_entries,

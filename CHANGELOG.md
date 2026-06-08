@@ -39,6 +39,9 @@ be documented.
   repeated-run pairing, cumulative/median/nearest-rank-p90 timing,
   context-generation and discovery-to-first-edit visibility, per-task
   comparisons, and optional authoring-time break-even reporting.
+- Benchmark audit provenance fields for the Bunya-Jido version output, git
+  commit SHA, and agent-map file SHA-256 so raw runner results identify
+  the exact map and package under test.
 
 ### Fixed
 

@@ -356,6 +356,17 @@ An entry records review work; it does not prove architectural completeness.
   stale-map review, blueprint and agent-map validation, utility and
   atlas-quality gates, and the full unit suite before commit.
 
+## 2026-06-08 - Benchmark Provenance Fields
+
+- Change: Added benchmark audit provenance for Bunya-Jido version output, git
+  commit SHA, and the agent-map file SHA-256 when present.
+- Decision: This strengthens the Benchmark Evidence Suite contract and raw
+  runner result traceability. It does not change route selection, semantic map
+  structure, viewer output, or benchmark scoring.
+- Validation: Run benchmark audit fixtures, version-alignment smoke test,
+  refresh-context, stale-map review, blueprint and agent-map validation,
+  utility and atlas-quality gates, and the full unit suite before commit.
+
 ## 2026-06-05 - P3 Compact Context And Token Evidence
 
 - Change: Made task-selected Markdown and JSON context compact by default,

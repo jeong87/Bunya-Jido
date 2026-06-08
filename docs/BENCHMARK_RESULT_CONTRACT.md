@@ -61,10 +61,22 @@ final production changes while adding the complete `baseline_audit`,
 protected-file, and no-match policy checks should use observed production
 activity so a write-then-revert attempt cannot evade them.
 
+Each raw benchmark result should also retain the audit report's
+`benchmark_provenance` object. It records the Bunya-Jido CLI version output,
+the repository commit under test, and the SHA-256 of the agent-map file
+when present, so later analysis can identify exactly which map and package
+version produced the run.
+
 ## Result Fields
 
 The `bunya-jido-worktree-audit-v2` report records:
 
+- `benchmark_provenance`
+  - `bunya_jido_version`
+  - `bunya_jido_version_output`
+  - `git_commit_sha`
+  - `agent_map_path`
+  - `agent_map_sha256`
 - `worktree_clean`
 - `production_clean`
 - `changed_files_tracked`
@@ -106,16 +118,19 @@ artifacts still make the worktree non-clean, but they do not make
    runner result's `baseline_clean` field, and mark the run invalid when
    `--require-clean` fails.
 3. Store the complete post-run audit report with the benchmark result.
-4. Treat all changed paths as production unless they classify as an explicit,
+4. Preserve `benchmark_provenance` in the raw result. At minimum, later
+   reports must be able to recover the equivalent of `bunya-jido --version`,
+   `git rev-parse HEAD`, and the agent-map SHA-256.
+5. Treat all changed paths as production unless they classify as an explicit,
    reviewed `--allow-artifact` glob or generated/cache noise.
-5. Do not use `.gitignore` as a blanket production exemption; add only reviewed
+6. Do not use `.gitignore` as a blanket production exemption; add only reviewed
    generated-noise globs when the default classifier is insufficient.
-6. Treat production JSONL file-change events as policy failures even when the
+7. Treat production JSONL file-change events as policy failures even when the
    final worktree is clean.
-7. Use `--require-jsonl` for claims about write-attempt-free execution; a
+8. Use `--require-jsonl` for claims about write-attempt-free execution; a
    missing, empty, malformed, or structurally invalid JSONL log makes that
    evidence incomplete.
-8. Keep context-decision and execution-policy fields in the enclosing runner
+9. Keep context-decision and execution-policy fields in the enclosing runner
    result; this audit reports filesystem truth rather than router policy.
 
 ## Context Policy For Runners
