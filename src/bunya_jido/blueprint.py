@@ -53,6 +53,7 @@ CONTEXT_EXECUTION_POLICIES = {
     "IN_SCOPE_NO_ROUTE": "read_only_discovery",
     "OUT_OF_SCOPE": "read_only",
     "UNCERTAIN": "read_only",
+    "DISABLED": "read_only",
     "NOT_REQUESTED": "read_only",
 }
 CONTEXT_CODEX_SANDBOX_MODES = {
@@ -65,9 +66,14 @@ CONTEXT_AGENT_INSTRUCTIONS = {
     "IN_SCOPE_NO_ROUTE": "Do not modify files during initial discovery. Inspect repository evidence, then request a new context decision or user approval before editing.",
     "OUT_OF_SCOPE": "Do not modify files or create placeholder implementations. Explain the reviewed repository boundary.",
     "UNCERTAIN": "Do not modify files. Inspect read-only evidence only when useful, then request clarification before editing.",
+    "DISABLED": "Bunya-Jido context is disabled for this run. Do not use trusted routes, safe-edit paths, or bounded discovery from this map; continue with ordinary repository inspection.",
     "NOT_REQUESTED": "No task decision was requested. Treat listed routes as a read-only catalog, not permission to edit.",
 }
-NON_MATCH_CONTEXT_DECISIONS = {"IN_SCOPE_NO_ROUTE", "OUT_OF_SCOPE", "UNCERTAIN"}
+NON_MATCH_CONTEXT_DECISIONS = {"IN_SCOPE_NO_ROUTE", "OUT_OF_SCOPE", "UNCERTAIN", "DISABLED"}
+BUNYA_JIDO_CONTEXT_ENV = "BUNYA_JIDO_CONTEXT"
+BUNYA_JIDO_DISABLE_CONTEXT_ENV = "BUNYA_JIDO_DISABLE_CONTEXT"
+CONTEXT_DISABLE_VALUES = {"0", "false", "no", "off", "disable", "disabled"}
+CONTEXT_DISABLE_TRUTHY_VALUES = {"1", "true", "yes", "on"}
 DISCOVERY_REPAIR_TERMS = {
     "correct",
     "ensure",
@@ -2851,6 +2857,124 @@ def _resolve_agent_context_request(
     }
 
 
+def _context_disabled_by_environment(
+    environ: dict[str, str] | os._Environ[str] | None = None,
+) -> dict[str, str] | None:
+    values = os.environ if environ is None else environ
+    disable_value = values.get(BUNYA_JIDO_DISABLE_CONTEXT_ENV)
+    if disable_value is not None and disable_value.strip().lower() in CONTEXT_DISABLE_TRUTHY_VALUES:
+        return {"name": BUNYA_JIDO_DISABLE_CONTEXT_ENV, "value": disable_value}
+    mode_value = values.get(BUNYA_JIDO_CONTEXT_ENV)
+    if mode_value is not None and mode_value.strip().lower() in CONTEXT_DISABLE_VALUES:
+        return {"name": BUNYA_JIDO_CONTEXT_ENV, "value": mode_value}
+    return None
+
+
+def _disabled_context_reason(disabled_by: dict[str, str]) -> str:
+    return (
+        "Bunya-Jido context is disabled by environment "
+        f"{disabled_by['name']}={disabled_by['value']!r}. Continue with ordinary "
+        "repository inspection as if no Bunya-Jido map is available."
+    )
+
+
+def _disabled_agent_context_report(
+    root: str | Path,
+    *,
+    node: str | None,
+    workflow: str | None,
+    task: str | None,
+    changed_files: list[str] | None,
+    verbose: bool,
+    disabled_by: dict[str, str],
+) -> dict[str, Any]:
+    reason = _disabled_context_reason(disabled_by)
+    return {
+        "schema_version": "bunya-jido-context-decision-v1",
+        "output_profile": "verbose" if verbose else "compact",
+        "task": task,
+        "focus_node": node,
+        "focus_workflow": workflow,
+        "changed_files": list(changed_files or []),
+        "artifact_mode": "disabled",
+        "grounding_status": "not_assessed",
+        "trusted_route_count": 0,
+        "context_disabled": True,
+        "disabled_by_environment": dict(disabled_by),
+        "decision": "DISABLED",
+        "route_status": "disabled",
+        "edit_policy": "read_only",
+        "execution_policy": CONTEXT_EXECUTION_POLICIES["DISABLED"],
+        "codex_sandbox_mode": CONTEXT_CODEX_SANDBOX_MODES[
+            CONTEXT_EXECUTION_POLICIES["DISABLED"]
+        ],
+        "agent_instruction": CONTEXT_AGENT_INSTRUCTIONS["DISABLED"],
+        "reason": reason,
+        "route_score": 0,
+        "route_margin": 0,
+        "matched_routes": [],
+        "safe_edit_paths": [],
+        "decision_basis": [reason],
+        "scope_evidence": {
+            "supported_matches": [],
+            "unsupported_matches": [],
+            "ungrounded_sensitive_terms": [],
+        },
+        "warnings": [],
+    }
+
+
+def _generate_disabled_agent_context_text(
+    root: str | Path,
+    *,
+    node: str | None,
+    workflow: str | None,
+    task: str | None,
+    changed_files: list[str] | None,
+    verbose: bool,
+    disabled_by: dict[str, str],
+) -> str:
+    report = _disabled_agent_context_report(
+        root,
+        node=node,
+        workflow=workflow,
+        task=task,
+        changed_files=changed_files,
+        verbose=verbose,
+        disabled_by=disabled_by,
+    )
+    lines = ["# Bunya-Jido Agent Context\n"]
+    if task:
+        lines.append(f"**Task:** {task}")
+    if node:
+        lines.append(f"**Focus node:** `{node}`")
+    if workflow:
+        lines.append(f"**Focus workflow:** `{workflow}`")
+    if changed_files:
+        lines.append(f"**Changed files:** {', '.join(changed_files)}")
+    lines.extend(
+        [
+            "",
+            "## Trust",
+            "- Bunya-Jido context: `disabled`",
+            f"- Disabled by: `{disabled_by['name']}={disabled_by['value']}`",
+            "- Grounding status: `not_assessed`",
+            "",
+            "## Decision",
+            f"- Decision: `{report['decision']}`",
+            f"- Execution policy: `{report['execution_policy']}`",
+            f"- Codex sandbox mode: `{report['codex_sandbox_mode']}`",
+            f"- Reason: {report['reason']}",
+            f"- Agent instruction: {report['agent_instruction']}",
+            "",
+            "## Recommended task routes",
+            "No Bunya-Jido task routes are available because context is disabled for this run.",
+            "",
+        ]
+    )
+    return "\n".join(lines).rstrip() + "\n"
+
+
 def generate_agent_context(
     root: str | Path,
     *,
@@ -2860,6 +2984,17 @@ def generate_agent_context(
     changed_files: list[str] | None = None,
     verbose: bool = False,
 ) -> str:
+    disabled_by = _context_disabled_by_environment()
+    if disabled_by:
+        return _generate_disabled_agent_context_text(
+            root,
+            node=node,
+            workflow=workflow,
+            task=task,
+            changed_files=changed_files,
+            verbose=verbose,
+            disabled_by=disabled_by,
+        )
     resolved = _resolve_agent_context_request(
         root,
         node=node,
@@ -3112,6 +3247,17 @@ def generate_agent_context_report(
     changed_files: list[str] | None = None,
     verbose: bool = False,
 ) -> dict[str, Any]:
+    disabled_by = _context_disabled_by_environment()
+    if disabled_by:
+        return _disabled_agent_context_report(
+            root,
+            node=node,
+            workflow=workflow,
+            task=task,
+            changed_files=changed_files,
+            verbose=verbose,
+            disabled_by=disabled_by,
+        )
     resolved = _resolve_agent_context_request(
         root,
         node=node,
@@ -3243,16 +3389,17 @@ def validate_agent_evaluation_obj(evaluation: Any) -> list[str]:
         if not isinstance(expect, dict):
             errors.append(f"cases[{i}].expect must be an object")
             continue
-        if expect.get("route_status") not in {"matched", "not_found"}:
-            errors.append(f"cases[{i}].expect.route_status must be matched or not_found")
+        if expect.get("route_status") not in {"matched", "not_found", "disabled"}:
+            errors.append(f"cases[{i}].expect.route_status must be matched, not_found, or disabled")
         if "decision" in expect and expect.get("decision") not in {
             "MATCH",
             "IN_SCOPE_NO_ROUTE",
             "OUT_OF_SCOPE",
             "UNCERTAIN",
+            "DISABLED",
         }:
             errors.append(
-                f"cases[{i}].expect.decision must be MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, or UNCERTAIN"
+                f"cases[{i}].expect.decision must be MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, UNCERTAIN, or DISABLED"
             )
         if "execution_policy" in expect and expect.get("execution_policy") not in {
             "workspace_write",
@@ -3572,7 +3719,7 @@ def evaluate_agent_utility(root: str | Path, evaluation_path: str | Path | None 
     def rate(numerator: int, denominator: int) -> float | None:
         return round(numerator / denominator, 3) if denominator else None
 
-    decision_labels = ["MATCH", "IN_SCOPE_NO_ROUTE", "OUT_OF_SCOPE", "UNCERTAIN"]
+    decision_labels = ["MATCH", "IN_SCOPE_NO_ROUTE", "OUT_OF_SCOPE", "UNCERTAIN", "DISABLED"]
     confusion_matrix = {
         expected: {
             actual: decision_confusion[expected][actual]
@@ -3681,15 +3828,16 @@ def _agent_activation_instructions() -> str:
     For implementation, debugging, or code-review work in this repository:
 
     1. Before editing, run `bunya-jido context --root . --task "<user request>"`.
-    2. Obey the returned `Execution policy`; integrations should enforce the matching sandbox when available.
-    3. If the decision is `MATCH`, use `workspace_write` and read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
-    4. If the decision is `IN_SCOPE_NO_ROUTE`, use `read_only_discovery`; state that the map has `No matching trusted route`, inspect only the supplied bounded discovery or ordinary repository evidence without editing, then rerun context with a justified `--node` or `--workflow` focus or request user approval before changing files. Do not infer a route.
-    5. If the decision is `OUT_OF_SCOPE`, use `read_only`; do not edit files or create placeholder implementations, and explain the reviewed repository boundary.
-    6. If the decision is `UNCERTAIN`, use `read_only`; inspect only when useful and request clarification before editing.
-    7. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
-    8. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
-    9. If the repository defines `stale_map_policy`, run `bunya-jido check-stale --root . --git-diff --require-reviewed`; when it reports `stale`, refresh and validate the map or record a reviewed no-structure-change decision in `.bunya-jido/MAP_REVIEW.md`.
-    10. Run the tests named by a matched route after the change, together with any checks required by the repository.
+    2. To force a no-map run, set `BUNYA_JIDO_CONTEXT=off` or `BUNYA_JIDO_DISABLE_CONTEXT=1`; when context reports `DISABLED`, continue with ordinary repository inspection and do not use trusted routes or safe-edit paths.
+    3. Obey the returned `Execution policy`; integrations should enforce the matching sandbox when available.
+    4. If the decision is `MATCH`, use `workspace_write` and read its `Must read`, `Contracts`, and `Tests` guidance before changing files.
+    5. If the decision is `IN_SCOPE_NO_ROUTE`, use `read_only_discovery`; state that the map has `No matching trusted route`, inspect only the supplied bounded discovery or ordinary repository evidence without editing, then rerun context with a justified `--node` or `--workflow` focus or request user approval before changing files. Do not infer a route.
+    6. If the decision is `OUT_OF_SCOPE`, use `read_only`; do not edit files or create placeholder implementations, and explain the reviewed repository boundary.
+    7. If the decision is `UNCERTAIN`, use `read_only`; inspect only when useful and request clarification before editing.
+    8. If context generation reports that no semantic blueprint or agent map exists yet, continue with ordinary repository inspection and treat map creation as separate work.
+    9. After editing, run `bunya-jido refresh-context --root . --changed-file <path>` for the changed files and use only routes justified by that output.
+    10. If the repository defines `stale_map_policy`, run `bunya-jido check-stale --root . --git-diff --require-reviewed`; when it reports `stale`, refresh and validate the map or record a reviewed no-structure-change decision in `.bunya-jido/MAP_REVIEW.md`.
+    11. Run the tests named by a matched route after the change, together with any checks required by the repository.
 
     When asked to update the Bunya-Jido map itself, run `bunya-jido prepare --root . --quiet`,
     execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`, then validate the blueprint and agent map.

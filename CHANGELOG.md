@@ -42,6 +42,9 @@ be documented.
 - Benchmark audit provenance fields for the Bunya-Jido version output, git
   commit SHA, and agent-map file SHA-256 so raw runner results identify
   the exact map and package under test.
+- Runtime context opt-out with `BUNYA_JIDO_CONTEXT=off` or
+  `BUNYA_JIDO_DISABLE_CONTEXT=1`, returning `DISABLED` read-only context with
+  no trusted routes or safe-edit paths.
 
 ### Fixed
 

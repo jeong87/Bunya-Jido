@@ -6,6 +6,7 @@ import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 from bunya_jido.blueprint import (
     AGENT_ACTIVATION_END,
@@ -728,6 +729,59 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertIn("Related Trusted Routes", html)
         self.assertIn("Copy coding-agent context", html)
 
+    def test_environment_can_disable_agent_context_without_map_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            with patch.dict("os.environ", {"BUNYA_JIDO_CONTEXT": "off"}):
+                text = generate_agent_context(root, task="change builder behavior")
+                report = generate_agent_context_report(
+                    root,
+                    task="change builder behavior",
+                )
+                stdout = io.StringIO()
+                with redirect_stdout(stdout):
+                    context_result = main(
+                        [
+                            "context",
+                            "--root",
+                            str(root),
+                            "--task",
+                            "change builder behavior",
+                            "--json",
+                        ]
+                    )
+            with patch.dict("os.environ", {"BUNYA_JIDO_DISABLE_CONTEXT": "1"}):
+                refresh_stdout = io.StringIO()
+                with redirect_stdout(refresh_stdout):
+                    refresh_result = main(
+                        [
+                            "refresh-context",
+                            "--root",
+                            str(root),
+                            "--changed-file",
+                            "src/example.py",
+                        ]
+                    )
+
+        cli_report = json.loads(stdout.getvalue())
+        self.assertIn("Decision: `DISABLED`", text)
+        self.assertIn("Bunya-Jido context: `disabled`", text)
+        self.assertNotIn("### change builder behavior", text)
+        self.assertEqual(report["decision"], "DISABLED")
+        self.assertTrue(report["context_disabled"])
+        self.assertEqual(report["execution_policy"], "read_only")
+        self.assertEqual(report["codex_sandbox_mode"], "read-only")
+        self.assertEqual(report["matched_routes"], [])
+        self.assertEqual(report["safe_edit_paths"], [])
+        self.assertNotIn("discovery_context", report)
+        self.assertEqual(context_result, 0)
+        self.assertEqual(cli_report["decision"], "DISABLED")
+        self.assertEqual(cli_report["matched_routes"], [])
+        self.assertEqual(cli_report["safe_edit_paths"], [])
+        self.assertEqual(refresh_result, 0)
+        self.assertIn("Decision: `DISABLED`", refresh_stdout.getvalue())
+        self.assertIn("**Changed files:** src/example.py", refresh_stdout.getvalue())
+
     def test_validated_optional_studio_route_context_is_projected_but_missing_references_block(self) -> None:
         blueprint = example_blueprint()
         blueprint["atlas"] = {
@@ -1093,7 +1147,7 @@ class AgentMapCharacterizationTests(unittest.TestCase):
             ],
         }
         self.assertIn(
-            "cases[0].expect.decision must be MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, or UNCERTAIN",
+            "cases[0].expect.decision must be MATCH, IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, UNCERTAIN, or DISABLED",
             validate_agent_evaluation_obj(invalid_decision),
         )
         invalid_non_match_contract = {

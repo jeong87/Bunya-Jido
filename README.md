@@ -559,6 +559,12 @@ from actual changed files after editing. If a repository
 defines a stale-map policy, it also tells the agent to run `check-stale` and
 either update the map or record an explicit no-structure-change review.
 
+To temporarily force a no-map run without editing these instruction files, set
+`BUNYA_JIDO_CONTEXT=off` or `BUNYA_JIDO_DISABLE_CONTEXT=1` before invoking
+`bunya-jido context` or `refresh-context`. The command then returns
+`decision=DISABLED`, no trusted routes, no safe-edit paths, and a read-only
+sandbox recommendation.
+
 To generate copyable snippets without touching native project instruction
 files, omit `--activate`:
 

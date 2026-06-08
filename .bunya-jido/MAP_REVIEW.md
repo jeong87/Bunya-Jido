@@ -367,6 +367,20 @@ An entry records review work; it does not prove architectural completeness.
   refresh-context, stale-map review, blueprint and agent-map validation,
   utility and atlas-quality gates, and the full unit suite before commit.
 
+## 2026-06-08 - Runtime Context Opt-Out
+
+- Change: Added `BUNYA_JIDO_CONTEXT=off` and
+  `BUNYA_JIDO_DISABLE_CONTEXT=1` runtime opt-out for `context` and
+  `refresh-context`, returning `DISABLED` read-only context with no trusted
+  routes, safe-edit paths, or discovery context.
+- Decision: This supports explicit no-map runs for users and benchmark
+  runners without deleting map artifacts or editing native agent instruction
+  files. It changes the agent-context contract, not the semantic map
+  structure, viewer output, or route definitions.
+- Validation: Run context opt-out fixtures, activation snippet tests,
+  refresh-context, stale-map review, blueprint and agent-map validation,
+  utility and atlas-quality gates, and the full unit suite before commit.
+
 ## 2026-06-05 - P3 Compact Context And Token Evidence
 
 - Change: Made task-selected Markdown and JSON context compact by default,

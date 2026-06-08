@@ -142,6 +142,12 @@ Markdown:
 bunya-jido context --root workspace --task "<task>" --json
 ```
 
+To force a no-map condition while leaving repository files untouched, set
+`BUNYA_JIDO_CONTEXT=off` or `BUNYA_JIDO_DISABLE_CONTEXT=1` before requesting
+context. The command then returns `decision=DISABLED`, omits trusted routes,
+omits safe-edit paths, and recommends `read-only` sandboxing even if map
+artifacts are present.
+
 The context report includes `decision`, `edit_policy`, `execution_policy`, and
 `codex_sandbox_mode`. Use `codex_sandbox_mode` directly when launching Codex:
 
@@ -151,6 +157,7 @@ The context report includes `decision`, `edit_policy`, `execution_policy`, and
 | `IN_SCOPE_NO_ROUTE` | `read_only_discovery` | `read-only` |
 | `OUT_OF_SCOPE` | `read_only` | `read-only` |
 | `UNCERTAIN` | `read_only` | `read-only` |
+| `DISABLED` | `read_only` | `read-only` |
 
 Do not scrape backtick-wrapped Markdown fields for sandbox selection. If a
 legacy runner must consume older Markdown output, it must normalize surrounding

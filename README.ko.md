@@ -565,6 +565,12 @@ read-only로 유지하고, `IN_SCOPE_NO_ROUTE`에서는 route를 추측하지 �
 `check-stale`도 실행하고, 지도 갱신 또는 구조 변경 없음 검토 기록 중
 맞는 조치를 남기도록 안내합니다.
 
+native 지침 파일을 수정하지 않고 일시적으로 no-map 실행을 강제하려면
+`bunya-jido context` 또는 `refresh-context` 실행 전에
+`BUNYA_JIDO_CONTEXT=off` 또는 `BUNYA_JIDO_DISABLE_CONTEXT=1`을 설정합니다.
+그러면 명령은 `decision=DISABLED`, trusted route 없음, safe-edit path 없음,
+read-only sandbox 권장을 반환합니다.
+
 native 지침 파일을 건드리지 않고 복사 가능한 snippet만 만들려면
 `--activate`를 생략합니다.
 
