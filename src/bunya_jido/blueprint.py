@@ -3885,6 +3885,41 @@ def _merge_activation_block(existing: str, block: str) -> tuple[str, str]:
     return (prefix + "\n\n" if prefix else "") + block + "\n", "appended"
 
 
+def _activation_pattern() -> re.Pattern[str]:
+    return re.compile(
+        re.escape(AGENT_ACTIVATION_START)
+        + r".*?"
+        + re.escape(AGENT_ACTIVATION_END),
+        re.DOTALL,
+    )
+
+
+def _cursor_activation_wrapper_only(text: str) -> bool:
+    return text.strip() == (
+        "---\n"
+        "description: Use Bunya-Jido validated context before repository work\n"
+        "alwaysApply: true\n"
+        "---"
+    )
+
+
+def _remove_activation_block(name: str, existing: str) -> tuple[str, str]:
+    match = _activation_pattern().search(existing)
+    if not match:
+        return existing, "unchanged"
+    before = existing[: match.start()].rstrip()
+    after = existing[match.end() :].lstrip()
+    if before and after:
+        rendered = before + "\n\n" + after
+    elif before:
+        rendered = before + "\n"
+    else:
+        rendered = after
+    if not rendered.strip() or (name == "cursor" and _cursor_activation_wrapper_only(rendered)):
+        return "", "deleted"
+    return rendered if rendered.endswith("\n") else rendered + "\n", "removed"
+
+
 def activate_agent_guides(root: str | Path, agent: str = "all", *, dry_run: bool = False) -> dict[str, dict[str, Any]]:
     root_path = Path(root).resolve()
     targets = _active_agent_targets(root_path)
@@ -3901,6 +3936,37 @@ def activate_agent_guides(root: str | Path, agent: str = "all", *, dry_run: bool
         actions[name] = {"path": path, "status": status, "content": rendered}
         if not dry_run:
             path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(rendered, encoding="utf-8", newline="\n")
+    return actions
+
+
+def deactivate_agent_guides(root: str | Path, agent: str = "all", *, dry_run: bool = False) -> dict[str, dict[str, Any]]:
+    root_path = Path(root).resolve()
+    targets = _active_agent_targets(root_path)
+    selected = targets if agent == "all" else {agent: targets[agent]}
+    actions: dict[str, dict[str, Any]] = {}
+    planned_actions = {
+        "deleted": "would_delete",
+        "removed": "would_remove",
+        "unchanged": "unchanged",
+        "not_found": "not_found",
+    }
+    for name, path in selected.items():
+        if not path.exists():
+            action = "not_found"
+            rendered = ""
+        else:
+            rendered, action = _remove_activation_block(
+                name,
+                path.read_text(encoding="utf-8"),
+            )
+        status = planned_actions[action] if dry_run else action
+        actions[name] = {"path": path, "status": status, "content": rendered}
+        if dry_run:
+            continue
+        if action == "deleted":
+            path.unlink()
+        elif action == "removed":
             path.write_text(rendered, encoding="utf-8", newline="\n")
     return actions
 

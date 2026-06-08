@@ -381,6 +381,19 @@ An entry records review work; it does not prove architectural completeness.
   refresh-context, stale-map review, blueprint and agent-map validation,
   utility and atlas-quality gates, and the full unit suite before commit.
 
+## 2026-06-08 - Persistent Agent Activation Deactivation
+
+- Change: Added `install-agent-guides --deactivate` to remove managed
+  Bunya-Jido native activation blocks while preserving project instructions
+  outside the markers.
+- Decision: This completes the native activation lifecycle without changing
+  map artifacts, trusted routes, context routing behavior, or viewer output.
+  Files created only for Bunya-Jido activation may be removed when no
+  user-authored content remains.
+- Validation: Run deactivation API/CLI fixtures, activation snippet tests,
+  refresh-context, stale-map review, blueprint and agent-map validation,
+  utility and atlas-quality gates, and the full unit suite before commit.
+
 ## 2026-06-05 - P3 Compact Context And Token Evidence
 
 - Change: Made task-selected Markdown and JSON context compact by default,

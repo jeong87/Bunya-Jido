@@ -571,6 +571,18 @@ native 지침 파일을 수정하지 않고 일시적으로 no-map 실행을 강
 그러면 명령은 `decision=DISABLED`, trusted route 없음, safe-edit path 없음,
 read-only sandbox 권장을 반환합니다.
 
+native 활성화를 지속적으로 끄려면 표시된 Bunya-Jido 관리 블록만 제거합니다.
+
+```bash
+bunya-jido install-agent-guides --root . --agent all --deactivate --dry-run
+bunya-jido install-agent-guides --root . --agent all --deactivate
+```
+
+비활성화는 관리 블록 밖의 프로젝트 지침을 보존합니다. native 지침 파일이
+Bunya-Jido 활성화만을 위해 생성되었고 다른 내용이 없으면 그 파일은
+삭제됩니다. 이 작업은 `.bunya-jido/` 지도 artifact나 생성된 HTML 지도는
+삭제하지 않습니다.
+
 native 지침 파일을 건드리지 않고 복사 가능한 snippet만 만들려면
 `--activate`를 생략합니다.
 

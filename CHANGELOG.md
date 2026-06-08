@@ -45,6 +45,9 @@ be documented.
 - Runtime context opt-out with `BUNYA_JIDO_CONTEXT=off` or
   `BUNYA_JIDO_DISABLE_CONTEXT=1`, returning `DISABLED` read-only context with
   no trusted routes or safe-edit paths.
+- Persistent native activation deactivation via
+  `install-agent-guides --deactivate`, removing only managed Bunya-Jido blocks
+  while preserving user-authored project instructions.
 
 ### Fixed
 

@@ -11,6 +11,7 @@ from typing import Any
 from . import __version__
 from .blueprint import (
     activate_agent_guides,
+    deactivate_agent_guides,
     default_blueprint_path,
     default_agent_map_path,
     evaluate_atlas_quality,
@@ -691,14 +692,26 @@ def cmd_summarize_time_efficiency(args: argparse.Namespace) -> int:
 
 
 def cmd_install_agent_guides(args: argparse.Namespace) -> int:
-    if args.dry_run and not args.activate:
-        print("--dry-run requires --activate.", file=sys.stderr)
+    if args.dry_run and not (args.activate or args.deactivate):
+        print("--dry-run requires --activate or --deactivate.", file=sys.stderr)
         return 2
     if args.activate:
         actions = activate_agent_guides(args.root, agent=args.agent, dry_run=args.dry_run)
         for name, action in actions.items():
             print(f"{name}: {action['status']} {action['path']}")
             if args.dry_run:
+                print(action["content"].rstrip())
+                print()
+        return 0
+    if args.deactivate:
+        actions = deactivate_agent_guides(
+            args.root,
+            agent=args.agent,
+            dry_run=args.dry_run,
+        )
+        for name, action in actions.items():
+            print(f"{name}: {action['status']} {action['path']}")
+            if args.dry_run and action["content"]:
                 print(action["content"].rstrip())
                 print()
         return 0
@@ -841,8 +854,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_guides.add_argument("--root", default=".", help="Repository root. Default: current directory.")
     p_guides.add_argument("--agent", choices=["all", "codex", "claude", "cursor", "cline"], default="all", help="Which guide to write. Default: all.")
     p_guides.add_argument("--overwrite", action="store_true", help="Overwrite existing snippet files in default snippet mode.")
-    p_guides.add_argument("--activate", action="store_true", help="Install or update a managed task-context block in each agent's native project instructions file.")
-    p_guides.add_argument("--dry-run", action="store_true", help="With --activate, show planned native instruction writes without changing files.")
+    activation_mode = p_guides.add_mutually_exclusive_group()
+    activation_mode.add_argument("--activate", action="store_true", help="Install or update a managed task-context block in each agent's native project instructions file.")
+    activation_mode.add_argument("--deactivate", action="store_true", help="Remove the managed Bunya-Jido block from each agent's native project instructions file.")
+    p_guides.add_argument("--dry-run", action="store_true", help="With --activate or --deactivate, show planned native instruction changes without changing files.")
     p_guides.set_defaults(func=cmd_install_agent_guides)
     return parser
 

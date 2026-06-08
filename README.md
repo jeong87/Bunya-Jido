@@ -565,6 +565,19 @@ To temporarily force a no-map run without editing these instruction files, set
 `decision=DISABLED`, no trusted routes, no safe-edit paths, and a read-only
 sandbox recommendation.
 
+To persistently turn off native activation, remove only the managed
+Bunya-Jido block:
+
+```bash
+bunya-jido install-agent-guides --root . --agent all --deactivate --dry-run
+bunya-jido install-agent-guides --root . --agent all --deactivate
+```
+
+Deactivation preserves any project instructions outside the marked block. If a
+native instruction file was created only for Bunya-Jido activation and has no
+other content, it is removed. This does not delete `.bunya-jido/` map artifacts
+or the generated HTML map.
+
 To generate copyable snippets without touching native project instruction
 files, omit `--activate`:
 

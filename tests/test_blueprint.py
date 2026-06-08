@@ -12,6 +12,7 @@ from bunya_jido.blueprint import (
     AGENT_ACTIVATION_END,
     AGENT_ACTIVATION_START,
     activate_agent_guides,
+    deactivate_agent_guides,
     evaluate_agent_utility,
     evaluate_map_freshness,
     generate_agent_context,
@@ -1291,13 +1292,74 @@ class AgentGuideActivationTests(unittest.TestCase):
         self.assertIn(".bunya-jido/MAP_REVIEW.md", cursor_text)
         self.assertNotIn(b"\r\n", cursor_bytes)
 
+    def test_deactivation_removes_only_managed_blocks_and_preserves_user_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            agents_path = root / "AGENTS.md"
+            agents_path.write_text("# Existing Rules\n\nKeep this instruction.\n", encoding="utf-8")
+            activate_agent_guides(root, agent="all")
+            cursor_path = root / ".cursor" / "rules" / "bunya-jido.mdc"
+
+            dry_run = deactivate_agent_guides(root, agent="codex", dry_run=True)
+            dry_run_text = agents_path.read_text(encoding="utf-8")
+            codex = deactivate_agent_guides(root, agent="codex")
+            codex_text = agents_path.read_text(encoding="utf-8")
+            remaining = deactivate_agent_guides(root, agent="all")
+            cursor_exists_after_deactivation = cursor_path.exists()
+            missing = deactivate_agent_guides(root, agent="all")
+
+        self.assertEqual(dry_run["codex"]["status"], "would_remove")
+        self.assertIn(AGENT_ACTIVATION_START, dry_run_text)
+        self.assertEqual(codex["codex"]["status"], "removed")
+        self.assertIn("Keep this instruction.", codex_text)
+        self.assertNotIn(AGENT_ACTIVATION_START, codex_text)
+        self.assertNotIn(AGENT_ACTIVATION_END, codex_text)
+        self.assertEqual(remaining["cursor"]["status"], "deleted")
+        self.assertFalse(cursor_exists_after_deactivation)
+        self.assertEqual(missing["cursor"]["status"], "not_found")
+        self.assertEqual(missing["codex"]["status"], "unchanged")
+
+    def test_deactivation_cli_dry_run_lists_native_targets_without_writing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            activate_agent_guides(root, agent="all")
+            stdout = io.StringIO()
+            with redirect_stdout(stdout):
+                result = main(
+                    [
+                        "install-agent-guides",
+                        "--root",
+                        str(root),
+                        "--agent",
+                        "all",
+                        "--deactivate",
+                        "--dry-run",
+                    ]
+                )
+
+            output = stdout.getvalue()
+            agents_exists = (root / "AGENTS.md").exists()
+            claude_exists = (root / "CLAUDE.md").exists()
+            cursor_exists = (root / ".cursor" / "rules" / "bunya-jido.mdc").exists()
+            cline_exists = (root / ".clinerules" / "bunya-jido.md").exists()
+
+        self.assertEqual(result, 0)
+        self.assertIn("codex: would_delete", output)
+        self.assertIn("claude: would_delete", output)
+        self.assertIn("cursor: would_delete", output)
+        self.assertIn("cline: would_delete", output)
+        self.assertTrue(agents_exists)
+        self.assertTrue(claude_exists)
+        self.assertTrue(cursor_exists)
+        self.assertTrue(cline_exists)
+
     def test_dry_run_without_activation_is_rejected(self) -> None:
         stderr = io.StringIO()
         with redirect_stderr(stderr):
             result = main(["install-agent-guides", "--dry-run"])
 
         self.assertEqual(result, 2)
-        self.assertIn("--dry-run requires --activate", stderr.getvalue())
+        self.assertIn("--dry-run requires --activate or --deactivate", stderr.getvalue())
 
 
 if __name__ == "__main__":
