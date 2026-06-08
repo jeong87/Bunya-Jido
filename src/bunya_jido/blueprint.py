@@ -96,6 +96,8 @@ DISCOVERY_SKIP_DIRECTORIES = {
 DISCOVERY_LIMITS = {
     "likely_areas": 3,
     "likely_workflows": 2,
+    "domain_entities": 6,
+    "route_signals": 6,
     "read_first": 5,
     "likely_tests": 3,
     "search_commands": 3,
@@ -353,6 +355,9 @@ def agent_map_schema() -> dict[str, Any]:
                         "when_not_to_use": {"type": "array", "items": {"type": "string"}},
                         "forbidden_technologies": {"type": "array", "items": {"type": "string"}},
                         "unsupported_artifacts": {"type": "array", "items": {"type": "string"}},
+                        "trigger_phrases": {"type": "array", "items": {"type": "string"}},
+                        "failure_symptoms": {"type": "array", "items": {"type": "string"}},
+                        "domain_entities": {"type": "array", "items": {"type": "string"}},
                         "projection_context": {"type": "string"},
                         "scenario_context": {"type": "array", "items": {"type": "string"}},
                         "do_not_touch_without_reason": {"type": "array", "items": {"type": "string"}},
@@ -1287,6 +1292,9 @@ def validate_agent_map_obj(agent_map: dict[str, Any], root: str | Path | None = 
             "when_to_use",
             "when_not_to_use",
             "common_failure_modes",
+            "trigger_phrases",
+            "failure_symptoms",
+            "domain_entities",
             "forbidden_technologies",
             "unsupported_artifacts",
         ):
@@ -1567,7 +1575,14 @@ def _route_positive_text(route: dict[str, Any]) -> str:
         str(route.get("intent") or ""),
         str(route.get("notes") or ""),
     ]
-    for key in ("match_terms", "when_to_use", "common_failure_modes"):
+    for key in (
+        "match_terms",
+        "when_to_use",
+        "common_failure_modes",
+        "trigger_phrases",
+        "failure_symptoms",
+        "domain_entities",
+    ):
         values.extend(str(item) for item in route.get(key) or [] if item)
     return " ".join(values)
 
@@ -1960,11 +1975,26 @@ def _match_route(
         ]
         explicit_matches = _matching_boundary_entries(
             task,
-            [*(route.get("match_terms") or []), *(route.get("when_to_use") or [])],
+            [
+                *(route.get("match_terms") or []),
+                *(route.get("when_to_use") or []),
+            ],
         )
-        symptom_matches = _matching_boundary_entries(
+        trigger_matches = _matching_boundary_entries(
+            task,
+            list(route.get("trigger_phrases") or []),
+        )
+        common_failure_matches = _matching_boundary_entries(
             task,
             list(route.get("common_failure_modes") or []),
+        )
+        failure_symptom_matches = _matching_boundary_entries(
+            task,
+            list(route.get("failure_symptoms") or []),
+        )
+        domain_matches = _matching_boundary_entries(
+            task,
+            list(route.get("domain_entities") or []),
         )
         strong_explicit_matches = [
             entry
@@ -1979,10 +2009,34 @@ def _match_route(
                 if term in task_terms
             )
         )
-        symptom_terms = list(
+        trigger_terms = list(
             dict.fromkeys(
                 term
-                for entry in symptom_matches
+                for entry in trigger_matches
+                for term in _task_match_terms(entry)
+                if term in task_terms
+            )
+        )
+        common_failure_terms = list(
+            dict.fromkeys(
+                term
+                for entry in common_failure_matches
+                for term in _task_match_terms(entry)
+                if term in task_terms
+            )
+        )
+        failure_symptom_terms = list(
+            dict.fromkeys(
+                term
+                for entry in failure_symptom_matches
+                for term in _task_match_terms(entry)
+                if term in task_terms
+            )
+        )
+        domain_terms = list(
+            dict.fromkeys(
+                term
+                for entry in domain_matches
                 for term in _task_match_terms(entry)
                 if term in task_terms
             )
@@ -2000,21 +2054,52 @@ def _match_route(
             reasons.append("task terms match: " + ", ".join(f"`{word}`" for word in matched_terms))
         if explicit_matches:
             reasons.extend(f"task matches explicit route use `{entry}`" for entry in explicit_matches)
-        if symptom_matches:
-            reasons.extend(f"task matches route failure mode `{entry}`" for entry in symptom_matches)
+        if trigger_matches:
+            reasons.extend(f"task matches route trigger phrase `{entry}`" for entry in trigger_matches)
+        if common_failure_matches:
+            reasons.extend(
+                f"task matches route failure mode `{entry}`" for entry in common_failure_matches
+            )
+        if failure_symptom_matches:
+            reasons.extend(
+                f"task matches route failure symptom `{entry}`"
+                for entry in failure_symptom_matches
+            )
+        if domain_matches:
+            reasons.extend(f"task matches route domain entity `{entry}`" for entry in domain_matches)
         reasons.extend(grounded_matches["reasons"])
         evidence_terms = {
             "route_text": matched_terms,
             "explicit_use": explicit_terms,
-            "failure_mode": symptom_terms,
+            "trigger_phrase": trigger_terms,
+            "failure_mode": common_failure_terms,
+            "failure_symptom": failure_symptom_terms,
+            "domain_entity": domain_terms,
+            "route_specific_start_node": grounded_matches["unique_node_terms"],
+            "route_specific_workflow": grounded_matches["unique_workflow_terms"],
+        }
+        route_confirming_evidence_terms = {
+            "route_text": matched_terms,
+            "explicit_use": explicit_terms,
+            "failure_mode": common_failure_terms,
             "route_specific_start_node": grounded_matches["unique_node_terms"],
             "route_specific_workflow": grounded_matches["unique_workflow_terms"],
         }
         positive_categories = {
             category for category, terms in evidence_terms.items() if terms
         }
+        route_confirming_categories = {
+            category
+            for category, terms in route_confirming_evidence_terms.items()
+            if terms
+        }
         distinct_positive_terms = list(
             dict.fromkeys(term for terms in evidence_terms.values() for term in terms)
+        )
+        distinct_route_confirming_terms = list(
+            dict.fromkeys(
+                term for terms in route_confirming_evidence_terms.values() for term in terms
+            )
         )
         # Early route-title terms help rank intent; shared workflow vocabulary never confirms a route.
         title_position_bonus = max(
@@ -2029,7 +2114,10 @@ def _match_route(
             + (len(matched_intent_terms) * 2)
             + (len(strong_explicit_matches) * 6)
             + (len(explicit_terms) * 2)
-            + len(symptom_terms)
+            + len(common_failure_terms)
+            + len(failure_symptom_terms)
+            + len(trigger_terms)
+            + len(domain_terms)
             + (len(grounded_matches["unique_node_terms"]) * 3)
             + (len(grounded_matches["unique_workflow_terms"]) * 3)
             + len(grounded_matches["shared_node_terms"])
@@ -2038,9 +2126,9 @@ def _match_route(
             + title_position_bonus
         )
         independently_grounded = (
-            len(positive_categories) >= 2
-            and len(distinct_positive_terms) >= 2
-            and positive_categories != {"failure_mode"}
+            len(route_confirming_categories) >= 2
+            and len(distinct_route_confirming_terms) >= 2
+            and route_confirming_categories != {"failure_mode"}
         )
         multiple_explicit_terms = len(explicit_matches) >= 2 and len(explicit_terms) >= 2
         strong_match = (
@@ -2128,9 +2216,28 @@ def _repository_discovery_candidates(
     task_terms: list[str],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     task_term_set = set(task_terms)
-    areas: list[dict[str, Any]] = []
+    area_by_path: dict[str, dict[str, Any]] = {}
     files: list[dict[str, Any]] = []
     visited = 0
+
+    def add_area(
+        *,
+        relative: str,
+        matched: list[str],
+        score: int,
+        evidence: str,
+    ) -> None:
+        existing = area_by_path.get(relative)
+        if existing and int(existing.get("score") or 0) >= score:
+            return
+        area_by_path[relative] = {
+            "kind": "repository_path",
+            "path": relative,
+            "matched_terms": matched,
+            "score": score,
+            "evidence": evidence,
+        }
+
     # Repository fallback uses bounded path-name evidence only, never file contents or edit paths.
     for current, directories, filenames in os.walk(root_path):
         directories[:] = sorted(
@@ -2151,14 +2258,11 @@ def _repository_discovery_candidates(
             relative = (relative_current / directory).as_posix()
             matched = sorted(task_term_set & set(_context_terms(relative, drop_generic=True)))
             if matched:
-                areas.append(
-                    {
-                        "kind": "repository_path",
-                        "path": relative,
-                        "matched_terms": matched,
-                        "score": (len(matched) * 10) - len(Path(relative).parts),
-                        "evidence": "existing repository directory",
-                    }
+                add_area(
+                    relative=relative,
+                    matched=matched,
+                    score=(len(matched) * 10) - len(Path(relative).parts),
+                    evidence="existing repository directory",
                 )
         for filename in sorted(filenames):
             visited += 1
@@ -2166,6 +2270,14 @@ def _repository_discovery_candidates(
             filename_terms = set(_context_terms(filename, drop_generic=True))
             matched = sorted(task_term_set & filename_terms)
             if matched:
+                parent = Path(relative).parent.as_posix()
+                if parent and parent != ".":
+                    add_area(
+                        relative=parent,
+                        matched=matched,
+                        score=(len(matched) * 8) - len(Path(parent).parts),
+                        evidence="parent directory of matching file",
+                    )
                 files.append(
                     {
                         "path": relative,
@@ -2176,9 +2288,52 @@ def _repository_discovery_candidates(
                 )
         if visited >= 20000:
             break
-    areas.sort(key=lambda item: (-item["score"], item["path"]))
+    areas = sorted(area_by_path.values(), key=lambda item: (-item["score"], item["path"]))
     files.sort(key=lambda item: (-item["score"], item["path"]))
     return areas, files
+
+
+def _route_metadata_discovery_candidates(
+    scored: list[tuple[dict[str, Any], dict[str, Any]]],
+    task_terms: list[str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    domain_entities: list[dict[str, Any]] = []
+    route_signals: list[dict[str, Any]] = []
+    fields = (
+        ("domain_entities", "route domain entity", domain_entities),
+        ("trigger_phrases", "route trigger phrase", route_signals),
+        ("failure_symptoms", "route failure symptom", route_signals),
+        ("common_failure_modes", "route failure mode", route_signals),
+    )
+    for match, route in scored:
+        if match.get("status") not in {"weak"}:
+            continue
+        for field, evidence, target in fields:
+            for entry in route.get(field) or []:
+                if not isinstance(entry, str) or not entry.strip():
+                    continue
+                matched = _matched_semantic_terms(task_terms, entry)
+                if not matched:
+                    continue
+                target.append(
+                    {
+                        "value": entry,
+                        "source": "agent-map route metadata",
+                        "matched_terms": matched,
+                        "evidence": evidence,
+                        "score": int(match.get("score") or 0) + (len(matched) * 4),
+                    }
+                )
+    def unique_sorted(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        deduped = {
+            (str(item["value"]), str(item["source"]), str(item["evidence"])): item
+            for item in items
+        }
+        return sorted(
+            deduped.values(),
+            key=lambda item: (-int(item.get("score") or 0), str(item["value"])),
+        )
+    return unique_sorted(domain_entities), unique_sorted(route_signals)
 
 
 def _is_test_path(path: str, kind: str = "") -> bool:
@@ -2310,6 +2465,10 @@ def _build_bounded_discovery(
     repository_areas, repository_files = _repository_discovery_candidates(
         root_path, task_terms
     )
+    domain_entities, route_signals = _route_metadata_discovery_candidates(
+        selection["scored"],
+        task_terms,
+    )
     area_candidates = sorted(
         [*node_candidates, *repository_areas],
         key=lambda item: (
@@ -2372,7 +2531,14 @@ def _build_bounded_discovery(
             for candidate in selected_workflows
         ],
     ][: DISCOVERY_LIMITS["recheck_commands"]]
-    if not area_candidates and not selected_workflows and not read_first and not likely_tests:
+    if (
+        not area_candidates
+        and not selected_workflows
+        and not domain_entities
+        and not route_signals
+        and not read_first
+        and not likely_tests
+    ):
         return {}
     return {
         "mode": "bounded_read_only",
@@ -2384,6 +2550,14 @@ def _build_bounded_discovery(
         "likely_workflows": [
             {key: value for key, value in candidate.items() if key != "score"}
             for candidate in selected_workflows
+        ],
+        "domain_entities": [
+            {key: value for key, value in candidate.items() if key != "score"}
+            for candidate in domain_entities[: DISCOVERY_LIMITS["domain_entities"]]
+        ],
+        "route_signals": [
+            {key: value for key, value in candidate.items() if key != "score"}
+            for candidate in route_signals[: DISCOVERY_LIMITS["route_signals"]]
         ],
         "read_first": read_first,
         "likely_tests": likely_tests,
@@ -2796,6 +2970,19 @@ def generate_agent_context(
             for candidate in likely_workflows:
                 terms = ", ".join(f"`{term}`" for term in candidate.get("matched_terms") or [])
                 lines.append(f"- `{candidate.get('id')}` - {candidate.get('label', '')} | matched: {terms}")
+        for title, field in (
+            ("Domain entities", "domain_entities"),
+            ("Route signals", "route_signals"),
+        ):
+            candidates = discovery.get(field) or []
+            if candidates:
+                lines.append(f"\n**{title}:**")
+                for candidate in candidates:
+                    terms = ", ".join(f"`{term}`" for term in candidate.get("matched_terms") or [])
+                    lines.append(
+                        f"- `{candidate.get('value')}` - {candidate.get('evidence')} "
+                        f"from {candidate.get('source')} | matched: {terms}"
+                    )
         for title, field in (
             ("Read first", "read_first"),
             ("Likely tests", "likely_tests"),

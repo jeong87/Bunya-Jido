@@ -343,6 +343,19 @@ An entry records review work; it does not prove architectural completeness.
   review, blueprint and agent-map validation, utility and atlas-quality gates,
   and the full unit suite before commit.
 
+## 2026-06-08 - Bounded Discovery Route Metadata
+
+- Change: Added validated route metadata fields for trigger phrases, failure
+  symptoms, and domain entities, and exposed matching weak-route hints in
+  capped `IN_SCOPE_NO_ROUTE` discovery output.
+- Decision: This strengthens the existing bounded agent-context projection. It
+  does not change semantic map structure, viewer output, or safe-edit
+  boundaries; metadata hints remain read-only discovery signals and cannot
+  confirm a trusted route without independent route evidence.
+- Validation: Run focused route-selection/discovery tests, refresh-context,
+  stale-map review, blueprint and agent-map validation, utility and
+  atlas-quality gates, and the full unit suite before commit.
+
 ## 2026-06-05 - P3 Compact Context And Token Evidence
 
 - Change: Made task-selected Markdown and JSON context compact by default,

@@ -23,6 +23,9 @@ be documented.
 - Evidence-backed, capped `IN_SCOPE_NO_ROUTE` discovery with likely areas,
   first reads, likely tests, read-only search commands, and context recheck
   commands.
+- Optional bounded-discovery route metadata for trigger phrases, failure
+  symptoms, and domain entities without treating those hints as trusted-route
+  confirmation by themselves.
 - P2 trusted-route recall, bounded-discovery coverage, actionable-guidance
   coverage, and normal-bugfix hard-rejection metrics.
 - Compact-by-default Markdown and JSON context output with `--verbose`
@@ -52,6 +55,9 @@ be documented.
 - Normal bugfix routing now recovers from independent explicit, failure-mode,
   route-specific node, and workflow evidence without allowing a failure mode
   or shared-workflow term to select a route alone.
+- `IN_SCOPE_NO_ROUTE` can surface weak-route domain and symptom hints for
+  read-only discovery while keeping trusted route and safe-edit output
+  suppressed.
 - Default task context no longer repeats diagnostic scores, route evidence,
   start-node identifiers, generated-doc references, or full discovery
   evidence when the compact handoff already carries the actionable contract.

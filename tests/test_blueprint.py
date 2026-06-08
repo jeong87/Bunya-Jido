@@ -328,6 +328,7 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         agent_map["task_routes"][0]["must_read"] = "README.md"
         agent_map["task_routes"][0]["when_not_to_use"] = "mobile work"
         agent_map["task_routes"][0]["common_failure_modes"] = "cursor drift"
+        agent_map["task_routes"][0]["domain_entities"] = "BuilderState"
         agent_map["repository_scope"]["unsupported_surfaces"] = "native iOS application"
 
         errors, _, _ = validate_agent_map_obj(agent_map, blueprint=example_blueprint())
@@ -336,6 +337,10 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertIn("task_routes[0].when_not_to_use must be a list of non-empty strings", errors)
         self.assertIn(
             "task_routes[0].common_failure_modes must be a list of non-empty strings",
+            errors,
+        )
+        self.assertIn(
+            "task_routes[0].domain_entities must be a list of non-empty strings",
             errors,
         )
         self.assertIn(
@@ -472,6 +477,13 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         blueprint["nodes"][0]["source_path"] = "src/cli.py"
         blueprint["nodes"][0]["evidence"] = [{"kind": "source", "path": "src/cli.py"}]
         agent_map = example_agent_map()
+        agent_map["task_routes"][0]["domain_entities"] = [
+            "queue lease owner",
+            "QueueLease",
+        ]
+        agent_map["task_routes"][0]["failure_symptoms"] = [
+            "lease ownership does not transfer",
+        ]
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             outdir = root / ".bunya-jido"
@@ -540,9 +552,26 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertLessEqual(len(discovery["read_first"]), 5)
         self.assertLessEqual(len(discovery["likely_tests"]), 3)
         self.assertEqual(repository_path["decision"], "IN_SCOPE_NO_ROUTE")
+        self.assertEqual(repository_path["matched_routes"], [])
+        self.assertEqual(repository_path["safe_edit_paths"], [])
         self.assertIn(
             "src/fixture/queueing",
             [candidate.get("path") for candidate in repository_path["discovery_context"]["likely_areas"]],
+        )
+        self.assertIn(
+            "queue lease owner",
+            [candidate.get("value") for candidate in repository_path["discovery_context"]["domain_entities"]],
+        )
+        self.assertIn(
+            "lease ownership does not transfer",
+            [candidate.get("value") for candidate in repository_path["discovery_context"]["route_signals"]],
+        )
+        self.assertFalse(
+            any(
+                "source_route" in candidate
+                for field in ("domain_entities", "route_signals")
+                for candidate in repository_path["discovery_context"][field]
+            )
         )
         self.assertTrue(repository_path["discovery_context"]["search_commands"])
         self.assertNotIn("discovery_context", unsupported)

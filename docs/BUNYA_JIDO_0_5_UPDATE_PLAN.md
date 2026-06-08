@@ -163,6 +163,19 @@ These are context-generation replay results, not live-agent resolution,
 boundary-violation, token, or timing evidence. The versioned-runner live gates
 remain required before claiming the full P2 release minimum.
 
+### 1.4.1 P2 bounded-discovery metadata hardening - 2026-06-08
+
+Agent-map task routes may now carry optional `trigger_phrases`,
+`failure_symptoms`, and `domain_entities`. These fields are validated as
+non-empty string lists and can appear in capped `IN_SCOPE_NO_ROUTE` discovery
+as route signals or domain entities.
+
+These fields deliberately do not lower trusted-route confirmation thresholds.
+They can rank and explain read-only discovery, but they do not produce
+`MATCH`, trusted routes, or safe-edit paths unless independent route-confirming
+evidence still justifies the route. This keeps P2 recall recovery from turning
+synthetic benchmark vocabulary into false-positive route selection.
+
 ### 1.5 P3 implementation status - 2026-06-05
 
 Task-selected Markdown and JSON context is now compact by default, while
