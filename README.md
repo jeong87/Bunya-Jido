@@ -41,11 +41,16 @@ links to the detailed reports.
 
 ## Quick Start
 
-1. In the repository you want to map, install Bunya-Jido:
+1. In the repository you want to map, install the public alpha from PyPI:
 
 ```bash
 python -m pip install --pre bunya-jido
+bunya-jido --version
 ```
+
+The `--pre` flag is required while the newest release is an alpha. If your
+environment has an older `pip`, run `python -m pip install --upgrade pip`
+first.
 
 2. From that repository root, give your coding agent(gpt5.5-xhigh is recommended) this prompt:
 
@@ -115,14 +120,15 @@ Requirements:
 The CLI is designed for Windows, macOS, and Linux. CI tests Ubuntu with Python
 3.10-3.12 and Windows and macOS with Python 3.12.
 
-Install with one command:
+Install the public alpha from PyPI with one command:
 
 ```bash
 python -m pip install --pre bunya-jido
 ```
 
-The `--pre` flag selects the public alpha release. To test unreleased `main`,
-install directly from GitHub:
+The `--pre` flag selects alpha releases such as `0.5.0a1`. When Bunya-Jido has
+a stable release, `python -m pip install bunya-jido` will be enough. To test
+unreleased `main`, install directly from GitHub:
 
 ```bash
 python -m pip install git+https://github.com/jeong87/Bunya-Jido.git

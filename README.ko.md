@@ -41,11 +41,15 @@ Synthetic benchmark, GPT-5.5 Medium, scenario별 3회 반복 결과입니다.
 
 ## 빠른 시작
 
-1. 지도를 만들 저장소에서 Bunya-Jido를 설치합니다.
+1. 지도를 만들 저장소에서 PyPI public alpha를 설치합니다.
 
 ```bash
 python -m pip install --pre bunya-jido
+bunya-jido --version
 ```
+
+최신 릴리스가 alpha인 동안에는 `--pre` 옵션이 필요합니다. 오래된
+`pip` 환경이라면 먼저 `python -m pip install --upgrade pip`를 실행하세요.
 
 2. 그 저장소 루트에서 코딩 에이전트에게 다음 문장을 그대로 지시합니다.
 
@@ -116,15 +120,16 @@ CLI는 Windows, macOS, Linux에서 사용할 수 있도록 설계되어 있습�
 CI는 Ubuntu에서 Python 3.10-3.12를, Windows와 macOS에서 Python 3.12를
 검증합니다.
 
-설치는 한 줄이면 됩니다.
+PyPI public alpha 설치는 한 줄이면 됩니다.
 
 ```bash
 python -m pip install --pre bunya-jido
 ```
 
-`--pre`는 public alpha 릴리스를 설치하기 위한 옵션입니다. 아직
-릴리스되지 않은 `main`을 테스트하려면 GitHub에서 직접 설치할 수
-있습니다.
+`--pre`는 `0.5.0a1` 같은 alpha 릴리스를 설치하기 위한 옵션입니다.
+Bunya-Jido에 stable 릴리스가 생기면 `python -m pip install bunya-jido`만으로
+충분해집니다. 아직 릴리스되지 않은 `main`을 테스트하려면 GitHub에서
+직접 설치할 수 있습니다.
 
 ```bash
 python -m pip install git+https://github.com/jeong87/Bunya-Jido.git

@@ -4,6 +4,18 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-06-09 - Public Alpha Quick Install Clarification
+
+- Change: Clarified the PyPI public-alpha install path in both READMEs,
+  including the `--pre` requirement, version check, older-`pip` note, and
+  future stable install command.
+- Decision: This is onboarding copy for the already prepared `0.5.0a1`
+  release. It does not change the semantic blueprint, agent-map routes,
+  viewer behavior, release workflow semantics, or repository architecture
+  interpretation.
+- Validation: Run refresh-context for changed README files, stale-map review,
+  release smoke checks, and standard repository gates before publishing.
+
 ## 2026-06-09 - Public Alpha Release Metadata And Benchmark Disclosure
 
 - Change: Prepared `0.5.0a1` release metadata, benchmark disclosure docs,
