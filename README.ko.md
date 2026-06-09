@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://jeong87.github.io/Bunya-Jido/demo.html">
-    <img src="docs/assets/self-map-grounded.png" alt="Grounded Bunya-Jido constellation map preview with semantic role glyphs" width="100%">
+    <img src="https://jeong87.github.io/Bunya-Jido/assets/self-map-grounded.png" alt="Grounded Bunya-Jido constellation map preview with semantic role glyphs" width="100%">
   </a>
 </p>
 
@@ -126,7 +126,7 @@ PyPI public alpha 설치는 한 줄이면 됩니다.
 python -m pip install --pre bunya-jido
 ```
 
-`--pre`는 `0.5.0a1` 같은 alpha 릴리스를 설치하기 위한 옵션입니다.
+`--pre`는 `0.5.0a2` 같은 alpha 릴리스를 설치하기 위한 옵션입니다.
 Bunya-Jido에 stable 릴리스가 생기면 `python -m pip install bunya-jido`만으로
 충분해집니다. 아직 릴리스되지 않은 `main`을 테스트하려면 GitHub에서
 직접 설치할 수 있습니다.

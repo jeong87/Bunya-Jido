@@ -359,7 +359,10 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual((width, height), (1440, 900))
         for readme in ("README.md", "README.ko.md"):
             text = (ROOT / readme).read_text(encoding="utf-8")
-            self.assertIn("docs/assets/self-map-grounded.png", text)
+            self.assertIn(
+                "https://jeong87.github.io/Bunya-Jido/assets/self-map-grounded.png",
+                text,
+            )
             self.assertIn("semantic role glyphs", text)
 
     def test_release_diagnostics_require_the_committed_grounded_self_map(self) -> None:

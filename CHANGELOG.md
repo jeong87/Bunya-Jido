@@ -9,6 +9,14 @@ be documented.
 
 No changes yet.
 
+## 0.5.0a2 - 2026-06-09
+
+### Fixed
+
+- PyPI long-description rendering now uses an absolute public URL for the
+  README hero image so the package page shows the current self-map preview
+  instead of a broken relative `docs/assets/` image.
+
 ## 0.5.0a1 - 2026-06-09
 
 ### Added

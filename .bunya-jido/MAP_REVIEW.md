@@ -4,6 +4,19 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-06-09 - 0.5.0a2 PyPI Description Image Fix
+
+- Change: Replaced the README hero image's repository-relative
+  `docs/assets/` path with the public GitHub Pages image URL and bumped the
+  alpha package metadata to `0.5.0a2` for a PyPI long-description fix.
+- Decision: This is a packaging and documentation rendering correction. It
+  does not change the semantic blueprint, agent-map routes, viewer behavior,
+  benchmark evidence, release workflow semantics, or repository architecture
+  interpretation.
+- Validation: Run refresh-context for changed files, stale-map review,
+  version alignment, package build, metadata check, and installed-wheel smoke
+  before publishing the patch release.
+
 ## 2026-06-09 - Public Alpha Quick Install Clarification
 
 - Change: Clarified the PyPI public-alpha install path in both READMEs,

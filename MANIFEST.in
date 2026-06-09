@@ -13,6 +13,7 @@ include docs/BUNYA_JIDO_RECENT_DUAL_SCALE_REPORT_KO.md
 include docs/CONTEXT_EXECUTION_POLICY.md
 include docs/CONTRIBUTION_PLAN.md
 include docs/RELEASE_NOTES_0_5_0A1.md
+include docs/RELEASE_NOTES_0_5_0A2.md
 include docs/RELEASING.md
 include docs/SCANNER_COVERAGE.md
 include docs/STUDIO_ATLAS_UPGRADE_BASELINE.md

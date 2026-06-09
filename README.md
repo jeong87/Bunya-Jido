@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://jeong87.github.io/Bunya-Jido/demo.html">
-    <img src="docs/assets/self-map-grounded.png" alt="Grounded Bunya-Jido constellation map preview with semantic role glyphs" width="100%">
+    <img src="https://jeong87.github.io/Bunya-Jido/assets/self-map-grounded.png" alt="Grounded Bunya-Jido constellation map preview with semantic role glyphs" width="100%">
   </a>
 </p>
 
@@ -126,7 +126,7 @@ Install the public alpha from PyPI with one command:
 python -m pip install --pre bunya-jido
 ```
 
-The `--pre` flag selects alpha releases such as `0.5.0a1`. When Bunya-Jido has
+The `--pre` flag selects alpha releases such as `0.5.0a2`. When Bunya-Jido has
 a stable release, `python -m pip install bunya-jido` will be enough. To test
 unreleased `main`, install directly from GitHub:
 
