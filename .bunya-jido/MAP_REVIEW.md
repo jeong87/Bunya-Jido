@@ -4,6 +4,18 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-06-09 - Public Alpha Release Metadata And Benchmark Disclosure
+
+- Change: Prepared `0.5.0a1` release metadata, benchmark disclosure docs,
+  README benchmark/limitation summaries, and release wheel smoke validation.
+- Decision: This is release packaging and evidence disclosure work. It does
+  not change the committed semantic blueprint, agent-map routes, viewer
+  behavior, or repository architecture interpretation.
+- Validation: Run refresh-context for changed files, stale-map review,
+  blueprint and agent-map validation, utility and atlas-quality gates, full
+  unit tests, source distribution/wheel build, and installed-wheel CLI smoke
+  checks before release publication.
+
 ## 2026-06-05 - P2 Normal Bugfix Recovery And Bounded Discovery
 
 - Change: Added independent-evidence route recovery, capped evidence-backed

@@ -3,4 +3,18 @@ include README.md
 include LICENSE
 include CHANGELOG.md
 include CONTRIBUTING.md
-recursive-include docs *.md
+include docs/AGENT_UTILITY_EVALUATION.md
+include docs/BENCHMARKS.md
+include docs/BENCHMARK_RESULT_CONTRACT.md
+include docs/BUNYA_JIDO_0_5_UPDATE_PLAN.md
+include docs/BUNYA_JIDO_COMPLETE_BENCHMARK_CHRONICLE_KO.md
+include docs/BUNYA_JIDO_RECENT_DUAL_SCALE_REPORT_EN.md
+include docs/BUNYA_JIDO_RECENT_DUAL_SCALE_REPORT_KO.md
+include docs/CONTEXT_EXECUTION_POLICY.md
+include docs/CONTRIBUTION_PLAN.md
+include docs/RELEASE_NOTES_0_5_0A1.md
+include docs/RELEASING.md
+include docs/SCANNER_COVERAGE.md
+include docs/STUDIO_ATLAS_UPGRADE_BASELINE.md
+include docs/STUDIO_BENCHMARK.md
+include docs/gallery.md

@@ -25,7 +25,7 @@ MINIMAL_EXAMPLE = ROOT / "examples" / "minimal"
 
 class SmokeTests(unittest.TestCase):
     def test_version_is_set(self) -> None:
-        self.assertRegex(__version__, r"^\d+\.\d+\.\d+$")
+        self.assertRegex(__version__, r"^\d+\.\d+\.\d+(?:(?:a|b|rc)\d+)?$")
         with (ROOT / "pyproject.toml").open("rb") as handle:
             package_version = tomllib.load(handle)["project"]["version"]
         self.assertEqual(__version__, package_version)

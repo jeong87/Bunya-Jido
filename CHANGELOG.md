@@ -7,6 +7,10 @@ be documented.
 
 ## Unreleased
 
+No changes yet.
+
+## 0.5.0a1 - 2026-06-09
+
 ### Added
 
 - A reusable `audit-worktree` API and CLI for live-agent benchmark runners

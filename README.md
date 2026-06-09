@@ -24,12 +24,27 @@ The project is inspired by Cheonsang Yeolcha Bunyajido, the Korean star map that
 
 The goal is a grounded semantic map whose important claims can be inspected, not an automatic claim of architectural truth.
 
+## Benchmark Snapshot
+
+Recent synchronized synthetic benchmarks suggest that Bunya-Jido can reduce
+large-repository repair cost while preserving bugfix success:
+
+| Synthetic repo | Bugfix success | Token change | Time change |
+| --- | ---: | ---: | ---: |
+| 28.7K SLOC | 24/24 -> 24/24 | -18.8% | -28.0% |
+| 126.7K SLOC | 39/39 -> 39/39 | -22.8% | -12.5% |
+
+Synthetic benchmark; GPT-5.5 Medium; 3 repetitions per scenario. Results do
+not prove equivalent gains on production repositories. See
+[docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology, limitations, and
+links to the detailed reports.
+
 ## Quick Start
 
 1. In the repository you want to map, install Bunya-Jido:
 
 ```bash
-python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+python -m pip install --pre bunya-jido
 ```
 
 2. From that repository root, give your coding agent(gpt5.5-xhigh is recommended) this prompt:
@@ -103,11 +118,15 @@ The CLI is designed for Windows, macOS, and Linux. CI tests Ubuntu with Python
 Install with one command:
 
 ```bash
-python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+python -m pip install --pre bunya-jido
 ```
 
-The repository is prepared for a public alpha PyPI release. Until a release is
-published, install directly from GitHub as shown above.
+The `--pre` flag selects the public alpha release. To test unreleased `main`,
+install directly from GitHub:
+
+```bash
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+```
 
 Check the command:
 
@@ -122,7 +141,7 @@ Windows PowerShell:
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+python -m pip install --pre bunya-jido
 bunya-jido --version
 ```
 
@@ -131,7 +150,7 @@ macOS or Linux (`bash` / `zsh`):
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+python -m pip install --pre bunya-jido
 bunya-jido --version
 ```
 
@@ -516,6 +535,21 @@ optional authoring-time break-even measures. It is reporting-only and does not
 tune routing behavior from benchmark scenarios.
 
 These files are meant to be pasted or attached before handing work to a coding agent.
+
+## Alpha Limitations
+
+Bunya-Jido is public-alpha software. The most important current limits are:
+
+- Python repositories are the strongest supported target today.
+- Semantic map authoring requires a capable coding agent and a meaningful
+  initial token budget.
+- Small repositories may not recover the authoring cost.
+- A trusted route can still point to a downstream compensation path rather
+  than the root-cause owner; review the evidence before editing.
+- `IN_SCOPE_NO_ROUTE` two-stage discovery depends on the integration honoring
+  the read-only discovery contract before editing.
+- Synthetic benchmark results do not prove equivalent production-repository
+  gains.
 
 ## Supported Scope
 

@@ -35,6 +35,26 @@ jobs:
         run: python -m build
       - name: Check distribution metadata
         run: python -m twine check dist/*
+      - name: Smoke installed wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m venv "$RUNNER_TEMP/bunya-jido-wheel-smoke"
+          "$RUNNER_TEMP/bunya-jido-wheel-smoke/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/bunya-jido-wheel-smoke/bin/python" -m pip install dist/*.whl
+          SMOKE_BIN="$RUNNER_TEMP/bunya-jido-wheel-smoke/bin/bunya-jido"
+          SMOKE_ROOT="$RUNNER_TEMP/bunya-jido-release-smoke-root"
+          mkdir -p "$SMOKE_ROOT"
+          git archive HEAD | tar -x -C "$SMOKE_ROOT"
+          "$SMOKE_BIN" --version
+          "$SMOKE_BIN" prepare --root "$SMOKE_ROOT" --quiet
+          "$SMOKE_BIN" validate-blueprint --root "$SMOKE_ROOT"
+          "$SMOKE_BIN" validate-agent-map --root "$SMOKE_ROOT"
+          "$SMOKE_BIN" build --root "$SMOKE_ROOT" --out "$SMOKE_ROOT/bunya-jido.html"
+          "$SMOKE_BIN" context --root "$SMOKE_ROOT" --task "debug task context routing" --json --out "$RUNNER_TEMP/bunya-jido-context-smoke.json"
+          "$SMOKE_BIN" install-agent-guides --root "$SMOKE_ROOT" --agent all --activate
+          "$SMOKE_BIN" install-agent-guides --root "$SMOKE_ROOT" --agent all --deactivate
+          "$SMOKE_BIN" diagnose --root "$SMOKE_ROOT" --require-grounded
       - uses: actions/upload-artifact@v7
         with:
           name: python-package-distributions

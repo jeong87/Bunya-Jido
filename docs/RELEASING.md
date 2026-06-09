@@ -49,6 +49,35 @@ python -m build
 python -m twine check dist/*
 ```
 
+Before publishing, also install the built wheel in a clean virtual environment
+and run the package entrypoint against an archived copy of the repository. The
+publish workflow performs this smoke test automatically; a local Windows run
+can use:
+
+```powershell
+$smoke = Join-Path $env:TEMP "bunya-jido-wheel-smoke"
+$smokeRoot = Join-Path $env:TEMP "bunya-jido-release-smoke-root"
+Remove-Item -Recurse -Force $smoke, $smokeRoot -ErrorAction SilentlyContinue
+python -m venv $smoke
+& "$smoke\Scripts\python.exe" -m pip install --upgrade pip
+$wheel = (Get-ChildItem dist\*.whl | Select-Object -First 1).FullName
+& "$smoke\Scripts\python.exe" -m pip install $wheel
+New-Item -ItemType Directory -Force $smokeRoot | Out-Null
+$archive = Join-Path $env:TEMP "bunya-jido-release-smoke-root.tar"
+Remove-Item -Force $archive -ErrorAction SilentlyContinue
+git archive --format=tar --output=$archive HEAD
+tar -xf $archive -C $smokeRoot
+& "$smoke\Scripts\bunya-jido.exe" --version
+& "$smoke\Scripts\bunya-jido.exe" prepare --root $smokeRoot --quiet
+& "$smoke\Scripts\bunya-jido.exe" validate-blueprint --root $smokeRoot
+& "$smoke\Scripts\bunya-jido.exe" validate-agent-map --root $smokeRoot
+& "$smoke\Scripts\bunya-jido.exe" build --root $smokeRoot --out "$smokeRoot\bunya-jido.html"
+& "$smoke\Scripts\bunya-jido.exe" context --root $smokeRoot --task "debug task context routing" --json
+& "$smoke\Scripts\bunya-jido.exe" install-agent-guides --root $smokeRoot --agent all --activate
+& "$smoke\Scripts\bunya-jido.exe" install-agent-guides --root $smokeRoot --agent all --deactivate
+& "$smoke\Scripts\bunya-jido.exe" diagnose --root $smokeRoot --require-grounded
+```
+
 If the viewer or semantic self-map changed, regenerate and visually inspect
 `docs/demo.html` and its screenshot using the commands in
 [`gallery.md`](gallery.md) before releasing.
@@ -82,7 +111,8 @@ Maintainers must complete one-time repository and PyPI setup:
 2. Configure the `bunya-jido` project on PyPI with a GitHub Trusted Publisher
    for repository `jeong87/Bunya-Jido`, workflow file `publish.yml`, and
    environment `pypi`.
-3. Update `CHANGELOG.md` and both package version declarations.
+3. Update `CHANGELOG.md`, both package version declarations, and
+   release-facing benchmark/limitation documentation.
 4. Merge the release commit, then publish a GitHub Release tagged
    `v<package-version>`. The workflow uploads the distributions only after its
    validation job succeeds.

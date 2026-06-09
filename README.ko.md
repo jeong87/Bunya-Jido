@@ -24,12 +24,27 @@
 
 목표는 중요한 주장에 붙은 근거를 검토할 수 있는 시맨틱 지도를 만드는 것이며, 아키텍처의 정답을 자동으로 증명한다고 주장하는 것은 아닙니다.
 
+## 벤치마크 요약
+
+최근 동기화된 synthetic benchmark에서는 Bunya-Jido가 bugfix 성공률을
+유지하면서 대형 저장소 수리 비용을 줄일 수 있음을 보였습니다.
+
+| Synthetic repo | Bugfix success | Token change | Time change |
+| --- | ---: | ---: | ---: |
+| 28.7K SLOC | 24/24 -> 24/24 | -18.8% | -28.0% |
+| 126.7K SLOC | 39/39 -> 39/39 | -22.8% | -12.5% |
+
+Synthetic benchmark, GPT-5.5 Medium, scenario별 3회 반복 결과입니다.
+이 결과가 production 저장소에서도 동일한 개선을 보장한다는 뜻은
+아닙니다. 방법론, 제한사항, 상세 보고서 링크는
+[docs/BENCHMARKS.md](docs/BENCHMARKS.md)에 정리했습니다.
+
 ## 빠른 시작
 
 1. 지도를 만들 저장소에서 Bunya-Jido를 설치합니다.
 
 ```bash
-python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+python -m pip install --pre bunya-jido
 ```
 
 2. 그 저장소 루트에서 코딩 에이전트에게 다음 문장을 그대로 지시합니다.
@@ -104,11 +119,16 @@ CI는 Ubuntu에서 Python 3.10-3.12를, Windows와 macOS에서 Python 3.12를
 설치는 한 줄이면 됩니다.
 
 ```bash
-python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+python -m pip install --pre bunya-jido
 ```
 
-이 저장소는 public alpha PyPI 배포 준비를 마쳤습니다. 실제 릴리스가
-게시되기 전까지는 위와 같이 GitHub에서 직접 설치하세요.
+`--pre`는 public alpha 릴리스를 설치하기 위한 옵션입니다. 아직
+릴리스되지 않은 `main`을 테스트하려면 GitHub에서 직접 설치할 수
+있습니다.
+
+```bash
+python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+```
 
 설치가 끝나면 명령어를 확인합니다.
 
@@ -123,7 +143,7 @@ Windows PowerShell:
 ```powershell
 py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+python -m pip install --pre bunya-jido
 bunya-jido --version
 ```
 
@@ -132,7 +152,7 @@ macOS 또는 Linux (`bash` / `zsh`):
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install git+https://github.com/jeong87/Bunya-Jido.git
+python -m pip install --pre bunya-jido
 bunya-jido --version
 ```
 
@@ -522,6 +542,22 @@ break-even을 보고합니다. 이는 측정 전용 기능이며 benchmark 시�
 맞춰 routing 동작을 튜닝하지 않습니다.
 
 이 파일들은 코딩 에이전트에게 작업을 맡기기 전에 붙여넣거나 첨부하기 좋습니다.
+
+## Alpha 제한사항
+
+Bunya-Jido는 public alpha 소프트웨어입니다. 현재 가장 중요한 제한은
+다음과 같습니다.
+
+- Python 저장소가 현재 가장 강하게 지원되는 대상입니다.
+- 시맨틱 지도 authoring에는 충분히 강한 코딩 에이전트와 의미 있는 초기
+  token budget이 필요합니다.
+- 작은 저장소에서는 authoring 비용을 회수하지 못할 수 있습니다.
+- trusted route가 root-cause owner 대신 downstream compensation path를
+  제안할 수 있으므로, 편집 전에 근거를 검토해야 합니다.
+- `IN_SCOPE_NO_ROUTE` two-stage discovery는 integration이 read-only
+  discovery 계약을 지키는지에 따라 효과가 달라집니다.
+- Synthetic benchmark 결과가 production 저장소에서 같은 개선을 보장하지
+  않습니다.
 
 ## 현재 지원 범위
 
