@@ -18,26 +18,50 @@
   <strong>사람과 코딩 에이전트를 위한 시맨틱 저장소 지도입니다.</strong>
 </p>
 
-`Bunya-Jido`는 결정적으로 수집한 근거와 코딩 에이전트의 검토 가능한 해석을 바탕으로 오프라인 저장소 지도를 만듭니다. 사람에게는 책임 영역, 워크플로우, 변경 경계를 보여주고, 코딩 에이전트에게는 특정 작업을 위한 제한된 탐색 문맥을 제공합니다.
+`Bunya-Jido`는 저장소를 재사용 가능한 시맨틱 지도로 만듭니다. 이후 유지보수 작업에서 코딩 에이전트가 먼저 읽을 곳, 확인할 테스트, 넘지 말아야 할 변경 경계를 좁히는 데 쓰입니다. 같은 지도는 사람이 탐색할 수 있는 HTML atlas로도 렌더링되어, 폴더와 import 목록만 보고 시작하지 않아도 코드베이스의 흐름을 잡을 수 있게 돕습니다.
 
-이 프로젝트는 천상열차분야지도에서 영감을 받았습니다. 하늘의 별을 구역과 관계로 읽어내듯, Bunya-Jido는 코드 저장소 안의 파일, 모듈, 문서, 설정, 런타임 산출물, 코딩 에이전트의 설계 해석을 하나의 지도로 엮습니다.
-
-목표는 중요한 주장에 붙은 근거를 검토할 수 있는 시맨틱 지도를 만드는 것이며, 아키텍처의 정답을 자동으로 증명한다고 주장하는 것은 아닙니다.
+이름은 하늘을 구역과 관계로 읽어낸 한국의 별자리 지도, 천상열차분야지도에서 따왔습니다. Bunya-Jido는 그 방식을 코드에 옮겨 파일, 문서, 워크플로우, 런타임 산출물, 검토된 해석을 하나의 살펴볼 수 있는 지도로 묶습니다.
 
 ## 벤치마크 요약
 
 최근 동기화된 synthetic benchmark에서는 Bunya-Jido가 bugfix 성공률을
 유지하면서 대형 저장소 수리 비용을 줄일 수 있음을 보였습니다.
 
-| Synthetic repo | Bugfix success | Token change | Time change |
-| --- | ---: | ---: | ---: |
-| 28.7K SLOC | 24/24 -> 24/24 | -18.8% | -28.0% |
-| 126.7K SLOC | 39/39 -> 39/39 | -22.8% | -12.5% |
+<div align="center">
+<table align="center">
+  <thead>
+    <tr>
+      <th>저장소 규모</th>
+      <th align="center">Bugfix 성공</th>
+      <th align="center">Tokens</th>
+      <th align="center">Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>28.7K SLOC</td>
+      <td align="center">bugfix 24개 중 24개 성공</td>
+      <td align="center">total -18.8%<br><small>(paired 13.7% ± 37.9%)</small></td>
+      <td align="center">total -28.0%<br><small>(paired -1.8% ± 51.8%)</small></td>
+    </tr>
+    <tr>
+      <td>126.7K SLOC</td>
+      <td align="center">bugfix 39개 중 39개 성공</td>
+      <td align="center">total -22.8%<br><small>(paired 18.6% ± 31.9%)</small></td>
+      <td align="center">total -12.5%<br><small>(paired -48.1% ± 233.3%)</small></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
-Synthetic benchmark, GPT-5.5 Medium, scenario별 3회 반복 결과입니다.
-이 결과가 production 저장소에서도 동일한 개선을 보장한다는 뜻은
-아닙니다. 방법론, 제한사항, 상세 보고서 링크는
-[docs/BENCHMARKS.md](docs/BENCHMARKS.md)에 정리했습니다.
+- Synthetic benchmark, GPT-5.5 Medium, scenario별 3회 반복 결과입니다.
+- `total`: bugfix suite 전체의 누적 변화입니다.
+- `paired`: scenario별 saving 평균 ± 표준편차입니다.
+- Wall-clock time은 노이즈가 커서 누적 시간이 줄어도 paired time 평균은
+  음수일 수 있습니다.
+- Production 저장소에서도 같은 개선을 보장한다는 뜻은 아닙니다.
+  방법론, 제한사항, 상세 보고서는 [docs/BENCHMARKS.md](docs/BENCHMARKS.md)에
+  정리했습니다.
 
 ## 빠른 시작
 
@@ -51,13 +75,42 @@ bunya-jido --version
 최신 릴리스가 alpha인 동안에는 `--pre` 옵션이 필요합니다. 오래된
 `pip` 환경이라면 먼저 `python -m pip install --upgrade pip`를 실행하세요.
 
-2. 그 저장소 루트에서 코딩 에이전트에게 다음 문장을 그대로 지시합니다.
+2. 그 저장소 루트에서 코딩 에이전트에게 (GPT-5.5 Medium 권장) 다음 문장을 그대로 지시합니다.
 
 ```text
 Run `bunya-jido prepare --root . --atlas-mode studio --quiet`, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Use `.bunya-jido/ATLAS_INTERVIEW.md` as an internal checklist while creating or refreshing `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and `bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix errors and grounding blockers; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
 ```
 
 완료되면 브라우저에서 `bunya-jido.html`을 엽니다.
+
+## 어떻게 쓰나요?
+
+Bunya-Jido를 설치하는 것만으로는 저장소 파일이 바뀌지 않습니다. 빠른
+시작 프롬프트를 실행하면 `.bunya-jido/` 시맨틱 산출물과
+`bunya-jido.html` 지도가 만들어집니다.
+
+코딩 에이전트가 구현, 디버깅, 리뷰 전에 지도를 먼저 보게 하려면 생성된
+context 지침을 활성화합니다.
+
+```bash
+bunya-jido install-agent-guides --root . --agent all --activate
+```
+
+이 명령은 `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/bunya-jido.mdc`,
+`.clinerules/bunya-jido.md` 같은 파일에 Bunya-Jido 관리 블록을 추가하거나
+갱신합니다. 나중에 끄려면 다음 명령을 사용합니다.
+
+```bash
+bunya-jido install-agent-guides --root . --agent all --deactivate
+```
+
+한 번만 지도 없는 실행을 하고 싶다면 `BUNYA_JIDO_CONTEXT=off` 또는
+`BUNYA_JIDO_DISABLE_CONTEXT=1`을 설정합니다.
+
+사람은 `bunya-jido.html`을 브라우저에서 바로 열면 됩니다. 먼저 overview를
+보고, 필요하면 projection이나 workflow를 바꾸고, 노드를 눌러 목적과
+근거를 확인합니다. 지도가 narrated scenario를 게시한 경우에는 scenario
+playback으로 흐름을 따라갈 수 있습니다.
 
 ## 무엇을 만드나요?
 
@@ -667,19 +720,17 @@ bunya-jido build --root . --data-policy full --out bunya-jido.html
 
 ## 릴리스와 로드맵
 
-기존 grounded-map 구현 로드맵은 PR8까지 완료되었습니다. PR9부터 PR12는
-정직한 route matching, 선택적 native agent activation, 변경 인지
-refresh routing, stale-map 검토, 제한된 효용 평가로 agent-consumption
-흐름을 확장합니다. Studio Atlas 단계는 저장소별 projection, 정직한
-scenario playback, 결정적 품질 검사, 다중 도메인 benchmark를 더하며,
-커밋된 self-map은 이제 Studio v2 예시입니다. 커밋된 Grounded
-self-map은 [docs/gallery.md](docs/gallery.md), public alpha 릴리스 조건과
-게시 설정은 [docs/RELEASING.md](docs/RELEASING.md), 변경 내역은
-[CHANGELOG.md](CHANGELOG.md), 기여 요건은
-[CONTRIBUTING.md](CONTRIBUTING.md)에서 확인할 수 있습니다. 완료 및 확장 구현
-계획은 [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md)에 남아 있습니다.
-후속 constellation-viewer 디자인 작업도 위의 라이브 데모와 미리보기
-이미지에 반영되어 있습니다.
+Bunya-Jido는 public alpha 단계입니다. 현재 라인은 시맨틱 지도 authoring,
+코딩 에이전트 consumption, 그리고 지도 효과와 한계를 함께 보여주는
+benchmark evidence를 중심으로 다듬고 있습니다. 커밋된 self-map은 현재
+Studio 예시이며, 라이브 데모와 미리보기 이미지는 최신 constellation-viewer
+디자인 작업을 반영합니다.
+
+커밋된 self-map은 [docs/gallery.md](docs/gallery.md), 릴리스 gate와 게시
+설정은 [docs/RELEASING.md](docs/RELEASING.md), 변경 내역은
+[CHANGELOG.md](CHANGELOG.md), 기여 요건은 [CONTRIBUTING.md](CONTRIBUTING.md),
+과거 구현 계획은 [docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md)에서
+확인할 수 있습니다.
 
 ## 라이선스
 

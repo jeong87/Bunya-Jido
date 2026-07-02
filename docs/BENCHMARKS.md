@@ -1,6 +1,6 @@
 # Bunya-Jido Benchmarks
 
-This page summarizes the public benchmark evidence for the `0.5.0a1` alpha.
+This page summarizes the public benchmark evidence for the `0.5.0` alpha line.
 It is intentionally short; detailed reports are linked at the end.
 
 ## Recent Dual-Scale Synthetic Benchmark
@@ -10,10 +10,15 @@ test window on two synthetic Python repositories. The repair agent was
 GPT-5.5 Medium through Codex CLI, with web search disabled and three
 repetitions per scenario.
 
-| Synthetic repository | Scale | Bugfix scenarios | No-route scenarios | Bugfix success | Bugfix token change | Bugfix time change |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Realistic Large | 28.7K SLOC, 1,432 Python files | 8 | 1 | 24/24 -> 24/24 | -18.8% | -28.0% |
-| Enterprise XLarge | 126.7K SLOC, 5,926 Python files | 13 | 2 | 39/39 -> 39/39 | -22.8% | -12.5% |
+| Synthetic repository | Scale | Scenarios | Bugfix success | Tokens | Time |
+| --- | ---: | ---: | ---: | :---: | :---: |
+| Realistic Large | 28.7K SLOC, 1,432 Python files | 8 bugfix, 1 no-route | 24 of 24 bugfixes | total -18.8%<br><small>(paired 13.7% ± 37.9%)</small> | total -28.0%<br><small>(paired -1.8% ± 51.8%)</small> |
+| Enterprise XLarge | 126.7K SLOC, 5,926 Python files | 13 bugfix, 2 no-route | 39 of 39 bugfixes | total -22.8%<br><small>(paired 18.6% ± 31.9%)</small> | total -12.5%<br><small>(paired -48.1% ± 233.3%)</small> |
+
+`total` is the cumulative bugfix-suite change. `paired` is mean per-scenario
+saving ± standard deviation from synchronized no-map vs. mapped runs. Paired
+time means are much noisier than cumulative totals because backend latency and
+local I/O can dominate individual runs.
 
 Across both repositories, the mapped condition preserved all 63 bugfix
 successes while reducing repair tokens by 21.6% and cumulative bugfix

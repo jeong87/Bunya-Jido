@@ -18,26 +18,50 @@
   <strong>A semantic repository atlas for humans and coding agents.</strong>
 </p>
 
-`Bunya-Jido` creates offline repository maps from deterministic evidence and reviewable coding-agent interpretation. It shows responsibilities, workflows, and change boundaries for humans, then derives bounded task-oriented navigation context for coding agents.
+`Bunya-Jido` turns a repository into a reusable semantic map. For future maintenance work, that map helps coding agents narrow where to read, which tests matter, and which change boundaries to respect. The same map is rendered as an interactive HTML atlas, so humans can understand the codebase without starting from raw folders and imports.
 
-The project is inspired by Cheonsang Yeolcha Bunyajido, the Korean star map that reads the sky through regions and relationships. In the same spirit, Bunya-Jido gathers files, modules, docs, configuration, runtime artifacts, and coding-agent interpretation into one map of a codebase.
-
-The goal is a grounded semantic map whose important claims can be inspected, not an automatic claim of architectural truth.
+The name comes from Cheonsang Yeolcha Bunyajido, the Korean star map that reads the sky through regions and relationships. Bunya-Jido applies that idea to code: files, docs, workflows, runtime artifacts, and reviewed interpretation are gathered into one inspectable map.
 
 ## Benchmark Snapshot
 
 Recent synchronized synthetic benchmarks suggest that Bunya-Jido can reduce
 large-repository repair cost while preserving bugfix success:
 
-| Synthetic repo | Bugfix success | Token change | Time change |
-| --- | ---: | ---: | ---: |
-| 28.7K SLOC | 24/24 -> 24/24 | -18.8% | -28.0% |
-| 126.7K SLOC | 39/39 -> 39/39 | -22.8% | -12.5% |
+<div align="center">
+<table align="center">
+  <thead>
+    <tr>
+      <th>Synthetic repo</th>
+      <th align="center">Bugfix success</th>
+      <th align="center">Tokens</th>
+      <th align="center">Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>28.7K SLOC</td>
+      <td align="center">24 of 24 bugfixes</td>
+      <td align="center">total -18.8%<br><small>(paired 13.7% ± 37.9%)</small></td>
+      <td align="center">total -28.0%<br><small>(paired -1.8% ± 51.8%)</small></td>
+    </tr>
+    <tr>
+      <td>126.7K SLOC</td>
+      <td align="center">39 of 39 bugfixes</td>
+      <td align="center">total -22.8%<br><small>(paired 18.6% ± 31.9%)</small></td>
+      <td align="center">total -12.5%<br><small>(paired -48.1% ± 233.3%)</small></td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
-Synthetic benchmark; GPT-5.5 Medium; 3 repetitions per scenario. Results do
-not prove equivalent gains on production repositories. See
-[docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology, limitations, and
-links to the detailed reports.
+- Synthetic benchmark; GPT-5.5 Medium; 3 repetitions per scenario.
+- `total`: cumulative bugfix-suite change.
+- `paired`: mean per-scenario saving ± standard deviation.
+- Wall-clock time is noisy; paired time means can be negative even when
+  cumulative time improves.
+- Results do not prove equivalent gains on production repositories. See
+  [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for methodology, limitations, and
+  detailed reports.
 
 ## Quick Start
 
@@ -52,13 +76,42 @@ The `--pre` flag is required while the newest release is an alpha. If your
 environment has an older `pip`, run `python -m pip install --upgrade pip`
 first.
 
-2. From that repository root, give your coding agent(gpt5.5-xhigh is recommended) this prompt:
+2. From that repository root, give your coding agent (GPT-5.5 Medium is recommended) this prompt:
 
 ```text
 Run `bunya-jido prepare --root . --atlas-mode studio --quiet`, then read and execute `.bunya-jido/BUNYA_JIDO_BLUEPRINT_PROMPT.md`. Use `.bunya-jido/ATLAS_INTERVIEW.md` as an internal checklist while creating or refreshing `.bunya-jido/COMPONENTS.md`, `.bunya-jido/WORKFLOWS.md`, `.bunya-jido/REPOSITORY_THESIS.md`, `.bunya-jido/PROJECTIONS.md`, `.bunya-jido/SCENARIOS.md`, `.bunya-jido/bunya-jido.blueprint.json`, and `.bunya-jido/bunya-jido.agent-map.json`; run `bunya-jido validate-blueprint --root .`, `bunya-jido validate-agent-map --root .`, and `bunya-jido evaluate-atlas-quality --root . --require-pass --json`; fix errors and grounding blockers; then run `bunya-jido build --root . --out bunya-jido.html`; confirm the HTML path and say `ready`.
 ```
 
 Open `bunya-jido.html` in your browser.
+
+## How To Use It
+
+Installing Bunya-Jido does not change your repository by itself. The Quick
+Start prompt creates the `.bunya-jido/` semantic artifacts and the
+`bunya-jido.html` map.
+
+For coding agents, activate the generated context instructions when you want
+them to consult the map before implementation, debugging, or review work:
+
+```bash
+bunya-jido install-agent-guides --root . --agent all --activate
+```
+
+This updates managed Bunya-Jido blocks in files such as `AGENTS.md`,
+`CLAUDE.md`, `.cursor/rules/bunya-jido.mdc`, and
+`.clinerules/bunya-jido.md`. To turn that off later:
+
+```bash
+bunya-jido install-agent-guides --root . --agent all --deactivate
+```
+
+For a one-off no-map run, set `BUNYA_JIDO_CONTEXT=off` or
+`BUNYA_JIDO_DISABLE_CONTEXT=1`.
+
+For humans, open `bunya-jido.html` directly in a browser. Start with the
+overview, switch projections or workflows when needed, click nodes to inspect
+purpose and evidence, and use scenario playback when the map publishes a
+narrated path.
 
 ## What It Creates
 
@@ -661,21 +714,18 @@ Use `summary` for most repositories. Use `sample` when the shape of a data direc
 
 ## Release And Roadmap
 
-The original grounded-map implementation roadmap is complete through PR8.
-PR9 through PR12 extend agent consumption with honest route matching, optional
-native agent activation, change-aware refresh routing, stale-map review, and
-bounded utility evaluation. The Studio Atlas phases add repository-specific
-projections, truthful scenario playback, deterministic quality checks, and a
-cross-domain benchmark; the committed self-map is now its Studio v2 example.
-See
-[docs/gallery.md](docs/gallery.md) for the committed Grounded self-map,
-[docs/RELEASING.md](docs/RELEASING.md) for public-alpha release gates and
-publishing setup, [CHANGELOG.md](CHANGELOG.md) for release notes, and
-[CONTRIBUTING.md](CONTRIBUTING.md) for contribution requirements. The completed
-and extended implementation plan remains recorded in
-[docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md). The follow-up
-constellation-viewer design pass is reflected in the live demo and preview
-image above.
+Bunya-Jido is in public alpha. The current line focuses on three connected
+surfaces: semantic map authoring, coding-agent consumption, and benchmark
+evidence that keeps map benefits and limits visible. The committed self-map is
+the current Studio example, and the live demo plus preview image reflect the
+latest constellation-viewer design pass.
+
+See [docs/gallery.md](docs/gallery.md) for the committed self-map,
+[docs/RELEASING.md](docs/RELEASING.md) for release gates and publishing setup,
+[CHANGELOG.md](CHANGELOG.md) for release notes,
+[CONTRIBUTING.md](CONTRIBUTING.md) for contribution requirements, and
+[docs/CONTRIBUTION_PLAN.md](docs/CONTRIBUTION_PLAN.md) for the historical
+implementation plan.
 
 ## License
 

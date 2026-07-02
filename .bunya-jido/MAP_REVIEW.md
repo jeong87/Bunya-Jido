@@ -4,6 +4,34 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-06-09 - Benchmark Paired Variation Disclosure
+
+- Change: Added paired mean-saving standard deviations to the README benchmark
+  snapshot and the benchmark summary page, then compacted the tables so those
+  values remain visible in Markdown previews while keeping cumulative bugfix
+  token/time changes separate. Clarified bugfix success wording, changed the
+  README benchmark notes to bullets, and removed stale alpha/roadmap wording
+  from public docs.
+- Decision: This changes benchmark presentation only. It does not alter the
+  benchmark methodology, raw results, semantic blueprint, agent-map routes,
+  viewer behavior, release workflow semantics, or repository architecture
+  interpretation.
+- Validation: Run refresh-context for changed documentation, stale-map review,
+  and benchmark-reporting checks before publication.
+
+## 2026-06-09 - README Positioning And Usage Copy
+
+- Change: Shortened the README opening position statement, centered the
+  product story on a reusable semantic map, updated the Quick Start model
+  recommendation, and added brief human/agent usage guidance in both English
+  and Korean.
+- Decision: This is public-facing documentation and onboarding copy. It does
+  not change the semantic blueprint, agent-map routes, viewer behavior,
+  benchmark evidence, release workflow semantics, or repository architecture
+  interpretation.
+- Validation: Run refresh-context for changed files, stale-map review, and
+  documentation-focused checks before publication.
+
 ## 2026-06-09 - 0.5.0a2 PyPI Description Image Fix
 
 - Change: Replaced the README hero image's repository-relative
