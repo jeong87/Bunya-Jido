@@ -17,7 +17,10 @@ An entry records review work; it does not prove architectural completeness.
 - Validation: The rebuilt demo, focused runner and self-map regressions, 112
   unit tests, compile, blueprint, agent-map, grounded diagnostic, utility,
   atlas-quality, per-file refresh-context, and stale-map gates passed locally.
-  Cross-platform success remains pending until corrective CI is green.
+  An approved disposable live read-only smoke at commit `3544c19` also
+  completed with return code 0, complete JSONL, no production activity, and no
+  boundary violation. Cross-platform success remains pending until corrective
+  CI is green.
 
 ## 2026-07-18 - Guarded Codex Run Structure
 

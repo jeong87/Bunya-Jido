@@ -8,6 +8,8 @@
 - Primary Codex session ID: `019f73d5-d0c4-7633-8f08-fd8fb5933b3b`
 - Verified session model metadata: the local Codex rollout for that session
   records `turn_context.model` as `gpt-5.6-sol` on July 18, 2026.
+- Approved live smoke source commit:
+  `3544c198f7c1279fb96084790f109cd5ac38b34b`
 
 The baseline was verified before implementation with 97 unit tests, Python
 compileall, blueprint and agent-map validation, grounded diagnostics, 18 agent
@@ -45,8 +47,10 @@ Guarded Codex Run adds:
 10. Deterministic automation that ignores user and trusted-project execpolicy
     `.rules` without claiming to bypass administrator-managed requirements.
 
-HTML reporting, benchmark claims, package release, and live nested Codex proof
-are not part of this MVP.
+HTML reporting, benchmark claims, and package release are not part of this MVP.
+One separately approved disposable read-only live smoke is recorded as narrow
+validation evidence; it does not establish workspace-write, cross-platform, or
+general safety behavior.
 
 ## Contributions and Decisions
 
@@ -64,8 +68,9 @@ Human decisions are separated as follows:
   report while preserving the existing viewer design.
 
 The session metadata above identifies the model recorded for this engineering
-session. It does not turn fake-executable tests into live GPT-5.6 or live Codex
-sandbox validation.
+session. Separately, one live Codex CLI smoke exercised the read-only guarded
+path. The smoke did not independently report or verify a model identity and
+must not be presented as a GPT-5.6 benchmark.
 
 The benchmark snapshot and reports already present at the baseline use
 GPT-5.5 Medium and are pre-Build-Week evidence. Guarded Codex Run is new
@@ -86,11 +91,11 @@ python -m bunya_jido codex-run --root . --task "Implement guarded Codex run orch
 ```
 
 The focused suite uses a fake executable and does not require Codex
-authentication. A live nested Codex run is a separate human approval gate.
-The disposable-repository smoke protocol and expected artifacts are documented
-in [`docs/build-week/TESTING.md`](docs/build-week/TESTING.md); it must not be
-run before that approval. Fake-executable evidence must not be described as
-proof of a live Codex OS sandbox.
+authentication. The separately approved live smoke and its exact limitations
+are documented in
+[`docs/build-week/TESTING.md`](docs/build-week/TESTING.md). Future live nested
+Codex runs remain a separate human approval gate. Fake-executable evidence must
+not be described as proof of a live Codex OS sandbox.
 
 For the full validation set and current results, see
 [`docs/build-week/TESTING.md`](docs/build-week/TESTING.md). Product and

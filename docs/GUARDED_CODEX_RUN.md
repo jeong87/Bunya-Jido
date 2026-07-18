@@ -105,4 +105,6 @@ violation, status, and exit-code facts for human review.
 The repository test suite uses a fake Codex executable for deterministic
 coverage. Passing fake-executable tests does not prove the behavior of a live
 Codex OS sandbox. A real nested Codex run remains a separate, explicit human
-approval gate.
+approval gate. One separately approved Build Week read-only smoke is recorded
+in `docs/build-week/TESTING.md`; future live runs still require approval, and
+that single result is not workspace-write or cross-platform proof.

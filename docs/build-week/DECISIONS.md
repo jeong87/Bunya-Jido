@@ -75,3 +75,17 @@
   controlled runner.
 - Boundary: This decision does not claim to bypass administrator-managed
   requirements.
+
+## BW-009: Disposable live smoke
+
+- Decision: Run one live nested Codex smoke from a disposable clean clone after
+  focused and full fake-executable validation passed.
+- Human owner: Product owner.
+- Scope: Exercise only the reviewed `OUT_OF_SCOPE` path with Codex
+  `read-only`, approval disabled, web search disabled, workspace-shell network
+  disabled, and user/project execpolicy rules ignored.
+- Stop condition: Do not push if the process fails, JSONL is incomplete, the
+  final worktree is not production-clean, or any write attempt or boundary
+  violation is observed.
+- Limitation: One Windows read-only run is not workspace-write,
+  cross-platform, exhaustive sandbox, performance, or model-identity proof.

@@ -100,23 +100,24 @@ Git-tracked content.
   documentation scope to the declared directory `docs/build-week/`.
 - The required `origin/main...HEAD` stale-map check and a supplemental
   working-diff stale-map check both reported `review_recorded`.
-- Corrective cross-platform CI: pending commit approval, push approval, and a
-  new GitHub Actions run.
-- A clean checkout of the corrective revision remains pending because that
-  revision cannot exist until the commit Decision Gate is approved.
+- Corrective cross-platform CI: pending push and a new GitHub Actions run.
+- A disposable clean clone at corrective commit
+  `3544c198f7c1279fb96084790f109cd5ac38b34b` passed the documented preview and
+  live read-only smoke.
 - Cross-platform success is not claimed while the latest published CI run is
   red.
-- Live nested Codex validation: not run; explicit human approval is pending.
+- Live nested Codex validation: one explicitly approved read-only smoke
+  succeeded; details and limitations are recorded below.
 - The fake executable verifies Bunya-Jido's command construction, capture,
   policy, and audit logic. It does not prove the behavior of a live Codex OS
   sandbox.
 
 ## Disposable Live Smoke Protocol
 
-Do not run this protocol until the product owner approves the live nested
-Codex Decision Gate. Use a disposable clean clone, a separately installed and
-authenticated Codex CLI, and the exact corrective commit selected for
-submission.
+This protocol was approved and run once on July 18, 2026. Future live runs
+still require a new product-owner approval. Use a disposable clean clone, a
+separately installed and authenticated Codex CLI, and the exact corrective
+commit selected for submission.
 
 1. Clone the approved `build-week-2026` revision into a temporary directory,
    install it with `python -m pip install -e .`, and confirm
@@ -145,3 +146,38 @@ violation, status `succeeded`, and exit code `0`.
 One successful smoke is evidence for the observed installed Codex version and
 that disposable environment only. It is not an exhaustive safety,
 cross-platform, or workspace-write proof.
+
+## Approved Live Smoke Result
+
+- Date: July 18, 2026.
+- Source commit: `3544c198f7c1279fb96084790f109cd5ac38b34b`.
+- Environment: disposable clean Windows clone, Python 3.12, Codex CLI
+  `0.144.5`.
+- Run ID: `20260718T103801Z-8885b3dd`.
+- Task decision: `OUT_OF_SCOPE`.
+- Codex sandbox: `read-only`.
+- Invocation controls: approval `never`, user config ignored, user/project
+  execpolicy rules ignored, web search `disabled`, workspace-shell network
+  `false`, ephemeral JSONL execution.
+- Process: launched, return code `0`, no timeout or cancellation.
+- Audit: four valid JSONL events, complete stream, production-clean worktree,
+  no production write attempts, outside-workspace attempts, or boundary
+  violations.
+- Result: schema `bunya-jido-codex-run-v1`, status `succeeded`, exit code `0`,
+  and all five expected artifacts present.
+- Artifact hashes:
+  - `run.json`:
+    `ca8f9826ff19a8807e2a99b4baec9b8817373560c0931154b0559f60f729f3e3`
+  - `events.jsonl`:
+    `992f3027e4efa261d44f753f51bd32e0fea9761ec3d55c45c293dfe66c9e1245`
+  - `last-message.txt`:
+    `fb7329f9552e81e859166b18f21cfbf41d07d928b118f14fe0cca000e7e52425`
+- Stderr contained one non-fatal Codex warning that PowerShell shell snapshots
+  are not yet supported. It did not change the return code, JSONL
+  completeness, worktree audit, or boundary result.
+
+The live process returned the reviewed repository-boundary explanation and
+made no file changes. This result validates only the observed read-only path
+for the versions and environment above. It does not prove `workspace-write`
+enforcement, other operating systems, other Codex versions, performance, or
+the model identity used by the provider.
