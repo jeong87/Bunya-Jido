@@ -19,8 +19,9 @@ An entry records review work; it does not prove architectural completeness.
   atlas-quality, per-file refresh-context, and stale-map gates passed locally.
   An approved disposable live read-only smoke at commit `3544c19` also
   completed with return code 0, complete JSONL, no production activity, and no
-  boundary violation. Cross-platform success remains pending until corrective
-  CI is green.
+  boundary violation. Corrective CI run `29641266678` passed Ubuntu Python
+  3.10/3.11/3.12, macOS Python 3.12, Windows Python 3.12, and semantic-map
+  review.
 
 ## 2026-07-18 - Guarded Codex Run Structure
 

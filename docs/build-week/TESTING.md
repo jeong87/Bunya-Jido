@@ -100,12 +100,18 @@ Git-tracked content.
   documentation scope to the declared directory `docs/build-week/`.
 - The required `origin/main...HEAD` stale-map check and a supplemental
   working-diff stale-map check both reported `review_recorded`.
-- Corrective cross-platform CI: pending push and a new GitHub Actions run.
+- Corrective cross-platform CI:
+  [run `29641266678`](https://github.com/jeong87/Bunya-Jido/actions/runs/29641266678)
+  completed successfully at
+  `f10182c97d5f139703063ad60876c3ccb9d64547`.
+- Successful jobs: Ubuntu Python 3.10, 3.11, and 3.12; macOS Python 3.12;
+  Windows Python 3.12; and semantic-map review.
 - A disposable clean clone at corrective commit
   `3544c198f7c1279fb96084790f109cd5ac38b34b` passed the documented preview and
   live read-only smoke.
-- Cross-platform success is not claimed while the latest published CI run is
-  red.
+- Cross-platform success is limited to the fake-executable and repository
+  validation exercised by that CI matrix. It is not cross-platform live Codex
+  sandbox evidence.
 - Live nested Codex validation: one explicitly approved read-only smoke
   succeeded; details and limitations are recorded below.
 - The fake executable verifies Bunya-Jido's command construction, capture,

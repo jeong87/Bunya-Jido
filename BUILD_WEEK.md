@@ -10,6 +10,9 @@
   records `turn_context.model` as `gpt-5.6-sol` on July 18, 2026.
 - Approved live smoke source commit:
   `3544c198f7c1279fb96084790f109cd5ac38b34b`
+- Corrective cross-platform CI:
+  [run 29641266678](https://github.com/jeong87/Bunya-Jido/actions/runs/29641266678),
+  successful at `f10182c97d5f139703063ad60876c3ccb9d64547`
 
 The baseline was verified before implementation with 97 unit tests, Python
 compileall, blueprint and agent-map validation, grounded diagnostics, 18 agent
