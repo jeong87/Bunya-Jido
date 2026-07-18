@@ -13,7 +13,7 @@ service, telemetry channel, or data upload mechanism.
 Preview does not require a clean baseline:
 
 ```bash
-bunya-jido codex-run --root . --task "change guarded Codex run orchestration" --preview
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
 ```
 
 Preview prints the context decision, sandbox, scoped context, sanitized argv,
@@ -23,7 +23,7 @@ not launch Codex or create run artifacts.
 An actual run is:
 
 ```bash
-bunya-jido codex-run --root . --task "change guarded Codex run orchestration"
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting."
 ```
 
 Options are limited to `--preview`, `--json`, `--out-dir`, `--model`,
@@ -42,13 +42,21 @@ arbitrary additional Codex arguments.
 | `DISABLED` | `read-only` |
 
 The command invokes Codex with approval disabled, user configuration ignored,
-ephemeral sessions, JSONL output, color disabled, the mapped sandbox, and the
-selected repository root. Prompt and scoped context are sent as UTF-8 standard
-input with an argv list and `shell=False`.
+user and project execpolicy `.rules` ignored, ephemeral sessions, JSONL
+output, color disabled, the mapped sandbox, and the selected repository root.
+Prompt and scoped context are sent as UTF-8 standard input with an argv list
+and `shell=False`.
 
-Web search is not enabled. Workspace shell network access is disabled. The
-provider connection needed to run the model is a separate Codex control path,
-not workspace shell network permission.
+`--ignore-rules` makes the guarded automation contract independent of local
+user and trusted-project `.rules` files, which may otherwise allow matching
+commands outside the selected sandbox or restrict them. It does not claim to
+bypass administrator-managed requirements.
+
+Codex web search is explicitly disabled with `-c web_search="disabled"`.
+Workspace shell network access is independently disabled with
+`-c sandbox_workspace_write.network_access=false`. The provider connection
+needed to run the model is a separate Codex control path, not web search or
+workspace shell network permission.
 
 ## Enforcement and Audit
 

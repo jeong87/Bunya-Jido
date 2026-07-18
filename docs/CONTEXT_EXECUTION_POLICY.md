@@ -60,14 +60,23 @@ process's sandbox. Enforcement belongs to the runner, IDE, or agent host.
 local Codex CLI:
 
 ```bash
-bunya-jido codex-run --root . --task "change guarded Codex run orchestration" --preview
-bunya-jido codex-run --root . --task "change guarded Codex run orchestration"
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting."
 ```
 
 Preview does not launch Codex or create run artifacts. Actual execution requires
 a clean Git worktree. Only `MATCH` maps to `workspace-write`; every other
 supported decision maps to `read-only`, and the command exposes no sandbox,
 dirty-worktree, network, or arbitrary-argument override.
+
+The runner explicitly sets Codex web search to `disabled` and independently
+sets workspace-shell network access to `false`. The model provider control path
+is not workspace-shell network permission.
+
+For deterministic automation, the runner also passes `--ignore-rules`.
+User and trusted-project execpolicy `.rules` therefore cannot expand or
+restrict the selected sandbox for this invocation. This does not claim to
+bypass administrator-managed requirements.
 
 Codex's OS sandbox is the enforcement boundary. Safe-edit paths are scoped
 semantic guidance and a post-run audit rule. A safe-edit path never grants

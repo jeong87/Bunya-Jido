@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import fnmatch
 import io
 import json
 import struct
+import subprocess
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
@@ -98,6 +100,36 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertEqual(warnings, [])
         self.assertEqual(metrics["grounding_status"], "grounded")
         self.assertEqual(metrics["trusted_route_count"], 8)
+
+    def test_agent_map_safe_edit_paths_resolve_to_git_tracked_content(self) -> None:
+        agent_map = load_json(AGENT_MAP_PATH)
+        tracked = {
+            item
+            for item in subprocess.run(
+                ["git", "ls-files", "-z"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+            ).stdout.decode("utf-8").split("\0")
+            if item
+        }
+
+        for route in agent_map["task_routes"]:
+            for safe_edit in route.get("safe_edit", []):
+                normalized = safe_edit.replace("\\", "/").removeprefix("./")
+                if any(character in normalized for character in "*?["):
+                    resolved = any(
+                        fnmatch.fnmatchcase(path, normalized) for path in tracked
+                    )
+                elif normalized.endswith("/"):
+                    resolved = any(path.startswith(normalized) for path in tracked)
+                else:
+                    resolved = normalized in tracked
+                self.assertTrue(
+                    resolved,
+                    f"safe-edit path is not Git-tracked: {safe_edit} "
+                    f"in route {route['task']}",
+                )
 
     def test_gallery_build_projects_expected_semantic_paths(self) -> None:
         graph, _ = graph_with_optional_blueprint(ROOT, max_files=0)

@@ -110,7 +110,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
-  "generated_at": "2026-07-18T06:57:00+00:00",
+  "generated_at": "2026-07-18T10:15:15+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes, with an optional guarded Codex execution boundary.",
   "artifact_mode": "semantic_blueprint",
@@ -2291,7 +2291,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "contracts": [
         "Only MATCH may select workspace-write; IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, UNCERTAIN, and DISABLED must remain read-only.",
         "Actual execution requires a clean Git baseline, while preview launches no process and creates no run artifacts.",
-        "Codex must receive UTF-8 standard input through an argv list with shell=False, approval disabled, user config ignored, and workspace shell network disabled.",
+        "Codex must receive UTF-8 standard input through an argv list with shell=False, approval disabled, user config and user/project execpolicy rules ignored, Codex web search disabled, and workspace shell network independently disabled.",
         "Safe-edit paths are semantic guidance and post-run audit criteria, never an OS permission grant.",
         "Boundary audit must retain final changes, rename endpoints, outside-workspace attempts, and write-then-revert attempts observed in JSONL.",
         "Malformed, partial, or empty JSONL must preserve readable evidence but fail as audit_incomplete.",
@@ -2308,7 +2308,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "tests/test_self_map.py",
         "docs/GUARDED_CODEX_RUN.md",
         "docs/CONTEXT_EXECUTION_POLICY.md",
-        "docs/build-week/**",
+        "docs/build-week/",
         "BUILD_WEEK.md",
         "README.md",
         "README.ko.md",
@@ -2319,7 +2319,6 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         ".bunya-jido/REPOSITORY_THESIS.md",
         ".bunya-jido/PROJECTIONS.md",
         ".bunya-jido/SCENARIOS.md",
-        ".bunya-jido/ATLAS_QUALITY_REPORT.md",
         ".bunya-jido/MAP_REVIEW.md",
         ".bunya-jido/bunya-jido.blueprint.json",
         ".bunya-jido/bunya-jido.agent-map.json",

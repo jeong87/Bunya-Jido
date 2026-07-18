@@ -22,6 +22,22 @@
 
 The name comes from Cheonsang Yeolcha Bunyajido, the Korean star map that reads the sky through regions and relationships. Bunya-Jido applies that idea to code: files, docs, workflows, runtime artifacts, and reviewed interpretation are gathered into one inspectable map.
 
+## Build Week 2026: Guarded Codex Run
+
+The `build-week-2026` branch adds `bunya-jido codex-run`, a guarded local Codex
+workflow driven by Bunya-Jido's context decision:
+
+```bash
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
+```
+
+Preview does not launch Codex or create run artifacts. An actual run requires a
+clean Git worktree; only `MATCH` receives `workspace-write`, while every other
+decision remains `read-only`. Codex web search and workspace-shell network
+access are explicitly disabled as separate controls. See
+[BUILD_WEEK.md](BUILD_WEEK.md) for the submission evidence boundary and
+[docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md) for the full contract.
+
 ## Benchmark Snapshot
 
 Recent synchronized synthetic benchmarks suggest that Bunya-Jido can reduce
@@ -479,22 +495,24 @@ plan. Preview is safe to run in a dirty checkout and does not launch Codex or
 create run artifacts:
 
 ```bash
-bunya-jido codex-run --root . --task "change guarded Codex run orchestration" --preview
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
 ```
 
 An actual run requires a clean Git worktree and a separately installed,
 authenticated Codex CLI:
 
 ```bash
-bunya-jido codex-run --root . --task "change guarded Codex run orchestration"
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting."
 ```
 
 Only `MATCH` receives Codex's `workspace-write` OS sandbox. Every other context
 decision remains `read-only`, with no CLI option to raise it. Safe-edit paths
 remain semantic guidance and a post-run audit boundary; they do not expand the
-OS sandbox. Web search is not enabled, and workspace shell network access is
-disabled. Reports and captured process output are written under
-`.bunya-jido/runs/<run-id>/`. See
+OS sandbox. Codex web search is explicitly set to `disabled`, and workspace
+shell network access is independently disabled. Reports and captured process
+output are written under `.bunya-jido/runs/<run-id>/`. User and trusted-project
+execpolicy `.rules` are ignored for deterministic automation; administrator-
+managed requirements remain a separate constraint. See
 [docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md) for the full contract.
 
 Task-selected Markdown and JSON context is compact by default: it keeps the

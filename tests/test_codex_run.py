@@ -286,7 +286,44 @@ class GuardedCodexRunTests(unittest.TestCase):
             self.assertIn("--ask-for-approval", report["execution"]["command"])
             self.assertIn("--ignore-user-config", report["execution"]["command"])
             self.assertIn("--ephemeral", report["execution"]["command"])
-            self.assertIn("sandbox_workspace_write.network_access=false", report["execution"]["command"])
+            expected_command = [
+                sys.executable,
+                str(fake),
+                "--ask-for-approval",
+                "never",
+                "-c",
+                "sandbox_workspace_write.network_access=false",
+                "-c",
+                'web_search="disabled"',
+                "exec",
+                "--strict-config",
+                "--ignore-user-config",
+                "--ignore-rules",
+                "--ephemeral",
+                "--json",
+                "--color",
+                "never",
+                "--sandbox",
+                "read-only",
+                "--cd",
+                str(root.resolve()),
+                "--output-last-message",
+                str(
+                    (
+                        root.resolve()
+                        / ".bunya-jido"
+                        / "runs"
+                        / "preview-run"
+                        / "last-message.txt"
+                    )
+                ),
+                "-",
+            ]
+            self.assertEqual(report["execution"]["command"], expected_command)
+            self.assertTrue(report["execution"]["execpolicy_rules_ignored"])
+            self.assertEqual(report["execution"]["web_search_mode"], "disabled")
+            self.assertFalse(report["execution"]["web_search_enabled"])
+            self.assertFalse(report["execution"]["workspace_network_access"])
             self.assertFalse((root / "injected.txt").exists())
             self.assertFalse((root / ".bunya-jido" / "runs").exists())
             self.assertEqual(before, after)
@@ -374,6 +411,17 @@ class GuardedCodexRunTests(unittest.TestCase):
                 },
             )
             self.assertIn("Status: `succeeded`", markdown)
+            self.assertIn(
+                "User and project Codex execpolicy `.rules` files are ignored "
+                "for deterministic automation; this does not claim to bypass "
+                "managed requirements.",
+                markdown,
+            )
+            self.assertIn(
+                'Codex web search is explicitly set to `"disabled"`; '
+                "workspace shell network access is independently disabled.",
+                markdown,
+            )
             self.assertIn("Decision: `MATCH`", markdown)
             self.assertIn("Return code: `0`", markdown)
             self.assertEqual(

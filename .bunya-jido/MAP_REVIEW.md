@@ -4,6 +4,21 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-07-18 - Guarded Runner CI Stabilization
+
+- Change: Removed an ignored atlas-quality report from the Guarded Codex Run
+  route's safe-edit list, required every safe-edit entry to resolve to
+  Git-tracked content, and made web-search and workspace-shell network
+  isolation explicit independent command settings. The approved execpolicy
+  Decision Gate also makes user and project `.rules` inert for guarded runs.
+- Decision: This corrects clean-checkout grounding and invocation fidelity
+  without changing semantic nodes, workflows, route ownership, sandbox
+  mapping, schema version, or the primary projection.
+- Validation: The rebuilt demo, focused runner and self-map regressions, 112
+  unit tests, compile, blueprint, agent-map, grounded diagnostic, utility,
+  atlas-quality, per-file refresh-context, and stale-map gates passed locally.
+  Cross-platform success remains pending until corrective CI is green.
+
 ## 2026-07-18 - Guarded Codex Run Structure
 
 - Change: Added the Guarded Codex Run execution component, its context,

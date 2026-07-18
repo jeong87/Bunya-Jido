@@ -22,6 +22,22 @@
 
 이름은 하늘을 구역과 관계로 읽어낸 한국의 별자리 지도, 천상열차분야지도에서 따왔습니다. Bunya-Jido는 그 방식을 코드에 옮겨 파일, 문서, 워크플로우, 런타임 산출물, 검토된 해석을 하나의 살펴볼 수 있는 지도로 묶습니다.
 
+## Build Week 2026: 보호된 Codex 실행
+
+`build-week-2026` 브랜치는 Bunya-Jido의 context 결정에 따라 로컬 Codex를
+실행하는 `bunya-jido codex-run` 워크플로를 추가합니다.
+
+```bash
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
+```
+
+Preview는 Codex를 실행하거나 run 산출물을 만들지 않습니다. 실제 실행은
+clean Git 작업 트리에서만 가능하며, `MATCH`만 `workspace-write`를 받고
+나머지 결정은 모두 `read-only`입니다. Codex 웹 검색과 workspace shell
+네트워크 접근은 서로 별개의 설정으로 명시적으로 비활성화됩니다. 제출
+근거 범위는 [BUILD_WEEK.md](BUILD_WEEK.md), 전체 계약은
+[docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md)를 참고하세요.
+
 ## 벤치마크 요약
 
 최근 동기화된 synthetic benchmark에서는 Bunya-Jido가 bugfix 성공률을
@@ -482,22 +498,24 @@ JSON 보고서는 `execution_policy`, `agent_instruction`, 그리고 근거가 �
 실행하거나 run 산출물을 만들지 않습니다.
 
 ```bash
-bunya-jido codex-run --root . --task "change guarded Codex run orchestration" --preview
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
 ```
 
 실제 실행에는 clean Git 작업 트리와 별도로 설치·인증된 Codex CLI가
 필요합니다.
 
 ```bash
-bunya-jido codex-run --root . --task "change guarded Codex run orchestration"
+bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting."
 ```
 
 `MATCH`만 Codex의 `workspace-write` OS sandbox를 받습니다. 나머지 context
 결정은 모두 `read-only`이며, CLI 옵션으로 권한을 높일 수 없습니다.
 safe-edit 경로는 의미적 안내와 실행 후 감사 경계일 뿐 OS sandbox를
-확장하지 않습니다. 웹 검색은 켜지 않으며 workspace shell의 네트워크
-접근은 비활성화합니다. 보고서와 프로세스 출력은
-`.bunya-jido/runs/<run-id>/` 아래에 저장됩니다. 전체 계약은
+확장하지 않습니다. Codex 웹 검색은 `disabled`로 명시하고, workspace
+shell의 네트워크 접근도 별도의 설정으로 비활성화합니다. 보고서와 프로세스 출력은
+`.bunya-jido/runs/<run-id>/` 아래에 저장됩니다. 결정적인 자동화를 위해
+사용자 및 trusted project의 execpolicy `.rules`는 무시하며, 관리자 강제
+요구사항은 별도 제약으로 남습니다. 전체 계약은
 [docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md)를 참고하세요.
 
 작업이 선택된 Markdown과 JSON context는 기본적으로 compact 출력입니다.

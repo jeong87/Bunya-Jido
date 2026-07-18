@@ -38,7 +38,7 @@ designed to be reviewable in the generated HTML map.
 1. `bunya-jido codex-run` requests a task-selected compact context report and maps only `MATCH` to `workspace-write`; every other supported decision maps to `read-only`.
 2. Preview renders the scoped context, sanitized argv, baseline cleanliness, and blocking reasons without launching Codex or creating run artifacts.
 3. An actual run calls `audit_worktree()` and blocks before process launch unless the Git baseline is clean.
-4. `src/bunya_jido/codex_run.py` passes the prompt as UTF-8 standard input with an argv list and `shell=False`, disables approval, user config, web search, and workspace shell network access, and captures JSONL, stderr, and the last message.
+4. `src/bunya_jido/codex_run.py` passes the prompt as UTF-8 standard input with an argv list and `shell=False`, disables approval, ignores user config and user/project execpolicy rules, disables web search and workspace shell network access, and captures JSONL, stderr, and the last message.
 5. The boundary evaluator combines post-run Git production changes with JSONL-observed writes, including outside-workspace, rename, and write-then-revert attempts.
 6. Exact paths, explicit globs, and descendants of declared directories are allowed only for `MATCH`; non-`MATCH` production activity always fails.
 7. Schema `bunya-jido-codex-run-v1` and its Markdown rendering preserve the execution plan, process result, audits, violations, artifacts, status, reason, and exit code.

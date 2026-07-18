@@ -31,8 +31,6 @@
 - Decision: Use schema `bunya-jido-codex-run-v1` with JSON and Markdown reports
   plus exit codes `0`, `2`, `130`, and `1`.
 - Human owner: Product owner.
-- Interpretation: The owner's numbered response `4. 간결한 계약` was treated as
-  the third decision question's compact result-contract option.
 - Reason: Preserve enough evidence for review without introducing an HTML report
   or a larger public artifact protocol in the MVP.
 
@@ -48,8 +46,10 @@
 ## BW-006: Dependency and live-run boundary
 
 - Decision: Add no runtime dependency, telemetry, credential flow, external
-  service, web-search enablement, or workspace-shell network permission.
+  service, Codex web-search access, or workspace-shell network permission.
 - Human owner: Product owner.
+- Enforcement: Set `web_search="disabled"` and independently set
+  `sandbox_workspace_write.network_access=false`.
 - Test policy: Use fake executables by default.
 - Deferred gate: One real nested Codex run requires explicit human approval
   after the fake-executable implementation and repository validation are
@@ -62,3 +62,16 @@
 - Owner: Implementation boundary accepted in the approved plan.
 - Reason: Guarded Codex Run does not require the combined-focus path, and fixing
   it would broaden the change beyond the agreed feature.
+
+## BW-008: Deterministic execpolicy rules
+
+- Decision: Pass `--ignore-rules` so Guarded Codex Run does not load user or
+  trusted-project execpolicy `.rules` files.
+- Human owner: Product owner.
+- Reason: Local rules can restrict commands or allow matching commands outside
+  the selected sandbox, making identical guarded argv behave differently in
+  development and judge environments.
+- Accepted tradeoff: Project-local `.rules` conventions do not apply to this
+  controlled runner.
+- Boundary: This decision does not claim to bypass administrator-managed
+  requirements.

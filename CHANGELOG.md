@@ -16,6 +16,15 @@ be documented.
   coverage, intentional exit codes, and local run artifacts under
   `.bunya-jido/runs/`.
 
+### Fixed
+
+- Make clean checkouts validate identically to development worktrees by keeping
+  ignored atlas-quality output out of trusted safe-edit routes.
+- Explicitly disable Codex web search independently from workspace-shell
+  network access, and assert the complete guarded invocation argv.
+- Ignore user and trusted-project Codex execpolicy `.rules` so the guarded
+  runner's selected sandbox does not vary across local and judge environments.
+
 ## 0.5.0a2 - 2026-06-09
 
 ### Fixed
