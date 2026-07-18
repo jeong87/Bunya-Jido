@@ -332,19 +332,26 @@
       }
     },
     {
-      "id": "weak-lexical-overlap-is-uncertain",
+      "id": "guarded-audit-event-bounded-discovery",
       "dimension": "honest_no_match",
       "query": {
         "task": "Add a new audit event for a workflow state not yet represented in the map."
       },
       "expect": {
         "route_status": "not_found",
-        "decision": "UNCERTAIN",
-        "execution_policy": "read_only",
+        "decision": "IN_SCOPE_NO_ROUTE",
+        "execution_policy": "read_only_discovery",
         "routes": [],
         "forbid_routes": [
           "change grounding policy",
-          "change task route projection"
+          "change task route projection",
+          "change guarded Codex run orchestration"
+        ],
+        "discovery_nodes": [
+          "execution:codex_run"
+        ],
+        "read_first": [
+          "src/bunya_jido/codex_run.py"
         ]
       }
     },
@@ -372,6 +379,43 @@
         "decision": "UNCERTAIN",
         "execution_policy": "read_only",
         "routes": []
+      }
+    },
+    {
+      "id": "guarded-codex-run-boundary",
+      "dimension": "boundary_discipline",
+      "query": {
+        "task": "Implement guarded Codex run orchestration and boundary reporting."
+      },
+      "expect": {
+        "route_status": "matched",
+        "decision": "MATCH",
+        "execution_policy": "workspace_write",
+        "routes": [
+          "change guarded Codex run orchestration"
+        ],
+        "forbid_routes": [
+          "change benchmark evidence reporting",
+          "change task route projection"
+        ],
+        "must_read": [
+          "src/bunya_jido/codex_run.py",
+          "docs/GUARDED_CODEX_RUN.md"
+        ],
+        "contracts": [
+          "Only MATCH may select workspace-write; IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, UNCERTAIN, and DISABLED must remain read-only.",
+          "Fake-executable tests must not be reported as live Codex OS sandbox proof."
+        ],
+        "tests": [
+          "tests/test_codex_run.py"
+        ],
+        "safe_edit": [
+          "src/bunya_jido/codex_run.py",
+          "tests/test_codex_run.py"
+        ],
+        "projection_context": [
+          "projection:agent_navigation"
+        ]
       }
     },
     {

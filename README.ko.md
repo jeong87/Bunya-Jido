@@ -475,6 +475,31 @@ JSON 보고서는 `execution_policy`, `agent_instruction`, 그리고 근거가 �
 계약은 [docs/CONTEXT_EXECUTION_POLICY.md](docs/CONTEXT_EXECUTION_POLICY.md)에
 있습니다.
 
+### 보호된 Codex 실행
+
+`codex-run`은 context 결정을 권한 상승이 없는 Codex 실행 계획으로
+바꿉니다. Preview는 작업 트리가 dirty여도 사용할 수 있고, Codex를
+실행하거나 run 산출물을 만들지 않습니다.
+
+```bash
+bunya-jido codex-run --root . --task "change guarded Codex run orchestration" --preview
+```
+
+실제 실행에는 clean Git 작업 트리와 별도로 설치·인증된 Codex CLI가
+필요합니다.
+
+```bash
+bunya-jido codex-run --root . --task "change guarded Codex run orchestration"
+```
+
+`MATCH`만 Codex의 `workspace-write` OS sandbox를 받습니다. 나머지 context
+결정은 모두 `read-only`이며, CLI 옵션으로 권한을 높일 수 없습니다.
+safe-edit 경로는 의미적 안내와 실행 후 감사 경계일 뿐 OS sandbox를
+확장하지 않습니다. 웹 검색은 켜지 않으며 workspace shell의 네트워크
+접근은 비활성화합니다. 보고서와 프로세스 출력은
+`.bunya-jido/runs/<run-id>/` 아래에 저장됩니다. 전체 계약은
+[docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md)를 참고하세요.
+
 작업이 선택된 Markdown과 JSON context는 기본적으로 compact 출력입니다.
 선택된 route 또는 bounded discovery 계약은 유지하되 반복 진단과 무관한
 생성 문서 참조를 제거합니다. route 점수나 전체 discovery evidence를

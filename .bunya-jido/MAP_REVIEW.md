@@ -4,6 +4,22 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-07-18 - Guarded Codex Run Structure
+
+- Change: Added the Guarded Codex Run execution component, its context,
+  clean-baseline, process-capture, and boundary-audit workflow, an independent
+  trusted maintenance route, and a deterministic agent-utility case. Rebuilt
+  the committed demo from the 15-node, 32-relationship, 8-route self-map.
+- Decision: Guarded local execution is a new maintained responsibility rather
+  than an implementation detail of context selection or benchmark reporting.
+  It appears in the Bounded Agent Navigation projection while Trusted
+  Publication remains the primary human onboarding view. Fake-executable
+  evidence remains distinct from separately approved live Codex sandbox proof.
+- Validation: Guarded-run focused tests, full unit tests, blueprint and
+  agent-map validation, grounded diagnostics, strict agent utility and
+  atlas-quality gates, changed-file refresh, and stale-map review are required.
+  The 1440 x 900 capture remains pending when no connected browser is available.
+
 ## 2026-06-09 - Benchmark Paired Variation Disclosure
 
 - Change: Added paired mean-saving standard deviations to the README benchmark

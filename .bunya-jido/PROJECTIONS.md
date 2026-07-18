@@ -19,11 +19,15 @@
 
 - **Question answered:** How does a coding task obtain a trusted route, bounded read-only discovery, or an honest rejection?
 - **Landmark nodes:** Command Line Interface, Trusted Context Generator, Agent
-  Route Parity, Grounding Gate, Semantic Contract Tests.
-- **Grounding strength:** Strong for context decisions, route validation, evidence-backed discovery, and machine-readable output.
+  Route Parity, Grounding Gate, Guarded Codex Run Orchestrator, Semantic
+  Contract Tests.
+- **Grounding strength:** Strong for context decisions, route validation,
+  evidence-backed discovery, non-escalating sandbox selection, fake-process
+  capture, and machine-readable output.
 - **First-screen value:** Useful for agent adopters, less complete for humans
   first discovering the map product.
-- **Distortion risks:** Making the viewer appear secondary to agent routing.
+- **Distortion risks:** Making the viewer appear secondary to agent routing, or
+  presenting deterministic fake-Codex evidence as live sandbox proof.
 - **Scenario potential:** Strong documented behavioral path.
 
 ## Candidate C: Quality And Benchmark Contract

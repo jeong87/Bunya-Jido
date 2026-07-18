@@ -2,18 +2,20 @@
   "schema_version": "bunya-jido-blueprint-v2",
   "project": {
     "name": "Bunya-Jido",
-    "summary": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
-    "architecture_style": "Offline semantic projection with deterministic support and explicit trust gates.",
+    "summary": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes, with an optional guarded Codex execution boundary.",
+    "architecture_style": "Offline semantic projection with deterministic support, explicit trust gates, and guarded local execution.",
     "entrypoints": [
       "src/bunya_jido/cli.py",
-      "src/bunya_jido/blueprint.py"
+      "src/bunya_jido/blueprint.py",
+      "src/bunya_jido/codex_run.py"
     ],
-    "thesis": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context only after explicit trust gates pass.",
+    "thesis": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context, and can execute that context through a guarded Codex runner only after explicit trust and worktree gates pass.",
     "primary_projection_id": "projection:trusted_publication",
     "ordered_behavior_assessment": "strong"
   },
   "planes": [
     {"id": "entry", "label": "Entry", "purpose": "User commands and orchestration."},
+    {"id": "execution", "label": "Execution", "purpose": "Guarded local process execution and evidence capture."},
     {"id": "analysis", "label": "Observation", "purpose": "Deterministic repository observation."},
     {"id": "semantic", "label": "Semantic Contract", "purpose": "Reviewed architecture and agent-route projection."},
     {"id": "quality", "label": "Trust And Quality", "purpose": "Grounding, readability, benchmark, and regression checks."},
@@ -30,15 +32,51 @@
       "importance": "core",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Dispatches build, validation, preparation, trusted context, benchmark audit, and safe-and-resolved token/time reporting commands.",
+      "description": "Dispatches build, validation, preparation, trusted context, guarded Codex execution, benchmark audit, and safe-and-resolved token/time reporting commands.",
       "why_it_matters": "Every published artifact or agent-context request begins at an explicit command boundary.",
       "inspector_summary": "Command entrypoints coordinate publication and diagnostics without defining the trust policy.",
       "source_path": "src/bunya_jido/cli.py",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_build"},
+        {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_codex_run"},
         {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_evaluate_atlas_quality"},
         {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_summarize_token_efficiency"},
         {"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_summarize_time_efficiency"}
+      ]
+    },
+    {
+      "id": "execution:codex_run",
+      "label": "Guarded Codex Run",
+      "type": "component",
+      "family": "runner",
+      "plane": "execution",
+      "importance": "major",
+      "overview_visibility": "visible",
+      "activation": "conditional",
+      "description": "Maps compact context decisions to a non-escalating Codex sandbox, requires a clean baseline for launch, captures JSONL process evidence, and audits semantic production boundaries.",
+      "why_it_matters": "It turns route advice into a reviewable local run without letting non-MATCH decisions become writable.",
+      "inspector_summary": "Only MATCH receives workspace-write; fake-executable tests prove orchestration and audit behavior, not a live Codex OS sandbox.",
+      "inputs": [
+        "Required task and repository root",
+        "Validated compact context report",
+        "Optional model, executable, output directory, and timeout"
+      ],
+      "outputs": [
+        "bunya-jido-codex-run-v1 JSON result",
+        "Markdown report and captured process streams",
+        "Post-run production boundary decision"
+      ],
+      "constraints": [
+        "Actual execution requires a clean Git baseline.",
+        "Non-MATCH decisions remain read-only without an escalation option.",
+        "Safe-edit paths guide and audit activity but do not grant OS access.",
+        "Live nested Codex execution requires separate human approval during Build Week."
+      ],
+      "source_path": "src/bunya_jido/codex_run.py",
+      "evidence": [
+        {"kind": "source", "path": "src/bunya_jido/codex_run.py", "symbol": "_execute_guarded_codex_run"},
+        {"kind": "test", "path": "tests/test_codex_run.py"},
+        {"kind": "documentation", "path": "docs/GUARDED_CODEX_RUN.md"}
       ]
     },
     {
@@ -223,11 +261,12 @@
       "importance": "major",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Exercises grounding publication gates, Studio contracts, benchmark evidence reporting, viewer playback surfaces, and agent-map parity behavior.",
+      "description": "Exercises grounding publication gates, guarded Codex execution, Studio contracts, benchmark evidence reporting, viewer playback surfaces, and agent-map parity behavior.",
       "inspector_summary": "Regression tests make the public self-map and viewer contract repeatable in CI.",
       "source_path": "tests/test_blueprint.py",
       "evidence": [
         {"kind": "test", "path": "tests/test_blueprint.py"},
+        {"kind": "test", "path": "tests/test_codex_run.py"},
         {"kind": "test", "path": "tests/test_blueprint_v2.py"},
         {"kind": "test", "path": "tests/test_projection_quality.py"},
         {"kind": "test", "path": "tests/test_benchmark_audit.py"},
@@ -259,7 +298,7 @@
       "importance": "support",
       "overview_visibility": "contextual",
       "activation": "always",
-      "description": "Explains artifact modes, Studio scenario expectations, quality review reporting, trust boundaries, and command usage.",
+      "description": "Explains artifact modes, Studio scenario expectations, guarded Codex execution, quality review reporting, trust boundaries, and command usage.",
       "inspector_summary": "Public onboarding documents declared behavior and limitations.",
       "source_path": "README.md",
       "evidence": [
@@ -285,6 +324,11 @@
   ],
   "edges": [
     {"id": "edge:cli_blueprint", "source": "entry:cli", "target": "semantic:blueprint", "relation": "calls", "relation_family": "invocation", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_build"}]},
+    {"id": "edge:cli_codex_run", "source": "entry:cli", "target": "execution:codex_run", "relation": "calls", "relation_family": "invocation", "workflow_role": "primary", "overview_visibility": "visible", "activation": "conditional", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/cli.py", "symbol": "cmd_codex_run"}]},
+    {"id": "edge:codex_run_context", "source": "execution:codex_run", "target": "semantic:context", "relation": "calls", "relation_family": "invocation", "workflow_role": "primary", "overview_visibility": "contextual", "activation": "conditional", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/codex_run.py", "symbol": "_execute_guarded_codex_run"}]},
+    {"id": "edge:codex_run_audit", "source": "execution:codex_run", "target": "quality:benchmark", "relation": "uses_contract", "relation_family": "assurance", "workflow_role": "boundary", "overview_visibility": "contextual", "activation": "conditional", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/codex_run.py", "symbol": "_evaluate_boundary"}, {"kind": "source", "path": "src/bunya_jido/benchmark.py", "symbol": "audit_worktree"}]},
+    {"id": "edge:tests_codex_run", "source": "quality:tests", "target": "execution:codex_run", "relation": "checks", "relation_family": "verification", "workflow_role": "supporting", "overview_visibility": "contextual", "activation": "conditional", "confidence": "deterministic", "evidence": [{"kind": "test", "path": "tests/test_codex_run.py"}]},
+    {"id": "edge:readme_codex_run", "source": "docs:readme", "target": "execution:codex_run", "relation": "documents", "relation_family": "explanation", "workflow_role": "supporting", "overview_visibility": "contextual", "activation": "conditional", "confidence": "llm_grounded", "evidence": [{"kind": "documentation", "path": "README.md"}, {"kind": "documentation", "path": "docs/GUARDED_CODEX_RUN.md"}]},
     {"id": "edge:blueprint_scanner", "source": "semantic:blueprint", "target": "analysis:scanner", "relation": "calls", "relation_family": "invocation", "workflow_role": "supporting", "overview_visibility": "contextual", "activation": "optional", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "graph_with_optional_blueprint"}]},
     {"id": "edge:scanner_blueprint", "source": "analysis:scanner", "target": "semantic:blueprint", "relation": "feeds", "relation_family": "observation", "workflow_role": "supporting", "overview_visibility": "contextual", "activation": "optional", "confidence": "llm_grounded", "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "graph_from_blueprint"}]},
     {"id": "edge:blueprint_validation", "source": "semantic:blueprint", "target": "semantic:validation", "relation": "validates", "relation_family": "assurance", "workflow_role": "primary", "overview_visibility": "visible", "activation": "always", "confidence": "deterministic", "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "validate_blueprint_obj"}]},
@@ -362,6 +406,18 @@
       "evidence": [{"kind": "source", "path": "src/bunya_jido/blueprint.py", "symbol": "generate_agent_context"}]
     },
     {
+      "id": "guarded_codex_run",
+      "label": "Guarded Codex Run",
+      "description": "Select non-escalating sandbox policy from compact context, require a clean baseline, capture a local Codex process, and audit observed plus final production activity.",
+      "kind": "behavioral",
+      "ordered": true,
+      "trigger": "bunya-jido codex-run",
+      "outcome": "A schema v1 run report whose success requires context policy, process completion, complete JSONL, and production boundary compliance.",
+      "confidence": "deterministic",
+      "node_ids": ["entry:cli", "execution:codex_run", "semantic:context", "semantic:validation", "semantic:agent_map", "quality:benchmark", "quality:tests"],
+      "evidence": [{"kind": "source", "path": "src/bunya_jido/codex_run.py"}, {"kind": "test", "path": "tests/test_codex_run.py"}, {"kind": "documentation", "path": "docs/GUARDED_CODEX_RUN.md"}]
+    },
+    {
       "id": "continuous_contract_check",
       "label": "Continuous Contract Check",
       "description": "Run characterization and golden checks in CI against the published semantic contract.",
@@ -415,25 +471,25 @@
       "id": "product_architecture",
       "label": "Product Architecture",
       "description": "Core implementation flow from command to trusted offline presentation.",
-      "node_ids": ["entry:cli", "analysis:scanner", "semantic:blueprint", "semantic:validation", "quality:atlas", "quality:benchmark", "semantic:agent_map", "presentation:renderer", "presentation:viewer"]
+      "node_ids": ["entry:cli", "execution:codex_run", "analysis:scanner", "semantic:blueprint", "semantic:validation", "quality:atlas", "quality:benchmark", "semantic:agent_map", "presentation:renderer", "presentation:viewer"]
     },
     {
       "id": "trust_contract",
       "label": "Trust Contract",
       "description": "Validation, agent context, tests, benchmark, CI, and roadmap commitments.",
-      "node_ids": ["semantic:validation", "quality:atlas", "quality:benchmark", "semantic:agent_map", "semantic:context", "quality:tests", "quality:ci", "docs:roadmap"]
+      "node_ids": ["semantic:validation", "quality:atlas", "quality:benchmark", "semantic:agent_map", "semantic:context", "execution:codex_run", "quality:tests", "quality:ci", "docs:roadmap"]
     },
     {
       "id": "documentation_surface",
       "label": "Documentation Surface",
       "description": "Public narrative and the command/viewer surfaces it explains.",
-      "node_ids": ["docs:readme", "docs:roadmap", "entry:cli", "quality:benchmark", "presentation:viewer"]
+      "node_ids": ["docs:readme", "docs:roadmap", "entry:cli", "execution:codex_run", "quality:benchmark", "presentation:viewer"]
     }
   ],
   "atlas": {
     "scenario_policy": "required",
     "decision_record": {
-      "repository_thesis_summary": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context only after explicit trust gates pass.",
+      "repository_thesis_summary": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context, and can execute that context through a guarded Codex runner only after explicit trust and worktree gates pass.",
       "selected_projection_id": "projection:trusted_publication",
       "projection_candidates": [
         {
@@ -449,11 +505,11 @@
         {
           "id": "projection:agent_navigation",
           "label": "Bounded Agent Navigation",
-          "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
+          "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, honest rejection, or guarded local execution?",
           "selected": false,
           "grounding_strength": "strong",
           "first_screen_value": "medium",
-          "distortion_risks": ["It could make the human-facing map look like a secondary product surface."],
+          "distortion_risks": ["It could make the human-facing map look like a secondary product surface.", "Fake-executable evidence could be mistaken for live Codex sandbox proof."],
           "selection_reason": "It remains an important alternate view, but does not introduce the shared artifact as clearly as Trusted Publication."
         },
         {
@@ -495,12 +551,18 @@
           "node_or_family": "quality:ci",
           "risk": "Automation could appear to prove editorial truth rather than repeat deterministic checks.",
           "mitigation": "Keep CI contextual and state that projection quality remains review-required."
+        },
+        {
+          "node_or_family": "execution:codex_run",
+          "risk": "A guarded runner could be mistaken for proof that a live nested Codex sandbox was exercised.",
+          "mitigation": "Keep fake-executable orchestration evidence distinct from separately approved live-run evidence."
         }
       ]
     },
     "vocabularies": {
       "node_families": [
         {"id": "command", "label": "Command", "description": "Invokes a user-visible operation.", "glyph": "hexagon", "color_role": "primary"},
+        {"id": "runner", "label": "Guarded Runner", "description": "Executes a local process under explicit policy and captures auditable evidence.", "glyph": "rounded_square", "color_role": "transform"},
         {"id": "observation", "label": "Observation", "description": "Provides supporting discovered facts.", "glyph": "dashed_tile", "color_role": "muted"},
         {"id": "projection", "label": "Projection", "description": "Transforms or emits semantic presentation data.", "glyph": "rounded_square", "color_role": "transform"},
         {"id": "gate", "label": "Trust Gate", "description": "Checks whether a claim may continue.", "glyph": "octagon", "color_role": "warning"},
@@ -531,11 +593,11 @@
       {
         "id": "projection:agent_navigation",
         "label": "Bounded Agent Navigation",
-        "description": "How a coding task receives a trusted route or capped read-only discovery only after scope, sufficiency, and trust checks.",
-        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
+        "description": "How a coding task receives a trusted route, capped read-only discovery, honest rejection, or guarded local execution only after scope, sufficiency, trust, and worktree checks.",
+        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, honest rejection, or guarded local execution?",
         "is_primary": false,
-        "node_ids": ["entry:cli", "semantic:context", "semantic:validation", "semantic:agent_map", "quality:tests", "presentation:viewer"],
-        "plane_ids": ["entry", "semantic", "quality", "presentation"],
+        "node_ids": ["entry:cli", "semantic:context", "semantic:validation", "semantic:agent_map", "execution:codex_run", "quality:benchmark", "quality:tests", "presentation:viewer"],
+        "plane_ids": ["entry", "execution", "semantic", "quality", "presentation"],
         "relation_family_ids": ["invocation", "assurance", "verification", "delivery"],
         "evidence": [{"kind": "documentation", "path": ".bunya-jido/PROJECTIONS.md"}]
       },

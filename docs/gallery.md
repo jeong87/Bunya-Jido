@@ -14,13 +14,13 @@ repository and is protected by semantic golden tests.
 | Atlas contract | Studio v2, primary projection `Trusted Publication`, machine-readable decision record, two behavioral scenarios |
 | Grounding status | `grounded` |
 | Atlas quality status | `passed`, with projection choice and narration honesty still review-required |
-| Review status | Maintainer-authored and mechanically validated on June 6, 2026 |
-| Semantic coverage | 14 nodes, 27 relationships, 5 core nodes, 14 critical relationships |
+| Review status | Semantic artifact mechanically validated on July 18, 2026; refreshed browser capture pending |
+| Semantic coverage | 15 nodes, 32 relationships, 5 core nodes, 15 critical relationships |
 | Grounding metrics | 100% core-node evidence; 100% critical-relationship evidence |
-| Agent routes | 7 of 7 routes validated and projected as `Task Route` paths with optional Studio reading context |
+| Agent routes | 8 of 8 routes validated and projected as `Task Route` paths with optional Studio reading context |
 | Viewer surface | Studio constellation with authored projection tabs, scenario playback, semantic role glyphs, workflow launcher bar, and copyable trusted route context |
 | Viewer disclosure | `Overview` by default; map controls and selected-item inspector open on demand |
-| Screenshot capture | Clean `Overview` state at 1440 x 900 |
+| Screenshot capture | Previous 1440 x 900 `Overview` capture preserved; refresh pending a connected browser |
 | Published output | `docs/demo.html` |
 
 **Generation command:**
@@ -44,6 +44,7 @@ python -m bunya_jido build --root . --max-files 0 --out docs/demo.html
 - Atlas-quality reporting keeps review-only narration signals separate from blockers and can write an optional local Markdown review summary.
 - Benchmark evidence reporting keeps unsafe or unresolved runs out of token/time savings and treats synthetic timing results as measurement rather than routing-tuning instructions.
 - Validated routes may connect a coding task to a relevant projection question and qualified scenario, and the viewer copies only this projected trusted context.
+- Guarded Codex Run is a distinct execution component and maintenance route; only `MATCH` becomes writable, while fake-executable evidence remains explicitly separate from live sandbox proof.
 - Provider hint observations now carry origin/type metadata, and generated prompt/schema example text cannot become a contextual overlay node.
 - The benchmark suite exercises six different repository shapes so this promoted self-map is not the only quality target. See [`STUDIO_BENCHMARK.md`](STUDIO_BENCHMARK.md).
 - The canvas-first overview keeps controls out of the initial reading surface while preserving them in an on-demand drawer.

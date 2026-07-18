@@ -22,6 +22,7 @@ dist/
 *.tar.gz
 
 # Bunya-Jido generated workspaces and previews
+.bunya-jido/runs/
 .bunya-jido/*
 !.bunya-jido/
 !.bunya-jido/COMPONENTS.md

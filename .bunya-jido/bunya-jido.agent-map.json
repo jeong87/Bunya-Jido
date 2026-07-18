@@ -10,6 +10,7 @@
       "coding agent context generation",
       "context decision routing",
       "context decision calibration",
+      "guarded local Codex execution",
       "benchmark worktree auditing",
       "safe-and-resolved token efficiency reporting",
       "safe-and-resolved time efficiency reporting",
@@ -26,6 +27,7 @@
       "unit test",
       "Markdown documentation",
       "benchmark result JSON",
+      "Codex run JSONL and report artifacts",
       "offline HTML atlas"
     ],
     "unsupported_surfaces": [
@@ -261,6 +263,96 @@
       ],
       "watch_out": [
         "An independently reviewed complex workflow may test output quality, but its nouns must not become generic viewer or prompt vocabulary."
+      ]
+    },
+    {
+      "task": "change guarded Codex run orchestration",
+      "intent": "Modify the guarded local Codex runner, non-escalating sandbox mapping, process capture, boundary audit, or schema v1 result contract.",
+      "match_terms": [
+        "guarded Codex run",
+        "codex-run",
+        "Codex execution orchestration",
+        "nested Codex runner",
+        "Codex sandbox mapping",
+        "Codex run boundary audit"
+      ],
+      "when_to_use": [
+        "public codex-run CLI behavior or preview",
+        "context-to-Codex sandbox mapping",
+        "clean-baseline process launch and capture",
+        "Codex JSONL production boundary audit or run reports"
+      ],
+      "when_not_to_use": [
+        "benchmark efficiency claims without guarded-run changes",
+        "live nested Codex validation without explicit human approval",
+        "viewer-only presentation changes"
+      ],
+      "common_failure_modes": [
+        "Allowing a non-MATCH decision to become writable.",
+        "Launching from a dirty baseline or through a shell-interpreted command string.",
+        "Treating safe-edit guidance as OS permission.",
+        "Missing rename, outside-workspace, or write-then-revert activity.",
+        "Treating malformed or empty JSONL as a complete audit.",
+        "Presenting fake-executable evidence as proof of a live Codex sandbox."
+      ],
+      "start_nodes": [
+        "execution:codex_run"
+      ],
+      "workflows": [
+        "guarded_codex_run"
+      ],
+      "projection_context": "projection:agent_navigation",
+      "scenario_context": [],
+      "must_read": [
+        "src/bunya_jido/codex_run.py",
+        "src/bunya_jido/cli.py",
+        "docs/GUARDED_CODEX_RUN.md",
+        "docs/CONTEXT_EXECUTION_POLICY.md"
+      ],
+      "contracts": [
+        "Only MATCH may select workspace-write; IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, UNCERTAIN, and DISABLED must remain read-only.",
+        "Actual execution requires a clean Git baseline, while preview launches no process and creates no run artifacts.",
+        "Codex must receive UTF-8 standard input through an argv list with shell=False, approval disabled, user config ignored, and workspace shell network disabled.",
+        "Safe-edit paths are semantic guidance and post-run audit criteria, never an OS permission grant.",
+        "Boundary audit must retain final changes, rename endpoints, outside-workspace attempts, and write-then-revert attempts observed in JSONL.",
+        "Malformed, partial, or empty JSONL must preserve readable evidence but fail as audit_incomplete.",
+        "Fake-executable tests must not be reported as live Codex OS sandbox proof."
+      ],
+      "tests": [
+        "tests/test_codex_run.py",
+        "tests/test_self_map.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/codex_run.py",
+        "src/bunya_jido/cli.py",
+        "tests/test_codex_run.py",
+        "tests/test_self_map.py",
+        "docs/GUARDED_CODEX_RUN.md",
+        "docs/CONTEXT_EXECUTION_POLICY.md",
+        "docs/build-week/**",
+        "BUILD_WEEK.md",
+        "README.md",
+        "README.ko.md",
+        "CHANGELOG.md",
+        ".gitignore",
+        ".bunya-jido/COMPONENTS.md",
+        ".bunya-jido/WORKFLOWS.md",
+        ".bunya-jido/REPOSITORY_THESIS.md",
+        ".bunya-jido/PROJECTIONS.md",
+        ".bunya-jido/SCENARIOS.md",
+        ".bunya-jido/ATLAS_QUALITY_REPORT.md",
+        ".bunya-jido/MAP_REVIEW.md",
+        ".bunya-jido/bunya-jido.blueprint.json",
+        ".bunya-jido/bunya-jido.agent-map.json",
+        ".bunya-jido/bunya-jido.agent-evaluation.json",
+        "docs/demo.html",
+        "docs/gallery.md",
+        "docs/assets/self-map-grounded.png"
+      ],
+      "watch_out": [
+        "Keep generated run artifacts outside production boundary evaluation.",
+        "Do not add sandbox, dirty-worktree, network, or arbitrary Codex argument escalation options.",
+        "Do not launch a live nested Codex process during Build Week development without human approval."
       ]
     },
     {

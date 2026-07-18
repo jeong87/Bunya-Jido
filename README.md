@@ -472,6 +472,31 @@ launching an agent; Bunya-Jido reports the policy but does not control another
 process's sandbox. See
 [docs/CONTEXT_EXECUTION_POLICY.md](docs/CONTEXT_EXECUTION_POLICY.md).
 
+### Guarded Codex Run
+
+`codex-run` turns the context decision into a non-escalating Codex execution
+plan. Preview is safe to run in a dirty checkout and does not launch Codex or
+create run artifacts:
+
+```bash
+bunya-jido codex-run --root . --task "change guarded Codex run orchestration" --preview
+```
+
+An actual run requires a clean Git worktree and a separately installed,
+authenticated Codex CLI:
+
+```bash
+bunya-jido codex-run --root . --task "change guarded Codex run orchestration"
+```
+
+Only `MATCH` receives Codex's `workspace-write` OS sandbox. Every other context
+decision remains `read-only`, with no CLI option to raise it. Safe-edit paths
+remain semantic guidance and a post-run audit boundary; they do not expand the
+OS sandbox. Web search is not enabled, and workspace shell network access is
+disabled. Reports and captured process output are written under
+`.bunya-jido/runs/<run-id>/`. See
+[docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md) for the full contract.
+
 Task-selected Markdown and JSON context is compact by default: it keeps the
 selected route or bounded discovery contract while removing repeated
 diagnostics and unrelated generated-document references. Use `--verbose`

@@ -54,6 +54,27 @@ After execution, combine the decision with
 The CLI reports policy; it does not silently claim to enforce another
 process's sandbox. Enforcement belongs to the runner, IDE, or agent host.
 
+## Built-in Codex Integration
+
+`bunya-jido codex-run` is the built-in runner that applies this policy to a
+local Codex CLI:
+
+```bash
+bunya-jido codex-run --root . --task "change guarded Codex run orchestration" --preview
+bunya-jido codex-run --root . --task "change guarded Codex run orchestration"
+```
+
+Preview does not launch Codex or create run artifacts. Actual execution requires
+a clean Git worktree. Only `MATCH` maps to `workspace-write`; every other
+supported decision maps to `read-only`, and the command exposes no sandbox,
+dirty-worktree, network, or arbitrary-argument override.
+
+Codex's OS sandbox is the enforcement boundary. Safe-edit paths are scoped
+semantic guidance and a post-run audit rule. A safe-edit path never grants
+additional OS access. See
+[GUARDED_CODEX_RUN.md](GUARDED_CODEX_RUN.md) for the command, artifact, schema,
+and exit-code contract.
+
 ## Deterministic P1 Gate
 
 `bunya-jido evaluate-agent-utility --require-pass --json` now reports:

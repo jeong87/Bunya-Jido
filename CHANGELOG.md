@@ -7,7 +7,14 @@ be documented.
 
 ## Unreleased
 
-No changes yet.
+### Added
+
+- Add the public `bunya-jido codex-run` workflow with non-escalating context
+  sandbox mapping, JSONL capture, post-run boundary auditing, and paired schema
+  v1 JSON and Markdown reports.
+- Add non-mutating preview, clean-worktree enforcement, deterministic fake-Codex
+  coverage, intentional exit codes, and local run artifacts under
+  `.bunya-jido/runs/`.
 
 ## 0.5.0a2 - 2026-06-09
 

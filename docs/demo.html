@@ -110,9 +110,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
-  "generated_at": "2026-06-05T15:33:46+00:00",
+  "generated_at": "2026-07-18T06:57:00+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
-  "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes.",
+  "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes, with an optional guarded Codex execution boundary.",
   "artifact_mode": "semantic_blueprint",
   "grounding": {
     "status": "grounded",
@@ -121,12 +121,12 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "publish_blockers": [],
     "warnings": [],
     "metrics": {
-      "node_count": 14,
-      "edge_count": 27,
+      "node_count": 15,
+      "edge_count": 32,
       "grounded_node_ratio": 1.0,
       "grounded_edge_ratio": 1.0,
       "core_node_count": 5,
-      "critical_edge_count": 14,
+      "critical_edge_count": 15,
       "grounded_core_node_ratio": 1.0,
       "grounded_critical_edge_ratio": 1.0,
       "grounding_status": "grounded",
@@ -143,8 +143,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     }
   },
   "stats": {
-    "nodes": 14,
-    "edges": 27,
+    "nodes": 15,
+    "edges": 32,
     "relations": [
       "calls",
       "checks",
@@ -154,12 +154,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "precedes",
       "projects_to",
       "runs",
+      "uses_contract",
       "validates"
     ],
     "planes": [
       "analysis",
       "docs",
       "entry",
+      "execution",
       "presentation",
       "quality",
       "semantic"
@@ -188,6 +190,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "id": "entry",
       "label": "Entry",
       "purpose": "User commands and orchestration."
+    },
+    {
+      "id": "execution",
+      "label": "Execution",
+      "purpose": "Guarded local process execution and evidence capture."
     },
     {
       "id": "presentation",
@@ -272,7 +279,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Public Product Contract",
       "type": "document",
       "plane": "docs",
-      "description": "Explains artifact modes, Studio scenario expectations, quality review reporting, trust boundaries, and command usage.",
+      "description": "Explains artifact modes, Studio scenario expectations, guarded Codex execution, quality review reporting, trust boundaries, and command usage.",
       "source_path": "README.md",
       "tags": [
         "blueprint",
@@ -282,7 +289,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": false,
-      "degree": 2,
+      "degree": 3,
       "size": 10.0,
       "parent": "",
       "detail_level": "overview",
@@ -302,7 +309,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Command Line Interface",
       "type": "component",
       "plane": "entry",
-      "description": "Dispatches build, validation, preparation, trusted context, benchmark audit, and safe-and-resolved token/time reporting commands.",
+      "description": "Dispatches build, validation, preparation, trusted context, guarded Codex execution, benchmark audit, and safe-and-resolved token/time reporting commands.",
       "source_path": "src/bunya_jido/cli.py",
       "tags": [
         "blueprint",
@@ -312,7 +319,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 6,
+      "degree": 7,
       "size": 22.0,
       "parent": "",
       "detail_level": "overview",
@@ -321,6 +328,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "kind": "source",
           "path": "src/bunya_jido/cli.py",
           "symbol": "cmd_build"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_codex_run"
         },
         {
           "kind": "source",
@@ -343,6 +355,62 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "activation": "always",
       "why_it_matters": "Every published artifact or agent-context request begins at an explicit command boundary.",
       "inspector_summary": "Command entrypoints coordinate publication and diagnostics without defining the trust policy."
+    },
+    {
+      "id": "execution:codex_run",
+      "label": "Guarded Codex Run",
+      "type": "component",
+      "plane": "execution",
+      "description": "Maps compact context decisions to a non-escalating Codex sandbox, requires a clean baseline for launch, captures JSONL process evidence, and audits semantic production boundaries.",
+      "source_path": "src/bunya_jido/codex_run.py",
+      "tags": [
+        "blueprint",
+        "importance/major",
+        "plane/execution",
+        "type/component"
+      ],
+      "status": "",
+      "major": true,
+      "degree": 5,
+      "size": 17.23606797749979,
+      "parent": "",
+      "detail_level": "overview",
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/codex_run.py",
+          "symbol": "_execute_guarded_codex_run"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_codex_run.py"
+        },
+        {
+          "kind": "documentation",
+          "path": "docs/GUARDED_CODEX_RUN.md"
+        }
+      ],
+      "family": "runner",
+      "overview_visibility": "visible",
+      "activation": "conditional",
+      "why_it_matters": "It turns route advice into a reviewable local run without letting non-MATCH decisions become writable.",
+      "inputs": [
+        "Required task and repository root",
+        "Validated compact context report",
+        "Optional model, executable, output directory, and timeout"
+      ],
+      "outputs": [
+        "bunya-jido-codex-run-v1 JSON result",
+        "Markdown report and captured process streams",
+        "Post-run production boundary decision"
+      ],
+      "constraints": [
+        "Actual execution requires a clean Git baseline.",
+        "Non-MATCH decisions remain read-only without an escalation option.",
+        "Safe-edit paths guide and audit activity but do not grant OS access.",
+        "Live nested Codex execution requires separate human approval during Build Week."
+      ],
+      "inspector_summary": "Only MATCH receives workspace-write; fake-executable tests prove orchestration and audit behavior, not a live Codex OS sandbox."
     },
     {
       "id": "presentation:renderer",
@@ -519,8 +587,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 5,
-      "size": 17.23606797749979,
+      "degree": 6,
+      "size": 17.44948974278318,
       "parent": "",
       "detail_level": "overview",
       "evidence": [
@@ -565,7 +633,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Semantic Contract Tests",
       "type": "test",
       "plane": "quality",
-      "description": "Exercises grounding publication gates, Studio contracts, benchmark evidence reporting, viewer playback surfaces, and agent-map parity behavior.",
+      "description": "Exercises grounding publication gates, guarded Codex execution, Studio contracts, benchmark evidence reporting, viewer playback surfaces, and agent-map parity behavior.",
       "source_path": "tests/test_blueprint.py",
       "tags": [
         "blueprint",
@@ -575,14 +643,18 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 5,
-      "size": 17.23606797749979,
+      "degree": 6,
+      "size": 17.44948974278318,
       "parent": "",
       "detail_level": "overview",
       "evidence": [
         {
           "kind": "test",
           "path": "tests/test_blueprint.py"
+        },
+        {
+          "kind": "test",
+          "path": "tests/test_codex_run.py"
         },
         {
           "kind": "test",
@@ -688,7 +760,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "status": "",
       "major": true,
-      "degree": 3,
+      "degree": 4,
       "size": 17.0,
       "parent": "",
       "detail_level": "overview",
@@ -764,6 +836,128 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "workflow_role": "primary",
       "overview_visibility": "visible",
       "activation": "always"
+    },
+    {
+      "id": "edge:cli_codex_run",
+      "source": "entry:cli",
+      "target": "execution:codex_run",
+      "source_label": "Command Line Interface",
+      "target_label": "Guarded Codex Run",
+      "relation": "calls",
+      "lens": "call",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/cli.py",
+          "symbol": "cmd_codex_run"
+        }
+      ],
+      "relation_family": "invocation",
+      "workflow_role": "primary",
+      "overview_visibility": "visible",
+      "activation": "conditional"
+    },
+    {
+      "id": "edge:codex_run_context",
+      "source": "execution:codex_run",
+      "target": "semantic:context",
+      "source_label": "Guarded Codex Run",
+      "target_label": "Trusted Context Generator",
+      "relation": "calls",
+      "lens": "call",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/codex_run.py",
+          "symbol": "_execute_guarded_codex_run"
+        }
+      ],
+      "relation_family": "invocation",
+      "workflow_role": "primary",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
+    },
+    {
+      "id": "edge:codex_run_audit",
+      "source": "execution:codex_run",
+      "target": "quality:benchmark",
+      "source_label": "Guarded Codex Run",
+      "target_label": "Benchmark Evidence Suite",
+      "relation": "uses_contract",
+      "lens": "contract",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/codex_run.py",
+          "symbol": "_evaluate_boundary"
+        },
+        {
+          "kind": "source",
+          "path": "src/bunya_jido/benchmark.py",
+          "symbol": "audit_worktree"
+        }
+      ],
+      "relation_family": "assurance",
+      "workflow_role": "boundary",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
+    },
+    {
+      "id": "edge:tests_codex_run",
+      "source": "quality:tests",
+      "target": "execution:codex_run",
+      "source_label": "Semantic Contract Tests",
+      "target_label": "Guarded Codex Run",
+      "relation": "checks",
+      "lens": "contract",
+      "note": "",
+      "confidence": "deterministic",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "test",
+          "path": "tests/test_codex_run.py"
+        }
+      ],
+      "relation_family": "verification",
+      "workflow_role": "supporting",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
+    },
+    {
+      "id": "edge:readme_codex_run",
+      "source": "docs:readme",
+      "target": "execution:codex_run",
+      "source_label": "Public Product Contract",
+      "target_label": "Guarded Codex Run",
+      "relation": "documents",
+      "lens": "docs",
+      "note": "",
+      "confidence": "llm_grounded",
+      "directed": true,
+      "evidence": [
+        {
+          "kind": "documentation",
+          "path": "README.md"
+        },
+        {
+          "kind": "documentation",
+          "path": "docs/GUARDED_CODEX_RUN.md"
+        }
+      ],
+      "relation_family": "explanation",
+      "workflow_role": "supporting",
+      "overview_visibility": "contextual",
+      "activation": "conditional"
     },
     {
       "id": "edge:blueprint_scanner",
@@ -1374,12 +1568,13 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "kind": "overview",
       "source": "blueprint",
       "node_ids": [
-        "semantic:validation",
         "entry:cli",
-        "semantic:agent_map",
-        "semantic:blueprint",
+        "semantic:validation",
         "quality:benchmark",
         "quality:tests",
+        "semantic:agent_map",
+        "semantic:blueprint",
+        "execution:codex_run",
         "presentation:renderer",
         "quality:atlas",
         "semantic:context",
@@ -1390,12 +1585,13 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "quality:ci"
       ],
       "nodes": [
-        "Grounding Gate",
         "Command Line Interface",
-        "Agent Route Parity",
-        "Blueprint Projection",
+        "Grounding Gate",
         "Benchmark Evidence Suite",
         "Semantic Contract Tests",
+        "Agent Route Parity",
+        "Blueprint Projection",
+        "Guarded Codex Run",
         "HTML Renderer",
         "Atlas Quality Evaluator",
         "Trusted Context Generator",
@@ -1452,8 +1648,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "id": "projection_projection:agent_navigation",
       "projection_id": "projection:agent_navigation",
       "label": "Bounded Agent Navigation",
-      "description": "How a coding task receives a trusted route or capped read-only discovery only after scope, sufficiency, and trust checks.",
-      "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
+      "description": "How a coding task receives a trusted route, capped read-only discovery, honest rejection, or guarded local execution only after scope, sufficiency, trust, and worktree checks.",
+      "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, honest rejection, or guarded local execution?",
       "kind": "projection",
       "source": "atlas",
       "is_primary": false,
@@ -1462,6 +1658,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "semantic:context",
         "semantic:validation",
         "semantic:agent_map",
+        "execution:codex_run",
+        "quality:benchmark",
         "quality:tests",
         "presentation:viewer"
       ],
@@ -1470,11 +1668,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Trusted Context Generator",
         "Grounding Gate",
         "Agent Route Parity",
+        "Guarded Codex Run",
+        "Benchmark Evidence Suite",
         "Semantic Contract Tests",
         "Interactive Viewer"
       ],
       "plane_ids": [
         "entry",
+        "execution",
         "semantic",
         "quality",
         "presentation"
@@ -1528,22 +1729,24 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "kind": "view",
       "source": "blueprint",
       "node_ids": [
-        "semantic:validation",
         "entry:cli",
+        "semantic:validation",
+        "quality:benchmark",
         "semantic:agent_map",
         "semantic:blueprint",
-        "quality:benchmark",
+        "execution:codex_run",
         "presentation:renderer",
         "quality:atlas",
         "presentation:viewer",
         "analysis:scanner"
       ],
       "nodes": [
-        "Grounding Gate",
         "Command Line Interface",
+        "Grounding Gate",
+        "Benchmark Evidence Suite",
         "Agent Route Parity",
         "Blueprint Projection",
-        "Benchmark Evidence Suite",
+        "Guarded Codex Run",
         "HTML Renderer",
         "Atlas Quality Evaluator",
         "Interactive Viewer",
@@ -1558,9 +1761,10 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "source": "blueprint",
       "node_ids": [
         "semantic:validation",
-        "semantic:agent_map",
         "quality:benchmark",
         "quality:tests",
+        "semantic:agent_map",
+        "execution:codex_run",
         "quality:atlas",
         "semantic:context",
         "docs:roadmap",
@@ -1568,9 +1772,10 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       ],
       "nodes": [
         "Grounding Gate",
-        "Agent Route Parity",
         "Benchmark Evidence Suite",
         "Semantic Contract Tests",
+        "Agent Route Parity",
+        "Guarded Codex Run",
         "Atlas Quality Evaluator",
         "Trusted Context Generator",
         "Contribution Roadmap",
@@ -1586,6 +1791,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "node_ids": [
         "entry:cli",
         "quality:benchmark",
+        "execution:codex_run",
         "presentation:viewer",
         "docs:readme",
         "docs:roadmap"
@@ -1593,6 +1799,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "nodes": [
         "Command Line Interface",
         "Benchmark Evidence Suite",
+        "Guarded Codex Run",
         "Interactive Viewer",
         "Public Product Contract",
         "Contribution Roadmap"
@@ -1676,6 +1883,31 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Trusted Context Generator",
         "Grounding Gate",
         "Agent Route Parity"
+      ]
+    },
+    {
+      "id": "workflow_guarded_codex_run",
+      "label": "Guarded Codex Run",
+      "description": "Select non-escalating sandbox policy from compact context, require a clean baseline, capture a local Codex process, and audit observed plus final production activity.",
+      "kind": "workflow",
+      "source": "blueprint",
+      "node_ids": [
+        "entry:cli",
+        "execution:codex_run",
+        "semantic:context",
+        "semantic:validation",
+        "semantic:agent_map",
+        "quality:benchmark",
+        "quality:tests"
+      ],
+      "nodes": [
+        "Command Line Interface",
+        "Guarded Codex Run",
+        "Trusted Context Generator",
+        "Grounding Gate",
+        "Agent Route Parity",
+        "Benchmark Evidence Suite",
+        "Semantic Contract Tests"
       ]
     },
     {
@@ -2021,6 +2253,90 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "scenario_context": []
     },
     {
+      "id": "task_route_change-guarded-Codex-run-orchestration",
+      "label": "change guarded Codex run orchestration",
+      "description": "Modify the guarded local Codex runner, non-escalating sandbox mapping, process capture, boundary audit, or schema v1 result contract.",
+      "kind": "task_route",
+      "source": "agent_map",
+      "node_ids": [
+        "execution:codex_run",
+        "entry:cli",
+        "semantic:context",
+        "semantic:validation",
+        "semantic:agent_map",
+        "quality:benchmark",
+        "quality:tests"
+      ],
+      "nodes": [
+        "Guarded Codex Run",
+        "Command Line Interface",
+        "Trusted Context Generator",
+        "Grounding Gate",
+        "Agent Route Parity",
+        "Benchmark Evidence Suite",
+        "Semantic Contract Tests"
+      ],
+      "start_nodes": [
+        "execution:codex_run"
+      ],
+      "workflows": [
+        "guarded_codex_run"
+      ],
+      "must_read": [
+        "src/bunya_jido/codex_run.py",
+        "src/bunya_jido/cli.py",
+        "docs/GUARDED_CODEX_RUN.md",
+        "docs/CONTEXT_EXECUTION_POLICY.md"
+      ],
+      "contracts": [
+        "Only MATCH may select workspace-write; IN_SCOPE_NO_ROUTE, OUT_OF_SCOPE, UNCERTAIN, and DISABLED must remain read-only.",
+        "Actual execution requires a clean Git baseline, while preview launches no process and creates no run artifacts.",
+        "Codex must receive UTF-8 standard input through an argv list with shell=False, approval disabled, user config ignored, and workspace shell network disabled.",
+        "Safe-edit paths are semantic guidance and post-run audit criteria, never an OS permission grant.",
+        "Boundary audit must retain final changes, rename endpoints, outside-workspace attempts, and write-then-revert attempts observed in JSONL.",
+        "Malformed, partial, or empty JSONL must preserve readable evidence but fail as audit_incomplete.",
+        "Fake-executable tests must not be reported as live Codex OS sandbox proof."
+      ],
+      "tests": [
+        "tests/test_codex_run.py",
+        "tests/test_self_map.py"
+      ],
+      "safe_edit": [
+        "src/bunya_jido/codex_run.py",
+        "src/bunya_jido/cli.py",
+        "tests/test_codex_run.py",
+        "tests/test_self_map.py",
+        "docs/GUARDED_CODEX_RUN.md",
+        "docs/CONTEXT_EXECUTION_POLICY.md",
+        "docs/build-week/**",
+        "BUILD_WEEK.md",
+        "README.md",
+        "README.ko.md",
+        "CHANGELOG.md",
+        ".gitignore",
+        ".bunya-jido/COMPONENTS.md",
+        ".bunya-jido/WORKFLOWS.md",
+        ".bunya-jido/REPOSITORY_THESIS.md",
+        ".bunya-jido/PROJECTIONS.md",
+        ".bunya-jido/SCENARIOS.md",
+        ".bunya-jido/ATLAS_QUALITY_REPORT.md",
+        ".bunya-jido/MAP_REVIEW.md",
+        ".bunya-jido/bunya-jido.blueprint.json",
+        ".bunya-jido/bunya-jido.agent-map.json",
+        ".bunya-jido/bunya-jido.agent-evaluation.json",
+        "docs/demo.html",
+        "docs/gallery.md",
+        "docs/assets/self-map-grounded.png"
+      ],
+      "projection_context": {
+        "id": "projection:agent_navigation",
+        "label": "Bounded Agent Navigation",
+        "description": "How a coding task receives a trusted route, capped read-only discovery, honest rejection, or guarded local execution only after scope, sufficiency, trust, and worktree checks.",
+        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, honest rejection, or guarded local execution?"
+      },
+      "scenario_context": []
+    },
+    {
       "id": "task_route_change-task-route-projection",
       "label": "change task route projection",
       "description": "Adjust agent-map validation, conservative context decision routing, evidence-backed route recovery, bounded discovery, compact context output, or task-route paths shown in rendered maps.",
@@ -2071,8 +2387,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "projection_context": {
         "id": "projection:agent_navigation",
         "label": "Bounded Agent Navigation",
-        "description": "How a coding task receives a trusted route or capped read-only discovery only after scope, sufficiency, and trust checks.",
-        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?"
+        "description": "How a coding task receives a trusted route, capped read-only discovery, honest rejection, or guarded local execution only after scope, sufficiency, trust, and worktree checks.",
+        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, honest rejection, or guarded local execution?"
       },
       "scenario_context": [
         {
@@ -2215,7 +2531,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Architecture",
       "relations": [
         "calls",
-        "feeds"
+        "feeds",
+        "uses_contract"
       ]
     },
     {
@@ -2230,7 +2547,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Contracts",
       "relations": [
         "gates",
-        "validates"
+        "validates",
+        "uses_contract"
       ]
     }
   ],
@@ -2240,6 +2558,19 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "kind": "source",
       "path": "src/bunya_jido/cli.py",
       "symbol": "cmd_build"
+    },
+    {
+      "kind": "source",
+      "path": "src/bunya_jido/codex_run.py",
+      "symbol": "_execute_guarded_codex_run"
+    },
+    {
+      "kind": "test",
+      "path": "tests/test_codex_run.py"
+    },
+    {
+      "kind": "documentation",
+      "path": "docs/GUARDED_CODEX_RUN.md"
     },
     {
       "kind": "source",
@@ -2310,12 +2641,12 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     }
   ],
   "blueprint_quality": {
-    "node_count": 14,
-    "edge_count": 27,
+    "node_count": 15,
+    "edge_count": 32,
     "grounded_node_ratio": 1.0,
     "grounded_edge_ratio": 1.0,
     "core_node_count": 5,
-    "critical_edge_count": 14,
+    "critical_edge_count": 15,
     "grounded_core_node_ratio": 1.0,
     "grounded_critical_edge_ratio": 1.0,
     "grounding_status": "grounded",
@@ -2331,13 +2662,13 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     "decision_record_present": true,
     "warnings": []
   },
-  "node_count": 14,
-  "edge_count": 27,
+  "node_count": 15,
+  "edge_count": 32,
   "blueprint_schema_version": "bunya-jido-blueprint-v2",
   "atlas": {
     "scenario_policy": "required",
     "decision_record": {
-      "repository_thesis_summary": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context only after explicit trust gates pass.",
+      "repository_thesis_summary": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context, and can execute that context through a guarded Codex runner only after explicit trust and worktree gates pass.",
       "selected_projection_id": "projection:trusted_publication",
       "projection_candidates": [
         {
@@ -2355,12 +2686,13 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         {
           "id": "projection:agent_navigation",
           "label": "Bounded Agent Navigation",
-          "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
+          "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, honest rejection, or guarded local execution?",
           "selected": false,
           "grounding_strength": "strong",
           "first_screen_value": "medium",
           "distortion_risks": [
-            "It could make the human-facing map look like a secondary product surface."
+            "It could make the human-facing map look like a secondary product surface.",
+            "Fake-executable evidence could be mistaken for live Codex sandbox proof."
           ],
           "selection_reason": "It remains an important alternate view, but does not introduce the shared artifact as clearly as Trusted Publication."
         },
@@ -2405,6 +2737,11 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "node_or_family": "quality:ci",
           "risk": "Automation could appear to prove editorial truth rather than repeat deterministic checks.",
           "mitigation": "Keep CI contextual and state that projection quality remains review-required."
+        },
+        {
+          "node_or_family": "execution:codex_run",
+          "risk": "A guarded runner could be mistaken for proof that a live nested Codex sandbox was exercised.",
+          "mitigation": "Keep fake-executable orchestration evidence distinct from separately approved live-run evidence."
         }
       ]
     },
@@ -2416,6 +2753,13 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
           "description": "Invokes a user-visible operation.",
           "glyph": "hexagon",
           "color_role": "primary"
+        },
+        {
+          "id": "runner",
+          "label": "Guarded Runner",
+          "description": "Executes a local process under explicit policy and captures auditable evidence.",
+          "glyph": "rounded_square",
+          "color_role": "transform"
         },
         {
           "id": "observation",
@@ -2537,19 +2881,22 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       {
         "id": "projection:agent_navigation",
         "label": "Bounded Agent Navigation",
-        "description": "How a coding task receives a trusted route or capped read-only discovery only after scope, sufficiency, and trust checks.",
-        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, or an honest rejection?",
+        "description": "How a coding task receives a trusted route, capped read-only discovery, honest rejection, or guarded local execution only after scope, sufficiency, trust, and worktree checks.",
+        "question_answered": "How can a coding agent receive a trusted route, bounded read-only discovery, honest rejection, or guarded local execution?",
         "is_primary": false,
         "node_ids": [
           "entry:cli",
           "semantic:context",
           "semantic:validation",
           "semantic:agent_map",
+          "execution:codex_run",
+          "quality:benchmark",
           "quality:tests",
           "presentation:viewer"
         ],
         "plane_ids": [
           "entry",
+          "execution",
           "semantic",
           "quality",
           "presentation"
@@ -2769,8 +3116,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
   "scenario_count": 2,
   "static_provider_overlay": "excluded",
   "agent_map_quality": {
-    "task_route_count": 7,
-    "trusted_route_count": 7,
+    "task_route_count": 8,
+    "trusted_route_count": 8,
     "grounded_route_ratio": 1.0,
     "grounding_status": "grounded",
     "publish_blocker_count": 0,
@@ -2782,7 +3129,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       3,
       4,
       5,
-      6
+      6,
+      7
     ],
     "warning_count": 0,
     "error_count": 0,

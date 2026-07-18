@@ -31,6 +31,11 @@ from .benchmark import (
     summarize_time_efficiency,
     summarize_token_efficiency,
 )
+from .codex_run import (
+    _GuardedCodexRunError,
+    _execute_guarded_codex_run,
+    _render_guarded_run_console,
+)
 from .quality import ATLAS_QUALITY_REPORT_FILE, render_atlas_quality_markdown
 from .render import render_html, write_json
 from .scanner import build_graph
@@ -595,6 +600,27 @@ def cmd_audit_worktree(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_codex_run(args: argparse.Namespace) -> int:
+    try:
+        report = _execute_guarded_codex_run(
+            root=args.root,
+            task=args.task,
+            preview=args.preview,
+            out_dir=args.out_dir,
+            model=args.model,
+            codex_executable=args.codex_executable,
+            timeout=args.timeout,
+        )
+    except (_GuardedCodexRunError, OSError, subprocess.CalledProcessError) as exc:
+        print(f"Guarded Codex Run blocked: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+    else:
+        print(_render_guarded_run_console(report), end="")
+    return int(report["exit_code"])
+
+
 def cmd_summarize_token_efficiency(args: argparse.Namespace) -> int:
     try:
         payload = json.loads(Path(args.results).read_text(encoding="utf-8"))
@@ -834,6 +860,20 @@ def build_parser() -> argparse.ArgumentParser:
     p_audit.add_argument("--json", action="store_true", help="Print the machine-readable audit report.")
     p_audit.set_defaults(func=cmd_audit_worktree)
 
+    p_codex_run = sub.add_parser(
+        "codex-run",
+        help="Run local Codex with a validated Bunya-Jido decision, sandbox policy, JSONL capture, and post-run boundary audit.",
+    )
+    p_codex_run.add_argument("--root", default=".", help="Git repository root. Default: current directory.")
+    p_codex_run.add_argument("--task", required=True, help="Task text used for Bunya-Jido context selection and the guarded Codex prompt.")
+    p_codex_run.add_argument("--preview", action="store_true", help="Show the decision, sandbox, scoped inputs, and intended command without launching Codex or writing run artifacts.")
+    p_codex_run.add_argument("--json", action="store_true", help="Print the machine-readable run or preview report.")
+    p_codex_run.add_argument("--out-dir", default=None, help="Optional run-artifact directory. Default: .bunya-jido/runs/<run-id>.")
+    p_codex_run.add_argument("--model", default=None, help="Optional Codex model override. When omitted, Codex selects its built-in default.")
+    p_codex_run.add_argument("--codex-executable", default="codex", help="Local Codex executable path or command name. Default: codex.")
+    p_codex_run.add_argument("--timeout", type=float, default=None, help="Optional positive execution timeout in seconds. A timeout terminates the run with exit code 130.")
+    p_codex_run.set_defaults(func=cmd_codex_run)
+
     p_tokens = sub.add_parser("summarize-token-efficiency", help="Compare paired safe-and-resolved benchmark token results.")
     p_tokens.add_argument("--results", required=True, help="JSON file containing runs and optional map_authoring_tokens.")
     p_tokens.add_argument("--baseline", required=True, help="Baseline condition name, such as no-map.")
@@ -864,7 +904,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     raw = list(sys.argv[1:] if argv is None else argv)
-    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "audit-worktree", "summarize-token-efficiency", "summarize-time-efficiency", "install-agent-guides"}
+    subcommands = {"build", "prepare", "scan", "render", "validate", "validate-blueprint", "validate-agent-map", "diagnose", "context", "refresh-context", "check-stale", "evaluate-agent-utility", "evaluate-atlas-quality", "audit-worktree", "codex-run", "summarize-token-efficiency", "summarize-time-efficiency", "install-agent-guides"}
     if not raw or (raw[0] not in subcommands and raw[0] not in {"-h", "--help", "--version"}):
         raw = ["build"] + raw
     parser = build_parser()

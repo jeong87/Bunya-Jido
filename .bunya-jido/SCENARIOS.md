@@ -39,3 +39,6 @@
   support material and are not by themselves a trusted semantic publication.
 - A benchmark animation was rejected because cross-domain fixtures evaluate
   honesty; they are not a runtime user journey.
+- A Guarded Codex Run animation is deferred until an explicitly approved live
+  nested run exists; deterministic fake-executable tests establish the runner
+  contract but do not prove a live Codex OS sandbox.

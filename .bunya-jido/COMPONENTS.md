@@ -9,9 +9,18 @@ keeps the review rationale visible beside it.
 ### CLI
 
 - **Plane:** entry
-- **Role:** Parses user commands and chooses scanning, semantic rendering, validation, context generation, benchmark audit, or token/time-efficiency reporting.
+- **Role:** Parses user commands and chooses scanning, semantic rendering, validation, context generation, guarded Codex execution, benchmark audit, or token/time-efficiency reporting.
 - **Evidence:** `src/bunya_jido/cli.py`
 - **Boundary:** It coordinates publication, but does not define grounding policy.
+
+### Guarded Codex Run Orchestrator
+
+- **Plane:** execution
+- **Role:** Reuses the compact context decision to select a non-escalating Codex OS sandbox, requires a clean Git baseline before launch, captures JSONL process evidence, and combines observed write attempts with post-run worktree audit into schema v1 JSON and Markdown reports.
+- **Evidence:** `src/bunya_jido/codex_run.py`, `tests/test_codex_run.py`, `docs/GUARDED_CODEX_RUN.md`
+- **Inputs:** Required task, repository root, compact context report, optional model/executable/timeout controls.
+- **Outputs:** `.bunya-jido/runs/<run-id>/run.json`, `report.md`, `events.jsonl`, `stderr.log`, and `last-message.txt`.
+- **Boundary:** Only `MATCH` maps to `workspace-write`; every non-`MATCH` decision remains `read-only`. Safe-edit paths guide and audit production activity but do not grant OS access. Fake-executable tests are not live Codex sandbox proof.
 
 ### Semantic Blueprint Pipeline
 
@@ -62,8 +71,8 @@ keeps the review rationale visible beside it.
 ### Contract Tests And CI
 
 - **Plane:** quality
-- **Role:** Characterize the trust contract, benchmark evidence reporting, Studio benchmark variety, and offline viewer surface for supported Python versions.
-- **Evidence:** `tests/test_blueprint.py`, `tests/test_benchmark_audit.py`, `tests/test_studio_benchmark.py`, `.github/workflows/ci.yml`
+- **Role:** Characterize the trust contract, guarded execution boundary, benchmark evidence reporting, Studio benchmark variety, and offline viewer surface for supported Python versions.
+- **Evidence:** `tests/test_blueprint.py`, `tests/test_codex_run.py`, `tests/test_benchmark_audit.py`, `tests/test_studio_benchmark.py`, `.github/workflows/ci.yml`
 
 ### Benchmark Evidence Suite
 
