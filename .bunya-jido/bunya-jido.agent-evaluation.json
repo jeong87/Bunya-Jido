@@ -347,8 +347,8 @@
           "change task route projection",
           "change guarded Codex run orchestration"
         ],
-        "discovery_nodes": [
-          "execution:codex_run"
+        "discovery_workflows": [
+          "guarded_codex_run"
         ],
         "read_first": [
           "src/bunya_jido/codex_run.py"
@@ -415,6 +415,27 @@
         ],
         "projection_context": [
           "projection:agent_navigation"
+        ]
+      }
+    },
+    {
+      "id": "map-guided-run-receipt-and-overlay",
+      "dimension": "boundary_discipline",
+      "query": {
+        "task": "Add a context efficiency receipt and run.json atlas overlay for map-guided Codex execution."
+      },
+      "expect": {
+        "route_status": "matched",
+        "decision": "MATCH",
+        "execution_policy": "workspace_write",
+        "routes": [
+          "change guarded Codex run orchestration"
+        ],
+        "must_read": [
+          "src/bunya_jido/codex_run.py"
+        ],
+        "tests": [
+          "tests/test_codex_run.py"
         ]
       }
     },

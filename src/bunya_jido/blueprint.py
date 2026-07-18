@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -74,6 +75,7 @@ BUNYA_JIDO_CONTEXT_ENV = "BUNYA_JIDO_CONTEXT"
 BUNYA_JIDO_DISABLE_CONTEXT_ENV = "BUNYA_JIDO_DISABLE_CONTEXT"
 CONTEXT_DISABLE_VALUES = {"0", "false", "no", "off", "disable", "disabled"}
 CONTEXT_DISABLE_TRUTHY_VALUES = {"1", "true", "yes", "on"}
+ROUTE_FINGERPRINT_ALGORITHM = "bunya-jido-route-fingerprint-v1"
 DISCOVERY_REPAIR_TERMS = {
     "correct",
     "ensure",
@@ -1681,6 +1683,100 @@ def _normalize_context_path(path: str) -> str:
     return normalized.rstrip("/")
 
 
+def _dedupe_text(values: list[Any]) -> list[str]:
+    return list(
+        dict.fromkeys(
+            str(value)
+            for value in values
+            if value is not None and str(value).strip()
+        )
+    )
+
+
+def _route_workflow_node_ids(workflow: dict[str, Any]) -> list[str]:
+    node_ids: list[str] = []
+    for raw_id in workflow.get("node_ids") or []:
+        node_id = str(raw_id)
+        if node_id and node_id not in node_ids:
+            node_ids.append(node_id)
+    for step in workflow.get("steps") or []:
+        if isinstance(step, str):
+            node_id = step
+        elif isinstance(step, dict):
+            node_id = str(step.get("node") or step.get("node_id") or "")
+        else:
+            continue
+        if node_id and node_id not in node_ids:
+            node_ids.append(node_id)
+    return node_ids
+
+
+def _task_route_identity(
+    route: dict[str, Any],
+    *,
+    node_by_id: dict[str, dict[str, Any]],
+    workflow_by_id: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    task = str(route.get("task") or "Task")
+    start_node_ids = _dedupe_text(list(route.get("start_nodes") or []))
+    workflow_ids = _dedupe_text(list(route.get("workflows") or []))
+    node_ids = list(start_node_ids)
+    for workflow_id in workflow_ids:
+        for node_id in _route_workflow_node_ids(workflow_by_id.get(workflow_id) or {}):
+            if node_id not in node_ids:
+                node_ids.append(node_id)
+
+    evidence_paths: list[str] = []
+    for path in [*(route.get("must_read") or []), *(route.get("tests") or [])]:
+        normalized = _normalize_context_path(str(path))
+        if normalized and normalized not in evidence_paths:
+            evidence_paths.append(normalized)
+    for node_id in node_ids:
+        for evidence in node_by_id.get(node_id, {}).get("evidence") or []:
+            if not isinstance(evidence, dict):
+                continue
+            normalized = _normalize_context_path(str(evidence.get("path") or ""))
+            if normalized and normalized not in evidence_paths:
+                evidence_paths.append(normalized)
+    for workflow_id in workflow_ids:
+        for evidence in workflow_by_id.get(workflow_id, {}).get("evidence") or []:
+            if not isinstance(evidence, dict):
+                continue
+            normalized = _normalize_context_path(str(evidence.get("path") or ""))
+            if normalized and normalized not in evidence_paths:
+                evidence_paths.append(normalized)
+
+    identity = {
+        "route_id": slug("task_route_" + task, 70),
+        "route_label": task,
+        "start_node_ids": start_node_ids,
+        "node_ids": node_ids,
+        "workflow_ids": workflow_ids,
+        "projection_ids": _dedupe_text([route.get("projection_context")]),
+        "scenario_ids": _dedupe_text(list(route.get("scenario_context") or [])),
+        "first_read_paths": _dedupe_text(list(route.get("must_read") or [])),
+        "relevant_test_paths": _dedupe_text(list(route.get("tests") or [])),
+        "contracts": _dedupe_text(list(route.get("contracts") or [])),
+        "safe_edit_paths": _dedupe_text(list(route.get("safe_edit") or [])),
+        "evidence_paths": evidence_paths,
+    }
+    canonical = json.dumps(
+        identity,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return {
+        **identity,
+        "route_fingerprint": hashlib.sha256(canonical).hexdigest(),
+        "route_fingerprint_algorithm": ROUTE_FINGERPRINT_ALGORITHM,
+        "starting_responsibilities": [
+            str(node_by_id.get(node_id, {}).get("label") or node_id)
+            for node_id in start_node_ids
+        ],
+    }
+
+
 def _context_paths_overlap(left: str, right: str) -> bool:
     left_path = _normalize_context_path(left)
     right_path = _normalize_context_path(right)
@@ -2854,6 +2950,37 @@ def _resolve_agent_context_request(
         "affected_nodes": affected_nodes,
         "selection_requested": selection_requested,
         "selection": selection,
+    }
+
+
+def _generate_agent_route_receipt(root: str | Path, *, task: str) -> dict[str, Any]:
+    disabled_by = _context_disabled_by_environment()
+    if disabled_by:
+        return {
+            "available": False,
+            "reason": "context_disabled",
+            "route_fingerprint_algorithm": ROUTE_FINGERPRINT_ALGORITHM,
+        }
+    resolved = _resolve_agent_context_request(root, task=task)
+    selection = resolved["selection"]
+    chosen = selection.get("chosen") or []
+    if selection.get("decision") != "MATCH" or len(chosen) != 1:
+        return {
+            "available": False,
+            "reason": "no_single_matched_route",
+            "route_fingerprint_algorithm": ROUTE_FINGERPRINT_ALGORITHM,
+        }
+    identity = _task_route_identity(
+        chosen[0][1],
+        node_by_id=resolved["node_by_id"],
+        workflow_by_id=resolved["workflow_by_id"],
+    )
+    return {
+        "available": True,
+        "reason": None,
+        **identity,
+        "first_read_count": len(identity["first_read_paths"]),
+        "relevant_test_count": len(identity["relevant_test_paths"]),
     }
 
 
@@ -4449,6 +4576,7 @@ def _path_presets_from_blueprint(
                 "nodes": [node_by_id[i]["label"] for i in arr],
             })
     workflow_node_ids: dict[str, list[str]] = {}
+    workflow_by_id: dict[str, dict[str, Any]] = {}
     for wf in bp.get("workflows") or []:
         if not isinstance(wf, dict):
             continue
@@ -4470,6 +4598,7 @@ def _path_presets_from_blueprint(
         workflow_id = str(wf.get("id") or "")
         if workflow_id:
             workflow_node_ids[workflow_id] = ordered_ids
+            workflow_by_id[workflow_id] = wf
         if ordered_ids:
             arr = ordered_ids[:60]
             presets.append({
@@ -4497,6 +4626,11 @@ def _path_presets_from_blueprint(
                         route_ids.append(node_id)
             if route_ids:
                 task = str(route.get("task") or f"Task {index + 1}")
+                identity = _task_route_identity(
+                    route,
+                    node_by_id=node_by_id,
+                    workflow_by_id=workflow_by_id,
+                )
                 projection = projection_by_id.get(str(route.get("projection_context") or ""))
                 scenarios = [
                     scenario_by_id[scenario_id]
@@ -4504,7 +4638,7 @@ def _path_presets_from_blueprint(
                     if scenario_id in scenario_by_id
                 ]
                 presets.append({
-                    "id": slug("task_route_" + task, 70),
+                    "id": identity["route_id"],
                     "label": task,
                     "description": str(route.get("intent") or "Validated coding-agent task route."),
                     "kind": "task_route",
@@ -4517,6 +4651,10 @@ def _path_presets_from_blueprint(
                     "contracts": list(route.get("contracts") or []),
                     "tests": list(route.get("tests") or []),
                     "safe_edit": list(route.get("safe_edit") or []),
+                    "route_fingerprint": identity["route_fingerprint"],
+                    "route_fingerprint_algorithm": identity["route_fingerprint_algorithm"],
+                    "semantic_node_ids": identity["node_ids"],
+                    "evidence_paths": identity["evidence_paths"],
                     "projection_context": {
                         "id": str(projection.get("id")),
                         "label": str(projection.get("label") or ""),

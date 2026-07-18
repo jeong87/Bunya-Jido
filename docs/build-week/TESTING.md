@@ -31,6 +31,21 @@ Run implementation:
   preservation.
 - Schema v1 fields, status and exit-code priority, relative artifact paths, and
   deterministic injected run IDs and clocks.
+- Shared route ID/fingerprint parity between run artifacts and HTML task-route
+  presets.
+- Context byte counts, exact single-event Codex token usage, unavailable and
+  partial usage, rejection of negative token counts, and refusal to sum
+  multiple usage events.
+- Combined malformed JSONL and boundary violations preserve both reasons while
+  failing with the contractually stronger `audit_incomplete` status.
+- Single-run `tokens_saved` unavailability and the paired no-map requirement.
+
+The viewer smoke coverage verifies the offline local-file import surface,
+schema gate, route fingerprint gate, exact evidence-path mapping, overlay
+legend, 5 MiB limit, and route-fragment support. Generated HTML also passes a
+JavaScript syntax check. Interactive browser QA remains pending because no
+controllable browser was connected during this work; no live Codex process is
+needed for that future check.
 
 The fake executable verifies Bunya-Jido's command construction, capture, policy,
 and audit logic. It does not prove the behavior of a live Codex OS sandbox.
@@ -54,6 +69,32 @@ python -m bunya_jido check-stale --root . --git-diff "origin/main...HEAD" --requ
 
 Run `bunya-jido refresh-context --root . --changed-file <path>` for every
 changed file before the stale check.
+
+## Shared Route And Receipt Slice
+
+The strong visual submission slice was validated locally on July 19, 2026:
+
+- A fresh Python 3.12 virtual environment installed the worktree with
+  `python -m pip install -e .`.
+- Focused fake-Codex suite: 15 of 15 passed.
+- Full unit suite: 114 of 114 passed.
+- `python -m compileall -q src tests`: passed.
+- Blueprint: grounded, 15 nodes, 32 relationships, no warning or blocker.
+- Agent map: 8 of 8 routes validated.
+- Grounded diagnostics: passed.
+- Agent utility: 20 of 20 cases passed.
+- Atlas quality: passed with one explicit human-review warning and no
+  deterministic warning or blocker.
+- The committed demo was rebuilt; its semantic golden test and generated
+  JavaScript syntax check passed.
+- All 21 implementation, test, map, demo, and documentation files owned by
+  this slice received a matched `refresh-context` result.
+- Both the required `origin/main...HEAD` stale check and the supplemental
+  working-diff stale check reported `review_recorded`.
+
+No new CI run, live Codex run, cross-platform live behavior, or token-savings
+claim is attached to this uncommitted slice. Interactive browser QA remains
+pending for the reason recorded above.
 
 ## CI Incident at `b03f510`
 

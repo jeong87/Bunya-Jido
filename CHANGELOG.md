@@ -15,6 +15,12 @@ be documented.
 - Add non-mutating preview, clean-worktree enforcement, deterministic fake-Codex
   coverage, intentional exit codes, and local run artifacts under
   `.bunya-jido/runs/`.
+- Add compatible schema-v1 route and context-efficiency receipts, preserving
+  actual Codex token usage only when JSONL reports it and requiring a paired
+  no-map baseline before reporting savings.
+- Let the offline atlas open a local `run.json` and compare the fingerprinted
+  expected task route with exact evidence-linked changed paths and boundary
+  violations.
 
 ### Fixed
 

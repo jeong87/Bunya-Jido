@@ -151,6 +151,17 @@ elif mode == "malformed":
 elif mode == "partial":
     emit({"type": "agent_message", "text": "readable before malformed"})
     print("{malformed", flush=True)
+elif mode == "malformed_unsafe":
+    target = root / "README.md"
+    original = target.read_text(encoding="utf-8")
+    target.write_text("temporary\n", encoding="utf-8")
+    target.write_text(original, encoding="utf-8")
+    emit({
+        "type": "file_change",
+        "status": "completed",
+        "changes": [{"path": str(target), "kind": "update"}]
+    })
+    print("{malformed", flush=True)
 else:
     changes = []
     if mode == "safe":
@@ -189,6 +200,23 @@ else:
     if changes:
         emit({"type": "file_change", "status": "completed", "changes": changes})
     emit({"type": "agent_message", "text": "fake completed"})
+    if mode == "usage_partial":
+        print(json.dumps({"type": "turn.completed", "usage": {"input_tokens": 21}}), flush=True)
+    elif mode == "usage_negative":
+        print(json.dumps({"type": "turn.completed", "usage": {"input_tokens": -1, "output_tokens": -2}}), flush=True)
+    elif mode == "usage_multiple":
+        print(json.dumps({"type": "turn.completed", "usage": {"input_tokens": 21, "output_tokens": 5}}), flush=True)
+        print(json.dumps({"type": "turn.completed", "usage": {"input_tokens": 9, "output_tokens": 2}}), flush=True)
+    else:
+        print(json.dumps({
+            "type": "turn.completed",
+            "usage": {
+                "input_tokens": 21,
+                "cached_input_tokens": 8,
+                "output_tokens": 5,
+                "reasoning_output_tokens": 2
+            }
+        }), flush=True)
 
 last_message.parent.mkdir(parents=True, exist_ok=True)
 last_message.write_text("fake final message\n", encoding="utf-8")
@@ -202,6 +230,7 @@ class GuardedCodexRunTests(unittest.TestCase):
         root = parent / "fixture repo 한글 & ; $(noop)"
         root.mkdir()
         _write(root / "README.md", "fixture\n")
+        _write(root / "bunya-jido.html", "fixture atlas\n")
         _write(root / "src" / "app.py", "value = 1\n")
         _write(root / "tests" / "test_app.py", "def test_app():\n    assert True\n")
         _write(
@@ -396,6 +425,26 @@ class GuardedCodexRunTests(unittest.TestCase):
             )
             self.assertEqual(report["boundary_audit"]["boundary_violations"], [])
             self.assertFalse(report["boundary_audit"]["semantic_guidance_os_enforced"])
+            route = report["route_receipt"]
+            self.assertTrue(route["available"])
+            self.assertEqual(route["route_id"], "task_route_change-application-behavior")
+            self.assertEqual(route["starting_responsibilities"], ["Application"])
+            self.assertEqual(route["first_read_paths"], ["src/app.py"])
+            self.assertEqual(route["relevant_test_paths"], ["tests/test_app.py"])
+            self.assertEqual(len(route["route_fingerprint"]), 64)
+            self.assertEqual(
+                route["atlas"]["report_href"],
+                "../../../bunya-jido.html",
+            )
+            receipt = report["context_efficiency_receipt"]
+            self.assertEqual(receipt["actual_token_usage"]["availability"], "available")
+            self.assertEqual(receipt["actual_token_usage"]["input_tokens"], 21)
+            self.assertEqual(receipt["actual_token_usage"]["cached_input_tokens"], 8)
+            self.assertEqual(receipt["actual_token_usage"]["output_tokens"], 5)
+            self.assertIsNone(receipt["actual_token_usage"]["total_tokens"])
+            self.assertEqual(receipt["final_changed_file_count"], 1)
+            self.assertEqual(receipt["boundary_result"], "passed")
+            self.assertIsNone(receipt["tokens_saved"])
             run_dir = root / ".bunya-jido" / "runs" / "test-run"
             stored = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
             markdown = (run_dir / "report.md").read_text(encoding="utf-8")
@@ -424,11 +473,45 @@ class GuardedCodexRunTests(unittest.TestCase):
             )
             self.assertIn("Decision: `MATCH`", markdown)
             self.assertIn("Return code: `0`", markdown)
+            self.assertIn("## Shared Human-Agent Route", markdown)
+            self.assertIn(
+                "[bunya-jido.html](../../../bunya-jido.html#route=",
+                markdown,
+            )
+            self.assertIn("Actual token usage: `available`", markdown)
+            self.assertIn(
+                "a compatible paired no-map baseline is required",
+                markdown,
+            )
             self.assertEqual(
                 (run_dir / "last-message.txt").read_text(encoding="utf-8"),
                 "fake final message\n",
             )
             self.assertIn("fake stderr", (run_dir / "stderr.log").read_text(encoding="utf-8"))
+
+    def test_token_usage_is_never_estimated_or_ambiguously_summed(self) -> None:
+        cases = [
+            ("usage_partial", "partial", 21),
+            ("usage_negative", "partial", None),
+            ("usage_multiple", "multiple", None),
+        ]
+        for index, (mode, availability, input_tokens) in enumerate(cases):
+            with self.subTest(mode=mode):
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    root, fake = self._repository(Path(temp_dir))
+                    report = self._run(
+                        root,
+                        fake,
+                        mode=mode,
+                        run_id=f"usage-{index}",
+                    )
+                    usage = report["context_efficiency_receipt"]["actual_token_usage"]
+                    self.assertEqual(usage["availability"], availability)
+                    self.assertEqual(usage["input_tokens"], input_tokens)
+                    self.assertIsNone(usage["total_tokens"])
+                    if mode == "usage_negative":
+                        self.assertIsNone(usage["output_tokens"])
+                        self.assertEqual(usage["reason"], "usage_fields_incomplete")
 
     def test_non_match_fake_runs_stay_read_only_and_succeed(self) -> None:
         tasks = [
@@ -638,6 +721,33 @@ class GuardedCodexRunTests(unittest.TestCase):
                         )
                     if mode == "timeout":
                         self.assertTrue(report["execution"]["timed_out"])
+
+    def test_incomplete_jsonl_takes_precedence_over_boundary_violation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root, fake = self._repository(Path(temp_dir))
+
+            report = self._run(
+                root,
+                fake,
+                mode="malformed_unsafe",
+                run_id="incomplete-boundary",
+            )
+
+            self.assertEqual(report["status"], "audit_incomplete")
+            self.assertEqual(report["exit_code"], 2)
+            self.assertFalse(report["post_run_audit"]["jsonl_complete"])
+            self.assertEqual(report["post_run_audit"]["malformed_jsonl_lines"], 1)
+            self.assertTrue(report["boundary_audit"]["has_boundary_violation"])
+            self.assertEqual(
+                report["context_efficiency_receipt"]["boundary_result"],
+                "audit_incomplete",
+            )
+            self.assertIn("codex_jsonl_incomplete", report["reasons"])
+            self.assertIn("semantic_boundary_violation", report["reasons"])
+            self.assertEqual(
+                report["post_run_audit"]["jsonl_production_write_attempts"],
+                ["README.md"],
+            )
 
     def test_keyboard_interrupt_terminates_and_reports_cancelled(self) -> None:
         class InterruptingProcess:

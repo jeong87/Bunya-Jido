@@ -89,3 +89,23 @@
   violation is observed.
 - Limitation: One Windows read-only run is not workspace-write,
   cross-platform, exhaustive sandbox, performance, or model-identity proof.
+
+## BW-010: Shared human-agent route evidence
+
+- Decision: Implement the strong visual submission slice while keeping schema
+  `bunya-jido-codex-run-v1`: optional route/context receipts plus local
+  `run.json` import and expected-versus-actual overlay in the existing atlas.
+- Human owner: Product owner.
+- Product hierarchy: The evidence-grounded semantic map is the core product;
+  the HTML atlas and compact agent route are projections; map-guided Codex
+  execution is the Build Week extension; sandbox selection and audit are its
+  supporting safety layer.
+- Compatibility: Atlas overlay requires exact route ID and canonical SHA-256
+  route fingerprint. Actual changes map only to exact authored source/evidence
+  paths; the viewer never infers directory-prefix ownership or recomputes the
+  boundary verdict.
+- Measurement boundary: Preserve actual JSONL token usage when available,
+  record unavailable/partial/multiple states honestly, and never claim savings
+  without a compatible paired no-map run.
+- Constraint: Keep offline operation, add no dependency or network/storage
+  behavior, and do not weaken the existing execution or audit contract.

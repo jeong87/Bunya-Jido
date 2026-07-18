@@ -2,14 +2,14 @@
   "schema_version": "bunya-jido-blueprint-v2",
   "project": {
     "name": "Bunya-Jido",
-    "summary": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes, with an optional guarded Codex execution boundary.",
+    "summary": "One grounded semantic repository map projected as a human atlas and compact coding-agent routes, with optional map-guided Codex execution evidence.",
     "architecture_style": "Offline semantic projection with deterministic support, explicit trust gates, and guarded local execution.",
     "entrypoints": [
       "src/bunya_jido/cli.py",
       "src/bunya_jido/blueprint.py",
       "src/bunya_jido/codex_run.py"
     ],
-    "thesis": "Bunya-Jido publishes evidence-linked repository interpretations as offline maps and bounded coding-agent context, and can execute that context through a guarded Codex runner only after explicit trust and worktree gates pass.",
+    "thesis": "Bunya-Jido gives people and coding agents the same evidence-linked repository route, then can execute and measure that compact route through Codex while preserving explicit trust and worktree gates.",
     "primary_projection_id": "projection:trusted_publication",
     "ordered_behavior_assessment": "strong"
   },
@@ -53,16 +53,16 @@
       "importance": "major",
       "overview_visibility": "visible",
       "activation": "conditional",
-      "description": "Maps compact context decisions to a non-escalating Codex sandbox, requires a clean baseline for launch, captures JSONL process evidence, and audits semantic production boundaries.",
-      "why_it_matters": "It turns route advice into a reviewable local run without letting non-MATCH decisions become writable.",
-      "inspector_summary": "Only MATCH receives workspace-write; fake-executable tests prove orchestration and audit behavior, not a live Codex OS sandbox.",
+      "description": "Maps compact context decisions to a non-escalating Codex sandbox, requires a clean baseline, captures JSONL process evidence, audits semantic production boundaries, and preserves the shared route identity plus context/token receipt.",
+      "why_it_matters": "It makes map-guided execution measurable and reviewable without letting non-MATCH decisions become writable.",
+      "inspector_summary": "The run shares a fingerprinted route with the human atlas; actual token usage remains unavailable unless JSONL reports it, and fake-executable tests are not live sandbox proof.",
       "inputs": [
         "Required task and repository root",
         "Validated compact context report",
         "Optional model, executable, output directory, and timeout"
       ],
       "outputs": [
-        "bunya-jido-codex-run-v1 JSON result",
+        "bunya-jido-codex-run-v1 JSON result with route and context-efficiency receipts",
         "Markdown report and captured process streams",
         "Post-run production boundary decision"
       ],
@@ -228,7 +228,7 @@
       "importance": "core",
       "overview_visibility": "visible",
       "activation": "always",
-      "description": "Displays human-first repository orientation, semantic inspector context, trust, evidence, Studio projections, contextual navigation, validated narrated scenario playback, and copyable trusted agent-route context offline.",
+      "description": "Displays human-first repository orientation, semantic inspector context, trust, evidence, Studio projections, contextual navigation, copyable trusted agent routes, and locally imported run evidence offline.",
       "why_it_matters": "It is how people first understand and then inspect the map while preserving the provenance and limitations of authored claims.",
       "inputs": [
         "Published semantic graph data",
@@ -243,7 +243,7 @@
         "Presentation must not become evidence or reinterpret authored claims.",
         "Human orientation must preserve the existing canvas-first visual design."
       ],
-      "inspector_summary": "The viewer gives people a repository summary, outline, directional path cues, semantic inspector cards, and evidence-backed playback without becoming evidence.",
+      "inspector_summary": "The viewer gives people the same fingerprinted task route sent to Codex and can overlay exact evidence-linked changes without becoming or recomputing evidence.",
       "source_path": "src/bunya_jido/viewer/index.template.html",
       "evidence": [
         {"kind": "source", "path": "src/bunya_jido/viewer/index.template.html", "symbol": "renderTrust"},

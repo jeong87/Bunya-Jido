@@ -57,6 +57,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 .legend.focus{border-color:rgba(56,189,248,.38);box-shadow:0 0 0 1px rgba(56,189,248,.10) inset,0 10px 40px rgba(2,6,23,.28)}
 .legend .legend-title{flex-basis:100%;font-size:10px;color:#93c5fd;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px;font-weight:800}
 .legend .legend-note{font-size:10px;color:#8ca0bb;opacity:.9}
+.run-receipt{font-size:10.5px;line-height:1.45;color:#b6c5da}.run-receipt strong{color:#e5edf8}.run-receipt .run-status{display:inline-flex;padding:3px 7px;border-radius:999px;border:1px solid rgba(148,163,184,.24);margin-bottom:7px}.run-receipt .passed{color:#a7f3d0;border-color:rgba(52,211,153,.45)}.run-receipt .failed{color:#fda4af;border-color:rgba(251,113,133,.5)}.run-list{margin:6px 0 0;padding-left:16px;word-break:break-all}.run-list li+li{margin-top:3px}.run-legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}.run-legend span{display:flex;align-items:center;gap:5px}.run-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
 
 @media(max-width:1200px){.brand{min-width:180px}.sub{display:none}.search-wrap{width:220px}}
 @media(max-width:900px){:root{--toolbar-h:56px}#toolbar{gap:7px;padding:7px 10px}.brand{min-width:auto}.brand h1,.brand .sub{display:none}.logo{width:30px;height:30px}.search-wrap{width:220px;flex:0 0 220px}.drawer{top:10px;bottom:10px;width:min(360px,calc(100% - 20px))}#filters{left:10px}#inspector{right:10px;width:min(390px,calc(100% - 20px))}#presetBar{left:10px;right:10px;top:10px;transform:none;max-width:none}#mapSummary{left:10px;top:64px;width:min(278px,calc(100% - 20px));max-height:calc(100% - 138px);overflow:auto}.statgrid{display:none}.semantic-grid{grid-template-columns:1fr}.legend{display:none}#workflowBar{left:10px;right:10px;bottom:10px;transform:none;max-width:none}#scenarioMenu{top:64px}#scenarioPlayback{bottom:58px;justify-content:flex-start}#scenarioNarration{width:min(280px,calc(100% - 26px))}}
@@ -69,6 +70,8 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     <div class="toolbar-group" id="modeButtons" aria-label="Explore Mode"></div>
     <button class="toolbar-action" id="fitBtn">Fit map</button>
     <button class="toolbar-action" id="clearPathBtn">Clear highlight</button>
+    <button class="toolbar-action" id="openRunBtn">Open run.json</button>
+    <input id="runFileInput" type="file" accept=".json,application/json" hidden />
     <button class="toolbar-action" id="scenarioBtn" hidden>▶ Scenarios</button>
     <div class="toolbar-spacer"></div>
     <div class="search-wrap"><input id="search" list="nodeList" aria-label="Find a role or artifact" placeholder="Find a role or artifact"/><datalist id="nodeList"></datalist><button id="focusBtn">Focus</button></div>
@@ -99,6 +102,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         <div class="panel-section"><h2>Confidence</h2><div class="btnrow" style="margin-bottom:8px"><button id="confidenceAll">All</button><button id="confidenceNone">None</button></div><div class="confidence-grid" id="confidenceChecks"></div></div>
         <div class="panel-section"><h2>View</h2><div class="btnrow"><button id="resetBtn">Reset spread</button><button id="paintBtn" class="active">Plane paint</button><button id="labelsBtn" class="active">Labels</button><button id="edgeLabelsBtn">Edge labels</button></div><div style="margin-top:10px" class="range"><input id="charge" type="range" min="0.2" max="2.2" step="0.05" value="1"/><span class="small muted" id="chargeVal">1.0</span></div><div class="footer-note" style="margin-top:8px">Drag nodes · wheel zoom · click node/edge · <span class="kbd">F</span> fit · <span class="kbd">R</span> reset spread</div></div>
         <div class="panel-section"><h2>Validated Task Routes</h2><div id="pathSummary"></div><div id="paths"></div><div class="btnrow" style="margin-top:8px"><button id="pathOnlyBtn">Path only</button></div></div>
+        <div class="panel-section"><h2>Run Evidence</h2><div id="runEvidencePanel" class="run-receipt">Open a local <span class="code">run.json</span> to compare the expected route with exact evidence-linked changed paths. The file stays in this browser.</div></div>
         <div class="panel-section"><h2>Export</h2><div class="btnrow"><button id="pngBtn">PNG</button><button id="jsonBtn">JSON</button></div></div>
       </div>
     </aside>
@@ -110,9 +114,9 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
-  "generated_at": "2026-07-18T10:15:15+00:00",
+  "generated_at": "2026-07-18T13:15:55+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
-  "description": "A grounded semantic repository map that publishes evidence-linked architecture and bounded coding-agent routes, with an optional guarded Codex execution boundary.",
+  "description": "One grounded semantic repository map projected as a human atlas and compact coding-agent routes, with optional map-guided Codex execution evidence.",
   "artifact_mode": "semantic_blueprint",
   "grounding": {
     "status": "grounded",
@@ -361,7 +365,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Guarded Codex Run",
       "type": "component",
       "plane": "execution",
-      "description": "Maps compact context decisions to a non-escalating Codex sandbox, requires a clean baseline for launch, captures JSONL process evidence, and audits semantic production boundaries.",
+      "description": "Maps compact context decisions to a non-escalating Codex sandbox, requires a clean baseline, captures JSONL process evidence, audits semantic production boundaries, and preserves the shared route identity plus context/token receipt.",
       "source_path": "src/bunya_jido/codex_run.py",
       "tags": [
         "blueprint",
@@ -393,14 +397,14 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "family": "runner",
       "overview_visibility": "visible",
       "activation": "conditional",
-      "why_it_matters": "It turns route advice into a reviewable local run without letting non-MATCH decisions become writable.",
+      "why_it_matters": "It makes map-guided execution measurable and reviewable without letting non-MATCH decisions become writable.",
       "inputs": [
         "Required task and repository root",
         "Validated compact context report",
         "Optional model, executable, output directory, and timeout"
       ],
       "outputs": [
-        "bunya-jido-codex-run-v1 JSON result",
+        "bunya-jido-codex-run-v1 JSON result with route and context-efficiency receipts",
         "Markdown report and captured process streams",
         "Post-run production boundary decision"
       ],
@@ -410,7 +414,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Safe-edit paths guide and audit activity but do not grant OS access.",
         "Live nested Codex execution requires separate human approval during Build Week."
       ],
-      "inspector_summary": "Only MATCH receives workspace-write; fake-executable tests prove orchestration and audit behavior, not a live Codex OS sandbox."
+      "inspector_summary": "The run shares a fingerprinted route with the human atlas; actual token usage remains unavailable unless JSONL reports it, and fake-executable tests are not live sandbox proof."
     },
     {
       "id": "presentation:renderer",
@@ -449,7 +453,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
       "label": "Interactive Viewer",
       "type": "ui",
       "plane": "presentation",
-      "description": "Displays human-first repository orientation, semantic inspector context, trust, evidence, Studio projections, contextual navigation, validated narrated scenario playback, and copyable trusted agent-route context offline.",
+      "description": "Displays human-first repository orientation, semantic inspector context, trust, evidence, Studio projections, contextual navigation, copyable trusted agent routes, and locally imported run evidence offline.",
       "source_path": "src/bunya_jido/viewer/index.template.html",
       "tags": [
         "blueprint",
@@ -502,7 +506,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "Presentation must not become evidence or reinterpret authored claims.",
         "Human orientation must preserve the existing canvas-first visual design."
       ],
-      "inspector_summary": "The viewer gives people a repository summary, outline, directional path cues, semantic inspector cards, and evidence-backed playback without becoming evidence."
+      "inspector_summary": "The viewer gives people the same fingerprinted task route sent to Codex and can overlay exact evidence-linked changes without becoming or recomputing evidence."
     },
     {
       "id": "quality:atlas",
@@ -2022,6 +2026,24 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "tests/test_blueprint_v2.py",
         "docs/SCANNER_COVERAGE.md"
       ],
+      "route_fingerprint": "4e714a9d3c0c30611477cdb5eb941eb8864e5efc96d71d4f5b8f1e6f16f96385",
+      "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+      "semantic_node_ids": [
+        "analysis:scanner",
+        "entry:cli",
+        "semantic:blueprint",
+        "semantic:validation"
+      ],
+      "evidence_paths": [
+        "src/bunya_jido/scanner.py",
+        "src/bunya_jido/blueprint.py",
+        "docs/SCANNER_COVERAGE.md",
+        "tests/test_scanner_coverage.py",
+        "tests/test_blueprint_v2.py",
+        "tests/test_gallery.py",
+        "src/bunya_jido/cli.py",
+        "src/bunya_jido/schema.py"
+      ],
       "projection_context": {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
@@ -2073,6 +2095,25 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "src/bunya_jido/schema.py",
         "tests/test_blueprint.py",
         "tests/test_blueprint_v2.py"
+      ],
+      "route_fingerprint": "8289ae74687551eea05d495a00e3a49bfb4b2fb3917ae4226a2b36da472cd251",
+      "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+      "semantic_node_ids": [
+        "semantic:validation",
+        "entry:cli",
+        "semantic:blueprint",
+        "presentation:renderer",
+        "presentation:viewer"
+      ],
+      "evidence_paths": [
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/schema.py",
+        "docs/CONTRIBUTION_PLAN.md",
+        "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py",
+        "src/bunya_jido/cli.py",
+        "src/bunya_jido/render.py",
+        "src/bunya_jido/viewer/index.template.html"
       ],
       "projection_context": {
         "id": "projection:quality_contract",
@@ -2133,6 +2174,22 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "tests/test_projection_quality.py",
         "tests/test_blueprint_v2.py",
         "tests/test_studio_benchmark.py"
+      ],
+      "route_fingerprint": "f9526623a16d10c27434c5b210aa291a34b3e01361a246ee5de3b74fbf8bd9da",
+      "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+      "semantic_node_ids": [
+        "quality:atlas",
+        "entry:cli",
+        "semantic:validation"
+      ],
+      "evidence_paths": [
+        "src/bunya_jido/quality.py",
+        "src/bunya_jido/schema.py",
+        "src/bunya_jido/blueprint.py",
+        "tests/test_projection_quality.py",
+        "tests/test_blueprint_v2.py",
+        "tests/test_studio_benchmark.py",
+        "src/bunya_jido/cli.py"
       ],
       "projection_context": {
         "id": "projection:quality_contract",
@@ -2195,6 +2252,26 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "tests/test_benchmark_audit.py",
         "docs/BENCHMARK_RESULT_CONTRACT.md"
       ],
+      "route_fingerprint": "c24718b6e6c39c2b952cb61861bfab9720e1609449da81f8658b426730259aef",
+      "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+      "semantic_node_ids": [
+        "quality:benchmark",
+        "entry:cli",
+        "quality:tests"
+      ],
+      "evidence_paths": [
+        "src/bunya_jido/benchmark.py",
+        "src/bunya_jido/cli.py",
+        "docs/BENCHMARK_RESULT_CONTRACT.md",
+        "tests/test_benchmark_audit.py",
+        "tests/test_studio_benchmark.py",
+        "tests/fixtures/studio_benchmark_cases.json",
+        "docs/STUDIO_BENCHMARK.md",
+        "tests/test_blueprint.py",
+        "tests/test_codex_run.py",
+        "tests/test_blueprint_v2.py",
+        "tests/test_projection_quality.py"
+      ],
       "projection_context": {
         "id": "projection:quality_contract",
         "label": "Quality Contract",
@@ -2243,6 +2320,25 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "tests/fixtures/studio_benchmark_cases.json",
         "tests/test_studio_benchmark.py",
         "src/bunya_jido/studio.py"
+      ],
+      "route_fingerprint": "2c5fb0adf908d23a636e60532a39b4a5488fc3c3f9e415d9df14b4bd0ced100f",
+      "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+      "semantic_node_ids": [
+        "quality:benchmark",
+        "quality:atlas",
+        "presentation:viewer"
+      ],
+      "evidence_paths": [
+        "docs/STUDIO_BENCHMARK.md",
+        "tests/fixtures/studio_benchmark_cases.json",
+        "tests/test_studio_benchmark.py",
+        "src/bunya_jido/studio.py",
+        "tests/test_projection_quality.py",
+        "src/bunya_jido/benchmark.py",
+        "tests/test_benchmark_audit.py",
+        "docs/BENCHMARK_RESULT_CONTRACT.md",
+        "src/bunya_jido/quality.py",
+        "src/bunya_jido/viewer/index.template.html"
       ],
       "projection_context": {
         "id": "projection:quality_contract",
@@ -2327,6 +2423,36 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "docs/gallery.md",
         "docs/assets/self-map-grounded.png"
       ],
+      "route_fingerprint": "b8623e53d39031afe37322ad275723c1c5cc70a69c0bcd1d1bb8d7bab301c8f7",
+      "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+      "semantic_node_ids": [
+        "execution:codex_run",
+        "entry:cli",
+        "semantic:context",
+        "semantic:validation",
+        "semantic:agent_map",
+        "quality:benchmark",
+        "quality:tests"
+      ],
+      "evidence_paths": [
+        "src/bunya_jido/codex_run.py",
+        "src/bunya_jido/cli.py",
+        "docs/GUARDED_CODEX_RUN.md",
+        "docs/CONTEXT_EXECUTION_POLICY.md",
+        "tests/test_codex_run.py",
+        "tests/test_self_map.py",
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/schema.py",
+        "src/bunya_jido/benchmark.py",
+        "tests/test_benchmark_audit.py",
+        "tests/test_studio_benchmark.py",
+        "tests/fixtures/studio_benchmark_cases.json",
+        "docs/STUDIO_BENCHMARK.md",
+        "docs/BENCHMARK_RESULT_CONTRACT.md",
+        "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py",
+        "tests/test_projection_quality.py"
+      ],
       "projection_context": {
         "id": "projection:agent_navigation",
         "label": "Bounded Agent Navigation",
@@ -2382,6 +2508,23 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "src/bunya_jido/cli.py",
         "src/bunya_jido/viewer/index.template.html",
         "tests/test_blueprint.py"
+      ],
+      "route_fingerprint": "428cb56fe50a2cf2fcba8facf7e2c72ffc5d3ab75ba7c505c7fcc9cb169a8c5f",
+      "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+      "semantic_node_ids": [
+        "semantic:agent_map",
+        "entry:cli",
+        "semantic:blueprint",
+        "presentation:renderer",
+        "presentation:viewer"
+      ],
+      "evidence_paths": [
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/cli.py",
+        "src/bunya_jido/viewer/index.template.html",
+        "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py",
+        "src/bunya_jido/render.py"
       ],
       "projection_context": {
         "id": "projection:agent_navigation",
@@ -2455,6 +2598,27 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         "tests/test_blueprint_v2.py",
         "tests/test_self_map.py",
         "tests/test_studio_benchmark.py"
+      ],
+      "route_fingerprint": "4bfa95c9f23e4130b3a345f6971127640cff34981c04fea829128971ea67178a",
+      "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+      "semantic_node_ids": [
+        "presentation:viewer",
+        "entry:cli",
+        "semantic:blueprint",
+        "semantic:validation",
+        "presentation:renderer"
+      ],
+      "evidence_paths": [
+        "src/bunya_jido/viewer/index.template.html",
+        "src/bunya_jido/render.py",
+        "src/bunya_jido/blueprint.py",
+        "src/bunya_jido/schema.py",
+        "tests/test_smoke.py",
+        "tests/test_blueprint.py",
+        "tests/test_blueprint_v2.py",
+        "tests/test_self_map.py",
+        "tests/test_studio_benchmark.py",
+        "src/bunya_jido/cli.py"
       ],
       "projection_context": {
         "id": "projection:trusted_publication",
@@ -3398,7 +3562,7 @@ if (Array.isArray(DATA.lenses)) {
 }
 const primaryProjectionPreset = studioAtlas ? (DATA.path_presets||[]).find(path=>path.kind==='projection' && path.projection_id===DATA.primary_projection && path.is_primary) || null : null;
 let state = {zoom:1, panX:0, panY:0, hover:null, selected:null, selectedEdge:null, mode:'overview', activeLens:'all', depthMode:false, path:primaryProjectionPreset, pathOnly:!!primaryProjectionPreset, showPaint:true, showLabels:true, showEdgeLabels:false, charge:1,
-  allowedPlanes:new Set(DATA.stats.planes), allowedNodeFamilies:new Set(Object.keys(nodeFamilyCounts)), allowedRelationFamilies:new Set(Object.keys(relationFamilyCounts)), allowedConfidences:new Set(Object.keys(confidenceCounts)), visibleNodes:new Set(), visibleEdges:new Set(), contextualNodeIds:new Set(), contextualEdgeIds:new Set(), scenarioNodeIds:new Set(), scenarioEdgeIds:new Set(), scenario:null, scenarioStepIndex:-1, scenarioPlaying:false, scenarioSpeed:1, scenarioStepDuration:0, scenarioStepEndsAt:0, scenarioPausedRemaining:0, scenarioTokenProgress:0, scenarioFrameAt:0, scenarioTimer:null, scenarioSnapshot:null, scenarioMenuOpen:false, dragging:null, running:true};
+  allowedPlanes:new Set(DATA.stats.planes), allowedNodeFamilies:new Set(Object.keys(nodeFamilyCounts)), allowedRelationFamilies:new Set(Object.keys(relationFamilyCounts)), allowedConfidences:new Set(Object.keys(confidenceCounts)), visibleNodes:new Set(), visibleEdges:new Set(), contextualNodeIds:new Set(), contextualEdgeIds:new Set(), scenarioNodeIds:new Set(), scenarioEdgeIds:new Set(), runEvidence:null, runExpectedNodeIds:new Set(), runActualNodeIds:new Set(), runViolationNodeIds:new Set(), scenario:null, scenarioStepIndex:-1, scenarioPlaying:false, scenarioSpeed:1, scenarioStepDuration:0, scenarioStepEndsAt:0, scenarioPausedRemaining:0, scenarioTokenProgress:0, scenarioFrameAt:0, scenarioTimer:null, scenarioSnapshot:null, scenarioMenuOpen:false, dragging:null, running:true};
 const anchors = Object.fromEntries(Object.keys(planePanels).map(k=>[k,[ (planePanels[k].x+planePanels[k].w/2)/WORLD.w, (planePanels[k].y+planePanels[k].h/2)/WORLD.h ]])); anchors.unknown = anchors.unknown || [.5,.9];
 function resize(){DPR=Math.max(1, Math.min(2, window.devicePixelRatio||1)); W=stage.clientWidth; H=stage.clientHeight; canvas.width=W*DPR; canvas.height=H*DPR; canvas.style.width=W+'px'; canvas.style.height=H+'px'; ctx.setTransform(DPR,0,0,DPR,0,0); if(!state._inited) initLayout(); else fit(false);}
 function randFor(id){let h=0; for(let i=0;i<id.length;i++) h=(h*31+id.charCodeAt(i))|0; return ((h>>>0)%10000)/10000;}
@@ -3648,6 +3812,12 @@ function draw(){
     const stroke=selected?rgba(color,.98):path?rgba(color,.76):rgba(color,.56);
     drawNodeShape(n,x,y,r,fill,stroke,selected||hovered||path);
     ctx.shadowBlur=0;
+    const runViolation=state.runViolationNodeIds.has(n.id), runActual=state.runActualNodeIds.has(n.id), runExpected=state.runExpectedNodeIds.has(n.id);
+    if(runExpected||runActual||runViolation){
+      ctx.globalAlpha=1;ctx.lineWidth=runViolation?3:2.2;ctx.strokeStyle=runViolation?'#fb7185':runActual?'#34d399':'#38bdf8';
+      ctx.setLineDash(runExpected&&!runActual&&!runViolation?[4,3]:[]);
+      ctx.beginPath();ctx.arc(x,y,r+6,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+    }
     ctx.fillStyle=selected?'#f5fbff':rgba(color,.98); ctx.textAlign='center'; ctx.textBaseline='middle';
     const markSize=role.mark.length>3?Math.max(5.5,Math.min(7.7,r*.45)):Math.max(7,Math.min(9.5,r*.58));
     ctx.font=`650 ${markSize}px Inter, sans-serif`; ctx.fillText(role.mark,x,y);
@@ -3724,11 +3894,73 @@ function selectNode(n){if(state.scenario)stopScenario(true);state.selected=n;sta
 function selectEdge(edge){if(state.scenario)stopScenario(true);state.selected=edge.t;state.selectedEdge=edge;state.mode='evidence';document.getElementById('search').value=edge.t.label;document.getElementById('inspector').classList.add('open');renderUI();fit(false);toast('inspect: '+edge.relation);}
 function pathKind(p){return p.kind==='projection'?'Projection':p.kind==='task_route'?'Task Route':p.kind==='workflow'||String(p.id||'').startsWith('workflow_')?'Workflow':p.kind==='overview'||p.id==='overview'||p.id==='blueprint_core'?'Overview':'View';}
 const trustedTaskRoutes=(DATA.path_presets||[]).filter(path=>path.kind==='task_route');
+function normalizedRunPath(value){return String(value||'').trim().replace(/\\/g,'/').replace(/^\.\//,'').replace(/\/+$/,'');}
+const evidenceNodeIdsByPath=new Map();
+nodes.forEach(node=>{
+  const paths=[node.source_path,...(node.evidence||[]).map(item=>item&&item.path)];
+  paths.forEach(raw=>{
+    const path=normalizedRunPath(raw);if(!path)return;
+    if(!evidenceNodeIdsByPath.has(path))evidenceNodeIdsByPath.set(path,new Set());
+    evidenceNodeIdsByPath.get(path).add(node.id);
+  });
+});
+function nodeIdsForExactPaths(paths){
+  const ids=new Set();(paths||[]).forEach(raw=>(evidenceNodeIdsByPath.get(normalizedRunPath(raw))||[]).forEach(id=>ids.add(id)));return ids;
+}
+function renderRunEvidence(){
+  const panel=document.getElementById('runEvidencePanel'), evidence=state.runEvidence;
+  if(!evidence){panel.innerHTML='Open a local <span class="code">run.json</span> to compare the expected route with exact evidence-linked changed paths. The file stays in this browser.';return;}
+  const run=evidence.run, route=evidence.route||{}, efficiency=run.context_efficiency_receipt||{}, usage=efficiency.actual_token_usage||{}, boundary=run.boundary_audit||{};
+  const status=String(run.status||'unknown'), failed=status!=='succeeded'&&status!=='preview';
+  const list=(title,values)=>values.length?`<div><strong>${escapeHtml(title)}</strong><ul class="run-list">${values.map(value=>`<li>${escapeHtml(value)}</li>`).join('')}</ul></div>`:'';
+  panel.innerHTML=`<div class="run-status ${failed?'failed':'passed'}">${escapeHtml(status)} · boundary ${escapeHtml(efficiency.boundary_result||'unavailable')}</div>
+    <div><strong>${escapeHtml(route.route_label||route.route_id||'Legacy run')}</strong></div>
+    <div>Route overlay: ${escapeHtml(evidence.compatibility)}</div>
+    <div>Context: ${escapeHtml(efficiency.compact_context_utf8_byte_count??'unavailable')} UTF-8 bytes</div>
+    <div>Actual tokens: ${escapeHtml(usage.availability||'unavailable')} · input ${escapeHtml(usage.input_tokens??'—')} · cached ${escapeHtml(usage.cached_input_tokens??'—')} · output ${escapeHtml(usage.output_tokens??'—')} · total ${escapeHtml(usage.total_tokens??'—')}</div>
+    <div>Elapsed: ${escapeHtml(efficiency.elapsed_execution_seconds??'—')}s · final changed files ${escapeHtml(efficiency.final_changed_file_count??'—')}</div>
+    <div class="run-legend"><span><i style="background:#38bdf8"></i>expected</span><span><i style="background:#34d399"></i>actual</span><span><i style="background:#fb7185"></i>violation</span></div>
+    ${list('Unmatched changed paths',evidence.unmatchedActual)}
+    ${list('Boundary violations',evidence.violationPaths)}
+    ${list('Unmatched violation paths',evidence.unmatchedViolations)}`;
+}
+function importRunObject(run){
+  if(!run||run.schema_version!=='bunya-jido-codex-run-v1')throw new Error('Unsupported or missing run schema.');
+  const route=run.route_receipt&&run.route_receipt.available?run.route_receipt:null;
+  const expectedRoute=route?trustedTaskRoutes.find(item=>item.id===route.route_id):null;
+  let compatibility='unavailable: this run has no route receipt';
+  if(route&&expectedRoute){
+    compatibility=expectedRoute.route_fingerprint===route.route_fingerprint?'matched route ID and fingerprint':'blocked: route fingerprint differs from this atlas';
+  } else if(route){compatibility='blocked: route ID is not present in this atlas';}
+  const compatible=compatibility.startsWith('matched');
+  const observed=((run.boundary_audit||{}).observed_production_activity||[]).map(item=>item.path).filter(Boolean);
+  const violations=((run.boundary_audit||{}).boundary_violations||[]).map(item=>item.path).filter(Boolean);
+  const actualIds=compatible?nodeIdsForExactPaths(observed):new Set(), violationIds=compatible?nodeIdsForExactPaths(violations):new Set();
+  state.runExpectedNodeIds=compatible?new Set(expectedRoute.node_ids||[]):new Set();
+  state.runActualNodeIds=actualIds;state.runViolationNodeIds=violationIds;
+  const matchedActualPaths=new Set(compatible?observed.filter(path=>evidenceNodeIdsByPath.has(normalizedRunPath(path))):[]);
+  const matchedViolationPaths=new Set(compatible?violations.filter(path=>evidenceNodeIdsByPath.has(normalizedRunPath(path))):[]);
+  state.runEvidence={run,route,compatibility,unmatchedActual:observed.filter(path=>!matchedActualPaths.has(path)),violationPaths:violations,unmatchedViolations:violations.filter(path=>!matchedViolationPaths.has(path))};
+  if(compatible)selectPath(expectedRoute.id,true);else renderUI();
+  toggleFilters(true);renderRunEvidence();toast('run evidence loaded locally');
+}
+function readRunFile(file){
+  if(!file)return;
+  if(file.size>5*1024*1024){toast('run.json exceeds 5 MiB');return;}
+  const reader=new FileReader();
+  reader.onload=()=>{try{importRunObject(JSON.parse(String(reader.result||'')));}catch(error){toast(error.message||'invalid run.json');}};
+  reader.onerror=()=>toast('could not read run.json');
+  reader.readAsText(file,'utf-8');
+}
 function selectPath(id,sticky=false){
   if(state.scenario)stopScenario(true);
   const selected=DATA.path_presets.find(path=>path.id===id), same=state.path&&state.path.id===id;
   state.path=!sticky&&same?null:selected;
   state.pathOnly=!!(state.path&&state.path.kind==='projection');
+  if(state.path&&state.path.kind==='task_route'){
+    const fragment='route='+encodeURIComponent(state.path.id);
+    if(location.hash.slice(1)!==fragment)history.replaceState(null,'','#'+fragment);
+  }
   document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly);
   renderUI(); fit(); toast(state.path?'path: '+state.path.label:'path cleared');
 }
@@ -3904,7 +4136,7 @@ function renderUI(){
   document.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>selectPath(b.dataset.path));
   document.querySelectorAll('[data-workflow-path]').forEach(b=>b.onclick=()=>selectPath(b.dataset.workflowPath));
   document.getElementById('pathOnlyBtn').classList.toggle('active',state.pathOnly);
-  renderScenarioUI(); updateLegend(); renderDetails();
+  renderRunEvidence(); renderScenarioUI(); updateLegend(); renderDetails();
 }
 
 function legendLineStyle(r){
@@ -3934,12 +4166,13 @@ function updateLegend(){
   const title=usingFocus
     ? `SELECTED RELATIONS · ${state.selected?escapeHtml(state.selected.label):escapeHtml(state.path.label)} · ${focusedEdges.length} EDGES`
     : `VISIBLE RELATION FAMILIES · ${visibleEdges.length} EDGES`;
-  const sig=title+'|'+families.map(item=>item.family+item.count).join('|')+'|'+state.activeLens;
+  const sig=title+'|'+families.map(item=>item.family+item.count).join('|')+'|'+state.activeLens+'|'+(state.runEvidence?state.runEvidence.compatibility:'');
   if(sig===_legendSig) return; _legendSig=sig;
   const legend=document.getElementById('legend'); legend.classList.toggle('focus', usingFocus);
   legend.innerHTML=`<span class="legend-title">${title}</span>` +
     families.map(item=>`<span><i style="${legendLineStyle(familyRepresentativeRelation(item.family))}"></i>${escapeHtml(relationFamilyDefs[item.family]?.label||'Structural Support')} (${item.count})</span>`).join('')+
-    (usingFocus?`<span class="legend-note">showing only highlighted edges</span>`:`<span><i style="background:transparent;border-top:2px solid #ffffff;height:8px"></i>${lensDefs[state.activeLens].label}</span>`);
+    (usingFocus?`<span class="legend-note">showing only highlighted edges</span>`:`<span><i style="background:transparent;border-top:2px solid #ffffff;height:8px"></i>${lensDefs[state.activeLens].label}</span>`)+
+    (state.runEvidence?'<span><i style="background:#38bdf8"></i>expected route</span><span><i style="background:#34d399"></i>actual evidence</span><span><i style="background:#fb7185"></i>violation</span>':'');
 }
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),1200)}
 function escapeHtml(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
@@ -3984,10 +4217,16 @@ document.getElementById('edgeLabelsBtn').onclick=e=>{state.showEdgeLabels=!state
 document.getElementById('charge').oninput=e=>{state.charge=+e.target.value;document.getElementById('chargeVal').textContent=state.charge.toFixed(2)};
 document.getElementById('pathOnlyBtn').onclick=e=>{if(state.scenario)stopScenario(true);state.pathOnly=!state.pathOnly;e.target.classList.toggle('active',state.pathOnly);fit();};
 document.getElementById('clearPathBtn').onclick=()=>{if(state.scenario)stopScenario(true);state.path=null; state.pathOnly=false; document.getElementById('pathOnlyBtn').classList.remove('active'); renderUI(); fit();};
+document.getElementById('openRunBtn').onclick=()=>document.getElementById('runFileInput').click();
+document.getElementById('runFileInput').onchange=event=>{readRunFile(event.target.files&&event.target.files[0]);event.target.value='';};
 document.getElementById('pngBtn').onclick=()=>{const a=document.createElement('a');a.download='bunya-jido.png';a.href=canvas.toDataURL('image/png');a.click();};
 document.getElementById('jsonBtn').onclick=()=>{const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});const a=document.createElement('a');a.download='bunya_jido_graph.json';a.href=URL.createObjectURL(blob);a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){if(state.scenario){stopScenario(true);}state.scenarioMenuOpen=false;renderScenarioUI();toggleFilters(false);inspectorDrawer.classList.remove('open');} if(e.key.toLowerCase()==='f')fit(); if(e.key.toLowerCase()==='r'){state._inited=false;initLayout();}});
-resize(); renderUI(); buildVisibility(); fit(false); requestAnimationFrame(draw);
+function openRouteFromHash(){
+  const params=new URLSearchParams(location.hash.replace(/^#/,''));
+  const routeId=params.get('route');if(routeId&&trustedTaskRoutes.some(route=>route.id===routeId))selectPath(routeId,true);
+}
+resize(); renderUI(); buildVisibility(); openRouteFromHash(); fit(false); requestAnimationFrame(draw);
 })();
 </script>
 </body>

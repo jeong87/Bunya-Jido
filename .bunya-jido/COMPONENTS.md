@@ -16,10 +16,10 @@ keeps the review rationale visible beside it.
 ### Guarded Codex Run Orchestrator
 
 - **Plane:** execution
-- **Role:** Reuses the compact context decision to select a non-escalating Codex OS sandbox, requires a clean Git baseline before launch, captures JSONL process evidence, and combines observed write attempts with post-run worktree audit into schema v1 JSON and Markdown reports.
+- **Role:** Executes a validated semantic route through Codex, preserves the shared route identity and context/token receipt, then applies the existing non-escalating sandbox and post-run audit controls.
 - **Evidence:** `src/bunya_jido/codex_run.py`, `tests/test_codex_run.py`, `docs/GUARDED_CODEX_RUN.md`
 - **Inputs:** Required task, repository root, compact context report, optional model/executable/timeout controls.
-- **Outputs:** `.bunya-jido/runs/<run-id>/run.json`, `report.md`, `events.jsonl`, `stderr.log`, and `last-message.txt`.
+- **Outputs:** `.bunya-jido/runs/<run-id>/run.json`, `report.md`, `events.jsonl`, `stderr.log`, and `last-message.txt`, including additive route and context-efficiency receipts.
 - **Boundary:** Only `MATCH` maps to `workspace-write`; every non-`MATCH` decision remains `read-only`. Safe-edit paths guide and audit production activity but do not grant OS access. Fake-executable tests are not live Codex sandbox proof.
 
 ### Semantic Blueprint Pipeline
@@ -32,7 +32,7 @@ keeps the review rationale visible beside it.
 ### Renderer And Viewer
 
 - **Plane:** presentation
-- **Role:** Embeds the graph payload into an offline HTML viewer and presents human-first repository orientation, an accessible outline, semantic inspector context, trust, evidence, projection presets, policy-qualified narrated scenarios, and copyable validated agent-route context.
+- **Role:** Embeds the graph payload into an offline HTML viewer and presents human-first repository orientation, an accessible outline, semantic inspector context, trust, evidence, projection presets, copyable validated agent-route context, and local run evidence overlaid on the same fingerprinted route.
 - **Evidence:** `src/bunya_jido/render.py`, `src/bunya_jido/viewer/index.template.html`
 - **Boundary:** Presentation consumes the semantic contract and may clarify direction or reading order, but it is not evidence itself and must not reinterpret authored meaning.
 

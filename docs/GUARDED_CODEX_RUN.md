@@ -75,7 +75,10 @@ violations even when the final worktree is clean. Run artifacts and existing
 generated-noise classifications are excluded from the production boundary.
 
 Malformed, partial, or empty JSONL preserves readable events, stderr, the last
-message, and the Codex return code, but the run fails as `audit_incomplete`.
+message, the Codex return code, and any detected boundary violations, but the
+run fails as `audit_incomplete`. Incomplete audit evidence takes precedence
+over a `boundary_violation` status because the full activity stream cannot be
+trusted.
 
 ## Artifacts and Result Schema
 
@@ -90,8 +93,32 @@ The default run directory is `.bunya-jido/runs/<run-id>/` and contains:
 `run.json` uses schema `bunya-jido-codex-run-v1`. It records the execution plan,
 context decision, process result, baseline and post-run audits, boundary
 decision, artifact paths, status, reason, and exit code. Artifact paths are
-relative to the run directory. `report.md` renders the same decision, process,
-violation, status, and exit-code facts for human review.
+relative to the run directory.
+
+The schema keeps its v1 identifier and adds optional `route_receipt` and
+`context_efficiency_receipt` objects. The route receipt preserves the selected
+route ID and canonical fingerprint, starting responsibilities, node and
+workflow IDs, first reads, relevant tests, contracts, semantic safe-edit scope,
+and evidence paths. The efficiency receipt records compact-context characters
+and UTF-8 bytes, elapsed execution time, changed-path counts, and the boundary
+result.
+
+When exactly one complete Codex `turn.completed.usage` object is available, the
+receipt preserves its non-negative integer input, cached-input, output,
+reasoning-output, and total token fields without deriving missing values.
+Missing, invalid, partial, or multiple usage events are reported explicitly
+and are never replaced with an estimate or arbitrary sum. A single run does
+not report tokens saved; that claim requires a compatible paired no-map
+baseline.
+
+`report.md` renders the same route, receipt, decision, process, violation,
+status, and exit-code facts for human review. If `bunya-jido.html` exists at the
+repository root, the report includes its route fragment. The offline atlas can
+open one local `run.json` (up to 5 MiB) without network or persistent browser
+storage. It overlays the expected route only when both route ID and fingerprint
+match, and maps actual paths to nodes only by exact `source_path` or evidence
+path. Unmatched paths remain visible in the receipt panel. The viewer displays
+the recorded boundary verdict and does not recompute the safety decision.
 
 ## Exit Codes
 

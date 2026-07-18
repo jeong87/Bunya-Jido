@@ -33,16 +33,19 @@ designed to be reviewable in the generated HTML map.
 6. Discovery candidates point back to blueprint nodes, workflows, or existing repository paths and require a new context decision before editing.
 7. The CLI emits compact Markdown or JSON by default while `--verbose` preserves route diagnostics and full discovery evidence.
 
-## Guarded Codex Run
+## Map-Guided Codex Run
 
-1. `bunya-jido codex-run` requests a task-selected compact context report and maps only `MATCH` to `workspace-write`; every other supported decision maps to `read-only`.
-2. Preview renders the scoped context, sanitized argv, baseline cleanliness, and blocking reasons without launching Codex or creating run artifacts.
-3. An actual run calls `audit_worktree()` and blocks before process launch unless the Git baseline is clean.
-4. `src/bunya_jido/codex_run.py` passes the prompt as UTF-8 standard input with an argv list and `shell=False`, disables approval, ignores user config and user/project execpolicy rules, disables web search and workspace shell network access, and captures JSONL, stderr, and the last message.
-5. The boundary evaluator combines post-run Git production changes with JSONL-observed writes, including outside-workspace, rename, and write-then-revert attempts.
-6. Exact paths, explicit globs, and descendants of declared directories are allowed only for `MATCH`; non-`MATCH` production activity always fails.
-7. Schema `bunya-jido-codex-run-v1` and its Markdown rendering preserve the execution plan, process result, audits, violations, artifacts, status, reason, and exit code.
-8. Timeout or cancellation terminates then kills if necessary, but still completes the audit and report.
+1. `bunya-jido codex-run` selects the same validated task route published to the human atlas and records its canonical route ID and fingerprint.
+2. The compact Codex context and schema-v1 route receipt preserve first reads, relevant tests, contracts, semantic edit boundaries, workflow/node identity, and evidence paths.
+3. The runner maps only `MATCH` to `workspace-write`; every other supported decision maps to `read-only`.
+4. Preview renders the scoped context, sanitized argv, baseline cleanliness, and blocking reasons without launching Codex or creating run artifacts.
+5. An actual run calls `audit_worktree()` and blocks before process launch unless the Git baseline is clean.
+6. `src/bunya_jido/codex_run.py` passes the prompt as UTF-8 standard input with an argv list and `shell=False`, disables approval, ignores user config and user/project execpolicy rules, disables web search and workspace shell network access, and captures JSONL, stderr, and the last message.
+7. The context-efficiency receipt preserves directly reported Codex usage without estimation or multi-event summation; tokens saved remain unavailable without a compatible paired no-map run.
+8. The boundary evaluator combines post-run Git production changes with JSONL-observed writes, including outside-workspace, rename, and write-then-revert attempts.
+9. Exact paths, explicit globs, and descendants of declared directories are allowed only for `MATCH`; non-`MATCH` production activity always fails.
+10. The offline atlas imports one local schema-v1 `run.json`, requires matching route ID and fingerprint for the expected overlay, maps actual paths only by exact evidence, and displays the recorded boundary verdict.
+11. Timeout or cancellation terminates then kills if necessary, but still completes the audit and report.
 
 ## Continuous Contract Check
 

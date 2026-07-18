@@ -22,20 +22,27 @@
 
 이름은 하늘을 구역과 관계로 읽어낸 한국의 별자리 지도, 천상열차분야지도에서 따왔습니다. Bunya-Jido는 그 방식을 코드에 옮겨 파일, 문서, 워크플로우, 런타임 산출물, 검토된 해석을 하나의 살펴볼 수 있는 지도로 묶습니다.
 
-## Build Week 2026: 보호된 Codex 실행
+## Build Week 2026: 사람과 Codex가 공유하는 하나의 작업 경로
 
-`build-week-2026` 브랜치는 Bunya-Jido의 context 결정에 따라 로컬 Codex를
-실행하는 `bunya-jido codex-run` 워크플로를 추가합니다.
+`build-week-2026` 브랜치에서는 하나의 검증된 시맨틱 작업 경로를 사람과
+Codex가 함께 봅니다. 사람은 오프라인 HTML atlas에서 경로를 열고, Codex는
+같은 경로의 첫 읽기, 관련 테스트, 계약, 편집 경계를 compact context로
+받습니다. `bunya-jido codex-run`은 이 지도를 사용하는 실행 계층입니다.
 
 ```bash
 bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
 ```
 
-Preview는 Codex를 실행하거나 run 산출물을 만들지 않습니다. 실제 실행은
-clean Git 작업 트리에서만 가능하며, `MATCH`만 `workspace-write`를 받고
-나머지 결정은 모두 `read-only`입니다. Codex 웹 검색과 workspace shell
-네트워크 접근은 서로 별개의 설정으로 명시적으로 비활성화됩니다. 제출
-근거 범위는 [BUILD_WEEK.md](BUILD_WEEK.md), 전체 계약은
+각 실행은 선택된 경로 ID, compact context 크기, JSONL에 있을 때의 실제
+Codex token usage, 실행 시간, 변경 경로, 경계 판정을 기록합니다. 오프라인
+atlas는 로컬 `run.json`을 열어 예상 경로, 정확한 evidence path와 일치하는
+실제 변경, 위반을 겹쳐 보여줍니다. 단일 실행으로는 token 절감을 주장하지
+않으며, 호환되는 no-map 대조 실행과 짝지어야 합니다.
+
+기존 sandbox와 audit는 이를 받치는 신뢰 계층입니다. Preview는 Codex를
+실행하지 않고, 실제 실행은 clean 작업 트리에서만 가능하며, `MATCH`만
+`workspace-write`를 받고 나머지는 모두 `read-only`입니다. 제출 근거
+범위는 [BUILD_WEEK.md](BUILD_WEEK.md), 전체 계약은
 [docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md)를 참고하세요.
 
 ## 벤치마크 요약

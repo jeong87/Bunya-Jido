@@ -11,9 +11,14 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
+from urllib.parse import quote
 
 from .benchmark import audit_worktree
-from .blueprint import generate_agent_context, generate_agent_context_report
+from .blueprint import (
+    _generate_agent_route_receipt,
+    generate_agent_context,
+    generate_agent_context_report,
+)
 
 
 CODEX_RUN_SCHEMA_VERSION = "bunya-jido-codex-run-v1"
@@ -374,6 +379,126 @@ def _boundary_audit(
     }
 
 
+def _route_receipt(root: Path, task: str, output_dir: Path) -> dict[str, Any]:
+    receipt = _generate_agent_route_receipt(root, task=task)
+    atlas_path = root / "bunya-jido.html"
+    route_id = str(receipt.get("route_id") or "")
+    receipt["atlas"] = {
+        "path": "bunya-jido.html",
+        "available": atlas_path.is_file(),
+        "route_fragment": f"#route={quote(route_id, safe='')}" if route_id else None,
+        "report_href": (
+            Path(os.path.relpath(atlas_path, output_dir)).as_posix()
+            if atlas_path.is_file()
+            else None
+        ),
+        "build_command": None if atlas_path.is_file() else "bunya-jido build --root .",
+    }
+    return receipt
+
+
+def _token_usage_receipt(events_path: Path | None) -> dict[str, Any]:
+    unavailable = {
+        "availability": "unavailable",
+        "reason": "no_turn_completed_usage",
+        "event_count": 0,
+        "input_tokens": None,
+        "cached_input_tokens": None,
+        "output_tokens": None,
+        "reasoning_output_tokens": None,
+        "total_tokens": None,
+    }
+    if events_path is None or not events_path.is_file():
+        return unavailable
+    usages: list[dict[str, Any]] = []
+    for line in events_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        usage = event.get("usage") if isinstance(event, dict) else None
+        if (
+            isinstance(event, dict)
+            and event.get("type") == "turn.completed"
+            and isinstance(usage, dict)
+        ):
+            usages.append(usage)
+    if not usages:
+        return unavailable
+    if len(usages) != 1:
+        return {
+            **unavailable,
+            "availability": "multiple",
+            "reason": "multiple_turn_completed_usage_events",
+            "event_count": len(usages),
+        }
+    usage = usages[0]
+    fields = {
+        name: (
+            value
+            if isinstance(value, int)
+            and not isinstance(value, bool)
+            and value >= 0
+            else None
+        )
+        for name, value in (
+            ("input_tokens", usage.get("input_tokens")),
+            ("cached_input_tokens", usage.get("cached_input_tokens")),
+            ("output_tokens", usage.get("output_tokens")),
+            ("reasoning_output_tokens", usage.get("reasoning_output_tokens")),
+            ("total_tokens", usage.get("total_tokens")),
+        )
+    }
+    required_available = fields["input_tokens"] is not None and fields["output_tokens"] is not None
+    return {
+        "availability": "available" if required_available else "partial",
+        "reason": None if required_available else "usage_fields_incomplete",
+        "event_count": 1,
+        **fields,
+    }
+
+
+def _update_efficiency_receipt(
+    report: dict[str, Any],
+    *,
+    events_path: Path | None,
+) -> None:
+    post_audit = report.get("post_run_audit") or {}
+    boundary = report.get("boundary_audit") or {}
+    if report.get("preview"):
+        boundary_result = "not_run_preview"
+        usage = {
+            **_token_usage_receipt(None),
+            "reason": "preview_does_not_launch_codex",
+        }
+    elif report.get("status") == "blocked":
+        boundary_result = "not_run_preflight_blocked"
+        usage = {
+            **_token_usage_receipt(None),
+            "reason": "codex_not_launched",
+        }
+    elif not post_audit.get("jsonl_complete"):
+        boundary_result = "audit_incomplete"
+        usage = _token_usage_receipt(events_path)
+    elif boundary.get("has_boundary_violation"):
+        boundary_result = "failed"
+        usage = _token_usage_receipt(events_path)
+    else:
+        boundary_result = "passed"
+        usage = _token_usage_receipt(events_path)
+    report["context_efficiency_receipt"].update(
+        {
+            "actual_token_usage": usage,
+            "elapsed_execution_seconds": report["execution"].get("duration_seconds"),
+            "final_changed_file_count": len(post_audit.get("production_file_changes") or []),
+            "observed_production_path_count": len(
+                boundary.get("observed_production_activity") or []
+            ),
+            "boundary_result": boundary_result,
+        }
+    )
+
+
 def _base_report(
     *,
     run_id: str,
@@ -389,6 +514,7 @@ def _base_report(
     output_dir: Path,
     baseline_audit: Mapping[str, Any],
     preview: bool,
+    route_receipt: Mapping[str, Any],
 ) -> dict[str, Any]:
     dirty = not bool(baseline_audit.get("worktree_clean"))
     preflight_reasons = ["dirty_worktree"] if dirty else []
@@ -412,6 +538,21 @@ def _base_report(
             "character_count": len(context_markdown),
             "utf8_byte_count": len(context_markdown.encode("utf-8")),
             "content": context_markdown,
+        },
+        "route_receipt": dict(route_receipt),
+        "context_efficiency_receipt": {
+            "compact_context_character_count": len(context_markdown),
+            "compact_context_utf8_byte_count": len(context_markdown.encode("utf-8")),
+            "actual_token_usage": {
+                **_token_usage_receipt(None),
+                "reason": "pending" if not preview else "preview_does_not_launch_codex",
+            },
+            "elapsed_execution_seconds": None,
+            "final_changed_file_count": 0,
+            "observed_production_path_count": 0,
+            "boundary_result": "not_run_preview" if preview else "pending",
+            "tokens_saved": None,
+            "tokens_saved_reason": "requires_compatible_paired_no_map_baseline",
         },
         "execution": {
             "sandbox_mode": sandbox_mode,
@@ -466,6 +607,9 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
     execution = report["execution"]
     preflight = report["preflight"]
     boundary = report.get("boundary_audit") or {}
+    route = report.get("route_receipt") or {}
+    efficiency = report.get("context_efficiency_receipt") or {}
+    usage = efficiency.get("actual_token_usage") or {}
     lines = [
         "# Bunya-Jido Guarded Codex Run",
         "",
@@ -479,6 +623,40 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         "## Task",
         "",
         str(report["task"]),
+        "",
+        "## Shared Human-Agent Route",
+        "",
+        f"- Route available: `{str(bool(route.get('available'))).lower()}`",
+        f"- Route ID: `{route.get('route_id') or 'unavailable'}`",
+        f"- Route fingerprint: `{route.get('route_fingerprint') or 'unavailable'}`",
+        f"- Starting responsibility: `{', '.join(route.get('starting_responsibilities') or []) or 'unavailable'}`",
+        f"- First reads: `{route.get('first_read_count', 0)}`",
+        f"- Relevant tests: `{route.get('relevant_test_count', 0)}`",
+    ]
+    atlas = route.get("atlas") or {}
+    if atlas.get("available") and atlas.get("route_fragment"):
+        lines.append(
+            f"- Atlas route: [{atlas.get('path')}]({atlas.get('report_href')}{atlas.get('route_fragment')})"
+        )
+    elif atlas.get("build_command"):
+        lines.append(f"- Atlas: unavailable; build with `{atlas.get('build_command')}`")
+    lines.extend(
+        [
+        "",
+        "## Context Efficiency Receipt",
+        "",
+        f"- Compact context: `{efficiency.get('compact_context_character_count')}` characters / `{efficiency.get('compact_context_utf8_byte_count')}` UTF-8 bytes",
+        f"- Actual token usage: `{usage.get('availability')}`",
+        f"- Input tokens: `{usage.get('input_tokens')}`",
+        f"- Cached input tokens: `{usage.get('cached_input_tokens')}`",
+        f"- Output tokens: `{usage.get('output_tokens')}`",
+        f"- Reasoning output tokens: `{usage.get('reasoning_output_tokens')}`",
+        f"- Total tokens: `{usage.get('total_tokens')}`",
+        f"- Token usage reason: `{usage.get('reason')}`",
+        f"- Elapsed execution: `{efficiency.get('elapsed_execution_seconds')}` seconds",
+        f"- Final changed files: `{efficiency.get('final_changed_file_count')}`",
+        f"- Boundary result: `{efficiency.get('boundary_result')}`",
+        "- Tokens saved: unavailable from a single run; a compatible paired no-map baseline is required.",
         "",
         "## Enforcement Boundary",
         "",
@@ -499,7 +677,8 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         "",
         f"- In-boundary paths: `{len(boundary.get('in_boundary_paths') or [])}`",
         f"- Violations: `{len(boundary.get('boundary_violations') or [])}`",
-    ]
+        ]
+    )
     for violation in boundary.get("boundary_violations") or []:
         lines.append(f"- `{violation['path']}`: {violation['reason']}")
     lines.extend(["", "## Outcome", ""])
@@ -591,6 +770,7 @@ def _execute_guarded_codex_run(
     artifacts = _artifact_paths(output_dir)
     context_report = generate_agent_context_report(root_path, task=task)
     context_markdown = generate_agent_context(root_path, task=task)
+    route_receipt = _route_receipt(root_path, task, output_dir)
     sandbox_mode = _validated_sandbox(context_report)
     prefix = _command_prefix(codex_executable, command_prefix)
     command = _build_codex_command(
@@ -620,6 +800,7 @@ def _execute_guarded_codex_run(
         output_dir=output_dir,
         baseline_audit=baseline_audit,
         preview=preview,
+        route_receipt=route_receipt,
     )
     if preview:
         _finish_report(
@@ -628,6 +809,7 @@ def _execute_guarded_codex_run(
             started_monotonic=started_monotonic,
             monotonic_fn=monotonic_fn,
         )
+        _update_efficiency_receipt(report, events_path=None)
         return report
 
     _prepare_artifacts(output_dir, artifacts)
@@ -641,6 +823,7 @@ def _execute_guarded_codex_run(
             started_monotonic=started_monotonic,
             monotonic_fn=monotonic_fn,
         )
+        _update_efficiency_receipt(report, events_path=None)
         _write_report(report, artifacts)
         return report
 
@@ -704,11 +887,11 @@ def _execute_guarded_codex_run(
     if process_result["timed_out"] or process_result["cancelled"]:
         status = "cancelled"
         exit_code = 130
-    elif boundary_violation:
-        status = "boundary_violation"
-        exit_code = 2
     elif audit_error or not jsonl_complete:
         status = "audit_incomplete"
+        exit_code = 2
+    elif boundary_violation:
+        status = "boundary_violation"
         exit_code = 2
     elif process_result["launch_error"] or process_result["return_code"] != 0:
         status = "codex_failed"
@@ -725,5 +908,6 @@ def _execute_guarded_codex_run(
         started_monotonic=started_monotonic,
         monotonic_fn=monotonic_fn,
     )
+    _update_efficiency_receipt(report, events_path=artifacts["events_jsonl"])
     _write_report(report, artifacts)
     return report

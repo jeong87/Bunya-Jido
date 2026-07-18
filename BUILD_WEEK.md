@@ -30,45 +30,58 @@ Those baseline capabilities must not be presented as Build Week additions.
 
 ## Features Added During Build Week
 
-Guarded Codex Run adds:
+The Build Week extension keeps the semantic map as the product and adds a
+measurable map-guided execution loop:
 
-1. Public `bunya-jido codex-run --root ROOT --task TASK` orchestration.
-2. A non-mutating preview that works with a dirty worktree.
-3. Clean-baseline enforcement before any actual nested process starts.
-4. Non-escalating context-to-Codex sandbox mapping: only `MATCH` is
+1. A canonical task-route identity and fingerprint shared by the compact agent
+   context, run artifacts, and offline human atlas.
+2. Additive route and context-efficiency receipts in schema v1, including
+   first reads, tests, semantic edit boundaries, compact-context bytes, actual
+   Codex token usage when available, elapsed time, changed-file counts, and the
+   boundary verdict.
+3. Offline `run.json` import in the HTML atlas, with expected-route,
+   exact evidence-linked actual-change, and violation overlays.
+4. An honest measurement boundary: a single run never reports tokens saved,
+   and unavailable model usage is recorded as unavailable rather than
+   estimated.
+5. Public `bunya-jido codex-run --root ROOT --task TASK` orchestration.
+6. A non-mutating preview and clean-baseline enforcement before an actual
+   nested process starts.
+7. Supporting non-escalating sandbox selection: only `MATCH` is
    `workspace-write`; every other decision is `read-only`.
-5. UTF-8 prompt delivery through standard input with argv execution and
+8. UTF-8 prompt delivery through standard input with argv execution and
    `shell=False`.
-6. JSONL capture, final Git audit, write-attempt auditing, and exact/glob/
+9. JSONL capture, final Git audit, write-attempt auditing, and exact/glob/
    declared-directory safe-edit evaluation.
-7. Schema `bunya-jido-codex-run-v1`, Markdown reporting, preserved stderr and
+10. Schema `bunya-jido-codex-run-v1`, Markdown reporting, preserved stderr and
    last message, and intentional exit codes.
-8. Deterministic fake-Codex tests for success, policy failures, malformed
+11. Deterministic fake-Codex tests for success, policy failures, malformed
    streams, cancellation, timeout, and command-injection-shaped input.
-9. Independent explicit controls for disabled Codex web search and disabled
+12. Independent explicit controls for disabled Codex web search and disabled
    workspace-shell network access.
-10. Deterministic automation that ignores user and trusted-project execpolicy
+13. Deterministic automation that ignores user and trusted-project execpolicy
     `.rules` without claiming to bypass administrator-managed requirements.
 
-HTML reporting, benchmark claims, and package release are not part of this MVP.
-One separately approved disposable read-only live smoke is recorded as narrow
-validation evidence; it does not establish workspace-write, cross-platform, or
-general safety behavior.
+This is not a new Build Week savings benchmark. One separately approved
+disposable read-only live smoke is recorded as narrow execution evidence; it
+does not establish workspace-write, cross-platform, general safety, or token
+savings.
 
 ## Contributions and Decisions
 
-Codex inspected the baseline, designed and implemented the isolated runner,
-added tests and documentation, updated the repository map, and ran local
-validators.
+Codex inspected the baseline, designed and implemented the shared route
+identity, receipts, atlas overlay, isolated runner, tests, documentation, and
+repository-map updates, and ran local validators.
 
 Human decisions are separated as follows:
 
-- Product: expose one public `bunya-jido codex-run` command and keep live
-  nested validation, benchmark claims, release, and publication outside MVP.
+- Product: keep the evidence-grounded semantic map as the core, expose it as a
+  human atlas and compact agent route, and use `codex-run` as a measured
+  map-guided extension.
 - Engineering: use an independent module, require a clean actual-run baseline,
   and prevent non-`MATCH` sandbox escalation.
-- Design: use a compact JSON plus Markdown result contract and defer an HTML
-  report while preserving the existing viewer design.
+- Design: add optional schema-v1 receipts and a small local-file overlay to the
+  existing offline viewer instead of creating a separate HTML report.
 
 The session metadata above identifies the model recorded for this engineering
 session. Separately, one live Codex CLI smoke exercised the read-only guarded

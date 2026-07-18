@@ -4,6 +4,22 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-07-18 - Shared Route Receipt And Atlas Overlay
+
+- Change: Re-centered the Build Week extension on the shared semantic map,
+  added one canonical route fingerprint to agent/run/viewer projections,
+  preserved honest context and Codex token receipts, and let the offline atlas
+  import a local run artifact for expected-versus-actual evidence overlays.
+- Decision: This extends the existing context, runner, and viewer
+  responsibilities without adding a top-level product identity, dependency,
+  network/storage behavior, new CLI option, new schema version, or weaker
+  sandbox/audit policy. Actual paths map only through exact authored evidence,
+  and savings still require paired no-map evidence.
+- Validation: Route-fingerprint parity, fake usage capture, partial/multiple
+  usage handling, viewer import surface, browser interaction, full unit tests,
+  compile, map validators, strict utility/quality, per-file context refresh,
+  stale review, and demo rebuild are required before submission.
+
 ## 2026-07-18 - Guarded Runner CI Stabilization
 
 - Change: Removed an ignored atlas-quality report from the Guarded Codex Run

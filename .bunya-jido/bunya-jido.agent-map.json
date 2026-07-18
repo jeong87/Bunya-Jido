@@ -274,7 +274,11 @@
         "Codex execution orchestration",
         "nested Codex runner",
         "Codex sandbox mapping",
-        "Codex run boundary audit"
+        "Codex run boundary audit",
+        "map-guided Codex execution",
+        "context efficiency receipt",
+        "route fingerprint",
+        "run.json atlas overlay"
       ],
       "when_to_use": [
         "public codex-run CLI behavior or preview",

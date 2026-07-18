@@ -15,6 +15,7 @@ from bunya_jido.blueprint import (
     deactivate_agent_guides,
     evaluate_agent_utility,
     evaluate_map_freshness,
+    _generate_agent_route_receipt,
     generate_agent_context,
     generate_agent_context_report,
     graph_from_blueprint,
@@ -674,6 +675,10 @@ class AgentMapCharacterizationTests(unittest.TestCase):
                     ]
                 )
             graph, _ = graph_with_optional_blueprint(root)
+            route_receipt = _generate_agent_route_receipt(
+                root,
+                task="change builder behavior",
+            )
             html = render_html(graph, root / "atlas.html").read_text(encoding="utf-8")
 
         self.assertEqual(errors, [])
@@ -724,6 +729,15 @@ class AgentMapCharacterizationTests(unittest.TestCase):
         self.assertEqual(route["source"], "agent_map")
         self.assertIn("component:builder", route["node_ids"])
         self.assertIn("component:validator", route["node_ids"])
+        self.assertEqual(
+            route["route_fingerprint"],
+            route_receipt["route_fingerprint"],
+        )
+        self.assertEqual(route["id"], route_receipt["route_id"])
+        self.assertEqual(
+            route["route_fingerprint_algorithm"],
+            "bunya-jido-route-fingerprint-v1",
+        )
         self.assertEqual(graph["agent_map_quality"]["trusted_route_count"], 1)
         self.assertIn('"kind": "task_route"', html)
         self.assertIn("Task Route", html)

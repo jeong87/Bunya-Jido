@@ -333,7 +333,7 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
 
         self.assertEqual(result, 0)
         self.assertEqual(report["status"], "passed")
-        self.assertEqual(report["case_count"], 19)
+        self.assertEqual(report["case_count"], 20)
         self.assertEqual(report["dimensions"]["honest_no_match"]["passed"], 7)
         self.assertEqual(report["dimensions"]["normal_bugfix_recovery"]["passed"], 2)
         self.assertEqual(report["safety_metrics"]["expected_decision_accuracy"], 1.0)

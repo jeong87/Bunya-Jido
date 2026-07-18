@@ -22,19 +22,27 @@
 
 The name comes from Cheonsang Yeolcha Bunyajido, the Korean star map that reads the sky through regions and relationships. Bunya-Jido applies that idea to code: files, docs, workflows, runtime artifacts, and reviewed interpretation are gathered into one inspectable map.
 
-## Build Week 2026: Guarded Codex Run
+## Build Week 2026: One Route, Shared by Humans and Codex
 
-The `build-week-2026` branch adds `bunya-jido codex-run`, a guarded local Codex
-workflow driven by Bunya-Jido's context decision:
+The `build-week-2026` branch makes one validated semantic task route visible to
+both sides of the work: people open it in the offline HTML atlas, while Codex
+receives its compact first reads, tests, contracts, and edit boundaries.
+`bunya-jido codex-run` is the map-guided execution layer:
 
 ```bash
 bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
 ```
 
-Preview does not launch Codex or create run artifacts. An actual run requires a
-clean Git worktree; only `MATCH` receives `workspace-write`, while every other
-decision remains `read-only`. Codex web search and workspace-shell network
-access are explicitly disabled as separate controls. See
+Each run records the selected route identity, compact-context size, actual
+Codex token usage when the JSONL stream provides it, elapsed time, changed
+paths, and the boundary verdict. The offline atlas can open that local
+`run.json` and overlay expected route nodes, exact evidence-linked changed
+paths, and violations. A single run never claims tokens saved; savings require
+a compatible paired no-map baseline.
+
+The existing sandbox and audit remain supporting trust controls: preview does
+not launch Codex, actual execution requires a clean worktree, only `MATCH`
+receives `workspace-write`, and all other decisions remain `read-only`. See
 [BUILD_WEEK.md](BUILD_WEEK.md) for the submission evidence boundary and
 [docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md) for the full contract.
 
