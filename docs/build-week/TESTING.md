@@ -228,3 +228,30 @@ made no file changes. This result validates only the observed read-only path
 for the versions and environment above. It does not prove `workspace-write`
 enforcement, other operating systems, other Codex versions, performance, or
 the model identity used by the provider.
+
+## Second Approved Live Run — July 20, 2026 (workspace-write)
+
+Product-owner approved, run for the Build Week demo video. Disposable clean
+clone of `build-week-2026`, Linux Codex CLI under WSL Ubuntu, task
+`Change guarded Codex run orchestration: clarify the route receipt
+explanation in the codex_run.py module docstring with one short sentence.
+Make exactly one small docstring edit.`
+
+- Run ID `20260720T062213Z-bd704b40`, decision `MATCH`, sandbox
+  `workspace-write`, status `succeeded`, exit code `0`.
+- Exactly one changed file (`src/bunya_jido/codex_run.py`, one docstring
+  sentence), inside the declared safe-edit boundary; boundary result
+  `passed`.
+- Recorded usage from the single complete `turn.completed` event: input
+  182,823 · cached input 159,232 · output 1,652 · reasoning 367. Elapsed
+  54.9 s. Compact context 3,095 UTF-8 bytes.
+- Run artifacts are retained locally for the demo video and are not
+  committed.
+
+A first attempt on native Windows (run `20260720T…` earlier the same day) is
+recorded as a platform observation: Codex reported its OS sandbox as
+effectively read-only despite the requested `workspace-write`, made no file
+changes, and the run finished `succeeded` with zero changed files. The
+guarded contract held in the restrictive direction. Neither run is
+performance or cross-platform enforcement evidence; each validates only the
+observed environment.

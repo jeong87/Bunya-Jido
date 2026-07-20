@@ -22,29 +22,31 @@
 
 The name comes from Cheonsang Yeolcha Bunyajido, the Korean star map that reads the sky through regions and relationships. Bunya-Jido applies that idea to code: files, docs, workflows, runtime artifacts, and reviewed interpretation are gathered into one inspectable map.
 
-## Build Week 2026: One Route, Shared by Humans and Codex
+## Build Week 2026: Guarded Codex Runs
 
-The `build-week-2026` branch makes one validated semantic task route visible to
-both sides of the work: people open it in the offline HTML atlas, while Codex
-receives its compact first reads, tests, contracts, and edit boundaries.
-`bunya-jido codex-run` is the map-guided execution layer:
+New for OpenAI Build Week, the map now drives execution instead of just
+reading. `codex-run` hands one validated task route to the local Codex CLI,
+picks the sandbox from the route decision, and audits everything Codex did
+against the declared edit boundaries:
 
 ```bash
 bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration and boundary reporting." --preview
 ```
 
-Each run records the selected route identity, compact-context size, actual
-Codex token usage when the JSONL stream provides it, elapsed time, changed
-paths, and the boundary verdict. The offline atlas can open that local
-`run.json` and overlay expected route nodes, exact evidence-linked changed
-paths, and violations. A single run never claims tokens saved; savings require
-a compatible paired no-map baseline.
+Only a confident route `MATCH` gets `workspace-write` — everything else,
+including "not sure", runs read-only, and there is no override flag. Every run
+writes a receipt (`run.json`) with the route ID and fingerprint, compact
+context size, real Codex token usage, elapsed time, changed files, and a
+boundary verdict. Open that file in the offline atlas and the same map shows
+the expected route, what actually changed, and any violations.
 
-The existing sandbox and audit remain supporting trust controls: preview does
-not launch Codex, actual execution requires a clean worktree, only `MATCH`
-receives `workspace-write`, and all other decisions remain `read-only`. See
-[BUILD_WEEK.md](BUILD_WEEK.md) for the submission evidence boundary and
-[docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md) for the full contract.
+Two honesty rules are built in: token usage missing from the Codex stream is
+recorded as unavailable rather than estimated, and a single run never claims
+"tokens saved" — that number only exists in paired map-vs-no-map comparisons.
+
+[BUILD_WEEK.md](BUILD_WEEK.md) records what was built during Build Week and
+what predates it; [docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md) has
+the full contract.
 
 ## Benchmark Snapshot
 
