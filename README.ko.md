@@ -43,9 +43,16 @@ atlas에서 열면 같은 지도 위에 예상 경로, 실제 변경, 위반이 
 않고 unavailable로 기록하며, 단일 실행으로는 "토큰 절감"을 주장하지 않습니다
 — 그 숫자는 지도 유무를 짝지은 비교에서만 나옵니다.
 
-Build Week에 만든 것과 그 이전 것의 구분은 [BUILD_WEEK.md](BUILD_WEEK.md),
-전체 계약은 [docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md)를
-참고하세요.
+**Codex와 GPT-5.6의 역할.** 이 기능 자체가 GPT-5.6 기반 Codex로 만들어졌습니다
+(세션 `019f73d5-d0c4-7633-8f08-fd8fb5933b3b`, 모델 메타데이터는 리포에 기록).
+Bunya-Jido 자신의 작업 경로 — 무엇을 먼저 읽고, 어떤 테스트를 만족시키고,
+어디를 수정해도 되는지 — 의 안내를 받아 Codex가 약 900줄의 러너와 800줄의
+테스트, atlas 오버레이를 작성했습니다. 동시에 Codex는 이 기능이 오케스트레이션
+하는 대상이기도 합니다: `codex-run`은 로컬 Codex CLI를 매핑된 샌드박스로 띄우고
+그 작업을 감사합니다. 사람의 결정 기록은
+[docs/build-week/DECISIONS.md](docs/build-week/DECISIONS.md), 협업 전체 기록과
+근거 경계는 [BUILD_WEEK.md](BUILD_WEEK.md), 명령 계약은
+[docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md)를 참고하세요.
 
 ## 벤치마크 요약
 

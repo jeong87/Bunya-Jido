@@ -44,9 +44,17 @@ Two honesty rules are built in: token usage missing from the Codex stream is
 recorded as unavailable rather than estimated, and a single run never claims
 "tokens saved" — that number only exists in paired map-vs-no-map comparisons.
 
-[BUILD_WEEK.md](BUILD_WEEK.md) records what was built during Build Week and
-what predates it; [docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md) has
-the full contract.
+**How Codex and GPT-5.6 were used.** This feature was itself built with Codex
+running GPT-5.6 (session `019f73d5-d0c4-7633-8f08-fd8fb5933b3b`, model
+metadata recorded in the repo). Guided by Bunya-Jido's own task route — which
+told it what to read first, which tests to satisfy, and where it could edit —
+Codex wrote the ~900-line runner, ~800 lines of tests, and the atlas overlay.
+Codex is also the agent the feature orchestrates: `codex-run` launches the
+local Codex CLI under the mapped sandbox and audits its work. The human
+decision log is in [docs/build-week/DECISIONS.md](docs/build-week/DECISIONS.md);
+the full collaboration record and evidence boundary are in
+[BUILD_WEEK.md](BUILD_WEEK.md), with the command contract in
+[docs/GUARDED_CODEX_RUN.md](docs/GUARDED_CODEX_RUN.md).
 
 ## Benchmark Snapshot
 
