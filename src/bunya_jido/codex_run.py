@@ -9,7 +9,7 @@ import subprocess
 import time
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any, Callable, Mapping, Sequence
 from urllib.parse import quote
 
@@ -189,10 +189,79 @@ def _build_codex_command(
     return command
 
 
-def _display_command(command: Sequence[str]) -> str:
+def _path_parts(value: str) -> tuple[str, tuple[str, ...], tuple[str, ...]] | None:
+    if value.startswith("/"):
+        path = PurePosixPath(value)
+        return "posix", path.parts, path.parts
+    if (
+        len(value) >= 3
+        and value[0].isalpha()
+        and value[1] == ":"
+        and value[2] in "\\/"
+    ) or value.startswith("\\\\"):
+        path = PureWindowsPath(value)
+        return (
+            "windows",
+            path.parts,
+            tuple(part.casefold() for part in path.parts),
+        )
+    return None
+
+
+def _redact_display_path(
+    value: str,
+    *,
+    root: str | os.PathLike[str],
+    run_dir: str | os.PathLike[str],
+) -> str:
+    candidate = _path_parts(value)
+    if candidate is None:
+        return value
+    style, parts, comparable = candidate
+    for base, placeholder in (
+        (os.fspath(run_dir), "<run-dir>"),
+        (os.fspath(root), "<repo-root>"),
+    ):
+        parsed_base = _path_parts(base)
+        if parsed_base is None or parsed_base[0] != style:
+            continue
+        base_comparable = parsed_base[2]
+        if (
+            len(comparable) >= len(base_comparable)
+            and comparable[: len(base_comparable)] == base_comparable
+        ):
+            relative = parts[len(base_comparable) :]
+            return (
+                placeholder
+                if not relative
+                else f"{placeholder}/{'/'.join(relative)}"
+            )
+    basename = parts[-1] if parts else ""
+    return f"<absolute-path>/{basename}" if basename else "<absolute-path>"
+
+
+def _display_argv(
+    command: Sequence[str],
+    *,
+    root: str | os.PathLike[str],
+    run_dir: str | os.PathLike[str],
+) -> list[str]:
+    return [
+        _redact_display_path(str(value), root=root, run_dir=run_dir)
+        for value in command
+    ]
+
+
+def _display_command(
+    command: Sequence[str],
+    *,
+    root: str | os.PathLike[str],
+    run_dir: str | os.PathLike[str],
+) -> str:
+    display_command = _display_argv(command, root=root, run_dir=run_dir)
     if os.name == "nt":
-        return subprocess.list2cmdline(list(command))
-    return shlex.join(command)
+        return subprocess.list2cmdline(display_command)
+    return shlex.join(display_command)
 
 
 def _render_prompt(
@@ -219,7 +288,7 @@ def _render_prompt(
             "modifying or creating files."
         )
     return (
-        "# Bunya-Jido Guarded Codex Run\n\n"
+        "# Bunya-Jido Map-Guided Codex Run\n\n"
         f"Task JSON: {json.dumps(task, ensure_ascii=False)}\n"
         f"Validated context decision: {decision}\n"
         f"OS-enforced Codex sandbox: {sandbox_mode}\n\n"
@@ -557,7 +626,11 @@ def _base_report(
         "execution": {
             "sandbox_mode": sandbox_mode,
             "command": list(command),
-            "command_display": _display_command(command),
+            "command_display": _display_command(
+                command,
+                root=root,
+                run_dir=output_dir,
+            ),
             "shell": False,
             "prompt_delivery": "stdin",
             "approval_policy": "never",
@@ -610,8 +683,19 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
     route = report.get("route_receipt") or {}
     efficiency = report.get("context_efficiency_receipt") or {}
     usage = efficiency.get("actual_token_usage") or {}
+    usage_reason = usage.get("reason")
+    if (
+        not usage_reason
+        and usage.get("total_tokens") is None
+        and usage.get("event_count") == 1
+    ):
+        usage_reason = "total not reported by this Codex event"
+
+    def human_value(value: Any) -> str:
+        return "unavailable" if value is None else str(value)
+
     lines = [
-        "# Bunya-Jido Guarded Codex Run",
+        "# Bunya-Jido Map-Guided Codex Run",
         "",
         f"- Run ID: `{report['run_id']}`",
         f"- Status: `{report['status']}`",
@@ -647,18 +731,18 @@ def _render_markdown(report: Mapping[str, Any]) -> str:
         "",
         f"- Compact context: `{efficiency.get('compact_context_character_count')}` characters / `{efficiency.get('compact_context_utf8_byte_count')}` UTF-8 bytes",
         f"- Actual token usage: `{usage.get('availability')}`",
-        f"- Input tokens: `{usage.get('input_tokens')}`",
-        f"- Cached input tokens: `{usage.get('cached_input_tokens')}`",
-        f"- Output tokens: `{usage.get('output_tokens')}`",
-        f"- Reasoning output tokens: `{usage.get('reasoning_output_tokens')}`",
-        f"- Total tokens: `{usage.get('total_tokens')}`",
-        f"- Token usage reason: `{usage.get('reason')}`",
+        f"- Input tokens: `{human_value(usage.get('input_tokens'))}`",
+        f"- Cached input tokens: `{human_value(usage.get('cached_input_tokens'))}`",
+        f"- Output tokens: `{human_value(usage.get('output_tokens'))}`",
+        f"- Reasoning output tokens: `{human_value(usage.get('reasoning_output_tokens'))}`",
+        f"- Total tokens: `{human_value(usage.get('total_tokens'))}`",
+        *([f"- Reason: {usage_reason}"] if usage_reason else []),
         f"- Elapsed execution: `{efficiency.get('elapsed_execution_seconds')}` seconds",
         f"- Final changed files: `{efficiency.get('final_changed_file_count')}`",
         f"- Boundary result: `{efficiency.get('boundary_result')}`",
         "- Tokens saved: unavailable from a single run; a compatible paired no-map baseline is required.",
         "",
-        "## Enforcement Boundary",
+        "## Guarded Execution",
         "",
         "- The Codex sandbox controls OS-level workspace write access.",
         "- Bunya-Jido safe-edit paths are semantic guidance and are audited after execution; they are not an OS path allowlist.",
@@ -704,7 +788,7 @@ def _render_guarded_run_console(report: Mapping[str, Any]) -> str:
     context = report["context"]
     preflight = report["preflight"]
     lines = [
-        f"Guarded Codex Run: {report['status']}",
+        f"Bunya-Jido Map-Guided Codex Run: {report['status']}",
         f"Decision: {context.get('decision')}",
         f"Sandbox: {report['execution'].get('sandbox_mode')}",
         f"Baseline: {'clean' if preflight.get('worktree_clean') else 'dirty'}",
@@ -749,14 +833,14 @@ def _execute_guarded_codex_run(
     environ: Mapping[str, str] | None = None,
     monotonic_fn: Callable[[], float] = time.monotonic,
 ) -> dict[str, Any]:
-    """Execute the internal Guarded Codex Run workflow used by the CLI.
+    """Execute the internal Map-Guided Codex Run workflow used by the CLI.
 
     This function is intentionally not exported from the package root. Injection
     parameters exist for deterministic tests and fake Codex executables.
     """
 
     if not isinstance(task, str) or not task.strip():
-        raise _GuardedCodexRunError("Guarded Codex Run requires a non-empty task.")
+        raise _GuardedCodexRunError("Map-Guided Codex Run requires a non-empty task.")
     if timeout is not None and timeout <= 0:
         raise _GuardedCodexRunError("timeout must be greater than zero")
     root_path = Path(root).resolve()

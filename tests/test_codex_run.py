@@ -13,7 +13,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 from bunya_jido.cli import main
-from bunya_jido.codex_run import _execute_guarded_codex_run, _safe_edit_allows
+from bunya_jido.codex_run import (
+    _display_argv,
+    _execute_guarded_codex_run,
+    _safe_edit_allows,
+)
 
 
 FIXED_NOW = datetime(2026, 7, 18, 12, 0, tzinfo=timezone.utc)
@@ -349,6 +353,15 @@ class GuardedCodexRunTests(unittest.TestCase):
                 "-",
             ]
             self.assertEqual(report["execution"]["command"], expected_command)
+            self.assertIn("<repo-root>", report["execution"]["command_display"])
+            self.assertIn(
+                "<run-dir>/last-message.txt",
+                report["execution"]["command_display"],
+            )
+            self.assertNotIn(
+                str(root.resolve()),
+                report["execution"]["command_display"],
+            )
             self.assertTrue(report["execution"]["execpolicy_rules_ignored"])
             self.assertEqual(report["execution"]["web_search_mode"], "disabled")
             self.assertFalse(report["execution"]["web_search_enabled"])
@@ -356,6 +369,56 @@ class GuardedCodexRunTests(unittest.TestCase):
             self.assertFalse((root / "injected.txt").exists())
             self.assertFalse((root / ".bunya-jido" / "runs").exists())
             self.assertEqual(before, after)
+
+    def test_display_argv_redacts_posix_and_windows_paths_structurally(self) -> None:
+        cases = [
+            (
+                "/home/alice/private-project",
+                "/home/alice/private-project/.bunya-jido/runs/demo",
+                [
+                    "/home/alice/.local/bin/codex",
+                    "--cd",
+                    "/home/alice/private-project",
+                    "--output-last-message",
+                    "/home/alice/private-project/.bunya-jido/runs/demo/last-message.txt",
+                    "/home/alice/outside.txt",
+                ],
+                [
+                    "<absolute-path>/codex",
+                    "--cd",
+                    "<repo-root>",
+                    "--output-last-message",
+                    "<run-dir>/last-message.txt",
+                    "<absolute-path>/outside.txt",
+                ],
+            ),
+            (
+                r"C:\Users\Alice\Bunya-Jido",
+                r"C:\Users\Alice\Bunya-Jido\.bunya-jido\runs\demo",
+                [
+                    r"C:\Users\Alice\AppData\Local\codex.exe",
+                    "--cd",
+                    r"C:\Users\Alice\Bunya-Jido",
+                    "--output-last-message",
+                    r"C:\Users\Alice\Bunya-Jido\.bunya-jido\runs\demo\last-message.txt",
+                    r"C:\Users\Alice\outside.txt",
+                ],
+                [
+                    "<absolute-path>/codex.exe",
+                    "--cd",
+                    "<repo-root>",
+                    "--output-last-message",
+                    "<run-dir>/last-message.txt",
+                    "<absolute-path>/outside.txt",
+                ],
+            ),
+        ]
+        for root, run_dir, command, expected in cases:
+            with self.subTest(root=root):
+                self.assertEqual(
+                    _display_argv(command, root=root, run_dir=run_dir),
+                    expected,
+                )
 
     def test_decisions_map_to_non_escalating_sandboxes(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -479,6 +542,14 @@ class GuardedCodexRunTests(unittest.TestCase):
                 markdown,
             )
             self.assertIn("Actual token usage: `available`", markdown)
+            self.assertIn("Total tokens: `unavailable`", markdown)
+            self.assertIn(
+                "Reason: total not reported by this Codex event",
+                markdown,
+            )
+            self.assertNotIn("Token usage reason: `None`", markdown)
+            self.assertNotIn("Total tokens: `None`", markdown)
+            self.assertIn("# Bunya-Jido Map-Guided Codex Run", markdown)
             self.assertIn(
                 "a compatible paired no-map baseline is required",
                 markdown,

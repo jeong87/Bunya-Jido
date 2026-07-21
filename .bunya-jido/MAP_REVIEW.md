@@ -4,6 +4,39 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-07-21 - Evidence-Route Scenario Playback Refinement
+
+- Change: Refined the existing offline viewer scenario projection with
+  full-route dimming, current-edge emphasis, a clipped moving route marker,
+  compact evidence-backed step cards, reduced-motion behavior, and explicit
+  run-overlay state restoration. Rebuilt `docs/demo.html` from the maintained
+  viewer template and added focused generated-output and self-map regressions.
+- Decision: This is a presentation-only refinement of the existing
+  `presentation:viewer` responsibility and `scenario:agent_context`. It uses
+  existing authored scenario fields and does not change semantic nodes,
+  workflows, blueprint, agent-map, scenario or run schemas, route ownership,
+  execution policy, safety contracts, dependencies, or benchmark claims.
+- Validation: Focused viewer and self-map tests, the full unit suite, compile,
+  blueprint and agent-map validation, grounded diagnostics, agent utility,
+  atlas quality, changed-file context refresh, stale-map review, and actual
+  browser QA are required. Browser QA and video capture remain explicitly
+  pending when no browser is connected.
+
+## 2026-07-20 - Map-Guided Run Display And Demo Revision
+
+- Change: Preserved raw Codex argv while redacting repository, run, and other
+  absolute paths from human-facing command output; rendered missing token
+  totals as `unavailable`; and rebuilt the reviewed demo around the shared
+  route, bounded live receipt, atlas overlay, and supporting safety layer.
+- Decision: This refines presentation inside the existing Guarded Codex Run
+  component and trusted maintenance route. It does not change schema v1,
+  sandbox selection, clean-baseline enforcement, process execution, boundary
+  audit, semantic nodes, workflows, or safe-edit ownership.
+- Validation: Structured POSIX and Windows redaction tests, focused and full
+  unit suites, compile, map validators, strict diagnostics, utility and atlas
+  quality, per-file context refresh, stale review, and media QA are required
+  before the revised video is handed off.
+
 ## 2026-07-18 - Shared Route Receipt And Atlas Overlay
 
 - Change: Re-centered the Build Week extension on the shared semantic map,

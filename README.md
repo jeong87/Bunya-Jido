@@ -20,9 +20,11 @@
 
 `Bunya-Jido` turns a repository into a reusable semantic map. For future maintenance work, that map helps coding agents narrow where to read, which tests matter, and which change boundaries to respect. The same map is rendered as an interactive HTML atlas, so humans can understand the codebase without starting from raw folders and imports.
 
+Scenario playback now makes evidence-backed routes easier to follow with focused dimming, a moving route marker, and compact step explanations.
+
 The name comes from Cheonsang Yeolcha Bunyajido, the Korean star map that reads the sky through regions and relationships. Bunya-Jido applies that idea to code: files, docs, workflows, runtime artifacts, and reviewed interpretation are gathered into one inspectable map.
 
-## Build Week 2026: Guarded Codex Runs
+## Build Week 2026: Map-Guided Codex Runs
 
 New for OpenAI Build Week, the map now drives execution instead of just
 reading. `codex-run` hands one validated task route to the local Codex CLI,

@@ -15,7 +15,7 @@ Judging a pre-existing project needs a clear line between old and new work.
 | Build Week branch | `build-week-2026`, first commit July 18, 2026 |
 | Primary Codex session | `019f73d5-d0c4-7633-8f08-fd8fb5933b3b` |
 | Session model (local rollout metadata) | `turn_context.model` = `gpt-5.6-sol`, July 18, 2026 |
-| Approved live smoke | one read-only run from `3544c198f7c1279fb96084790f109cd5ac38b34b` |
+| Approved live observations | one read-only boundary smoke from `3544c198f7c1279fb96084790f109cd5ac38b34b`; one bounded workspace-write integration smoke recorded July 20 |
 | Cross-platform CI | [run 29641266678](https://github.com/jeong87/Bunya-Jido/actions/runs/29641266678), green at `f10182c97d5f139703063ad60876c3ccb9d64547` |
 
 Everything in the baseline — repository scanning, blueprint generation, the
@@ -55,6 +55,9 @@ overlays the expected route, the actual changes, and any violations on the
 same map people already use — the overlay only activates when route ID and
 fingerprint match.
 
+Scenario playback now makes evidence-backed routes easier to follow with
+focused dimming, a moving route marker, and compact step explanations.
+
 Plumbing choices that matter for safety: the prompt travels as UTF-8 over
 stdin with argv execution (`shell=False`); Codex web search and
 workspace-shell network access are both explicitly disabled; user and
@@ -63,16 +66,17 @@ on every machine (administrator-managed requirements are not bypassed).
 
 ## What this doesn't prove
 
-The new tests (17 of them; 114 total in the suite) drive a deterministic fake
-Codex executable through success, boundary violations, write-then-revert,
+The current 117-test suite drives a deterministic fake Codex executable
+through success, boundary violations, write-then-revert,
 renames, malformed and empty JSONL, cancellation, timeout, and
 injection-shaped input. That proves the orchestration contract, not the
-behavior of a live Codex OS sandbox. One approved read-only live smoke is
-recorded in [docs/build-week/TESTING.md](docs/build-week/TESTING.md); it is
-not workspace-write, cross-platform, or performance evidence. There is no new
-GPT-5.6 benchmark. A single run never reports tokens saved — that number only
-exists in paired map-vs-no-map comparisons — and token usage missing from the
-stream is recorded as unavailable, never estimated.
+behavior of a live Codex OS sandbox. Two separately approved observations are
+recorded in [docs/build-week/TESTING.md](docs/build-week/TESTING.md): one
+read-only boundary smoke and one bounded workspace-write integration smoke.
+Neither is cross-platform, exhaustive sandbox, or performance evidence. There
+is no new GPT-5.6 benchmark. A single run never reports tokens saved — that
+number only exists in paired map-vs-no-map comparisons — and token usage
+missing from the stream is recorded as unavailable, never estimated.
 
 ## How Codex and I split the work
 

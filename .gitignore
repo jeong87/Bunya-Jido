@@ -37,6 +37,10 @@ dist/
 bunya-jido.html
 preview*.html
 
+# Local Build Week demo media and working files
+openai_build_week_demo/
+openai_build_week_demo.zip
+
 # Local upgrade design inputs
 docs/BUNYA_JIDO_STUDIO_ATLAS_UPGRADE_PLAN_FOR_CODEX.md
 docs/BUNYA_JIDO_CODING_AGENT_NATIVE_ATLAS_GUIDE.md

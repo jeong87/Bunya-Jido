@@ -199,6 +199,38 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
         self.assertIn("`projection:agent_navigation` - Bounded Agent Navigation", context)
         self.assertIn("`scenario:agent_context` - Request Bounded Agent Context", context)
 
+    def test_agent_context_scenario_keeps_authored_route_and_step_evidence(self) -> None:
+        blueprint = load_json(BLUEPRINT_PATH)
+        scenario = next(
+            item
+            for item in blueprint["atlas"]["scenarios"]
+            if item["id"] == "scenario:agent_context"
+        )
+
+        self.assertEqual(scenario["label"], "Request Bounded Agent Context")
+        self.assertEqual(
+            [step["node_id"] for step in scenario["steps"]],
+            [
+                "entry:cli",
+                "semantic:context",
+                "semantic:validation",
+                "semantic:agent_map",
+            ],
+        )
+        self.assertEqual(
+            [step.get("edge_id") for step in scenario["steps"]],
+            [
+                "edge:cli_context",
+                "edge:context_validation",
+                "edge:validation_agent_map",
+                None,
+            ],
+        )
+        self.assertTrue(
+            all(step.get("title") and step.get("narration") for step in scenario["steps"])
+        )
+        self.assertTrue(all(step.get("evidence") for step in scenario["steps"]))
+
     def test_scanner_provenance_has_a_bounded_quality_route(self) -> None:
         context = generate_agent_context(ROOT, task="change scanner hint provenance")
 

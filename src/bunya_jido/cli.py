@@ -612,7 +612,7 @@ def cmd_codex_run(args: argparse.Namespace) -> int:
             timeout=args.timeout,
         )
     except (_GuardedCodexRunError, OSError, subprocess.CalledProcessError) as exc:
-        print(f"Guarded Codex Run blocked: {exc}", file=sys.stderr)
+        print(f"Map-Guided Codex Run blocked: {exc}", file=sys.stderr)
         return 2
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2))

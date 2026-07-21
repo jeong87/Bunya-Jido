@@ -36,6 +36,10 @@ Run implementation:
 - Context byte counts, exact single-event Codex token usage, unavailable and
   partial usage, rejection of negative token counts, and refusal to sum
   multiple usage events.
+- Raw execution argv preservation alongside structured POSIX and Windows path
+  redaction for human-facing previews, with task text left unchanged.
+- Human Markdown rendering of a missing total as `unavailable`, without
+  displaying Python `None`.
 - Combined malformed JSONL and boundary violations preserve both reasons while
   failing with the contractually stronger `audit_incomplete` status.
 - Single-run `tokens_saved` unavailability and the paired no-map requirement.
@@ -95,6 +99,31 @@ The strong visual submission slice was validated locally on July 19, 2026:
 No new CI run, live Codex run, cross-platform live behavior, or token-savings
 claim is attached to this uncommitted slice. Interactive browser QA remains
 pending for the reason recorded above.
+
+## Scenario Playback Visual Refinement
+
+The uncommitted July 21 viewer refinement uses the actual
+`scenario:agent_context` data and does not change any public schema.
+
+- `tests.test_blueprint_v2`: 13 of 13 passed, including generated HTML hooks
+  for full-route state, current-edge classification, clipped route marker,
+  compact grounded card projection, viewport placement, reduced motion,
+  run-overlay restoration, and one RAF loop.
+- `tests.test_self_map`: 18 of 18 passed, including the actual
+  `Request Bounded Agent Context` node, edge, narration, and evidence
+  sequence.
+- `tests.test_smoke`: 4 of 4 passed.
+- Focused Guarded Codex Run suite: 16 of 16 passed.
+- Full local unit suite: 117 of 117 passed.
+- Compile, blueprint validation, agent-map validation, grounded diagnostics,
+  20-case agent utility, and deterministic atlas-quality checks passed.
+- The generated `docs/demo.html` contains the route-marker and step-card hooks
+  and contains none of the visual-reference product identifiers.
+
+Interactive browser QA is not claimed. The prescribed browser runtime exposed
+no connected browser, so desktop and small-viewport interaction, console,
+run-overlay restoration, and screenshot checks remain pending. No unrelated
+browser automation backend was substituted, and video editing has not started.
 
 ## CI Incident at `b03f510`
 
@@ -255,3 +284,70 @@ changes, and the run finished `succeeded` with zero changed files. The
 guarded contract held in the restrictive direction. Neither run is
 performance or cross-platform enforcement evidence; each validates only the
 observed environment.
+
+## Final Demo Revision QA — July 20, 2026
+
+The final demo revision reused the approved workspace-write smoke above. It did
+not launch another live Codex process or claim new benchmark evidence.
+
+- Original and backup SHA-256:
+  `8edb417610cfcf8040f506e2174feb66c448b2fcc96ca0c197ea18b7f90b2b93`.
+- Revised video:
+  `openai_build_week_demo/bunya-jido-demo-narrated-final-revised.mp4`,
+  SHA-256
+  `fb8ee7ec5af07fd98cc729c8fffd89608cf9aa67e1e9a84cddac3f1a290701df`.
+- Media contract: 168.033333 seconds, H.264, 1920 x 1080, 30 fps,
+  `yuv420p`, AAC stereo at 48 kHz.
+- Audio measurement: -16.01 LUFS integrated, -1.50 dBTP true peak, and
+  4.70 LU loudness range.
+- OpenAI transcription QA: passed, word error rate 0.012539, no missing
+  required phrase.
+- Focused runner suite: 16 of 16 passed. Full unit suite: 115 of 115 passed.
+  Compile, blueprint, agent-map, grounded diagnostics, 20-case agent utility,
+  atlas quality, changed-file context refresh, and stale-map review passed.
+- Revised render fixtures contained no private home path,
+  `codex_executable_not_found`, Python `None` token rendering, or the retired
+  `real token usage` caption.
+- The final contact sheet and explicit OUT_OF_SCOPE frame are retained under
+  `openai_build_week_demo/audio/revision-20260720/qa/`.
+
+## In-App Browser Demo Revision QA — July 21, 2026
+
+This revision did not launch a new nested Codex process or change the spoken
+narration. It replaced a static atlas interval with actual
+`Request Bounded Agent Context` playback captured from the ChatGPT in-app
+Browser.
+
+- Browser behavior verified at 1920 x 1080: four authored steps, route
+  dimming and emphasis, pause/play, previous/next, 2x playback, explicit exit,
+  and Escape restoration.
+- At 820 x 720, the measured narration card remained within the viewport.
+- The tested flow produced zero browser console warnings or errors.
+- Local run evidence import and post-scenario overlay restoration passed. The
+  original July 20 `run.json` is no longer available, so this UI-only check
+  used an explicitly marked QA fixture derived from the verified report. The
+  fixture is not raw execution evidence.
+- Approved browser-revised official video:
+  `openai_build_week_demo/bunya-jido-demo-narrated-final.mp4`,
+  SHA-256
+  `26c3e0b6c01bdf6b08bb49942882ad6cbab4fdc2a9455b459ff83d88d9e61fc4`.
+- Media contract: 165.933333 seconds, H.264, 1920 x 1080, 30 fps,
+  `yuv420p`, AAC stereo at 48 kHz.
+- Audio measurement: -16.00 LUFS integrated, -1.50 dBTP true peak, and
+  4.90 LU loudness range.
+- Retimed subtitle: 22 sequential, non-overlapping cues ending at
+  165.380 seconds; the original wording is unchanged.
+- No new transcription was run because no spoken cue content changed. The
+  prior revised narration transcription remains the evidence for the voice
+  content, while this revision separately validates the new SRT and media
+  timing.
+- Full unit suite: 117 of 117 passed after the browser/video revision.
+- Detailed browser measurements, preservation hashes, media metadata, and
+  artifact paths are recorded in
+  `openai_build_week_demo/qa/browser-revision-qa-report.json`.
+
+The browser motion is a 10 fps screenshot capture of the actual in-app
+playback encoded into a 30 fps video segment, not a native screen recording.
+The product owner approved replacing the official MP4/SRT with the verified
+browser revision and delivering the reviewed changes to the
+`build-week-2026` branch on July 21, 2026.

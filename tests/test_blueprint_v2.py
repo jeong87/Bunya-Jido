@@ -576,6 +576,33 @@ class BlueprintV2Tests(unittest.TestCase):
         self.assertIn('"playback_mode": "stepped_highlight"', html)
         self.assertIn("Illustrative structural tour", html)
 
+    def test_v2_scenario_playback_projects_route_marker_and_grounded_step_card(self) -> None:
+        graph = graph_from_blueprint(valid_v2_blueprint())
+        with tempfile.TemporaryDirectory() as tmpdir:
+            html = render_html(graph, Path(tmpdir) / "scenario.html").read_text(
+                encoding="utf-8"
+            )
+
+        self.assertIn("function scenarioRouteContext(", html)
+        self.assertIn("function scenarioVisualState()", html)
+        self.assertIn("scenarioVisual.currentEdges.has(e.id)", html)
+        self.assertIn("scenarioMarkerProgress", html)
+        self.assertNotIn("scenarioTokenProgress", html)
+        self.assertIn("const clipped=clipLine(", html)
+        self.assertIn("function scenarioStepCardData(", html)
+        self.assertIn("description:String(step.narration||'')", html)
+        self.assertIn("function scenarioCardPlacement(", html)
+        self.assertIn("runExpectedNodeIds:new Set(state.runExpectedNodeIds)", html)
+        self.assertIn("scenarioReducedMotion()", html)
+        self.assertIn("prefers-reduced-motion:reduce", html)
+        self.assertIn("route progress", html)
+        self.assertIn("A command submits authored structure.", html)
+        self.assertIn("evidenceLabel:evidence?", html)
+        self.assertNotIn("Auto-Researcher", html)
+        self.assertNotIn("Agent A", html)
+        self.assertNotIn("Runtime B", html)
+        self.assertEqual(html.count("requestAnimationFrame(draw)"), 2)
+
     def test_v2_none_with_reason_publishes_no_scenario_launcher_items(self) -> None:
         blueprint = valid_v2_blueprint()
         blueprint["atlas"]["scenario_policy"] = "none_with_reason"

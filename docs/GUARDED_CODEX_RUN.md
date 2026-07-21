@@ -1,8 +1,10 @@
-# Guarded Codex Run
+# Map-Guided Codex Run
 
 `bunya-jido codex-run` launches a local Codex CLI under the execution policy
-selected by Bunya-Jido context. It does not add a runtime dependency, external
-service, telemetry channel, or data upload mechanism.
+selected by a validated Bunya-Jido route. The shared semantic map is the
+product surface; guarded execution is the supporting trust layer. The command
+does not add a runtime dependency, external service, telemetry channel, or
+data upload mechanism.
 
 ## Prerequisites
 
@@ -19,6 +21,13 @@ bunya-jido codex-run --root . --task "Implement guarded Codex run orchestration 
 Preview prints the context decision, sandbox, scoped context, sanitized argv,
 baseline cleanliness, and any reason an actual run would be blocked. It does
 not launch Codex or create run artifacts.
+
+The process still receives the real absolute argv recorded in
+`execution.command`. Human-facing `execution.command_display` and console
+preview replace the repository root with `<repo-root>`, the run artifact
+directory with `<run-dir>`, and other absolute paths with `<absolute-path>`.
+Redaction is applied to structured argv elements and never changes task text
+or the command passed to the subprocess.
 
 An actual run is:
 
@@ -119,6 +128,9 @@ storage. It overlays the expected route only when both route ID and fingerprint
 match, and maps actual paths to nodes only by exact `source_path` or evidence
 path. Unmatched paths remain visible in the receipt panel. The viewer displays
 the recorded boundary verdict and does not recompute the safety decision.
+Raw JSON keeps an unavailable total as `null`; the Markdown report renders it
+as `unavailable` and explains when the complete Codex event did not report a
+total. Empty optional reasons are never shown as `None`.
 
 ## Exit Codes
 
@@ -132,6 +144,7 @@ the recorded boundary verdict and does not recompute the safety decision.
 The repository test suite uses a fake Codex executable for deterministic
 coverage. Passing fake-executable tests does not prove the behavior of a live
 Codex OS sandbox. A real nested Codex run remains a separate, explicit human
-approval gate. One separately approved Build Week read-only smoke is recorded
-in `docs/build-week/TESTING.md`; future live runs still require approval, and
-that single result is not workspace-write or cross-platform proof.
+approval gate. Two separately approved Build Week observations are recorded in
+`docs/build-week/TESTING.md`: one read-only boundary smoke and one bounded
+workspace-write integration smoke. Future live runs still require approval,
+and neither result is cross-platform or exhaustive sandbox proof.
