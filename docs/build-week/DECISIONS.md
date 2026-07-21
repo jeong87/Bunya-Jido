@@ -109,3 +109,19 @@
   without a compatible paired no-map run.
 - Constraint: Keep offline operation, add no dependency or network/storage
   behavior, and do not weaken the existing execution or audit contract.
+
+## BW-011: No-credentials judge receipt
+
+- Decision: Publish one sanitized demonstration receipt and embed it only in
+  the repository's generated public demo; generic atlases keep the optional
+  action hidden.
+- Owner: Implementation choice within the approved judge-testing scope.
+- Reason: A judge can exercise the complete scenario → route → run evidence
+  loop without installing Codex, downloading a file, or supplying credentials.
+- Provenance: The original July 20 `run.json` is unavailable. The fixture is
+  derived from the verified report and current validated route identity, and
+  is explicitly not presented as the raw live execution artifact.
+- Compatibility: The button calls the same `importRunObject()` path as local
+  file import, so schema and route-fingerprint validation are not bypassed.
+- Measurement boundary: `tokens_saved` remains unavailable because no
+  compatible paired no-map baseline is attached to this single run.

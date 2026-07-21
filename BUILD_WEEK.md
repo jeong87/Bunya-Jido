@@ -93,6 +93,13 @@ report format.
 
 ## Try it
 
+For a no-credentials judge path, use the
+[60-second Judge Quick Test](docs/build-week/JUDGE_GUIDE.md). The public demo
+can load a bundled [sanitized sample receipt](docs/build-week/judge-sample-run.json)
+through the same schema and route-fingerprint checks as a local `run.json`.
+The sample is derived from the verified July 20 report and is not presented as
+the raw live execution artifact; it does not claim token savings.
+
 From a clean checkout — the test suite needs no Codex authentication:
 
 ```bash

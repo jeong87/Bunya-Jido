@@ -26,6 +26,7 @@ BLUEPRINT_PATH = ROOT / ".bunya-jido" / "bunya-jido.blueprint.json"
 AGENT_MAP_PATH = ROOT / ".bunya-jido" / "bunya-jido.agent-map.json"
 AGENT_EVALUATION_PATH = ROOT / ".bunya-jido" / "bunya-jido.agent-evaluation.json"
 DEMO_PATH = ROOT / "docs" / "demo.html"
+JUDGE_SAMPLE_RUN_PATH = ROOT / "docs" / "build-week" / "judge-sample-run.json"
 HERO_PATH = ROOT / "docs" / "assets" / "self-map-grounded.png"
 PAGES_WORKFLOW_PATH = ROOT / ".github" / "workflows" / "pages.yml"
 
@@ -434,6 +435,98 @@ class SemanticSelfMapGoldenTests(unittest.TestCase):
             stable_semantic_contract(published),
             stable_semantic_contract(rebuilt),
         )
+
+    def test_judge_sample_is_sanitized_and_matches_the_published_route(self) -> None:
+        html = DEMO_PATH.read_text(encoding="utf-8")
+        sample = load_json(JUDGE_SAMPLE_RUN_PATH)
+        rebuilt, _ = graph_with_optional_blueprint(ROOT, max_files=0)
+        route = sample["route_receipt"]
+        published_route = next(
+            path for path in rebuilt["path_presets"] if path["id"] == route["route_id"]
+        )
+
+        marker = '<script id="bunya-jido-sample-run" type="application/json">'
+        sample_start = html.index(marker) + len(marker)
+        sample_end = html.index("</script>", sample_start)
+        embedded = json.loads(html[sample_start:sample_end])
+
+        self.assertEqual(embedded, sample)
+        self.assertEqual(sample["schema_version"], "bunya-jido-codex-run-v1")
+        self.assertEqual(route["route_fingerprint"], published_route["route_fingerprint"])
+        self.assertEqual(route["node_ids"], published_route["node_ids"])
+        self.assertEqual(route["workflow_ids"], ["guarded_codex_run"])
+        self.assertIsNone(sample["context_efficiency_receipt"]["tokens_saved"])
+        self.assertEqual(
+            sample["context_efficiency_receipt"]["tokens_saved_reason"],
+            "requires_compatible_paired_no_map_baseline",
+        )
+        self.assertFalse(sample["evidence_provenance"]["raw_run_json_available"])
+        self.assertIn(
+            "not presented as the raw live Codex execution artifact",
+            sample["evidence_provenance"]["note"],
+        )
+
+        evidence_nodes_by_path: dict[str, set[str]] = {}
+        for node in rebuilt["nodes"]:
+            paths = [node.get("source_path")]
+            paths.extend(item.get("path") for item in node.get("evidence", []))
+            for path in paths:
+                if path:
+                    evidence_nodes_by_path.setdefault(path, set()).add(node["id"])
+        observed = [
+            item["path"]
+            for item in sample["boundary_audit"]["observed_production_activity"]
+        ]
+        self.assertTrue(observed)
+        for path in observed:
+            self.assertIn(path, evidence_nodes_by_path)
+            self.assertTrue(evidence_nodes_by_path[path].intersection(route["node_ids"]))
+
+        fixture_text = JUDGE_SAMPLE_RUN_PATH.read_text(encoding="utf-8")
+        for forbidden in (
+            "/home/",
+            "C:\\Users\\",
+            "codex_executable_not_found",
+            "Total tokens: None",
+            "Token usage reason: None",
+            "Auto-Researcher",
+            "Agent A",
+            "api_key",
+            "access_token",
+            "cookie",
+        ):
+            self.assertNotIn(forbidden, fixture_text)
+        self.assertIn('id="loadSampleRunBtn"', html)
+        self.assertIn("Load sample receipt", html)
+        self.assertNotIn("Auto-Researcher", html)
+        self.assertNotIn("Agent A", html)
+
+    def test_judge_guide_links_the_no_credentials_path(self) -> None:
+        guide_path = ROOT / "docs" / "build-week" / "JUDGE_GUIDE.md"
+        template_path = (
+            ROOT / "docs" / "build-week" / "DEVPOST_JUDGE_FIELD_TEMPLATE.txt"
+        )
+        guide = guide_path.read_text(encoding="utf-8")
+        template = template_path.read_text(encoding="utf-8")
+        normalized_guide = " ".join(guide.split())
+
+        for required in (
+            "# Judge Quick Test",
+            "## 60-second test",
+            "Load sample receipt",
+            "Credentials",
+            "None.",
+            "judge-sample-run.json",
+        ):
+            self.assertIn(required, guide)
+        self.assertIn(
+            "not presented as the raw live Codex execution artifact",
+            normalized_guide,
+        )
+        self.assertTrue((guide_path.parent / "judge-sample-run.json").is_file())
+        self.assertIn("Credentials: none.", template)
+        self.assertIn("replace with the immutable commit URL", template)
+        self.assertNotIn("019f73d5-d0c4-7633-8f08-fd8fb5933b3b", guide)
 
     def test_published_hero_is_wide_and_linked_from_both_readmes(self) -> None:
         png = HERO_PATH.read_bytes()

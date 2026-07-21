@@ -27,7 +27,7 @@ button:hover,.chip:hover{border-color:rgba(56,189,248,.48);background:rgba(56,18
 .search-wrap{height:42px;display:flex;align-items:center;gap:5px;padding:4px;border:1px solid rgba(122,146,184,.14);background:rgba(13,21,38,.7);border-radius:12px;width:min(325px,24vw)}
 .search-wrap input{min-width:0;height:34px;border:0;background:transparent;padding:0 8px}.search-wrap input:focus{box-shadow:none}
 input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18);border-radius:10px;color:#e5eefb;padding:9px 10px;font-size:12px;outline:none}input:focus,select:focus{border-color:#38bdf8;box-shadow:0 0 0 2px rgba(56,189,248,.13)}
-#workspace{position:relative;min-height:0}
+#workspace{position:relative;min-height:0;overflow:hidden}
 .drawer{position:absolute;z-index:var(--layer-drawer);top:14px;bottom:14px;width:360px;border:1px solid rgba(122,146,184,.19);background:rgba(10,17,31,.96);backdrop-filter:blur(9px);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform .22s ease,opacity .22s ease,visibility .22s ease}
 #filters{left:14px;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(-12px)}#filters.open{opacity:1;visibility:visible;pointer-events:auto;transform:none}
 #inspector{right:14px;width:390px;opacity:0;visibility:hidden;pointer-events:none;transform:translateX(12px)}#inspector.open{opacity:1;visibility:visible;pointer-events:auto;transform:none}
@@ -57,7 +57,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 .legend.focus{border-color:rgba(56,189,248,.38);box-shadow:0 0 0 1px rgba(56,189,248,.10) inset,0 10px 40px rgba(2,6,23,.28)}
 .legend .legend-title{flex-basis:100%;font-size:10px;color:#93c5fd;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2px;font-weight:800}
 .legend .legend-note{font-size:10px;color:#8ca0bb;opacity:.9}
-.run-receipt{font-size:10.5px;line-height:1.45;color:#b6c5da}.run-receipt strong{color:#e5edf8}.run-receipt .run-status{display:inline-flex;padding:3px 7px;border-radius:999px;border:1px solid rgba(148,163,184,.24);margin-bottom:7px}.run-receipt .passed{color:#a7f3d0;border-color:rgba(52,211,153,.45)}.run-receipt .failed{color:#fda4af;border-color:rgba(251,113,133,.5)}.run-list{margin:6px 0 0;padding-left:16px;word-break:break-all}.run-list li+li{margin-top:3px}.run-legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}.run-legend span{display:flex;align-items:center;gap:5px}.run-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.run-receipt{font-size:10.5px;line-height:1.45;color:#b6c5da}.run-receipt strong{color:#e5edf8}.run-receipt .run-status{display:inline-flex;padding:3px 7px;border-radius:999px;border:1px solid rgba(148,163,184,.24);margin-bottom:7px}.run-receipt .passed{color:#a7f3d0;border-color:rgba(52,211,153,.45)}.run-receipt .failed{color:#fda4af;border-color:rgba(251,113,133,.5)}.run-list{margin:6px 0 0;padding-left:16px;word-break:break-all}.run-list li+li{margin-top:3px}.run-legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:8px}.run-legend span{display:flex;align-items:center;gap:5px}.run-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}.run-fixture-note{margin:0 0 9px;padding:8px;border:1px solid rgba(250,204,21,.28);border-radius:9px;background:rgba(250,204,21,.07);color:#fde68a;font-size:10px;line-height:1.4}.sample-run-hint{margin:0 0 8px;color:#9fb0c9;font-size:10px;line-height:1.4}.sample-run-hint[hidden],#loadSampleRunBtn[hidden]{display:none}
 
 @media(max-width:1200px){.brand{min-width:180px}.sub{display:none}.search-wrap{width:220px}}
 @media(max-width:900px){:root{--toolbar-h:56px}#toolbar{gap:7px;padding:7px 10px}.brand{min-width:auto}.brand h1,.brand .sub{display:none}.logo{width:30px;height:30px}.search-wrap{width:220px;flex:0 0 220px}.drawer{top:10px;bottom:10px;width:min(360px,calc(100% - 20px))}#filters{left:10px}#inspector{right:10px;width:min(390px,calc(100% - 20px))}#presetBar{left:10px;right:10px;top:10px;transform:none;max-width:none}#mapSummary{left:10px;top:64px;width:min(278px,calc(100% - 20px));max-height:calc(100% - 138px);overflow:auto}.statgrid{display:none}.semantic-grid{grid-template-columns:1fr}.legend{display:none}#workflowBar{left:10px;right:10px;bottom:10px;transform:none;max-width:none}#scenarioMenu{top:64px}#scenarioPlayback{bottom:58px;justify-content:flex-start}#scenarioNarration{width:min(320px,calc(100% - 26px))}}
@@ -73,6 +73,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
     <button class="toolbar-action" id="clearPathBtn">Clear highlight</button>
     <button class="toolbar-action" id="openRunBtn">Open run.json</button>
     <input id="runFileInput" type="file" accept=".json,application/json" hidden />
+    <button class="toolbar-action" id="loadSampleRunBtn" title="No credentials or live Codex account required." hidden>Load sample receipt</button>
     <button class="toolbar-action" id="scenarioBtn" hidden>▶ Scenarios</button>
     <div class="toolbar-spacer"></div>
     <div class="search-wrap"><input id="search" list="nodeList" aria-label="Find a role or artifact" placeholder="Find a role or artifact"/><datalist id="nodeList"></datalist><button id="focusBtn">Focus</button></div>
@@ -103,7 +104,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
         <div class="panel-section"><h2>Confidence</h2><div class="btnrow" style="margin-bottom:8px"><button id="confidenceAll">All</button><button id="confidenceNone">None</button></div><div class="confidence-grid" id="confidenceChecks"></div></div>
         <div class="panel-section"><h2>View</h2><div class="btnrow"><button id="resetBtn">Reset spread</button><button id="paintBtn" class="active">Plane paint</button><button id="labelsBtn" class="active">Labels</button><button id="edgeLabelsBtn">Edge labels</button></div><div style="margin-top:10px" class="range"><input id="charge" type="range" min="0.2" max="2.2" step="0.05" value="1"/><span class="small muted" id="chargeVal">1.0</span></div><div class="footer-note" style="margin-top:8px">Drag nodes · wheel zoom · click node/edge · <span class="kbd">F</span> fit · <span class="kbd">R</span> reset spread</div></div>
         <div class="panel-section"><h2>Validated Task Routes</h2><div id="pathSummary"></div><div id="paths"></div><div class="btnrow" style="margin-top:8px"><button id="pathOnlyBtn">Path only</button></div></div>
-        <div class="panel-section"><h2>Run Evidence</h2><div id="runEvidencePanel" class="run-receipt">Open a local <span class="code">run.json</span> to compare the expected route with exact evidence-linked changed paths. The file stays in this browser.</div></div>
+        <div class="panel-section"><h2>Run Evidence</h2><p id="sampleRunHint" class="sample-run-hint" hidden>Loads a sanitized demonstration receipt into this browser. No credentials or live Codex account required.</p><div id="runEvidencePanel" class="run-receipt">Open a local <span class="code">run.json</span> to compare the expected route with exact evidence-linked changed paths. The file stays in this browser.</div></div>
         <div class="panel-section"><h2>Export</h2><div class="btnrow"><button id="pngBtn">PNG</button><button id="jsonBtn">JSON</button></div></div>
       </div>
     </aside>
@@ -115,7 +116,7 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
 </div>
 <script id="graph-data" type="application/json">{
   "schema_version": "bunya-jido-v2",
-  "generated_at": "2026-07-20T15:34:48+00:00",
+  "generated_at": "2026-07-21T15:39:37+00:00",
   "title": "Bunya-Jido · Bunya-Jido",
   "description": "One grounded semantic repository map projected as a human atlas and compact coding-agent routes, with optional map-guided Codex execution evidence.",
   "artifact_mode": "semantic_blueprint",
@@ -3303,9 +3304,151 @@ input,select{width:100%;background:#0b1220;border:1px solid rgba(148,163,184,.18
   "blueprint_path": ".bunya-jido/bunya-jido.blueprint.json",
   "agent_map_path": ".bunya-jido/bunya-jido.agent-map.json"
 }</script>
+<script id="bunya-jido-sample-run" type="application/json">{
+  "schema_version": "bunya-jido-codex-run-v1",
+  "run_id": "judge-sample-derived-from-20260720-report",
+  "status": "succeeded",
+  "exit_code": 0,
+  "preview": false,
+  "evidence_provenance": {
+    "kind": "sanitized_demonstration_fixture",
+    "source": "docs/build-week/TESTING.md#second-approved-live-run--july-20-2026-workspace-write",
+    "raw_run_json_available": false,
+    "note": "Sanitized demonstration fixture derived from the verified Build Week run report. It is provided for UI evaluation and is not presented as the raw live Codex execution artifact."
+  },
+  "task": "Change guarded Codex run orchestration: clarify the route receipt explanation in the codex_run.py module docstring with one short sentence. Make exactly one small docstring edit.",
+  "context": {
+    "decision": "MATCH",
+    "route_status": "matched",
+    "execution_policy": "workspace_write",
+    "codex_sandbox_mode": "workspace-write"
+  },
+  "route_receipt": {
+    "available": true,
+    "reason": null,
+    "route_id": "task_route_change-guarded-Codex-run-orchestration",
+    "route_label": "change guarded Codex run orchestration",
+    "start_node_ids": [
+      "execution:codex_run"
+    ],
+    "node_ids": [
+      "execution:codex_run",
+      "entry:cli",
+      "semantic:context",
+      "semantic:validation",
+      "semantic:agent_map",
+      "quality:benchmark",
+      "quality:tests"
+    ],
+    "workflow_ids": [
+      "guarded_codex_run"
+    ],
+    "projection_ids": [
+      "projection:agent_navigation"
+    ],
+    "scenario_ids": [],
+    "first_read_paths": [
+      "src/bunya_jido/codex_run.py",
+      "src/bunya_jido/cli.py",
+      "docs/GUARDED_CODEX_RUN.md",
+      "docs/CONTEXT_EXECUTION_POLICY.md"
+    ],
+    "relevant_test_paths": [
+      "tests/test_codex_run.py",
+      "tests/test_self_map.py"
+    ],
+    "safe_edit_paths": [
+      "src/bunya_jido/codex_run.py",
+      "src/bunya_jido/cli.py",
+      "tests/test_codex_run.py",
+      "tests/test_self_map.py",
+      "docs/GUARDED_CODEX_RUN.md",
+      "docs/CONTEXT_EXECUTION_POLICY.md",
+      "docs/build-week/",
+      "BUILD_WEEK.md",
+      "README.md",
+      "README.ko.md",
+      "CHANGELOG.md",
+      ".gitignore",
+      ".bunya-jido/COMPONENTS.md",
+      ".bunya-jido/WORKFLOWS.md",
+      ".bunya-jido/REPOSITORY_THESIS.md",
+      ".bunya-jido/PROJECTIONS.md",
+      ".bunya-jido/SCENARIOS.md",
+      ".bunya-jido/MAP_REVIEW.md",
+      ".bunya-jido/bunya-jido.blueprint.json",
+      ".bunya-jido/bunya-jido.agent-map.json",
+      ".bunya-jido/bunya-jido.agent-evaluation.json",
+      "docs/demo.html",
+      "docs/gallery.md",
+      "docs/assets/self-map-grounded.png"
+    ],
+    "evidence_paths": [
+      "src/bunya_jido/codex_run.py",
+      "src/bunya_jido/cli.py",
+      "docs/GUARDED_CODEX_RUN.md",
+      "docs/CONTEXT_EXECUTION_POLICY.md",
+      "tests/test_codex_run.py",
+      "tests/test_self_map.py"
+    ],
+    "route_fingerprint": "b8623e53d39031afe37322ad275723c1c5cc70a69c0bcd1d1bb8d7bab301c8f7",
+    "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+    "starting_responsibilities": [
+      "Guarded Codex Run"
+    ],
+    "first_read_count": 4,
+    "relevant_test_count": 2
+  },
+  "context_efficiency_receipt": {
+    "compact_context_character_count": 3095,
+    "compact_context_utf8_byte_count": 3095,
+    "actual_token_usage": {
+      "availability": "available",
+      "reason": null,
+      "event_count": 1,
+      "input_tokens": 182823,
+      "cached_input_tokens": 159232,
+      "output_tokens": 1652,
+      "reasoning_output_tokens": 367,
+      "total_tokens": null
+    },
+    "elapsed_execution_seconds": 54.9,
+    "final_changed_file_count": 1,
+    "observed_production_path_count": 1,
+    "boundary_result": "passed",
+    "tokens_saved": null,
+    "tokens_saved_reason": "requires_compatible_paired_no_map_baseline"
+  },
+  "execution": {
+    "sandbox_mode": "workspace-write",
+    "launched": true,
+    "return_code": 0,
+    "timed_out": false,
+    "cancelled": false,
+    "web_search_mode": "disabled",
+    "workspace_network_access": false,
+    "duration_seconds": 54.9
+  },
+  "preflight": {
+    "worktree_clean": true,
+    "would_block_execution": false,
+    "reasons": []
+  },
+  "boundary_audit": {
+    "observed_production_activity": [
+      {
+        "path": "src/bunya_jido/codex_run.py",
+        "source": "post_run_worktree"
+      }
+    ],
+    "boundary_violations": [],
+    "has_boundary_violation": false
+  }
+}</script>
 <script>
 (() => {
 const DATA = JSON.parse(document.getElementById('graph-data').textContent);
+const embeddedSampleRun = JSON.parse(document.getElementById('bunya-jido-sample-run').textContent);
 const studioAtlas = DATA.schema_version==='bunya-jido-v2' && DATA.atlas && typeof DATA.atlas==='object' ? DATA.atlas : null;
 const studioVocabulary = studioAtlas && studioAtlas.vocabularies && typeof studioAtlas.vocabularies==='object' ? studioAtlas.vocabularies : null;
 const studioScenarios = studioAtlas && studioAtlas.scenario_policy!=='none_with_reason' && Array.isArray(studioAtlas.scenarios) ? studioAtlas.scenarios.slice(0,5) : [];
@@ -3969,10 +4112,11 @@ function nodeIdsForExactPaths(paths){
 function renderRunEvidence(){
   const panel=document.getElementById('runEvidencePanel'), evidence=state.runEvidence;
   if(!evidence){panel.innerHTML='Open a local <span class="code">run.json</span> to compare the expected route with exact evidence-linked changed paths. The file stays in this browser.';return;}
-  const run=evidence.run, route=evidence.route||{}, efficiency=run.context_efficiency_receipt||{}, usage=efficiency.actual_token_usage||{}, boundary=run.boundary_audit||{};
+  const run=evidence.run, route=evidence.route||{}, efficiency=run.context_efficiency_receipt||{}, usage=efficiency.actual_token_usage||{}, boundary=run.boundary_audit||{}, provenance=run.evidence_provenance||{};
   const status=String(run.status||'unknown'), failed=status!=='succeeded'&&status!=='preview';
   const list=(title,values)=>values.length?`<div><strong>${escapeHtml(title)}</strong><ul class="run-list">${values.map(value=>`<li>${escapeHtml(value)}</li>`).join('')}</ul></div>`:'';
-  panel.innerHTML=`<div class="run-status ${failed?'failed':'passed'}">${escapeHtml(status)} · boundary ${escapeHtml(efficiency.boundary_result||'unavailable')}</div>
+  const fixtureNote=provenance.kind==='sanitized_demonstration_fixture'?`<div class="run-fixture-note"><strong>Sanitized demonstration fixture</strong><br>${escapeHtml(provenance.note||'Provided for UI evaluation; not a raw live execution artifact.')}</div>`:'';
+  panel.innerHTML=`${fixtureNote}<div class="run-status ${failed?'failed':'passed'}">${escapeHtml(status)} · boundary ${escapeHtml(efficiency.boundary_result||'unavailable')}</div>
     <div><strong>${escapeHtml(route.route_label||route.route_id||'Legacy run')}</strong></div>
     <div>Route overlay: ${escapeHtml(evidence.compatibility)}</div>
     <div>Context: ${escapeHtml(efficiency.compact_context_utf8_byte_count??'unavailable')} UTF-8 bytes</div>
@@ -4001,8 +4145,9 @@ function importRunObject(run){
   const matchedViolationPaths=new Set(compatible?violations.filter(path=>evidenceNodeIdsByPath.has(normalizedRunPath(path))):[]);
   state.runEvidence={run,route,compatibility,unmatchedActual:observed.filter(path=>!matchedActualPaths.has(path)),violationPaths:violations,unmatchedViolations:violations.filter(path=>!matchedViolationPaths.has(path))};
   if(compatible)selectPath(expectedRoute.id,true);else renderUI();
-  toggleFilters(true);renderRunEvidence();toast('run evidence loaded locally');
+  toggleFilters(true);renderRunEvidence();toast('run evidence loaded in this browser');
 }
+function loadEmbeddedSampleRun(){if(!embeddedSampleRun)return;importRunObject(embeddedSampleRun);}
 function readRunFile(file){
   if(!file)return;
   if(file.size>5*1024*1024){toast('run.json exceeds 5 MiB');return;}
@@ -4280,6 +4425,9 @@ document.getElementById('pathOnlyBtn').onclick=e=>{if(state.scenario)stopScenari
 document.getElementById('clearPathBtn').onclick=()=>{if(state.scenario)stopScenario(true);state.path=null; state.pathOnly=false; document.getElementById('pathOnlyBtn').classList.remove('active'); renderUI(); fit();};
 document.getElementById('openRunBtn').onclick=()=>document.getElementById('runFileInput').click();
 document.getElementById('runFileInput').onchange=event=>{readRunFile(event.target.files&&event.target.files[0]);event.target.value='';};
+const loadSampleRunBtn=document.getElementById('loadSampleRunBtn'),sampleRunHint=document.getElementById('sampleRunHint');
+loadSampleRunBtn.hidden=!embeddedSampleRun;sampleRunHint.hidden=!embeddedSampleRun;
+loadSampleRunBtn.onclick=()=>loadEmbeddedSampleRun();
 document.getElementById('pngBtn').onclick=()=>{const a=document.createElement('a');a.download='bunya-jido.png';a.href=canvas.toDataURL('image/png');a.click();};
 document.getElementById('jsonBtn').onclick=()=>{const blob=new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'});const a=document.createElement('a');a.download='bunya_jido_graph.json';a.href=URL.createObjectURL(blob);a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);};
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){if(state.scenario){stopScenario(true);}state.scenarioMenuOpen=false;renderScenarioUI();toggleFilters(false);inspectorDrawer.classList.remove('open');} if(e.key.toLowerCase()==='f')fit(); if(e.key.toLowerCase()==='r'){state._inited=false;initLayout();}});

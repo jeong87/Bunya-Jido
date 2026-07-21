@@ -1,0 +1,11 @@
+Live demo: https://jeong87.github.io/Bunya-Jido/demo.html
+Credentials: none.
+
+60-second test: open the demo, click Scenarios, play "Request Bounded Agent Context" at 2x, exit playback, inspect Validated Task Routes, then click "Load sample receipt." The same offline atlas will show the validated expected route, the exact evidence-linked changed path, the context and Codex token receipt, and the recorded boundary verdict. No installation, account, API key, or live Codex execution is required. If the optional button is absent in the deployed build, download the sample receipt and use "Open run.json"; both paths use the same schema and route-fingerprint validation.
+
+Judge guide: https://github.com/jeong87/Bunya-Jido/blob/build-week-2026/docs/build-week/JUDGE_GUIDE.md
+Build Week evidence: https://github.com/jeong87/Bunya-Jido/blob/build-week-2026/BUILD_WEEK.md
+Sample receipt: https://raw.githubusercontent.com/jeong87/Bunya-Jido/build-week-2026/docs/build-week/judge-sample-run.json
+Submission source: replace with the immutable commit URL after the final push.
+
+Truthfulness note: the sample is a sanitized demonstration fixture derived from the verified Build Week run report, provided for UI evaluation rather than presented as the raw live Codex execution artifact. A single run does not claim token savings. Optional live codex-run use requires the judge's own authenticated local Codex CLI and is not required for evaluation.

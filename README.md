@@ -26,6 +26,17 @@ The name comes from Cheonsang Yeolcha Bunyajido, the Korean star map that reads 
 
 ## Build Week 2026: Map-Guided Codex Runs
 
+### Judge Quick Test
+
+No credentials, installation, or live Codex run is required. Open the
+[live demo](https://jeong87.github.io/Bunya-Jido/demo.html), play **Request
+Bounded Agent Context** at 2×, then load the bundled receipt to compare the
+validated route with actual evidence-linked changes. Use **Load sample
+receipt** when the deployed build exposes it; otherwise download the fixture
+and select **Open run.json**. See the
+[one-minute guide](docs/build-week/JUDGE_GUIDE.md) and the clearly labeled
+[sanitized sample receipt](docs/build-week/judge-sample-run.json).
+
 New for OpenAI Build Week, the map now drives execution instead of just
 reading. `codex-run` hands one validated task route to the local Codex CLI,
 picks the sandbox from the route decision, and audits everything Codex did

@@ -26,6 +26,17 @@
 
 ## Build Week 2026: 지도 기반 Codex 실행
 
+### 심사위원용 1분 테스트
+
+Credential, 설치, live Codex 실행이 필요 없습니다.
+[공개 데모](https://jeong87.github.io/Bunya-Jido/demo.html)에서 **Request
+Bounded Agent Context**를 2×로 재생한 뒤 번들 영수증을 불러오면 검증된
+예상 경로와 실제 근거 연결 변경을 같은 지도에서 비교할 수 있습니다. 배포본에
+**Load sample receipt**가 보이면 사용하고, 없으면 fixture를 내려받아 **Open
+run.json**으로 여세요.
+[1분 가이드](docs/build-week/JUDGE_GUIDE.md)와 명확히 표시된
+[sanitized sample receipt](docs/build-week/judge-sample-run.json)를 참고하세요.
+
 OpenAI Build Week에서 추가된 기능입니다. 이제 지도는 읽기 안내를 넘어 실행을
 직접 통제합니다. `codex-run`은 검증된 작업 경로 하나를 로컬 Codex CLI에
 넘기고, 경로 판정으로 샌드박스를 정하고, Codex가 한 일을 선언된 편집 경계와

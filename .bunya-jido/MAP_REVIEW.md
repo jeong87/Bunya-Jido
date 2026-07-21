@@ -4,6 +4,27 @@ This file records reviewed map-maintenance decisions when policy-covered
 repository changes do not require rewriting the semantic structure itself.
 An entry records review work; it does not prove architectural completeness.
 
+## 2026-07-21 - No-Credentials Judge Receipt
+
+- Change: Added one sanitized Build Week receipt to the committed public demo,
+  an optional one-click loader, a manual-import fallback, a short judge guide,
+  and focused renderer/self-map regressions. Generic generated atlases still
+  contain no receipt and hide the optional action.
+- Decision: This is an additive presentation and evidence fixture inside the
+  existing `presentation:viewer` and Guarded Codex Run responsibilities. It
+  reuses schema v1, the canonical route fingerprint, and the existing import
+  and overlay path. It does not change semantic nodes, workflows, blueprint,
+  agent-map, scenario/run schemas, execution policy, sandbox or audit
+  contracts, dependencies, benchmark methodology, or public safety claims.
+- Evidence boundary: The fixture is derived from the verified July 20 report,
+  not represented as the unavailable raw run artifact. Actual token fields are
+  preserved, unavailable totals stay unavailable, and no token-savings claim
+  is made without a compatible paired baseline.
+- Validation: Focused renderer and self-map tests, the full unit suite,
+  compile, blueprint and agent-map validation, grounded diagnostics, agent
+  utility, atlas quality, changed-file context refresh, stale-map review, and
+  browser QA at desktop and narrow viewports are required before delivery.
+
 ## 2026-07-21 - Evidence-Route Scenario Playback Refinement
 
 - Change: Refined the existing offline viewer scenario projection with

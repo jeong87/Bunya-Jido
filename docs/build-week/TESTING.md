@@ -351,3 +351,39 @@ playback encoded into a 30 fps video segment, not a native screen recording.
 The product owner approved replacing the official MP4/SRT with the verified
 browser revision and delivering the reviewed changes to the
 `build-week-2026` branch on July 21, 2026.
+
+## No-Credentials Judge Path — July 21, 2026
+
+The public atlas now has an optional embedded sample receipt for a judge flow
+that does not require installation, credentials, an API key, or live Codex
+execution. The generic renderer emits no sample and keeps the action hidden;
+the committed `docs/demo.html` embeds
+`docs/build-week/judge-sample-run.json`. Both the one-click action and manual
+`Open run.json` import use the same schema check, route-fingerprint gate, and
+expected-versus-actual overlay renderer.
+
+The sample is a sanitized demonstration fixture derived from the verified
+July 20 Build Week run report. The raw `run.json` is no longer available and
+the sample is not represented as that raw artifact. Its exact reported
+context and usage values are retained, `total_tokens` and `tokens_saved`
+remain unavailable, and no single-run savings claim is made.
+
+Local browser QA covered:
+
+- `Request Bounded Agent Context` playback at 2x, including four authored
+  steps, route emphasis, completion, and restoration.
+- One-click sample loading and manual import of the same tracked fixture,
+  producing the same matched route, receipt, changed-path overlay, and
+  `passed` boundary result.
+- A deliberately mismatched fingerprint, which was blocked and did not draw
+  an expected-versus-actual overlay.
+- 1920 x 1080 and 820 x 720 viewports, with no page-level horizontal overflow
+  and zero browser console warnings or errors.
+- Focused viewer/self-map/Studio tests: 39 of 39 passed. Guarded-run tests: 16
+  of 16 passed. Full unit suite: 121 of 121 passed. Compile, blueprint,
+  agent-map, grounded diagnostics, 20-case agent utility, atlas quality,
+  changed-file context refresh, and working-tree stale-map review passed.
+
+The committed demo was generated from the current semantic graph and tracked
+sample with the private `_render_html_with_sample_run` build helper. The public
+`render_html` API and generic viewer behavior remain unchanged.

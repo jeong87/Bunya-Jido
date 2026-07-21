@@ -1,0 +1,141 @@
+{
+  "schema_version": "bunya-jido-codex-run-v1",
+  "run_id": "judge-sample-derived-from-20260720-report",
+  "status": "succeeded",
+  "exit_code": 0,
+  "preview": false,
+  "evidence_provenance": {
+    "kind": "sanitized_demonstration_fixture",
+    "source": "docs/build-week/TESTING.md#second-approved-live-run--july-20-2026-workspace-write",
+    "raw_run_json_available": false,
+    "note": "Sanitized demonstration fixture derived from the verified Build Week run report. It is provided for UI evaluation and is not presented as the raw live Codex execution artifact."
+  },
+  "task": "Change guarded Codex run orchestration: clarify the route receipt explanation in the codex_run.py module docstring with one short sentence. Make exactly one small docstring edit.",
+  "context": {
+    "decision": "MATCH",
+    "route_status": "matched",
+    "execution_policy": "workspace_write",
+    "codex_sandbox_mode": "workspace-write"
+  },
+  "route_receipt": {
+    "available": true,
+    "reason": null,
+    "route_id": "task_route_change-guarded-Codex-run-orchestration",
+    "route_label": "change guarded Codex run orchestration",
+    "start_node_ids": [
+      "execution:codex_run"
+    ],
+    "node_ids": [
+      "execution:codex_run",
+      "entry:cli",
+      "semantic:context",
+      "semantic:validation",
+      "semantic:agent_map",
+      "quality:benchmark",
+      "quality:tests"
+    ],
+    "workflow_ids": [
+      "guarded_codex_run"
+    ],
+    "projection_ids": [
+      "projection:agent_navigation"
+    ],
+    "scenario_ids": [],
+    "first_read_paths": [
+      "src/bunya_jido/codex_run.py",
+      "src/bunya_jido/cli.py",
+      "docs/GUARDED_CODEX_RUN.md",
+      "docs/CONTEXT_EXECUTION_POLICY.md"
+    ],
+    "relevant_test_paths": [
+      "tests/test_codex_run.py",
+      "tests/test_self_map.py"
+    ],
+    "safe_edit_paths": [
+      "src/bunya_jido/codex_run.py",
+      "src/bunya_jido/cli.py",
+      "tests/test_codex_run.py",
+      "tests/test_self_map.py",
+      "docs/GUARDED_CODEX_RUN.md",
+      "docs/CONTEXT_EXECUTION_POLICY.md",
+      "docs/build-week/",
+      "BUILD_WEEK.md",
+      "README.md",
+      "README.ko.md",
+      "CHANGELOG.md",
+      ".gitignore",
+      ".bunya-jido/COMPONENTS.md",
+      ".bunya-jido/WORKFLOWS.md",
+      ".bunya-jido/REPOSITORY_THESIS.md",
+      ".bunya-jido/PROJECTIONS.md",
+      ".bunya-jido/SCENARIOS.md",
+      ".bunya-jido/MAP_REVIEW.md",
+      ".bunya-jido/bunya-jido.blueprint.json",
+      ".bunya-jido/bunya-jido.agent-map.json",
+      ".bunya-jido/bunya-jido.agent-evaluation.json",
+      "docs/demo.html",
+      "docs/gallery.md",
+      "docs/assets/self-map-grounded.png"
+    ],
+    "evidence_paths": [
+      "src/bunya_jido/codex_run.py",
+      "src/bunya_jido/cli.py",
+      "docs/GUARDED_CODEX_RUN.md",
+      "docs/CONTEXT_EXECUTION_POLICY.md",
+      "tests/test_codex_run.py",
+      "tests/test_self_map.py"
+    ],
+    "route_fingerprint": "b8623e53d39031afe37322ad275723c1c5cc70a69c0bcd1d1bb8d7bab301c8f7",
+    "route_fingerprint_algorithm": "bunya-jido-route-fingerprint-v1",
+    "starting_responsibilities": [
+      "Guarded Codex Run"
+    ],
+    "first_read_count": 4,
+    "relevant_test_count": 2
+  },
+  "context_efficiency_receipt": {
+    "compact_context_character_count": 3095,
+    "compact_context_utf8_byte_count": 3095,
+    "actual_token_usage": {
+      "availability": "available",
+      "reason": null,
+      "event_count": 1,
+      "input_tokens": 182823,
+      "cached_input_tokens": 159232,
+      "output_tokens": 1652,
+      "reasoning_output_tokens": 367,
+      "total_tokens": null
+    },
+    "elapsed_execution_seconds": 54.9,
+    "final_changed_file_count": 1,
+    "observed_production_path_count": 1,
+    "boundary_result": "passed",
+    "tokens_saved": null,
+    "tokens_saved_reason": "requires_compatible_paired_no_map_baseline"
+  },
+  "execution": {
+    "sandbox_mode": "workspace-write",
+    "launched": true,
+    "return_code": 0,
+    "timed_out": false,
+    "cancelled": false,
+    "web_search_mode": "disabled",
+    "workspace_network_access": false,
+    "duration_seconds": 54.9
+  },
+  "preflight": {
+    "worktree_clean": true,
+    "would_block_execution": false,
+    "reasons": []
+  },
+  "boundary_audit": {
+    "observed_production_activity": [
+      {
+        "path": "src/bunya_jido/codex_run.py",
+        "source": "post_run_worktree"
+      }
+    ],
+    "boundary_violations": [],
+    "has_boundary_violation": false
+  }
+}

@@ -15,7 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
 
 from bunya_jido import __version__
 from bunya_jido.cli import main
-from bunya_jido.render import render_html
+from bunya_jido.render import _render_html_with_sample_run, render_html
 from bunya_jido.scanner import build_graph
 
 
@@ -71,10 +71,29 @@ class SmokeTests(unittest.TestCase):
         self.assertIn("semanticOverviewHtml", html)
         self.assertIn("pathStepIndex", html)
         self.assertIn('id="openRunBtn"', html)
+        self.assertIn('id="loadSampleRunBtn"', html)
+        self.assertIn('id="bunya-jido-sample-run"', html)
         self.assertIn('id="runEvidencePanel"', html)
         self.assertIn("new FileReader()", html)
         self.assertIn("importRunObject", html)
+        self.assertIn(
+            "function loadEmbeddedSampleRun(){if(!embeddedSampleRun)return;importRunObject(embeddedSampleRun);}",
+            html,
+        )
+        self.assertIn("loadSampleRunBtn.hidden=!embeddedSampleRun", html)
+        self.assertIn(
+            "if(!run||run.schema_version!=='bunya-jido-codex-run-v1')",
+            html,
+        )
         self.assertIn("route_fingerprint", html)
+        self.assertIn(
+            "expectedRoute.route_fingerprint===route.route_fingerprint",
+            html,
+        )
+        self.assertIn(
+            "state.runExpectedNodeIds=compatible?new Set(expectedRoute.node_ids||[]):new Set()",
+            html,
+        )
         self.assertIn("const actualIds=compatible?", html)
         self.assertIn("expected route", html)
         self.assertIn("actual evidence", html)
@@ -91,6 +110,50 @@ class SmokeTests(unittest.TestCase):
         self.assertGreater(layers["scenario"], layers["drawer"])
         self.assertGreater(layers["toolbar"], layers["scenario"])
         self.assertEqual(html.count("z-index:var(--layer-scenario)"), 3)
+        self.assertNotIn("fetch(", html)
+        self.assertNotIn("localStorage", html)
+
+        marker = '<script id="bunya-jido-sample-run" type="application/json">'
+        start = html.index(marker) + len(marker)
+        end = html.index("</script>", start)
+        self.assertIsNone(json.loads(html[start:end]))
+
+    def test_render_html_can_embed_an_offline_sample_without_changing_generic_output(self) -> None:
+        graph = build_graph(MINIMAL_EXAMPLE)
+        sample = {
+            "schema_version": "bunya-jido-codex-run-v1",
+            "evidence_provenance": {
+                "kind": "sanitized_demonstration_fixture",
+                "note": "UI fixture </script> remains inert.",
+            },
+        }
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = Path(tmpdir) / "atlas.html"
+            html = _render_html_with_sample_run(graph, sample, out).read_text(
+                encoding="utf-8"
+            )
+
+        marker = '<script id="bunya-jido-sample-run" type="application/json">'
+        start = html.index(marker) + len(marker)
+        end = html.index("</script>", start)
+        self.assertEqual(json.loads(html[start:end]), sample)
+        self.assertNotIn("UI fixture </script>", html)
+        self.assertIn("UI fixture <\\/script>", html)
+        self.assertIn("Loads a sanitized demonstration receipt into this browser.", html)
+        self.assertIn("No credentials or live Codex account required.", html)
+
+    def test_custom_templates_without_a_sample_placeholder_remain_compatible(self) -> None:
+        graph = build_graph(MINIMAL_EXAMPLE)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            template = root / "custom.html"
+            template.write_text("<script>__BUNYA_JIDO_DATA__</script>", encoding="utf-8")
+            html = render_html(graph, root / "atlas.html", template=template).read_text(
+                encoding="utf-8"
+            )
+
+        self.assertIn("bunya-jido-v1", html)
+        self.assertNotIn("__BUNYA_JIDO_DATA__", html)
 
     def test_diagnose_reports_static_scan_as_not_grounded(self) -> None:
         stdout = io.StringIO()
